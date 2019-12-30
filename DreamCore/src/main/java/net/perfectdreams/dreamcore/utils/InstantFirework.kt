@@ -13,7 +13,13 @@ import org.bukkit.entity.Firework
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-class InstantFirework(world: World, val players: Array<out Player>) : EntityFireworks(world, CraftItemStack.asNMSCopy(ItemStack(Material.FIREWORK_ROCKET)), null) {
+class InstantFirework(world: World, location: Location) : EntityFireworks(
+	world,
+	location.x,
+	location.y,
+	location.z,
+	CraftItemStack.asNMSCopy(ItemStack(Material.FIREWORK_ROCKET))
+) {
 	private var gone = false
 
 	init {
@@ -21,38 +27,35 @@ class InstantFirework(world: World, val players: Array<out Player>) : EntityFire
 	}
 
 	override fun tick() {
-		if (gone) {
+		if (gone)
 			return
-		}
 
-		if (!this.world.isClientSide) {
-			gone = true
-
-			if (players.isNotEmpty()) {
-				for (player in players) {
-					(player as CraftPlayer).handle.playerConnection.sendPacket(PacketPlayOutEntityStatus(this, 17.toByte()))
-				}
-
-				this.die()
-				return
-			}
-			world.broadcastEntityEffect(this, 17.toByte())
-			this.die()
-		}
+		gone = true
+		this.world.broadcastEntityEffect(this, 17.toByte())
+		this.die()
 	}
 
 	companion object {
-		fun spawn(location: Location, effect: FireworkEffect, vararg players: Player = location.world.players.toTypedArray()) {
-			try {
-				val firework = InstantFirework((location.world as CraftWorld).handle, players)
-				val meta = (firework.getBukkitEntity() as Firework).fireworkMeta
-				meta.addEffect(effect)
-				(firework.getBukkitEntity() as Firework).fireworkMeta = meta
-				firework.setPosition(location.x, location.y, location.z)
+		@Deprecated("Please use spawn(location, effect)")
+		fun spawn(location: Location, effect: FireworkEffect, vararg players: Player = location.world.players.toTypedArray()) = spawn(location, effect)
 
-				if ((location.world as CraftWorld).handle.addEntity(firework)) {
+		/**
+		 * Spawns an instant firework at [location] with the [effect]
+		 *
+		 * @param location where the effect should be spawned
+		 * @param effect   what effects the firework should have
+		 */
+		fun spawn(location: Location, effect: FireworkEffect) {
+			try {
+				val nmsWorld = (location.world as CraftWorld).handle
+				val firework = InstantFirework(nmsWorld, location)
+				val bukkitEntity = firework.bukkitEntity as Firework
+				val meta = bukkitEntity.fireworkMeta
+				meta.addEffect(effect)
+				bukkitEntity.fireworkMeta = meta
+
+				if (nmsWorld.addEntity(firework))
 					firework.isInvisible = true
-				}
 			} catch (e: Exception) {
 				e.printStackTrace()
 			}
