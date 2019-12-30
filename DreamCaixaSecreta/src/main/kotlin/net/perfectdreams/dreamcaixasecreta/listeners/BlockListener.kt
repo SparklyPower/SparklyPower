@@ -91,7 +91,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 		if (e.player.inventory.itemInMainHand?.containsEnchantment(Enchantment.SILK_TOUCH) == true)
 			return
 
-		val chance = 0.4
+		val chance = 0.8
 
 		if (chance(chance)) {
 			val random = DreamUtils.random.nextInt(0, 100)
