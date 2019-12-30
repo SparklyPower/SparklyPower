@@ -1,0 +1,6 @@
+name: DreamQuiz
+main: net.perfectdreams.dreamquiz.DreamQuiz
+version: 1.0-SNAPSHOT
+
+author: MrGaabriel
+softdepend: [DreamCore]
