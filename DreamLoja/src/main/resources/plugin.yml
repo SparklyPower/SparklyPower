@@ -1,0 +1,5 @@
+name: DreamLoja
+main: net.perfectdreams.dreamloja.DreamLoja
+version: 1.0.0
+softdepend: ["DreamCore"]
+api-version: 1.13
