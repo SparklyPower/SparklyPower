@@ -54,10 +54,7 @@ object ItemUtils {
 	/**
 	 * Checks if the [itemStack] has the [key] metadata in it's NBT Tag
 	 */
-	fun hasStoredMetadataWithKey(itemStack: ItemStack, key: String): Boolean {
-		val tag = itemStack.getCompoundTag() ?: return false
-		return tag.containsKey(key)
-	}
+	fun hasStoredMetadataWithKey(itemStack: ItemStack, key: String) = getStoredMetadata(itemStack, key) != null
 
 	fun getTranslatedDisplayName(itemStack: ItemStack, player: Player): String {
 		return getTranslatedDisplayName(itemStack, player.locale)
