@@ -65,14 +65,14 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             }
 
             // VIPs
-            generateItemAt(0, 0, Material.IRON_INGOT, "§b§lVIP §7(30 dias)", 500) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip 30d")
+            generateItemAt(0, 0, Material.IRON_INGOT, "§b§lVIP §7(32 dias)", 500) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip 32d")
             }
-            generateItemAt(1, 0, Material.GOLD_INGOT, "§b§lVIP§e+ §7(30 dias)", 1000) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip+ 30d")
+            generateItemAt(1, 0, Material.GOLD_INGOT, "§b§lVIP§e+ §7(32 dias)", 1000) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip+ 32d")
             }
-            generateItemAt(2, 0, Material.DIAMOND, "§b§lVIP§e++ §7(30 dias)", 1500) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip++ 30d")
+            generateItemAt(2, 0, Material.DIAMOND, "§b§lVIP§e++ §7(32 dias)", 1500) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip++ 32d")
             }
 
             // Blocos de Proteção

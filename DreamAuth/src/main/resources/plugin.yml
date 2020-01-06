@@ -1,0 +1,5 @@
+name: DreamAuth
+main: net.perfectdreams.dreamauth.DreamAuth
+version: 1.0.0
+softdepend: ["DreamCore", "FastLogin"]
+api-version: 1.13

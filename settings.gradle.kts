@@ -19,6 +19,7 @@ pluginManagement {
 rootProject.name = "sparklypower-parent"
 
 include(":DreamCore")
+include(":DreamAuth")
 include(":DreamCash")
 include(":DreamVote")
 include(":DreamQuiz")
@@ -31,3 +32,4 @@ include(":DreamCaixaSecreta")
 include(":DreamJetpack")
 include(":DreamMochilas")
 include(":DreamEnchant")
+include(":DreamTrails")
