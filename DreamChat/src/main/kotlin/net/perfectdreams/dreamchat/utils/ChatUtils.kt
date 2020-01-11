@@ -178,6 +178,7 @@ object ChatUtils {
 
 		// bossbar
 		if (!isIgnoringTheSender) {
+			receiver.playSound(receiver.location, "perfectdreams.sfx.msn", 1F, 1F)
 			val bossBar = Bukkit.createBossBar("§b${fromName}§r§d: §d$message", BarColor.PINK, BarStyle.SOLID)
 
 			bossBar.addPlayer(receiver)
