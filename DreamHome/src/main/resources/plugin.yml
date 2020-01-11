@@ -1,0 +1,5 @@
+name: DreamHome
+main: net.perfectdreams.dreamhome.DreamHome
+version: 1.0.0
+softdepend: ["DreamCore"]
+api-version: 1.13

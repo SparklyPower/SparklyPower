@@ -1,0 +1,5 @@
+name: DreamResourcePack
+main: net.perfectdreams.dreamresourcepack.DreamResourcePack
+version: 1.0.0
+softdepend: ["DreamCore"]
+api-version: 1.13
