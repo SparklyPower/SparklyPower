@@ -39,15 +39,15 @@ object ChatUtils {
 		if (!message[0].isUpperCase() && !message.startsWith("http")) {
 			message = message[0].toUpperCase() + message.substring(1)
 		}
-		
-		if (message.contains("#")) { 
+
+		if (message.contains("#")) {
 			message = Regex("#\\w+").replace(message, "§9$0§f")
 		}
 
 		if (message.contains("/")) {
 			message = Regex("\b/\\w+\b").replace(message, "§6$0§f")
 		}
-		 
+
 		return message
 	}
 
@@ -61,7 +61,7 @@ object ChatUtils {
 
 		textComponent += TextComponent(*"§7${DreamChat.BOT_NAME}".translateColorCodes().toBaseComponent()).apply {
 			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT,
-					"""§6✪ §a§lSobre a §r${DreamChat.BOT_NAME} §6✪
+				"""§6✪ §a§lSobre a §r${DreamChat.BOT_NAME} §6✪
 						|
 						|§eGênero: §d♀
 						|§eGrana: §6Incontáveis Sonhos
@@ -96,7 +96,7 @@ object ChatUtils {
 
 		textComponent += TextComponent(*"§7${DreamChat.LORITTA_NAME}".translateColorCodes().toBaseComponent()).apply {
 			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT,
-					"""§6✪ §a§lSobre a §r${DreamChat.LORITTA_NAME} §6✪
+				"""§6✪ §a§lSobre a §r${DreamChat.LORITTA_NAME} §6✪
 						|
 						|§eGênero: §d♀
 						|§eGrana: §6Incontáveis Sonhos
@@ -132,6 +132,7 @@ object ChatUtils {
 	fun sendTell(sender: Player, receiver: Player, message: String) {
 		val fromCanBeSeen = sender.displayName.stripColorCode().contains(sender.name)
 		val toCanBeSeen = receiver.displayName.stripColorCode().contains(receiver.name)
+		val isIgnoringTheSender = DreamChat.INSTANCE.userData.getStringList("ignore.${receiver.uniqueId}").contains(sender.uniqueId.toString())
 
 		val fromName = if (!fromCanBeSeen) {
 			sender.displayName + "§d (${sender.name})"
@@ -145,7 +146,8 @@ object ChatUtils {
 			receiver.displayName
 		}
 
-		receiver.sendMessage("§dDe §b${fromName}§r§d: §d$message")
+		if (!isIgnoringTheSender)
+			receiver.sendMessage("§dDe §b${fromName}§r§d: §d$message")
 		sender.sendMessage("§dPara §b${toName}§r§d: §d$message")
 
 		DreamChat.INSTANCE.quickReply[receiver] = sender
@@ -169,27 +171,29 @@ object ChatUtils {
 
 		if (ChatUtils.isMensagemPolemica(message)) {
 			DreamNetwork.PANTUFA.sendMessageAsync(
-					"387632163106848769",
-					"**`" + sender.name.replace("_", "\\_") + "` escreveu uma mensagem potencialmente polêmica para `${receiver.name.replace("_", "\\_")}`!**\n```" + message + "```\n"
+				"387632163106848769",
+				"**`" + sender.name.replace("_", "\\_") + "` escreveu uma mensagem potencialmente polêmica para `${receiver.name.replace("_", "\\_")}`!**\n```" + message + "```\n"
 			)
 		}
 
 		// bossbar
-		val bossBar = Bukkit.createBossBar("§b${fromName}§r§d: §d$message", BarColor.PINK, BarStyle.SOLID)
+		if (!isIgnoringTheSender) {
+			val bossBar = Bukkit.createBossBar("§b${fromName}§r§d: §d$message", BarColor.PINK, BarStyle.SOLID)
 
-		bossBar.addPlayer(receiver)
+			bossBar.addPlayer(receiver)
 
-		scheduler().schedule(DreamChat.INSTANCE) {
-			while (bossBar.progress > 0) {
-				val newProgress = bossBar.progress - 0.01
-				if (0 >= newProgress) {
-					break
+			scheduler().schedule(DreamChat.INSTANCE) {
+				while (bossBar.progress > 0) {
+					val newProgress = bossBar.progress - 0.01
+					if (0 >= newProgress) {
+						break
+					}
+					bossBar.progress = newProgress
+					waitFor(1)
 				}
-				bossBar.progress = newProgress
-				waitFor(1)
-			}
 
-			bossBar.removeAll()
+				bossBar.removeAll()
+			}
 		}
 	}
 }

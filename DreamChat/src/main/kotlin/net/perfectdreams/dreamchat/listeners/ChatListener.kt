@@ -45,14 +45,14 @@ import kotlin.collections.set
 
 class ChatListener(val m: DreamChat) : Listener {
 	val chatCooldownCache = Caffeine.newBuilder()
-			.expireAfterWrite(1L, TimeUnit.MINUTES)
-			.build<Player, Long>()
-			.asMap()
+		.expireAfterWrite(1L, TimeUnit.MINUTES)
+		.build<Player, Long>()
+		.asMap()
 
 	val lastMessageCache = Caffeine.newBuilder()
-			.expireAfterAccess(1L, TimeUnit.MINUTES)
-			.build<Player, String>()
-			.asMap()
+		.expireAfterAccess(1L, TimeUnit.MINUTES)
+		.build<Player, String>()
+		.asMap()
 
 	@EventHandler
 	fun onJoin(e: PlayerJoinEvent) {
@@ -78,17 +78,17 @@ class ChatListener(val m: DreamChat) : Listener {
 	fun onTag(e: ApplyPlayerTagsEvent) {
 		if (e.player.uniqueId == m.eventoChat.lastWinner) {
 			e.tags.add(
-					PlayerTag(
-							"§b§lD",
-							"§b§lDatilógrafo",
-							listOf(
-									"§r§b${e.player.displayName}§r§7 ficou atento no chat e",
-									"§7e preparad${e.player.artigo} no teclado para conseguir",
-									"§7vencer o Evento Chat em primeiro lugar!"
-							),
-							null,
-							false
-					)
+				PlayerTag(
+					"§b§lD",
+					"§b§lDatilógrafo",
+					listOf(
+						"§r§b${e.player.displayName}§r§7 ficou atento no chat e",
+						"§7e preparad${e.player.artigo} no teclado para conseguir",
+						"§7vencer o Evento Chat em primeiro lugar!"
+					),
+					null,
+					false
+				)
 			)
 		}
 	}
@@ -174,8 +174,8 @@ class ChatListener(val m: DreamChat) : Listener {
 
 		if (ChatUtils.isMensagemPolemica(message)) {
 			DreamNetwork.PANTUFA.sendMessageAsync(
-					"387632163106848769",
-					"**`" + player.name.replace("_", "\\_") + "` escreveu uma mensagem potencialmente polêmica no chat!**\n```" + message + "```\n"
+				"387632163106848769",
+				"**`" + player.name.replace("_", "\\_") + "` escreveu uma mensagem potencialmente polêmica no chat!**\n```" + message + "```\n"
 			)
 		}
 
@@ -254,49 +254,49 @@ class ChatListener(val m: DreamChat) : Listener {
 
 		if (m.topEntries[0].equals(e.player.name, true)) {
 			event.tags.add(
-					PlayerTag(
-							"§2§lO",
-							"§2§lOstentador${if (player.girl) "a" else ""}",
-							listOf(
-									"§r§b${player.displayName}§r§7 é a pessoa mais ostentadora do §4§lSparkly§b§lPower§r§7!",
-									"",
-									"§7Eu duvido você conseguir passar del${if (player.girl) "a" else "e"}, será que você tem as habilidades para conseguir? ;)"
-							),
-							"/money top",
-							true
-					)
+				PlayerTag(
+					"§2§lO",
+					"§2§lOstentador${if (player.girl) "a" else ""}",
+					listOf(
+						"§r§b${player.displayName}§r§7 é a pessoa mais ostentadora do §4§lSparkly§b§lPower§r§7!",
+						"",
+						"§7Eu duvido você conseguir passar del${if (player.girl) "a" else "e"}, será que você tem as habilidades para conseguir? ;)"
+					),
+					"/money top",
+					true
+				)
 			)
 		}
 
 		if (m.topEntries[1].equals(e.player.name, true)) {
 			event.tags.add(
-					PlayerTag(
-							"§2§lO",
-							"§2§lMagnata",
-							listOf(
-									"§r§b${player.displayName}§r§7 é a segunda pessoa mais rica do §4§lSparkly§b§lPower§r§7!",
-									"",
-									"§7Eu duvido você conseguir passar del${if (player.girl) "a" else "e"}, será que você tem as habilidades para conseguir? ;)"
-							),
-							"/money top",
-							true
-					)
+				PlayerTag(
+					"§2§lO",
+					"§2§lMagnata",
+					listOf(
+						"§r§b${player.displayName}§r§7 é a segunda pessoa mais rica do §4§lSparkly§b§lPower§r§7!",
+						"",
+						"§7Eu duvido você conseguir passar del${if (player.girl) "a" else "e"}, será que você tem as habilidades para conseguir? ;)"
+					),
+					"/money top",
+					true
+				)
 			)
 		}
 
 		if (m.topEntries[2].equals(e.player.name, true)) {
 			event.tags.add(
-					PlayerTag(
-							"§2§lO",
-							"§2§lRic${(player.artigo)}",
-							listOf(
-									"§r§b${player.displayName}§r§7 é a terceira pessoa mais rica do §4§lSparkly§b§lPower§r§7!",
-									"",
-									"§7Eu duvido você conseguir passar del${if (player.girl) "a" else "e"}, será que você tem as habilidades para conseguir? ;)"
-							),
-							"/money top",
-							true
-					)
+				PlayerTag(
+					"§2§lO",
+					"§2§lRic${(player.artigo)}",
+					listOf(
+						"§r§b${player.displayName}§r§7 é a terceira pessoa mais rica do §4§lSparkly§b§lPower§r§7!",
+						"",
+						"§7Eu duvido você conseguir passar del${if (player.girl) "a" else "e"}, será que você tem as habilidades para conseguir? ;)"
+					),
+					"/money top",
+					true
+				)
 			)
 		}
 
@@ -383,7 +383,7 @@ class ChatListener(val m: DreamChat) : Listener {
 				val cachedDiscordAccount = m.cachedDiscordAccounts.getOrPut(discordAccount.discordId, {
 					val request = HttpRequest.get("https://discordapp.com/api/v6/users/${discordAccount.discordId}")
 						.userAgent("SparklyPower DreamChat")
-						.header("Authorization", "Bot ${m.config.getString("pantufaToken")}")
+						.header("Authorization", "Bot ${m.config.getString("pantufa-token")}")
 
 					val statusCode = request.code()
 					if (statusCode != 200)
@@ -439,8 +439,12 @@ class ChatListener(val m: DreamChat) : Listener {
 			return
 		}
 
-		for (player in Bukkit.getOnlinePlayers()) {
-			player.spigot().sendMessage(textComponent)
+		for (onlinePlayer in Bukkit.getOnlinePlayers()) {
+			// Verificar se o player está ignorando o player que enviou a mensagem
+			val isIgnoringTheSender = m.userData.getStringList("ignore.${onlinePlayer.uniqueId}").contains(player.uniqueId.toString())
+
+			if (!isIgnoringTheSender)
+				onlinePlayer.spigot().sendMessage(textComponent)
 		}
 
 		val calendar = Calendar.getInstance()
@@ -457,11 +461,11 @@ class ChatListener(val m: DreamChat) : Listener {
 
 		// Vamos mandar no Biscord!
 		DreamChat.CHAT_WEBHOOK.send(
-				DiscordMessage(
-						username = player.name,
-						content = message.stripColorCode().replace(Regex("\\\\+@"), "@").replace("@", "@\u200B"),
-						avatar = "https://sparklypower.net/api/v1/render/avatar?name=${player.name}&scale=16"
-				)
+			DiscordMessage(
+				username = player.name,
+				content = message.stripColorCode().replace(Regex("\\\\+@"), "@").replace("@", "@\u200B"),
+				avatar = "https://sparklypower.net/api/v1/render/avatar?name=${player.name}&scale=16"
+			)
 		)
 	}
 }
