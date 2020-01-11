@@ -1,6 +1,9 @@
 package net.perfectdreams.dreamchat.listeners
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.kevinsawicki.http.HttpRequest
+import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.string
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import me.lucko.luckperms.LuckPerms
@@ -10,12 +13,16 @@ import net.md_5.bungee.api.chat.TextComponent
 import net.perfectdreams.dreamcasamentos.DreamCasamentos
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamchat.dao.ChatUser
+import net.perfectdreams.dreamchat.dao.DiscordAccount
 import net.perfectdreams.dreamchat.events.ApplyPlayerTagsEvent
 import net.perfectdreams.dreamchat.tables.ChatUsers
+import net.perfectdreams.dreamchat.tables.DiscordAccounts
 import net.perfectdreams.dreamchat.utils.ChatUtils
+import net.perfectdreams.dreamchat.utils.DiscordAccountInfo
 import net.perfectdreams.dreamchat.utils.PlayerTag
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.DreamUtils.jsonParser
 import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.girl
@@ -358,21 +365,55 @@ class ChatListener(val m: DreamChat) : Listener {
 			val numberOfHours = input % 86400 / 3600
 			val numberOfMinutes = input % 86400 % 3600 / 60
 
-			var about = """§6✪ §a§lSobre ${player.artigo} §r§b${toDisplay}§r §6✪
-						|
-						|§eGênero: §d${if (!player.girl) { "§3♂" } else { "§d♀" }}
-						|§eGrana: §6${player.balance} Sonhos
-						|§eKDR: §6PvP é para os fracos, 2bj :3
-						|§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!
-					""".trimMargin()
+			val aboutLines = mutableListOf(
+				"§6✪ §a§lSobre ${player.artigo} §r§b${toDisplay}§r §6✪",
+				"",
+				"§eGênero: §d${if (!player.girl) { "§3♂" } else { "§d♀" }}",
+				"§eGrana: §6${player.balance} Sonhos",
+				"§eKDR: §6PvP é para os fracos, 2bj :3",
+				"§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!",
+				"§eVersão: §6Minecraft ${player.version.getName()}"
+			)
+
+			val discordAccount = transaction(Databases.databaseNetwork) {
+				DiscordAccount.find { DiscordAccounts.minecraftId eq player.uniqueId }.firstOrNull()
+			}
+
+			if (discordAccount != null) {
+				val cachedDiscordAccount = m.cachedDiscordAccounts.getOrPut(discordAccount.discordId, {
+					val request = HttpRequest.get("https://discordapp.com/api/v6/users/${discordAccount.discordId}")
+						.userAgent("SparklyPower DreamChat")
+						.header("Authorization", "Bot ${m.config.getString("pantufaToken")}")
+
+					val statusCode = request.code()
+					if (statusCode != 200)
+						Optional.empty()
+					else {
+						val json = jsonParser.parse(request.body())
+
+						Optional.of(
+							DiscordAccountInfo(
+								json["username"].string,
+								json["discriminator"].string
+							)
+						)
+					}
+				})
+
+				if (cachedDiscordAccount.isPresent) {
+					val info = cachedDiscordAccount.get()
+					aboutLines.add("§eDiscord: §6${info.name}§7#§6${info.discriminator}")
+				}
+			}
 
 			val adoption = DreamCasamentos.INSTANCE.getParentsOf(player)
 
 			if (adoption != null) {
-				about += "\n\n§eParentes: §b${Bukkit.getOfflinePlayer(adoption.player1)?.name ?: "???"} §b${Bukkit.getOfflinePlayer(adoption.player2)?.name ?: "???"}"
+				aboutLines.add("")
+				aboutLines.add("§eParentes: §b${Bukkit.getOfflinePlayer(adoption.player1)?.name ?: "???"} §b${Bukkit.getOfflinePlayer(adoption.player2)?.name ?: "???"}")
 			}
 			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT,
-					about.toBaseComponent()
+				aboutLines.joinToString("\n").toBaseComponent()
 			)
 		}
 

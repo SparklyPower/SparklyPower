@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamchat
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.kevinsawicki.http.HttpRequest
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.fromJson
@@ -16,6 +17,7 @@ import net.perfectdreams.dreamchat.listeners.SignListener
 import net.perfectdreams.dreamchat.tables.ChatUsers
 import net.perfectdreams.dreamchat.tables.DiscordAccounts
 import net.perfectdreams.dreamchat.tables.EventMessages
+import net.perfectdreams.dreamchat.utils.DiscordAccountInfo
 import net.perfectdreams.dreamchat.utils.bot.PantufaResponse
 import net.perfectdreams.dreamchat.utils.bot.responses.*
 import net.perfectdreams.dreamchat.utils.chatevent.EventoChatHandler
@@ -30,6 +32,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
 class DreamChat : KotlinPlugin() {
@@ -61,6 +64,10 @@ class DreamChat : KotlinPlugin() {
 
 	val artists = mutableSetOf<UUID>()
 	val partners = mutableSetOf<UUID>()
+	val cachedDiscordAccounts = Caffeine.newBuilder().maximumSize(1_000)
+		.expireAfterWrite(3, TimeUnit.DAYS)
+		.build<Long, Optional<DiscordAccountInfo>>()
+		.asMap()
 
 	val dataYaml by lazy {
 		File(dataFolder, "data.yml")
