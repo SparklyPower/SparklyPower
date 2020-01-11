@@ -111,6 +111,10 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
                     player.sendMessage("${DreamQuiz.PREFIX} Você estava indeciso e não soube escolher nenhum dos dois... Que pena.")
                     player.teleport(DreamCore.dreamConfig.spawn)
 
+                    for (onlinePlayer in Bukkit.getOnlinePlayers()) {
+                        player.showPlayer(m, onlinePlayer)
+                    }
+                    
                     player.playSound(player.location, "perfectdreams.sfx.errou", 10.0f, 1.0f)
                 }
 
@@ -152,7 +156,8 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
             lastTime = System.currentTimeMillis()
 
             switchContext(SynchronizationContext.SYNC)
-            players.forEach {
+            val finalPlayersInTheQuiz = players.toMutableList()
+            finalPlayersInTheQuiz.forEach {
                 it.teleport(DreamCore.dreamConfig.spawn)
 
                 for (player in Bukkit.getOnlinePlayers()) {
@@ -161,7 +166,7 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
             }
 
             scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                players.forEach {
+                finalPlayersInTheQuiz.forEach {
                     Cash.giveCash(it, 2)
                 }
             }
