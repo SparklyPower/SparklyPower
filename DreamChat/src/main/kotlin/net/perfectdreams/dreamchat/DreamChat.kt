@@ -104,6 +104,7 @@ class DreamChat : KotlinPlugin() {
 		registerCommand(NickCommand(this))
 		registerCommand(DreamChatCommand(this))
 		registerCommand(QueroTagCommand(this))
+		registerCommand(IgnoreCommand(this))
 		reload()
 		loadResponses()
 
