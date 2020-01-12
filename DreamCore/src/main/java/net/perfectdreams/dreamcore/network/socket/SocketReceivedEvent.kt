@@ -4,7 +4,7 @@ import com.google.gson.JsonObject
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
-class SocketReceivedEvent(val json: JsonObject, var response: JsonObject) : Event(true) {
+class SocketReceivedEvent(val json: JsonObject, var response: JsonObject) : Event() {
 	override fun getHandlers(): HandlerList {
 		return SocketReceivedEvent.handlers
 	}
