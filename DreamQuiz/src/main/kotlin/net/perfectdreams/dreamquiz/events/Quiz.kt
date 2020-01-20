@@ -114,7 +114,7 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
                     for (onlinePlayer in Bukkit.getOnlinePlayers()) {
                         player.showPlayer(m, onlinePlayer)
                     }
-                    
+
                     player.playSound(player.location, "perfectdreams.sfx.errou", 10.0f, 1.0f)
                 }
 

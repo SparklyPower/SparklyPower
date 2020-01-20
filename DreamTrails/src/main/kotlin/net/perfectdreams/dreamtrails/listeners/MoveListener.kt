@@ -14,6 +14,9 @@ class MoveListener(val m: DreamTrails) : Listener {
 		if (!e.displaced)
 			return
 
+		if (e.player.location.world.name == "Quiz")
+			return
+
 		val activeTrails = m.playerTrails[e.player.uniqueId] ?: return
 
 		activeTrails.activeParticles.forEach { activeParticle ->

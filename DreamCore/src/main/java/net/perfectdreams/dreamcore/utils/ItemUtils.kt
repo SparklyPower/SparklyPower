@@ -26,7 +26,7 @@ object ItemUtils {
 	fun getStoredMetadata(itemStack: ItemStack, key: String): String? {
 		try {
 			val tag = itemStack.getCompoundTag() ?: return null
-			if (!hasStoredMetadataWithKey(itemStack, NbtTagsUtils.SERVER_DATA_COMPOUND_NAME)) return null
+			if (!hasStoredMetadataWithKeyAtNbtRoot(itemStack, NbtTagsUtils.SERVER_DATA_COMPOUND_NAME)) return null
 			val compound = tag.getCompound(NbtTagsUtils.SERVER_DATA_COMPOUND_NAME)
 			if (!compound.containsKey(key))
 				return null
@@ -52,12 +52,17 @@ object ItemUtils {
 	}
 
 	/**
-	 * Checks if the [itemStack] has the [key] metadata in it's NBT Tag
+	 * Checks if the [itemStack] has the [key] metadata in it's NBT Root Tag
 	 */
-	fun hasStoredMetadataWithKey(itemStack: ItemStack, key: String): Boolean {
+	private fun hasStoredMetadataWithKeyAtNbtRoot(itemStack: ItemStack, key: String): Boolean {
 		val tag = itemStack.getCompoundTag() ?: return false
 		return tag.containsKey(key)
 	}
+
+	/**
+	 * Checks if the [itemStack] has the [key] metadata in it's NBT Tag
+	 */
+	fun hasStoredMetadataWithKey(itemStack: ItemStack, key: String) = getStoredMetadata(itemStack, key) != null
 
 	fun getTranslatedDisplayName(itemStack: ItemStack, player: Player): String {
 		return getTranslatedDisplayName(itemStack, player.locale)

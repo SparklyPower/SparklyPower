@@ -8,6 +8,7 @@ import net.perfectdreams.dreamhome.commands.DelHomeCommand
 import net.perfectdreams.dreamhome.commands.HomeCommand
 import net.perfectdreams.dreamhome.commands.SetHomeCommand
 import net.perfectdreams.dreamhome.dao.Home
+import net.perfectdreams.dreamhome.listeners.ClaimCreateListener
 import net.perfectdreams.dreamhome.tables.Homes
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -76,7 +77,7 @@ class DreamHome : KotlinPlugin() {
 				if (house == null) {
 					house = Home.new {
 						owner = player.uniqueId
-						houseName = houseName
+						houseName = homeName
 						setLocation(newLocation)
 						createdAt = System.currentTimeMillis()
 						editedAt = System.currentTimeMillis()

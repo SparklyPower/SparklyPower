@@ -107,7 +107,7 @@ class DreamTrails : KotlinPlugin() {
 				val b = coloredHaloData.b.addAndGet()
 				val haloColor = Color.fromRGB(r, g, b)
 
-				for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission(USE_TRAILS_PERMISSION) }) {
+				for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission(USE_TRAILS_PERMISSION) }.filter { it.location.world.name != "Quiz" }) {
 					val trailData = playerTrails[player.uniqueId] ?: continue
 					val activeHalo = trailData.activeHalo
 					if (activeHalo != null) {

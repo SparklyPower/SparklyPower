@@ -41,7 +41,7 @@ class DelHomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("delhome", "delc
 
 			scheduler().schedule(m, SynchronizationContext.ASYNC) {
 				val newLocation = house.getLocation()
-				transaction(Databases.databaseServer) {
+				transaction(Databases.databaseNetwork) {
 					Homes.deleteWhere { Homes.id eq house.id }
 				}
 

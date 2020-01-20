@@ -2,6 +2,7 @@ package net.perfectdreams.dreamhome.commands
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
@@ -59,6 +60,12 @@ class SetHomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("sethome", "setc
 					player.sendMessage("§aCasa marcada com sucesso! Que tal dar uma passadinha nela? §6/home $homeName")
 				} else {
 					player.sendMessage("§aCasa remarcada com sucesso!")
+				}
+
+				val claim = GriefPrevention.instance.dataStore.getClaimAt(newLocation, false, null)
+
+				if (claim == null) {
+					player.sendMessage("§eParece que você ainda não protegeu o terreno aonde você marcou o teletransporte rápido! Para evitar griefings e roubos, use a pá de ouro do §6/kit noob§e para proteger!")
 				}
 			}
 		}

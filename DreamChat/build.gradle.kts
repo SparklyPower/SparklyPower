@@ -15,11 +15,12 @@ dependencies {
     compile("net.perfectdreams.dreamcore:DreamCore:1.0-SNAPSHOT")
     compile("net.perfectdreams.dreamcorreios:DreamCorreios:1.0-SNAPSHOT")
     compile("net.perfectdreams.dreamcasamentos:DreamCasamentos:1.0-SNAPSHOT")
+    compileOnly(files("../libs/ProtocolSupport.jar"))
     compile("net.milkbowl.vault:VaultAPI:1.6")
     compile("com.greatmancode:craftconomy3:3.3.1")
     compile(project(":DreamVote"))
     compile("net.perfectdreams.dreammini:DreamMini:1.0-SNAPSHOT")
-    compile("me.lucko.luckperms:luckperms-api:4.3")
+    compile("net.luckperms:api:5.0")
 }
 
 tasks.withType<KotlinCompile> {

@@ -6,7 +6,8 @@ import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.string
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
-import me.lucko.luckperms.LuckPerms
+import net.luckperms.api.LuckPerms
+import net.luckperms.api.LuckPermsProvider
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
@@ -37,6 +38,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerResourcePackStatusEvent
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
@@ -192,9 +194,9 @@ class ChatListener(val m: DreamChat) : Listener {
 
 		var prefix = VaultUtils.chat.getPlayerPrefix(player)
 
-		val api = LuckPerms.getApi()
+		val api = LuckPermsProvider.get()
 
-		val luckyUser = api.getUser(e.player.uniqueId)
+		val luckyUser = api.userManager.getUser(e.player.uniqueId)
 
 		val chatUser = transaction(Databases.databaseNetwork) {
 			ChatUser.find {
@@ -365,6 +367,12 @@ class ChatListener(val m: DreamChat) : Listener {
 			val numberOfHours = input % 86400 / 3600
 			val numberOfMinutes = input % 86400 % 3600 / 60
 
+			val rpStatus = if (player.resourcePackStatus == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
+				"§a✔"
+			} else {
+				"§c✗"
+			}
+
 			val aboutLines = mutableListOf(
 				"§6✪ §a§lSobre ${player.artigo} §r§b${toDisplay}§r §6✪",
 				"",
@@ -372,7 +380,8 @@ class ChatListener(val m: DreamChat) : Listener {
 				"§eGrana: §6${player.balance} Sonhos",
 				"§eKDR: §6PvP é para os fracos, 2bj :3",
 				"§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!",
-				"§eVersão: §6Minecraft ${player.version.getName()}"
+				"§eVersão: §6Minecraft ${player.version.getName()}",
+				"§eUsando a Resource Pack? $rpStatus"
 			)
 
 			val discordAccount = transaction(Databases.databaseNetwork) {
@@ -402,7 +411,7 @@ class ChatListener(val m: DreamChat) : Listener {
 
 				if (cachedDiscordAccount.isPresent) {
 					val info = cachedDiscordAccount.get()
-					aboutLines.add("§eDiscord: §6${info.name}§7#§6${info.discriminator}")
+					aboutLines.add("§eDiscord: §6${info.name}§8#§6${info.discriminator} §8(§7${discordAccount.discordId}§8)")
 				}
 			}
 

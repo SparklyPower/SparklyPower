@@ -26,7 +26,7 @@ class IgnoreCommand(val m: DreamChat) : SparklyCommand(arrayOf("ignore", "ignora
 
 		if (onlinePlayer != null) {
 			if (onlinePlayer.hasPermission("sparklypower.soustaff")) {
-				p0.sendMessage("§cVocê não pode ignorar players que estão na equipe!")
+				p0.sendMessage("§cVocê não pode ignorar players que são da equipe!")
 				onlinePlayer.sendMessage("§cPlayer ${p0.name} tentou te ignorar!")
 				return
 			}

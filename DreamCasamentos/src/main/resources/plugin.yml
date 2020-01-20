@@ -1,0 +1,8 @@
+name: DreamCasamentos
+main: net.perfectdreams.dreamcasamentos.DreamCasamentos
+version: 1.0-SNAPSHOT
+
+author: MrGaabriel
+
+softdepend:
+  - DreamCore

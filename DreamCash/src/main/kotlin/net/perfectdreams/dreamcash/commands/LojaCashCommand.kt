@@ -2,6 +2,9 @@ package net.perfectdreams.dreamcash.commands
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.luckperms.api.LuckPermsProvider
+import net.luckperms.api.node.types.InheritanceNode
+import net.luckperms.api.node.types.PermissionNode
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.commands.bukkit.SubcommandPermission
@@ -65,13 +68,13 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             }
 
             // VIPs
-            generateItemAt(0, 0, Material.IRON_INGOT, "§b§lVIP §7(32 dias)", 500) {
+            generateItemAt(0, 0, Material.IRON_INGOT, "§b§lVIP §7(um mês • R$ 14,99)", 500) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip 32d")
             }
-            generateItemAt(1, 0, Material.GOLD_INGOT, "§b§lVIP§e+ §7(32 dias)", 1000) {
+            generateItemAt(1, 0, Material.GOLD_INGOT, "§b§lVIP§e+ §7(um mês • R$ 29,99)", 1000) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip+ 32d")
             }
-            generateItemAt(2, 0, Material.DIAMOND, "§b§lVIP§e++ §7(32 dias)", 1500) {
+            generateItemAt(2, 0, Material.DIAMOND, "§b§lVIP§e++ §7(um mês • R$ 44,99)", 1500) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip++ 32d")
             }
 
@@ -164,6 +167,32 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                 onClick {
                     it.closeInventory()
+                }
+            }
+
+            this.slot(6,  4) {
+                item = ItemStack(Material.BEACON)
+                    .rename("§e§lInformações sobre o meu VIP ativo")
+
+                onClick {
+                    it.closeInventory()
+
+                    val api = LuckPermsProvider.get()
+                    val user = api.userManager.getUser(sender.uniqueId) ?: return@onClick
+                    val vipPlusPlusPermission = user.nodes.filterIsInstance<InheritanceNode>()
+                        .firstOrNull { it.groupName == "vip++" }
+                    val vipPlusPermission = user.nodes.filterIsInstance<InheritanceNode>()
+                        .firstOrNull { it.groupName == "vip+" }
+                    val vipPermission = user.nodes.filterIsInstance<InheritanceNode>()
+                        .firstOrNull { it.groupName == "vip" }
+
+                    val time = vipPlusPlusPermission?.expiry ?: vipPlusPermission?.expiry ?: vipPermission?.expiry
+
+                    if (time == null) {
+                        sender.sendMessage("§cVocê não tem nenhum VIP ativo!")
+                    } else {
+                        sender.sendMessage("§eSeu VIP irá expirar em §6${DateUtils.formatDateDiff(time.toEpochMilli())}")
+                    }
                 }
             }
         }

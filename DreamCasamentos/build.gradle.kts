@@ -10,9 +10,9 @@ repositories {
 
 dependencies {
     compile(kotlin("stdlib-jdk8"))
+    compile(project(":DreamCash"))
     compile("com.destroystokyo.paper:paper:1.13-R0.1-SNAPSHOT")
     compile("net.perfectdreams.dreamcore:DreamCore:1.0-SNAPSHOT")
-    compile("net.luckperms:api:5.0")
 }
 
 tasks.withType<KotlinCompile> {

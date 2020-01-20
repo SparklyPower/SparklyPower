@@ -44,6 +44,8 @@ class BlockListener(val m: DreamEnchant) : Listener {
 		if (item == null || item.type == Material.AIR)
 			return
 
+		e.isCancelled = true
+
 		val player = e.whoClicked as Player
 
 		val inventoryAction = item.getStoredMetadata("inventoryAction")
