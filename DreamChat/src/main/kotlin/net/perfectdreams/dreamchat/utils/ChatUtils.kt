@@ -4,6 +4,7 @@ import com.github.salomonbrys.kotson.set
 import com.google.gson.JsonObject
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
@@ -72,18 +73,49 @@ object ChatUtils {
 		}
 		textComponent += " §6➤ ".toBaseComponent()
 
+		// Para não encher o chat de mensagens da Pantufa, vamos fazer que só apareça o texto ao passar o mouse em cima da mensagem dela
+		val forEveryone = textComponent.duplicate()
+		val lore = mutableListOf<String>()
+		val currentLoreLine = StringBuilder()
+		var currentTextSize = 0
+
 		val split = message.split("(?=\\b[ ])")
 		var previous: String? = null
+
 		for (piece in split) {
+			if (currentTextSize >= 40) {
+				lore += currentLoreLine.toString()
+				currentTextSize = 0
+			}
+
 			var editedPiece = piece
 			if (previous != null) {
 				editedPiece = "$previous$editedPiece"
 			}
 			textComponent += editedPiece.toBaseComponent()
+			currentLoreLine.append(piece)
+			currentTextSize += piece.length
+
 			previous = ChatColor.getLastColors(piece)
 		}
+		lore += currentLoreLine.toString()
 
-		broadcast(textComponent)
+		forEveryone.addExtra(
+			"§6[Passe o Mouse em Cima]".toTextComponent()
+				.apply {
+					hoverEvent = HoverEvent(
+						HoverEvent.Action.SHOW_TEXT,
+						lore.joinToString("\n").toBaseComponent()
+					)
+				}
+		)
+
+		Bukkit.getOnlinePlayers().forEach {
+			if (it != player)
+				it.sendMessage(forEveryone)
+			else
+				it.sendMessage(textComponent)
+		}
 	}
 
 	fun sendResponseAsLoritta(player: Player, message: String) {
