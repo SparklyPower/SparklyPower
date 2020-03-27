@@ -4,24 +4,17 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.luckperms.api.LuckPermsProvider
 import net.luckperms.api.node.types.InheritanceNode
-import net.luckperms.api.node.types.PermissionNode
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
-import net.perfectdreams.commands.bukkit.SubcommandPermission
 import net.perfectdreams.dreamcash.DreamCash
-import net.perfectdreams.dreamcash.dao.CashInfo
 import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamcore.utils.*
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
-import java.lang.IllegalArgumentException
-import java.util.*
 
 class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "cashloja")) {
     @Subcommand
@@ -121,28 +114,60 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             // Coisas Reais
             this.slot(0, 3) {
                 item = ItemStack(Material.OAK_BOAT)
-                    .rename("§aDiscord Nitro Classic")
+                    .rename("§aAumentar o seu Clube em +1 slot para Membros")
                     .lore(
-                        "§c1330 pesadelos"
+                        "§aPermita que o seu clube tenha mais pessoas! (Máximo: 20 membros)",
+                        "§aLembre-se: Isto apenas afeta o seu clube atual, se você deletar",
+                        "§ao seu clube, você irá perder os slots adicionais!",
+                        "§f",
+                        "§c50 pesadelos"
                     )
 
                 onClick {
-                    it.closeInventory()
+                    checkIfPlayerHasSufficientMoney(sender, 50) {
+                        askForConfirmation(sender) {
+                            sender.closeInventory()
 
-                    sender.sendMessage("§aPara comprar, mande uma mensagem para MrPowerGamerBR#4185 no Discord!")
-                }
-            }
-            this.slot(1, 3) {
-                item = ItemStack(Material.DARK_OAK_BOAT)
-                    .rename("§aDiscord Nitro")
-                    .lore(
-                        "§c2660 pesadelos"
-                    )
+                            scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                                val clube = ClubeAPI.getPlayerClube(sender)
 
-                onClick {
-                    it.closeInventory()
+                                switchContext(SynchronizationContext.SYNC)
 
-                    sender.sendMessage("§aPara comprar, mande uma mensagem para MrPowerGamerBR#4185 no Discord!")
+                                if (clube == null) {
+                                    sender.sendMessage("§cVocê não possui um clube!")
+                                    return@schedule
+                                }
+
+                                if (clube.ownerId != sender.uniqueId) {
+                                    sender.sendMessage("§cApenas o dono do clube pode aumentar os slots!")
+                                    return@schedule
+                                }
+
+                                if (clube.maxMembers >= 20) {
+                                    sender.sendMessage("§cVocê já comprou todos os slots disponíveis!")
+                                    return@schedule
+                                }
+
+                                switchContext(SynchronizationContext.ASYNC)
+
+                                transaction(Databases.databaseNetwork) {
+                                    try {
+                                        Cash.takeCash(sender, 50)
+                                        clube.maxMembers++
+                                    } catch (e: IllegalArgumentException) {
+                                        sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
+                                        return@transaction
+                                    }
+                                }
+
+                                switchContext(SynchronizationContext.SYNC)
+
+                                sender.sendMessage("§aObrigado pela compra! ^-^")
+
+                                Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou §dslots adicionais para o clube§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
+                            }
+                        }
+                    }
                 }
             }
 

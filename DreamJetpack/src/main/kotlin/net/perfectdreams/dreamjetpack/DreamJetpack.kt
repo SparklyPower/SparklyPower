@@ -114,7 +114,11 @@ class DreamJetpack : KotlinPlugin(), Listener {
 					}
 
 					if (durabilityTicks % TAKE_DAMAGE_EVERY == 0) {
-						meta.damage += applyDamage
+						if (applyDamage == 0) {
+							meta.damage = 0
+						} else {
+							meta.damage += applyDamage
+						}
 					}
 
 					if (meta.damage > 240) {

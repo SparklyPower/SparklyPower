@@ -53,9 +53,7 @@ class EventoChatMensagem : IEventoChat {
 		}
 	}
 
-	override fun getAnnouncementMessage(): String {
-		return currentMessage.message.toCharArray().joinToString("§c")
-	}
+	override fun getAnnouncementMessage() = currentMessage.message
 
 	override fun getToDoWhat(): String {
 		return "escrever"

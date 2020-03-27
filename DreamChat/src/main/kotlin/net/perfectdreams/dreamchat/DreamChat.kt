@@ -5,6 +5,8 @@ import com.github.kevinsawicki.http.HttpRequest
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.string
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType
+import com.gmail.nossr50.mcMMO
 import com.greatmancode.craftconomy3.Common
 import com.greatmancode.craftconomy3.groups.WorldGroupsManager
 import com.okkero.skedule.SynchronizationContext
@@ -48,13 +50,15 @@ class DreamChat : KotlinPlugin() {
 		val CHAT_WEBHOOK by lazy {
 			DiscordWebhook(INSTANCE.getConfig().getString("relay-chat-webhook-url"))
 		}
-		val INSTANCE get() = Bukkit.getPluginManager().getPlugin("DreamChat") as DreamChat
+		lateinit var INSTANCE: DreamChat
 		const val LAST_CHAT_WINNER_PATH = "last-chat-winner"
 	}
 
 	var pmLog = File(dataFolder, "privado.log")
 	var chatLog = File(dataFolder, "chat.log")
 	var topEntries = arrayOf("???", "???", "???")
+	var topMcMMOPlayer: String? = null
+	var topPlayerSkills = mutableMapOf<PrimarySkillType, String?>()
 	var lockedTells = WeakHashMap<Player, String>()
 	var quickReply = WeakHashMap<Player, Player>()
 
@@ -82,12 +86,13 @@ class DreamChat : KotlinPlugin() {
 
 	override fun softEnable() {
 		super.softEnable()
+		INSTANCE = this
 		dataFolder.mkdirs()
 
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.create(
-					ChatUsers,
-					EventMessages
+				ChatUsers,
+				EventMessages
 			)
 		}
 
@@ -118,6 +123,12 @@ class DreamChat : KotlinPlugin() {
 
 				for (idx in 0 until Math.min(3, entries.size)) {
 					topEntries[idx] = entries[idx].username
+				}
+
+				// MCMMO - TOP
+				topMcMMOPlayer = getTopPlayerInMcMMOSkill(null)
+				for (skill in PrimarySkillType.values().filter { it != PrimarySkillType.REPAIR && it != PrimarySkillType.SALVAGE && it != PrimarySkillType.SMELTING }) {
+					topPlayerSkills[skill] = getTopPlayerInMcMMOSkill(skill)
 				}
 
 				waitFor(20 * 15)
@@ -189,6 +200,7 @@ class DreamChat : KotlinPlugin() {
 
 	override fun softDisable() {
 		DreamChat.INSTANCE.saveConfig()
+		DreamCore.INSTANCE.dreamEventManager.events.remove(eventoChat)
 	}
 
 	fun reload() {
@@ -256,4 +268,6 @@ class DreamChat : KotlinPlugin() {
 		botResponses.add(PingResponse())
 		botResponses.add(LagResponse())
 	}
+
+	private fun getTopPlayerInMcMMOSkill(skill: PrimarySkillType?) = mcMMO.getDatabaseManager().readLeaderboard(skill, 1, 1).firstOrNull()?.name
 }

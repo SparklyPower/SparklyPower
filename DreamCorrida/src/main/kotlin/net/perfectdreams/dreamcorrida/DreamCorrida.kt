@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcorrida.commands.CorridaCommand
 import net.perfectdreams.dreamcorrida.events.EventoCorrida
 import net.perfectdreams.dreamcorrida.listeners.PlayerListener
+import net.perfectdreams.dreamcorrida.listeners.TagListener
 import net.perfectdreams.dreamcorrida.utils.Corrida
 import net.perfectdreams.dreamcorrida.utils.LocationWrapper
 import java.io.File
@@ -22,6 +23,7 @@ class DreamCorrida : KotlinPlugin() {
     lateinit var config: Config
     lateinit var eventoCorrida: EventoCorrida
     val availableCorridas = mutableListOf<Corrida>()
+    var lastWinner: UUID? = null
 
     override fun softEnable() {
         super.softEnable()
@@ -50,6 +52,7 @@ class DreamCorrida : KotlinPlugin() {
 
         registerCommand(CorridaCommand(this))
         registerEvents(PlayerListener(this))
+        registerEvents(TagListener(this))
 
         DreamCore.INSTANCE.dreamEventManager.events.add(eventoCorrida)
     }

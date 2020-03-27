@@ -1,10 +1,10 @@
-package net.perfectdreams.dreamenchant.listeners
+package net.perfectdreams.dreamclubes.listeners
 
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
-import net.perfectdreams.dreamenchant.DreamEnchant
-import net.perfectdreams.dreamenchant.utils.EnchantHolder
-import net.perfectdreams.dreamenchant.utils.EnchantUtils
+import net.perfectdreams.dreamclubes.DreamClubes
+import net.perfectdreams.dreamclubes.utils.EnchantHolder
+import net.perfectdreams.dreamclubes.utils.EnchantUtils
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
@@ -15,8 +15,8 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerInteractEvent
 
-class BlockListener(val m: DreamEnchant) : Listener {
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+class BlockListener(val m: DreamClubes) : Listener {
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	fun onInteract(e: PlayerInteractEvent) {
 		if (e.action != Action.RIGHT_CLICK_BLOCK)
 			return

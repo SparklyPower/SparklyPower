@@ -13,6 +13,7 @@ dependencies {
     compile("com.destroystokyo.paper:paper:1.13-R0.1-SNAPSHOT")
     compile("net.perfectdreams.dreamcore:DreamCore:1.0-SNAPSHOT")
     compile("net.luckperms:api:5.0")
+    compile(project(":DreamClubes"))
 }
 
 tasks.withType<KotlinCompile> {

@@ -88,7 +88,7 @@ class SignListener(val m: DreamLoja) : Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onBreak(e: BlockBreakEvent) {
-        if (e.block?.type != Material.SIGN && e.block?.type != Material.WALL_SIGN)
+        if (!e.block.type.name.endsWith("_SIGN"))
             return
 
         scheduler().schedule(m, SynchronizationContext.ASYNC) {
@@ -117,10 +117,10 @@ class SignListener(val m: DreamLoja) : Listener {
         if (!e.rightClick)
             return
 
-        if (e.clickedBlock?.type != Material.SIGN && e.clickedBlock?.type != Material.WALL_SIGN)
+        if (e.clickedBlock?.type?.name?.endsWith("_SIGN") == false)
             return
 
-        val block = e.clickedBlock
+        val block = e.clickedBlock ?: return
 
         val sign = block.state as Sign
 
@@ -181,7 +181,7 @@ class SignListener(val m: DreamLoja) : Listener {
 
             e.player.sendMessage("${DreamLoja.PREFIX} §aVocê votou na loja do §b${Bukkit.getOfflinePlayer(voteSign.owner)?.name ?: "???"}§a!")
 
-            InstantFirework.spawn(e.clickedBlock.location.add(0.0, 0.5, 0.0), FireworkEffect.builder()
+            InstantFirework.spawn(block.location.add(0.0, 0.5, 0.0), FireworkEffect.builder()
                     .with(FireworkEffect.Type.BALL)
                     .withColor(Color.AQUA)
                     .flicker(true)

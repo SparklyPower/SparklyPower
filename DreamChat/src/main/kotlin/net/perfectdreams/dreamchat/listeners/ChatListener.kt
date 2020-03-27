@@ -20,7 +20,9 @@ import net.perfectdreams.dreamchat.tables.ChatUsers
 import net.perfectdreams.dreamchat.tables.DiscordAccounts
 import net.perfectdreams.dreamchat.utils.ChatUtils
 import net.perfectdreams.dreamchat.utils.DiscordAccountInfo
+import net.perfectdreams.dreamchat.utils.McMMOTagsUtils
 import net.perfectdreams.dreamchat.utils.PlayerTag
+import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.jsonParser
@@ -248,9 +250,6 @@ class ChatListener(val m: DreamChat) : Listener {
 			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "kk eae men".toBaseComponent())
 		}
 
-		val tags = TextComponent()
-		tags += "§8[".toTextComponent()
-
 		val event = ApplyPlayerTagsEvent(player, mutableListOf())
 		Bukkit.getPluginManager().callEvent(event)
 
@@ -302,10 +301,26 @@ class ChatListener(val m: DreamChat) : Listener {
 			)
 		}
 
+		McMMOTagsUtils.addTags(e, event)
+
 		if (event.tags.isNotEmpty()) {
 			// omg tags!
-			for (tag in event.tags.filter { it.expanded }) {
-				val textTag = "§8[${tag.tagName}§8] ".toTextComponent().apply {
+			// Exemplos:
+			// Apenas tag estendida
+			// [Último Votador]
+			// Tag estendida + tag pequena
+			// [Último Votador DS]
+			// Apenas tags pequena
+			// [DS]
+			val textTags = "§8[".toTextComponent()
+
+			val hasExtendedTags = event.tags.filter { it.expanded }.isNotEmpty()
+			val hasShortTags = event.tags.filter { !it.expanded }.isNotEmpty()
+			val expandedTags = event.tags.filter { it.expanded }
+			val shortTags = event.tags.filter { !it.expanded }
+
+			for ((index, tag) in expandedTags.withIndex()) {
+				val textTag = tag.tagName.toTextComponent().apply {
 					if (tag.description != null) {
 						hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "§6✪ §f${tag.tagName} §6✪\n§7${tag.description.joinToString("\n§7")}".toBaseComponent())
 					}
@@ -313,11 +328,17 @@ class ChatListener(val m: DreamChat) : Listener {
 						clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, tag.suggestCommand)
 					}
 				}
-				textComponent += textTag
+				textTags += textTag
+
+				if (index != (expandedTags.size - 1))
+					textComponent += " ".toTextComponent()
 			}
 
-			for (tag in event.tags.filter { !it.expanded }) {
-				tags += tag.small.toTextComponent().apply {
+			if (hasExtendedTags && hasShortTags)
+				textTags += " ".toTextComponent()
+
+			for (tag in shortTags) {
+				textTags += tag.small.toTextComponent().apply {
 					if (tag.description != null) {
 						hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "§6✪ §f${tag.tagName} §6✪\n§7${tag.description.joinToString("\n§7")}".toBaseComponent())
 					}
@@ -327,10 +348,8 @@ class ChatListener(val m: DreamChat) : Listener {
 				}
 			}
 
-			tags += "§8] "
-			if (event.tags.count { !it.expanded } != 0) {
-				textComponent += tags
-			}
+			textTags.addExtra("§8] ")
+			textComponent += textTags
 		}
 
 		/* val panela = DreamPanelinha.INSTANCE.getPanelaByMember(player)
@@ -344,6 +363,19 @@ class ChatListener(val m: DreamChat) : Listener {
 					""".trimMargin().toBaseComponent())
 			textComponent += tag
 		} */
+
+		val clube = ClubeAPI.getPlayerClube(player)
+
+		if (clube != null) {
+			val clubeTag = "§8«§7${clube.shortName}§8» "
+
+			textComponent += clubeTag.toTextComponent().apply {
+				this.hoverEvent = HoverEvent(
+					HoverEvent.Action.SHOW_TEXT,
+					"§b${clube.name}".toBaseComponent()
+				)
+			}
+		}
 
 		val casal = DreamCasamentos.INSTANCE.getMarriageFor(player)
 		if (casal != null) {

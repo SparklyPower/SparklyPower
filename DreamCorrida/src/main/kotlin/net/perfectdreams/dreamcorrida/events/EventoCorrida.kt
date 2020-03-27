@@ -63,6 +63,9 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
                     it.fallDistance = 0.0f
                     it.fireTicks = 0
                     PlayerUtils.healAndFeed(it)
+                    it.activePotionEffects.filter { it.type != PotionEffectType.SPEED && it.type != PotionEffectType.JUMP } .forEach { effect ->
+                        it.removePotionEffect(effect.type)
+                    }
 
                     it.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 0, false, false))
                     it.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 200, 0, false, false))

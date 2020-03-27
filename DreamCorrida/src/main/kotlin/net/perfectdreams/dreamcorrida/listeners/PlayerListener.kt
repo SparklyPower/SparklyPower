@@ -60,6 +60,9 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                     e.player.playSound(e.player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
 
                     if (index + 1 == corrida.checkpoints.size) {
+                        if (eventoCorrida.wonPlayers.size == 0)
+                            m.lastWinner = e.player.uniqueId
+
                         // Player venceu a corrida!
                         eventoCorrida.wonPlayers.add(e.player.uniqueId)
                         val howMuchMoneyWillBeGiven = 15_000 / eventoCorrida.wonPlayers.size

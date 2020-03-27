@@ -136,18 +136,21 @@ class DreamLoja : KotlinPlugin() {
 	fun openMenu(player: Player) {
 		val diff = System.currentTimeMillis() - lastUpdate
 
-		if (diff >= 900_000 || dreamMenu == null) {
+		val currentDreamMenu = dreamMenu
+
+		if (diff >= 900_000 || currentDreamMenu == null) {
 			scheduler().schedule(this, SynchronizationContext.ASYNC) {
 				val menu = generateStoreMenu()
-				dreamMenu = menu.createInventory()
+				val newDreamMenu = menu.createInventory()
 				switchContext(SynchronizationContext.SYNC)
 				lastUpdate = System.currentTimeMillis()
-				player.openInventory(dreamMenu)
+				player.openInventory(newDreamMenu)
+				dreamMenu = newDreamMenu
 			}
 			return
 		}
 
-		player.openInventory(dreamMenu)
+		player.openInventory(currentDreamMenu)
 	}
 
 	fun generateStoreMenu(): DreamMenu {

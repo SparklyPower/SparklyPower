@@ -1,0 +1,7 @@
+name: DreamTorreDaMorte
+main: net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
+version: 1.0-SNAPSHOT
+author: MrGaabriel
+api-version: 1.13
+softdepend:
+  - DreamCore
