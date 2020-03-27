@@ -143,7 +143,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                                     return@schedule
                                 }
 
-                                if (clube.maxMembers >= 20) {
+                                if (clube.maxMembers >= 32) {
                                     sender.sendMessage("§cVocê já comprou todos os slots disponíveis!")
                                     return@schedule
                                 }
