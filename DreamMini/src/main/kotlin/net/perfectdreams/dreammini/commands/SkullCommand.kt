@@ -31,12 +31,12 @@ class SkullCommand(val m: DreamMini) : SparklyCommand(arrayOf("skull", "cabeça"
 			val skullMeta = skull.itemMeta as SkullMeta
 
 			skullMeta.addItemFlags(*meta.itemFlags.toTypedArray())
-			skullMeta.displayName = meta.displayName
+			skullMeta.setDisplayName(meta.displayName)
 			skullMeta.lore = meta.lore
 			skullMeta.owner = owner
 
 			skull.itemMeta = skullMeta
-			sender.inventory.itemInMainHand = skull
+			sender.inventory.setItemInMainHand(skull)
 
 			sender.sendMessage("§aAgora o dono da cabeça do player atual é §b${skullMeta.owner}§a!")
 		} else {

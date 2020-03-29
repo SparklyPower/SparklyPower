@@ -13,7 +13,7 @@ class WeatherListener(val m: DreamMini) : Listener {
         val disabledRain = Bukkit.getOnlinePlayers().filter { m.weatherBlacklist.contains(it.uniqueId) && e.world == it.world }
 
         disabledRain.forEach {
-            it.playerWeather = WeatherType.CLEAR
+            it.setPlayerWeather(WeatherType.CLEAR)
 
             if (e.toWeatherState()) {
                 it.sendMessage("§eA chuva começou... Como você desativou a chuva, você não irá ver ela... Caso queria reativar a chuva, use §6/chuva§e!")

@@ -17,7 +17,7 @@ class ChuvaCommand(val m: DreamMini) : SparklyCommand(arrayOf("chuva")) {
             m.weatherBlacklist.add(player.uniqueId)
             player.sendMessage("§aAgora você nunca mais irá ver chuva! Os efeitos da chuva ainda irão acontecer, mas você não irá *ver* ela! (Wow, mágica!)")
 
-            player.playerWeather = WeatherType.CLEAR
+            player.setPlayerWeather(WeatherType.CLEAR)
         }
     }
 }

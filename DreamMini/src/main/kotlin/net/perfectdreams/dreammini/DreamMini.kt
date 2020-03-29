@@ -130,8 +130,6 @@ class DreamMini : KotlinPlugin(), Listener {
 		registerCommand(OpenInvCommand(this))
 		registerCommand(DoNotPickupCommand(this))
 		registerCommand(CraftCommand(this))
-
-		registerCommand(StaffCommand())
 	}
 
 	override fun softDisable() {
@@ -153,20 +151,15 @@ class DreamMini : KotlinPlugin(), Listener {
 	fun onEdit(e: SignChangeEvent) {
 		if (e.player.hasPermission("dreammini.colorize")) {
 			for (idx in 0..3) {
-				e.setLine(idx, e.getLine(idx).translateColorCodes())
+				val line = e.getLine(idx)
+				if (line != null)
+					e.setLine(idx, line.translateColorCodes())
 			}
 		}
 	}
 
 	@EventHandler
 	fun onJoin(e: PlayerJoinEvent) {
-		if (config.getBoolean("resource-pack.enabled", false)) {
-			scheduler().schedule(this) {
-				waitFor(100)
-				e.player.setResourcePack(config.getString("resource-pack.link"), config.getString("resource-pack.hash"))
-			}
-		}
-
 		if (e.player.hasPermission("dreammini.keepfly") && !e.player.isOnGround) { // Se o usuário deslogar enquanto está no ar, ative o fly
 			scheduler().schedule(this) {
 				waitFor(20)

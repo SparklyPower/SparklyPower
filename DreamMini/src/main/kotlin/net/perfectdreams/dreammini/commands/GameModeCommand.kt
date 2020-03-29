@@ -8,7 +8,7 @@ import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.entity.Player
 
-class GameModeCommand(val m: DreamMini) : SparklyCommand(arrayOf("gm", "gamemode"), permission = "dreammini.fly"){
+class GameModeCommand(val m: DreamMini) : SparklyCommand(arrayOf("gm", "gamemode"), permission = "dreammini.gamemode") {
 
 	@Subcommand
 	fun root(sender: Player){
@@ -22,15 +22,13 @@ class GameModeCommand(val m: DreamMini) : SparklyCommand(arrayOf("gm", "gamemode
 		val gm: String?
 
 		if(playerName != null){
-			if(Bukkit.getPlayer(playerName) == null){
-				sender.sendMessage("§b$playerName §cNão existe ou está offline!")
+			player = Bukkit.getPlayer(playerName) ?: run {
+				sender.sendMessage("§c$playerName está offline ou não existe!")
 				return
-			}else{
-				player = Bukkit.getPlayer(playerName)
 			}
 		}
 
-		if(gameMode.matches("([0-3]|survival|creative|adventure|spectator)".toRegex())){
+		if(gameMode.matches("([0-3]|survival|creative|adventure|spectator)".toRegex())) {
 
 			gm = when(gameMode){
 				"0" -> "survival"

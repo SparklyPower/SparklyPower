@@ -9,10 +9,8 @@ import org.bukkit.entity.Player
 class OpenInvCommand(val m: DreamMini) : SparklyCommand(arrayOf("openinv", "openinventory", "seeinv"), permission = "dreammini.openinventory"){
 	@Subcommand
 	fun root(sender: Player, playerName: String? = null){
-		val player = Bukkit.getPlayer(playerName)
-
-		if (player == null) {
-			sender.sendMessage("§c$playerName não existe ou está offline!")
+		val player = Bukkit.getPlayer(playerName ?: return) ?: run {
+			sender.sendMessage("§c$playerName está offline ou não existe!")
 			return
 		}
 

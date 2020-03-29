@@ -14,11 +14,9 @@ class HatCommand(val m: DreamMini) : SparklyCommand(arrayOf("hat", "capacete", "
 		var player = sender
 
 		if(playerName != null){
-			if(Bukkit.getPlayer(playerName) == null){
-				sender.sendMessage("§b$playerName §cnão existe ou está offline!")
+			player = Bukkit.getPlayer(playerName) ?: run {
+				sender.sendMessage("§c$playerName está offline ou não existe!")
 				return
-			}else{
-				player = Bukkit.getPlayer(playerName)
 			}
 		}
 
@@ -27,7 +25,7 @@ class HatCommand(val m: DreamMini) : SparklyCommand(arrayOf("hat", "capacete", "
 		if(item != null) {
 			val type = item.type
 
-			player.inventory.itemInMainHand = player.inventory.helmet
+			player.inventory.setItemInMainHand(player.inventory.helmet)
 
 			player.inventory.helmet = item
 

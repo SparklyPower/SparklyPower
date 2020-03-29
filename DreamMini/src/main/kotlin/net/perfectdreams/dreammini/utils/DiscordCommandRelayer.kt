@@ -14,7 +14,7 @@ class DiscordCommandRelayer(val m: DreamMini) : Listener {
 	}
 
 	init {
-		COMMAND_WEBHOOK = DiscordWebhook(m.config.getString("command-relay.webhook-url"))
+		COMMAND_WEBHOOK = DiscordWebhook(m.config.getString("command-relay.webhook-url")!!)
 	}
 
 	@EventHandler

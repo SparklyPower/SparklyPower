@@ -23,12 +23,9 @@ class SpeedCommand(val m: DreamMini) : SparklyCommand(arrayOf("speed", "velocida
 		var type = setType
 
 		if(playerName != null){
-
-			if(Bukkit.getPlayer(playerName) == null){
+			user = Bukkit.getPlayer(playerName) ?: run {
 				sender.sendMessage("§c$playerName está offline ou não existe!")
 				return
-			}else{
-				user = Bukkit.getPlayer(playerName)
 			}
 		}
 

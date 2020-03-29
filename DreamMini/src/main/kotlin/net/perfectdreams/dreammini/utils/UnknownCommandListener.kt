@@ -28,7 +28,7 @@ class UnknownCommandListener(val m: DreamMini) : Listener {
 			if (test.key.contains(":"))
 				continue
 
-			if (test.value.permission != null && !e.player.hasPermission(test.value.permission))
+			if (test.value.permission != null && !e.player.hasPermission(test.value.permission!!))
 				continue
 
 			val theCmd = test.key
