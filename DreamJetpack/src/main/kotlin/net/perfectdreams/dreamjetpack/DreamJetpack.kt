@@ -75,8 +75,9 @@ class DreamJetpack : KotlinPlugin(), Listener {
 					}
 
 					val chestplate = player.inventory.chestplate
+					val isJetpack = isJetpack(player, chestplate)
 
-					if (chestplate?.type != jetpackType) {
+					if (!isJetpack) {
 						toBeRemoved.add(player)
 						bossBars[player]?.removeAll()
 						bossBars.remove(player)
@@ -184,12 +185,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 	fun onShift(e: PlayerToggleSneakEvent) {
 		val chestplate = e.player.inventory.chestplate
 		if (e.player.isOnGround && e.isSneaking && chestplate?.type == jetpackType) {
-			var isJetpack = chestplate.hasStoredMetadataWithKey("isJetpack")
-
-			if (!isJetpack && chestplate.itemMeta.displayName == "§6§lJetpack") {
-				e.player.inventory.chestplate = chestplate.storeMetadata("isJetpack", "true")
-				isJetpack = true
-			}
+			val isJetpack = isJetpack(e.player, chestplate)
 
 			if (!isJetpack) {
 				e.player.sendMessage("$PREFIX §cQue isso, comprou essa Jetpack no barzinho da esquina? Essa Jetpack é um risco a sua vida! Você apenas pode voar com jetpacks compradas na §6/loja§c!")
@@ -218,5 +214,16 @@ class DreamJetpack : KotlinPlugin(), Listener {
 				}
 			}
 		}
+	}
+
+	fun isJetpack(player: Player, chestplate: ItemStack): Boolean {
+		var isJetpack = chestplate.hasStoredMetadataWithKey("isJetpack")
+
+		if (!isJetpack && chestplate.itemMeta.displayName == "§6§lJetpack") {
+			player.inventory.chestplate = chestplate.storeMetadata("isJetpack", "true")
+			isJetpack = true
+		}
+
+		return isJetpack
 	}
 }
