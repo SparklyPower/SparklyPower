@@ -24,9 +24,16 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 	var start = 0L
 	var lastWinner: UUID? = null
 	val randomMessagesEvent = EventoChatMensagem()
+	val unshuffleWordEvent = EventoChatDesembaralhar()
+	val calculateEvent = EventoChatCalcular()
+	val events = listOf(
+		randomMessagesEvent,
+		unshuffleWordEvent,
+		calculateEvent
+	)
 
 	init {
-		this.delayBetween = 420000
+		this.delayBetween = 420_000
 		this.requiredPlayers = 7
 
 		prizes.add(ItemStack(Material.DIAMOND, 2))
@@ -53,11 +60,7 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 		super.start()
 		currentPrize = prizes.getRandom()
 
-		val random = DreamUtils.random.nextInt(0, 6)
-
-		event = when (random) {
-			else -> randomMessagesEvent
-		}
+		event = events.random()
 
 		event.preStart()
 

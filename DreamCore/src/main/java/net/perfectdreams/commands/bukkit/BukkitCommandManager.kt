@@ -26,7 +26,7 @@ class BukkitCommandManager(val plugin: Plugin) : DispatchableCommandManager<Comm
 		commandListeners.addCommandListener { commandSender, sparklyCommand ->
 			// Permissões
 			if (sparklyCommand.permission != null && !commandSender.hasPermission(sparklyCommand.permission)) {
-				commandSender.sendMessage(DreamCore.dreamConfig.withoutPermission)
+				commandSender.sendMessage(DreamCore.dreamConfig.strings.withoutPermission)
 				CommandContinuationType.CANCEL
 			} else {
 				CommandContinuationType.CONTINUE
@@ -37,7 +37,7 @@ class BukkitCommandManager(val plugin: Plugin) : DispatchableCommandManager<Comm
 			val subcommandPermissionAnnotation = kCallable.findAnnotation<SubcommandPermission>()
 
 			if (subcommandPermissionAnnotation != null && !commandSender.hasPermission(subcommandPermissionAnnotation.permission)) {
-				commandSender.sendMessage(DreamCore.dreamConfig.withoutPermission)
+				commandSender.sendMessage(DreamCore.dreamConfig.strings.withoutPermission)
 				CommandContinuationType.CANCEL
 			} else {
 				CommandContinuationType.CONTINUE

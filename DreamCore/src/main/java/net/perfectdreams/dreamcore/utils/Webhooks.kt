@@ -4,13 +4,19 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.discord.DiscordWebhook
 
 object Webhooks {
-	val PANTUFA: DiscordWebhook by lazy {
-		DiscordWebhook(DreamCore.dreamConfig.pantufaWebhook)
+	val PANTUFA: DiscordWebhook? by lazy {
+		DreamCore.dreamConfig.discord?.webhooks?.info?.let {
+			DiscordWebhook(it)
+		}
 	}
-	val PANTUFA_INFO: DiscordWebhook by lazy {
-		DiscordWebhook(DreamCore.dreamConfig.pantufaInfoWebhook)
+	val PANTUFA_INFO: DiscordWebhook? by lazy {
+		DreamCore.dreamConfig.discord?.webhooks?.info?.let {
+			DiscordWebhook(it)
+		}
 	}
-	val PANTUFA_ERROR: DiscordWebhook by lazy {
-		DiscordWebhook(DreamCore.dreamConfig.pantufaErrorWebhook)
+	val PANTUFA_ERROR: DiscordWebhook? by lazy {
+		DreamCore.dreamConfig.discord?.webhooks?.error?.let {
+			DiscordWebhook(it)
+		}
 	}
 }

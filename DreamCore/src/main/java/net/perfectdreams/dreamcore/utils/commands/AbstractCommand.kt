@@ -69,7 +69,7 @@ open class AbstractCommand(
 					abstractCommand.withoutPermissionCallback.invoke(sender, commandLabel, args)
 					return true
 				}
-				sender.sendMessage(abstractCommand.withoutPermission ?: DreamCore.dreamConfig.withoutPermission)
+				sender.sendMessage(abstractCommand.withoutPermission ?: DreamCore.dreamConfig.strings.withoutPermission)
 				return true
 			}
 
@@ -173,7 +173,7 @@ open class AbstractCommand(
 					callback.invoke(sender, commandLabel, args)
 					return false
 				}
-				val message = permissionAnnotation.message.replace("{UseDefaultMessage}", DreamCore.dreamConfig.withoutPermission)
+				val message = permissionAnnotation.message.replace("{UseDefaultMessage}", DreamCore.dreamConfig.strings.withoutPermission)
 				sender.sendMessage(message)
 				return false
 			}

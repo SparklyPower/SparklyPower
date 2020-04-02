@@ -8,6 +8,7 @@ import org.bukkit.entity.Player
 
 fun Player.canBreakAt(location: Location, material: Material) = PlayerUtils.canBreakAt(location, this, material)
 fun Player.canPlaceAt(location: Location, material: Material) = PlayerUtils.canPlaceAt(location, this, material)
+fun Player.healAndFeed() = PlayerUtils.healAndFeed(this)
 
 var Player.girl: Boolean
     get() = MeninaAPI.isGirl(this.uniqueId)

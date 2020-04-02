@@ -67,7 +67,12 @@ object DreamUtils {
 				.build()
 	}
 	@JvmStatic
-	val mongoClient by lazy { MongoClient(ServerAddress(DreamCore.dreamConfig.mongoDbIp, 27017), mongoClientOptions) }
+	val mongoClient by lazy {
+		val legacyMongo = DreamCore.dreamConfig.legacyMongoDB
+		if (legacyMongo == null)
+			throw RuntimeException("MongoDB is not configured!")
+		MongoClient(ServerAddress(legacyMongo.ip, 27017), mongoClientOptions)
+	}
 	@JvmStatic
 	val gson: Gson
 	@JvmStatic
@@ -85,8 +90,13 @@ object DreamUtils {
 		)
 	}
 
-	val database: MongoDatabase by lazy { getMongoDatabase(DreamCore.dreamConfig.databaseName) }
-	val usersCollection by lazy { database.getCollection("users") }
+	val database: MongoDatabase by lazy {
+		val legacyMongo = DreamCore.dreamConfig.legacyMongoDB
+		if (legacyMongo == null)
+			throw RuntimeException("MongoDB is not configured!")
+		getMongoDatabase(legacyMongo.serverDatabaseName) }
+	val usersCollection by lazy { database.getCollection("users")
+	}
 	val usersCollectionPlayerInfo by lazy { usersCollection.withDocumentClass(PlayerInfo::class.java) }
 	val nmsVersion: String by lazy { Bukkit.getServer()::class.java.getPackage().name.split("\\.")[3] }
 	const val HEADER_LINE = "§f §3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-";
@@ -413,7 +423,7 @@ val isPrimaryThread: Boolean
 	get() = Bukkit.getServer().isPrimaryThread
 
 val withoutPermission: String
-	get() = DreamCore.dreamConfig.withoutPermission
+	get() = DreamCore.dreamConfig.strings.withoutPermission
 
 val Player.version: ProtocolVersion
 	get() = ProtocolSupportAPI.getProtocolVersion(this)
@@ -430,7 +440,7 @@ val World.blacklistedTeleport: Boolean
 	}
 
 val isStaffPermission: String
-	get() = DreamCore.dreamConfig.isStaffPermission
+	get() = DreamCore.dreamConfig.strings.staffPermission
 
 val Location.blacklistedTeleport: Boolean
 	get() {

@@ -24,13 +24,15 @@ open class ServerEvent(val eventName: String, val prefix: String) {
 
 	open fun countdown() {
 		scheduler().schedule(DreamCore.INSTANCE) {
-			if (discordAnnouncementRole != null) {
+			val broadcastEventInChannelId = discordChannelId ?: DreamCore.dreamConfig.discord?.eventAnnouncementChannelId
+
+			if (discordAnnouncementRole != null && broadcastEventInChannelId != null) {
 				DreamNetwork.PANTUFA.sendAsync(
 						jsonObject(
 								"type" to "sendEventStart",
 								"eventName" to eventName,
 								"roleId" to discordAnnouncementRole,
-								"channelId" to (discordChannelId ?: DreamCore.dreamConfig.defaultEventChannelId)
+								"channelId" to broadcastEventInChannelId
 						)
 				)
 			}

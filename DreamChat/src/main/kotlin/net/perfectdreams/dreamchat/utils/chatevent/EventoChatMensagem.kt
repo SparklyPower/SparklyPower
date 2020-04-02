@@ -74,6 +74,6 @@ class EventoChatMensagem : IEventoChat {
 			}
 		}
 
-		return contains
+		return false
 	}
 }

@@ -29,6 +29,7 @@ dependencies {
     implementation("org.mongodb:mongo-java-driver:3.7.0-rc0")
     implementation("com.zaxxer:HikariCP:2.7.8")
     implementation("org.postgresql:postgresql:42.2.5")
+    implementation("org.xerial:sqlite-jdbc:3.30.1")
     implementation("org.jetbrains.exposed:exposed:0.10.5")
     implementation("com.okkero.skedule:skedule:1.2.4.1-SNAPSHOT")
     implementation("com.github.kevinsawicki:http-request:6.0")

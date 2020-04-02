@@ -3,9 +3,7 @@ package net.perfectdreams.dreamcore
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.commands.bukkit.BukkitCommandManager
-import net.perfectdreams.dreamcore.commands.DreamCoreCommand
-import net.perfectdreams.dreamcore.commands.MeninaCommand
-import net.perfectdreams.dreamcore.commands.MeninoCommand
+import net.perfectdreams.dreamcore.commands.*
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.eventmanager.DreamEventManager
 import net.perfectdreams.dreamcore.listeners.EntityListener
@@ -14,11 +12,14 @@ import net.perfectdreams.dreamcore.network.socket.SocketServer
 import net.perfectdreams.dreamcore.scriptmanager.DreamScriptManager
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.commands.DreamCommandManager
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.io.File
 import kotlin.concurrent.thread
 
 class DreamCore : JavaPlugin() {
@@ -28,56 +29,60 @@ class DreamCore : JavaPlugin() {
 			get() = Bukkit.getPluginManager().getPlugin("DreamCore") as DreamCore
 	}
 
+	val dataYaml by lazy {
+		File(dataFolder, "data.yml")
+	}
+	var spawn: Location? = null
+
+	val userData by lazy {
+		if (!dataYaml.exists())
+			dataYaml.writeText("")
+
+		YamlConfiguration.loadConfiguration(dataYaml)
+	}
+
 	val dreamEventManager = DreamEventManager()
 	lateinit var dreamScriptManager: DreamScriptManager
+	val dreamCommandManager = DreamCommandManager(this)
 
 	override fun onEnable() {
 		saveDefaultConfig()
 
-		if (!config.contains("server-name")) {
-			logger.severe { "Você esqueceu de colocar o \"server-name\" na configuração! Desligando servidor... :(" }
+		if (!config.contains("serverName")) {
+			logger.severe { "Você esqueceu de colocar o \"serverName\" na configuração! Desligando servidor... :(" }
 			Bukkit.shutdown()
 			return
 		}
 
 		// Carregar configuração
-		dreamConfig = DreamConfig(config.getString("server-name")!!, config.getString("bungee-name")!!).apply {
-			this.withoutPermission = config.getString("without-permission", "§cVocê não tem permissão para fazer isto!")!!
-			this.blacklistedWorldsTeleport = config.getStringList("blacklisted-worlds-teleport")
-			this.blacklistedRegionsTeleport = config.getStringList("blacklisted-regions-teleport")
-			this.isStaffPermission = config.getString("staff-permission", "perfectdreams.staff")!!
-			this.databaseName = config.getString("database-name", "perfectdreams")!!
-			this.tablePrefix = config.getString("table-prefix", "survival")!!
-			this.mongoDbIp = config.getString("mongodb-ip", "10.0.0.3")!!
-			this.serverDatabaseName = config.getString("server-database-name", "dummy")!!
-			this.postgreSqlIp = config.getString("postgresql-ip", "10.0.0.6")!!
-			this.postgreSqlPort = config.getInt("postgresql-port", 5432)
-			this.postgreSqlUser = config.getString("postgresql-user", "postgres")!!
-			this.postgreSqlPassword = config.getString("postgresql-password", "")!!
-			this.enablePostgreSql = config.getBoolean("enable-postgresql", true)
-			if (config.contains("spawn-location"))
-				this.spawn = config.getSerializable("spawn-location", Location::class.java)!!
-			this.pantufaWebhook = config.getString("webhooks.warn")!!
-			this.pantufaInfoWebhook = config.getString("webhooks.info")!!
-			this.pantufaErrorWebhook = config.getString("webhooks.error")!!
-			this.socketPort = config.getInt("socket-port", -1)
-			this.defaultEventChannelId = config.getString("default-event-channel-id", "477979549284564992")
-		}
+		dreamConfig = DreamConfig(config)
 
-		if (dreamConfig.socketPort != -1) {
-			thread { SocketServer(dreamConfig.socketPort).start() }
+		spawn = userData.getLocation("spawnLocation") ?: Bukkit.getWorlds().first().spawnLocation
+
+		logger.info { "Let's make the world a better place, one plugin at a time. :3" }
+		logger.info { "Server Name: ${dreamConfig.serverName}" }
+		logger.info { "Bungee Server Name: ${dreamConfig.bungeeName}" }
+
+		dreamConfig.socket?.let {
+			logger.info { "Starting socket server at port ${it.port}" }
+			thread { SocketServer(it.port).start() }
 			Bukkit.getPluginManager().registerEvents(SocketListener(), this)
 		}
 
-		if (dreamConfig.enablePostgreSql) {
-			transaction(Databases.databaseNetwork) {
-				SchemaUtils.createMissingTablesAndColumns(Users)
-			}
-		} else {
-			logger.warning { "Suporte ao PostgreSQL está desativado!" }
+		val databaseConfig = dreamConfig.networkDatabase
+		val databaseType = databaseConfig?.type ?: "SQLite"
+		logger.info { "Starting Database... Database type: $databaseType" }
+
+		transaction(Databases.databaseNetwork) {
+			SchemaUtils.createMissingTablesAndColumns(Users)
 		}
 
-		PhoenixScoreboard.init()
+		logger.info { "Preparing no flicker scoreboard in a separate thread..." }
+
+		thread {
+			PhoenixScoreboard.init()
+		}
+
 		if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
 			SignGUIUtils.registerSignGUIListener()
 
@@ -91,11 +96,13 @@ class DreamCore : JavaPlugin() {
 		try { VaultUtils.setupEconomy() } catch (e: NoClassDefFoundError) {}
 		try { VaultUtils.setupPermissions() } catch (e: NoClassDefFoundError) {}
 
-		BukkitCommandManager(this).registerCommands(
-				DreamCoreCommand(this),
-				MeninaCommand(this),
-				MeninoCommand(this)
-		)
+		dreamCommandManager.registerCommand(DreamCoreCommand.command(this))
+		dreamCommandManager.registerCommand(DreamCoreEvalCommand.command(this))
+		dreamCommandManager.registerCommand(DreamCoreReloadCommand.command(this))
+		dreamCommandManager.registerCommand(DreamCoreUnloadCommand.command(this))
+		dreamCommandManager.registerCommand(DreamCoreSetSpawnCommand.command(this))
+		dreamCommandManager.registerCommand(MeninaCommand.command(this))
+		dreamCommandManager.registerCommand(MeninoCommand.command(this))
 
 		val scheduler = Bukkit.getScheduler()
 
@@ -103,8 +110,8 @@ class DreamCore : JavaPlugin() {
 			while (true) {
 				val newGirls = transaction(Databases.databaseNetwork) {
 					User.find { Users.isGirl eq true }
-							.map { it.id.value }
-							.toMutableSet()
+						.map { it.id.value }
+						.toMutableSet()
 				}
 
 				MeninaAPI.girls = newGirls

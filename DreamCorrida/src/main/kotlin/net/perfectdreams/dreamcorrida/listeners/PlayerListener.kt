@@ -66,11 +66,11 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                         // Player venceu a corrida!
                         eventoCorrida.wonPlayers.add(e.player.uniqueId)
                         val howMuchMoneyWillBeGiven = 15_000 / eventoCorrida.wonPlayers.size
-                        val howMuchNightmaresWillBeGiven = (6 - eventoCorrida.wonPlayers.size).toLong()
+                        val howMuchNightmaresWillBeGiven = 1
 
                         e.player.balance += howMuchMoneyWillBeGiven
                         scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                            Cash.giveCash(e.player, (6 - eventoCorrida.wonPlayers.size).toLong())
+                            Cash.giveCash(e.player, howMuchNightmaresWillBeGiven.toLong())
                         }
 
                         e.player.fallDistance = 0.0f
@@ -79,7 +79,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
 
                         e.player.teleport(DreamCore.dreamConfig.spawn)
 
-                        Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a e §c$howMuchNightmaresWillBeGiven pesadelos§a!")
+                        Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
 
                         if (eventoCorrida.wonPlayers.size == 5) { // Finalizar corrida
                             Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §eEvento Corrida acabou, obrigado a todos que participaram! ^-^")
