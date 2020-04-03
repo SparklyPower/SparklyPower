@@ -1,0 +1,5 @@
+name: DreamAssinaturas
+main: net.perfectdreams.dreamassinaturas.DreamAssinaturas
+version: 1.0.0
+softdepend: ["DreamCore"]
+api-version: 1.13
