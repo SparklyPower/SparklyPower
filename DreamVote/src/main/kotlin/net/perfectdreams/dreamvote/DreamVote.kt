@@ -113,7 +113,16 @@ class DreamVote : KotlinPlugin() {
 	}
 
 	fun giveVoteAward(username: String, serviceName: String, broadcast: Boolean = true) {
-		giveVoteAward(Bukkit.getOfflinePlayer(username).uniqueId, serviceName, broadcast)
+		scheduler().schedule(this, SynchronizationContext.ASYNC) {
+			val uniqueId = Bukkit.getPlayerUniqueId(username)
+
+			if (uniqueId == null) {
+				logger.warning { "Player $username voted, but their UUID is null! Bug?" }
+				return@schedule
+			}
+
+			giveVoteAward(uniqueId, serviceName, broadcast)
+		}
 	}
 
 	fun giveVoteAward(uniqueId: UUID, serviceName: String, broadcast: Boolean = true) {
