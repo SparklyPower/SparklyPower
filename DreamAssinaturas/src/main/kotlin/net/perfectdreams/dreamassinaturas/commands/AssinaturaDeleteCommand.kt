@@ -18,7 +18,7 @@ object AssinaturaDeleteCommand : DSLCommandBase<DreamAssinaturas> {
     override fun command(plugin: DreamAssinaturas) = create(
         listOf("assinatura delete")
     ) {
-        permission = "dreamassinaturas.setup"
+        permission = "dreamassinaturas.staff"
 
         executes {
             val targetBlock = player.getTargetBlock(null, 10)

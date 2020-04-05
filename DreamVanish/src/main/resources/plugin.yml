@@ -1,0 +1,5 @@
+name: DreamVanish
+main: net.perfectdreams.dreamvanish.DreamVanish
+version: 1.0.0
+softdepend: ["DreamCore"]
+api-version: 1.13

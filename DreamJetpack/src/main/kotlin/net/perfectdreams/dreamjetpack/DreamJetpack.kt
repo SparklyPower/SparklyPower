@@ -42,6 +42,11 @@ class DreamJetpack : KotlinPlugin(), Listener {
 
 		INSTANCE = this
 
+		flyingPlayers.addAll(Bukkit.getOnlinePlayers().filter { player ->
+			val chestplate = player.inventory.chestplate
+			isJetpack(player, chestplate)
+		})
+
 		registerCommand(object: SparklyCommand(arrayOf("dreamjetpack"), permission = "dreamjetpack.setup") {
 			@Subcommand
 			fun root(sender: CommandSender) {
@@ -216,7 +221,9 @@ class DreamJetpack : KotlinPlugin(), Listener {
 		}
 	}
 
-	fun isJetpack(player: Player, chestplate: ItemStack): Boolean {
+	fun isJetpack(player: Player, chestplate: ItemStack?): Boolean {
+		if (chestplate == null)
+			return false
 		var isJetpack = chestplate.hasStoredMetadataWithKey("isJetpack")
 
 		if (!isJetpack && chestplate.itemMeta.displayName == "§6§lJetpack") {
