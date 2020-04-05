@@ -13,6 +13,10 @@ class DreamConfig(config: Configuration) {
         return DreamCore.INSTANCE.spawn!!
     }
 
+    fun getTablePrefix(): String {
+        return networkDatabase?.tablePrefix ?: ""
+    }
+
     val serverName: String by ConfigMapDelegate(map, "PleaseSetThis")
     val bungeeName: String by ConfigMapDelegate(map, "PleaseSetThis")
 

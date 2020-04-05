@@ -1,5 +1,7 @@
 package net.perfectdreams.dreamhome.commands
 
+import com.okkero.skedule.BukkitSchedulerController
+import com.okkero.skedule.schedule
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.perfectdreams.commands.annotation.Subcommand
@@ -59,10 +61,19 @@ class HomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("home", "casa")) {
 			return
 		}
 
-		player.teleport(location)
-		player.world.spawnParticle(Particle.VILLAGER_HAPPY, player.location.add(0.0, 0.5, 0.0), 25, 0.5, 0.5, 0.5)
-		player.sendMessage("§aVocê chegou ao seu destino. §cʕ•ᴥ•ʔ")
-		player.sendTitle("§b${house.houseName}", "§3${TextUtils.ROUND_TO_2_DECIMAL.format(location.x)}§b, §3${TextUtils.ROUND_TO_2_DECIMAL.format(location.y)}§b, §3${TextUtils.ROUND_TO_2_DECIMAL.format(location.z)}", 10, 60, 10)
+		player.teleportAsync(location).thenRun {
+			player.world.spawnParticle(Particle.VILLAGER_HAPPY, player.location.add(0.0, 0.5, 0.0), 25, 0.5, 0.5, 0.5)
+			player.sendMessage("§aVocê chegou ao seu destino. §cʕ•ᴥ•ʔ")
+			player.sendTitle(
+				"§b${house.houseName}",
+				"§3${TextUtils.ROUND_TO_2_DECIMAL.format(location.x)}§b, §3${TextUtils.ROUND_TO_2_DECIMAL.format(
+					location.y
+				)}§b, §3${TextUtils.ROUND_TO_2_DECIMAL.format(location.z)}",
+				10,
+				60,
+				10
+			)
+		}
 	}
 
 	@Subcommand

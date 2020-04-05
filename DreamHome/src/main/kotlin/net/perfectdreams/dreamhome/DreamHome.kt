@@ -92,14 +92,14 @@ class DreamHome : KotlinPlugin() {
 			val house = house ?: throw RuntimeException("home é nulo, mas isto jamais deve acontecer!")
 
 			if (new) {
-				Webhooks.PANTUFA_INFO.send(
+				Webhooks.PANTUFA_INFO?.send(
 					DiscordMessage(
 						content = "**${player.name}** marcou nova casa `${house.houseName}` em `${newLocation.world.name}` `${newLocation.x}`, `${newLocation.y}`, `${newLocation.z}`"
 					)
 				)
 			} else {
 				if (oldLocation != null)
-					Webhooks.PANTUFA_INFO.send(
+					Webhooks.PANTUFA_INFO?.send(
 						DiscordMessage(
 							content = "**${player.name}** alterou a localização da casa `${house.houseName}`.\n\n**Localização Velha:** `${oldLocation.world.name}` `${oldLocation.x}`, `${oldLocation.y}`, `${oldLocation.z}`\n**Localização Nova:** `${newLocation.world.name}` `${newLocation.x}`, `${newLocation.y}`, `${newLocation.z}`"
 						)

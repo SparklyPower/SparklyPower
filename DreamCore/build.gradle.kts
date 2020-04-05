@@ -25,6 +25,7 @@ dependencies {
     implementation("com.github.dmulloy2:PacketWrapper:84d4c3d9f1")
     compileOnly("net.milkbowl.vault:VaultAPI:1.6")
     compileOnly("com.meowj:LangUtils:1.9")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
     implementation("co.aikar:acf-paper:0.5.0-SNAPSHOT")
     implementation("org.mongodb:mongo-java-driver:3.7.0-rc0")
     implementation("com.zaxxer:HikariCP:2.7.8")
