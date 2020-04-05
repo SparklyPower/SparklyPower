@@ -140,6 +140,12 @@ class DreamBusca : KotlinPlugin(), Listener {
 	}
 
 	fun findBiome(player: Player, biomeMix: BiomeMix, onChunkTrack: (Int) -> (Unit), locationCallback: (Location?) -> (Unit)) {
+		if (biomeMix == BiomeMix.ALL_BIOMES && cachedLocations.isNotEmpty()) {
+			// Se for todos os biomas, apenas retorne qualquer um do cache
+			locationCallback.invoke(cachedLocations.values.random().location)
+			return
+		}
+
 		val cachedLocation = cachedLocations[biomeMix]
 
 		if (cachedLocation != null) {
