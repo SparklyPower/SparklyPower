@@ -21,22 +21,27 @@ import org.jetbrains.exposed.sql.transactions.transaction
 class LoginListener(val m: DreamAuth) : Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	fun onAuthLogin(e: PlayerLoggedInEvent) {
-		e.player.sendMessage("§aSua conta foi logada com sucesso! Bom divertimento! ^-^")
-		e.player.sendMessage("§aLembre-se, jamais compartilhe sua senha! Guarde ela com carinho em um lugar que você possa lembrar!")
+		if (m.premiumUsers.contains(e.player.uniqueId)) {
+			e.player.sendMessage("§aObrigado por suportar o desenvolvimento do Minecraft!")
+		} else {
+			e.player.sendMessage("§aSua conta foi logada com sucesso! Bom divertimento! ^-^")
+			e.player.sendMessage("§aLembre-se, jamais compartilhe sua senha! Guarde ela com carinho em um lugar que você possa lembrar!")
+			e.player.sendMessage("§3Tem Minecraft Original? Então utilize §6/premium§3 para deixar a sua conta mais segura e não precisar logar manualmente no servidor!")
+			e.player.sendMessage("§3Não tem Minecraft Original? Então compre para ajudar o desenvolvimento do Minecraft!§b https://www.minecraft.net/get-minecraft")
 
-		val authInfo = m.uniqueId2PlayerInfo[e.player.uniqueId] ?: return
+			val authInfo = m.uniqueId2PlayerInfo[e.player.uniqueId] ?: return
 
-		val hasEmail = authInfo.email != null
-		val hasTwoFactorAuth = authInfo.twoFactorAuthEnabled
+			val hasEmail = authInfo.email != null
+			val hasTwoFactorAuth = authInfo.twoFactorAuthEnabled
 
-		if (false && !hasEmail) {
-			e.player.sendMessage("§3Jamais perca acesso a sua conta! Use §6/email SeuEmail§3 para conseguir recuperar a sua conta caso você esqueça a sua senha!")
+			if (false && !hasEmail) {
+				e.player.sendMessage("§3Jamais perca acesso a sua conta! Use §6/email SeuEmail§3 para conseguir recuperar a sua conta caso você esqueça a sua senha!")
+			}
+
+			if (false && !hasTwoFactorAuth) {
+				e.player.sendMessage("§3Jamais seja hackeado! Ative o modo de autenticação dupla usando o seu celular utilizando §6/2fa ativar§3 e fique seguro sabendo que nunca irão conseguir hackear a sua conta, mesmo se descobrirem a sua senha!")
+			}
 		}
-
-		if (false && !hasTwoFactorAuth) {
-			e.player.sendMessage("§3Jamais seja hackeado! Ative o modo de autenticação dupla usando o seu celular utilizando §6/2fa ativar§3 e fique seguro sabendo que nunca irão conseguir hackear a sua conta, mesmo se descobrirem a sua senha!")
-		}
-
 	}
 
 	@EventHandler
@@ -56,7 +61,7 @@ class LoginListener(val m: DreamAuth) : Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	fun onJoin(e: PlayerJoinEvent) {
-		e.player.teleport(m.authConfig.loginLocation ?: DreamCore.dreamConfig.spawn)
+		e.player.teleport(m.authConfig.loginLocation ?: DreamCore.dreamConfig.getSpawn())
 
 		val authInfo = m.uniqueId2PlayerInfo[e.player.uniqueId]
 		val player = e.player
@@ -115,12 +120,6 @@ class LoginListener(val m: DreamAuth) : Listener {
 		}
 
 		m.playerStatus[player] = PlayerStatus.LOGGED_IN
-		val event = PlayerLoggedInEvent(e.player)
-		Bukkit.getPluginManager().callEvent(event)
-
-		if (event.isCancelled)
-			return
-
 		m.finishLogin(e.player)
 	}
 

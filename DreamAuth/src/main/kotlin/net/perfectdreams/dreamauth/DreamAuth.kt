@@ -16,7 +16,7 @@ import net.perfectdreams.dreamauth.utils.ConsoleFilter
 import net.perfectdreams.dreamauth.utils.PlayerStatus
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.commands.ExecutedCommandException
+import net.perfectdreams.dreamcore.utils.commands.CommandException
 import org.apache.commons.codec.binary.Base32
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.logging.log4j.LogManager
@@ -34,7 +34,6 @@ import java.util.concurrent.TimeUnit
 class DreamAuth : KotlinPlugin() {
 	companion object {
 		const val WORKLOAD = 12
-		const val QR_CODE_MAP_ID = 80
 		val WHITELISTED_COMMANDS = listOf(
 				"/login",
 				"/logar",
@@ -92,12 +91,13 @@ class DreamAuth : KotlinPlugin() {
 		registerEvents(PlayerListener(this))
 		registerEvents(SocketListener(this))
 
+		registerCommand(LoginCommand)
+		registerCommand(RegisterCommand)
+
 		registerCommand(DreamAuthCommand(this))
-		registerCommand(LoginCommand(this))
-		registerCommand(RegisterCommand(this))
 		registerCommand(ChangePassCommand(this))
-		registerCommand(EmailCommand(this))
-		registerCommand(RecuperarCommand(this))
+		// registerCommand(EmailCommand(this))
+		// registerCommand(RecuperarCommand(this))
 		// registerCommand(TwoFactorAuthCommand(this))
 		registerCommand(RememberCommand(this))
 
@@ -143,7 +143,7 @@ class DreamAuth : KotlinPlugin() {
 	}
 
 	fun checkIfNotRegistered(player: Player): String {
-		val authInfo = uniqueId2PlayerInfo[player.uniqueId] ?: throw ExecutedCommandException("§cVocê não está registrado! Registre a sua conta utilizando §6/register SuaSenha SuaSenha")
+		val authInfo = uniqueId2PlayerInfo[player.uniqueId] ?: throw CommandException("§cVocê não está registrado! Registre a sua conta utilizando §6/register SuaSenha SuaSenha")
 
 		return authInfo.password
 	}
@@ -152,7 +152,7 @@ class DreamAuth : KotlinPlugin() {
 		val authInfo = uniqueId2PlayerInfo[player.uniqueId]
 
 		if (authInfo != null)
-			throw ExecutedCommandException("§cVocê já está registrado! Entre na sua conta utilizando §6/login SuaSenha")
+			throw CommandException("§cVocê já está registrado! Entre na sua conta utilizando §6/login SuaSenha")
 	}
 
 	fun isPasswordSecure(player: Player, label: String, password1: String, password2: String): Boolean {
