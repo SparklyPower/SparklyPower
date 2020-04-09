@@ -152,7 +152,7 @@ class LoginListener(val m: DreamAuth) : Listener {
 				waitFor(20)
 			}
 
-			player.kickPlayer("§cVocê demorou demais para entrar...\n\nEsqueceu a sua senha? Então use §6/email recuperar§c!")
+			player.kickPlayer("§cVocê demorou demais para entrar...")
 		}
 	}
 }
