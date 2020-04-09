@@ -37,9 +37,10 @@ class BukkitCommandWrapper(val _plugin: Plugin, val command: Command<CommandCont
                 val labels = command.labels
 
                 for (label in labels) {
+                    var currentRemoveArgumentCount = 0
+
                     val subLabels = label.split(" ").toMutableList().drop(1)
 
-                    removeArgumentCount = 0
                     var validLabelCount = 0
 
                     for ((index, subLabel) in subLabels.withIndex()) {
@@ -47,7 +48,7 @@ class BukkitCommandWrapper(val _plugin: Plugin, val command: Command<CommandCont
 
                         if (rawArgumentAt.equals(subLabel, true)) { // ignoreCase = true ~ Permite usar "+cOmAnDo"
                             validLabelCount++
-                            removeArgumentCount++
+                            currentRemoveArgumentCount++
                         }
                     }
 
@@ -55,6 +56,7 @@ class BukkitCommandWrapper(val _plugin: Plugin, val command: Command<CommandCont
                         valid = true
                         validLabel = subLabels.joinToString(" ")
                         matchedCommand = command
+                        removeArgumentCount = currentRemoveArgumentCount
                         break
                     }
                 }
