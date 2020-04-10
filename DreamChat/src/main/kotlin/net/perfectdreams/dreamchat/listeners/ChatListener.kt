@@ -256,10 +256,10 @@ class ChatListener(val m: DreamChat) : Listener {
 		if (m.topEntries[0].equals(e.player.name, true)) {
 			event.tags.add(
 				PlayerTag(
-					"§2§lO",
-					"§2§lOstentador${if (player.girl) "a" else ""}",
+					"§2§lM",
+					"§2§lMagnata",
 					listOf(
-						"§r§b${player.displayName}§r§7 é a pessoa mais ostentadora do §4§lSparkly§b§lPower§r§7!",
+						"§r§b${player.displayName}§r§7 é a pessoa mais rica do §4§lSparkly§b§lPower§r§7!",
 						"",
 						"§7Eu duvido você conseguir passar del${if (player.girl) "a" else "e"}, será que você tem as habilidades para conseguir? ;)"
 					),
@@ -272,8 +272,8 @@ class ChatListener(val m: DreamChat) : Listener {
 		if (m.topEntries[1].equals(e.player.name, true)) {
 			event.tags.add(
 				PlayerTag(
-					"§2§lO",
-					"§2§lMagnata",
+					"§2§lL",
+					"§2§lLuxuoso",
 					listOf(
 						"§r§b${player.displayName}§r§7 é a segunda pessoa mais rica do §4§lSparkly§b§lPower§r§7!",
 						"",
@@ -288,8 +288,8 @@ class ChatListener(val m: DreamChat) : Listener {
 		if (m.topEntries[2].equals(e.player.name, true)) {
 			event.tags.add(
 				PlayerTag(
-					"§2§lO",
-					"§2§lRic${(player.artigo)}",
+					"§2§lB",
+					"§2§lBurguês",
 					listOf(
 						"§r§b${player.displayName}§r§7 é a terceira pessoa mais rica do §4§lSparkly§b§lPower§r§7!",
 						"",
@@ -312,38 +312,41 @@ class ChatListener(val m: DreamChat) : Listener {
 			// [Último Votador DS]
 			// Apenas tags pequena
 			// [DS]
+			//
+			// Para não encher o chat de tags
+			// Todas as tags são EXTENDIDAS por padrão
+			// Mas, se o cara tiver mais de uma tag, todas ficam ENCURTADAS
 			val textTags = "§8[".toTextComponent()
 
-			val hasExtendedTags = event.tags.filter { it.expanded }.isNotEmpty()
-			val hasShortTags = event.tags.filter { !it.expanded }.isNotEmpty()
-			val expandedTags = event.tags.filter { it.expanded }
-			val shortTags = event.tags.filter { !it.expanded }
+			val tags = event.tags
 
-			for ((index, tag) in expandedTags.withIndex()) {
-				val textTag = tag.tagName.toTextComponent().apply {
-					if (tag.description != null) {
-						hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "§6✪ §f${tag.tagName} §6✪\n§7${tag.description.joinToString("\n§7")}".toBaseComponent())
+			if (tags.size == 1) {
+				for ((index, tag) in tags.withIndex()) {
+					val textTag = tag.tagName.toTextComponent().apply {
+						if (tag.description != null) {
+							hoverEvent = HoverEvent(
+								HoverEvent.Action.SHOW_TEXT,
+								"§6✪ §f${tag.tagName} §6✪\n§7${tag.description.joinToString("\n§7")}".toBaseComponent()
+							)
+						}
+						if (tag.suggestCommand != null) {
+							clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, tag.suggestCommand)
+						}
 					}
-					if (tag.suggestCommand != null) {
-						clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, tag.suggestCommand)
-					}
+					textTags += textTag
 				}
-				textTags += textTag
-
-				if (index != (expandedTags.size - 1))
-					textComponent += " ".toTextComponent()
-			}
-
-			if (hasExtendedTags && hasShortTags)
-				textTags += " ".toTextComponent()
-
-			for (tag in shortTags) {
-				textTags += tag.small.toTextComponent().apply {
-					if (tag.description != null) {
-						hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "§6✪ §f${tag.tagName} §6✪\n§7${tag.description.joinToString("\n§7")}".toBaseComponent())
-					}
-					if (tag.suggestCommand != null) {
-						clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, tag.suggestCommand)
+			} else {
+				for (tag in tags) {
+					textTags += tag.small.toTextComponent().apply {
+						if (tag.description != null) {
+							hoverEvent = HoverEvent(
+								HoverEvent.Action.SHOW_TEXT,
+								"§6✪ §f${tag.tagName} §6✪\n§7${tag.description.joinToString("\n§7")}".toBaseComponent()
+							)
+						}
+						if (tag.suggestCommand != null) {
+							clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, tag.suggestCommand)
+						}
 					}
 				}
 			}
