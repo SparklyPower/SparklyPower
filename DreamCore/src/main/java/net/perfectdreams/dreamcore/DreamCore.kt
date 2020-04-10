@@ -48,20 +48,7 @@ class DreamCore : JavaPlugin() {
 	override fun onEnable() {
 		saveDefaultConfig()
 
-		if (!config.contains("serverName")) {
-			logger.severe { "Você esqueceu de colocar o \"serverName\" na configuração! Desligando servidor... :(" }
-			Bukkit.shutdown()
-			return
-		}
-
-		// Carregar configuração
-		dreamConfig = DreamConfig(config)
-
-		spawn = userData.getLocation("spawnLocation") ?: Bukkit.getWorlds().first().spawnLocation
-
-		logger.info { "Let's make the world a better place, one plugin at a time. :3" }
-		logger.info { "Server Name: ${dreamConfig.serverName}" }
-		logger.info { "Bungee Server Name: ${dreamConfig.bungeeName}" }
+		loadConfig()
 
 		dreamConfig.socket?.let {
 			logger.info { "Starting socket server at port ${it.port}" }
@@ -101,6 +88,7 @@ class DreamCore : JavaPlugin() {
 		dreamCommandManager.registerCommand(DreamCoreReloadCommand.command(this))
 		dreamCommandManager.registerCommand(DreamCoreUnloadCommand.command(this))
 		dreamCommandManager.registerCommand(DreamCoreSetSpawnCommand.command(this))
+		dreamCommandManager.registerCommand(DreamCoreReloadConfigCommand.command(this))
 		dreamCommandManager.registerCommand(MeninaCommand.command(this))
 		dreamCommandManager.registerCommand(MeninoCommand.command(this))
 
@@ -124,6 +112,23 @@ class DreamCore : JavaPlugin() {
 
 		ArmorStandHologram.loadArmorStandsIdsMarkedForRemoval()
 		dreamEventManager.startEventsTask()
+	}
+
+	fun loadConfig() {
+		if (!config.contains("serverName")) {
+			logger.severe { "Você esqueceu de colocar o \"serverName\" na configuração! Desligando servidor... :(" }
+			Bukkit.shutdown()
+			return
+		}
+
+		// Carregar configuração
+		dreamConfig = DreamConfig(config)
+
+		spawn = userData.getLocation("spawnLocation") ?: Bukkit.getWorlds().first().spawnLocation
+
+		logger.info { "Let's make the world a better place, one plugin at a time. :3" }
+		logger.info { "Server Name: ${dreamConfig.serverName}" }
+		logger.info { "Bungee Server Name: ${dreamConfig.bungeeName}" }
 	}
 
 	override fun onDisable() {
