@@ -1,0 +1,7 @@
+name: DreamFight
+main: net.perfectdreams.dreamfight.DreamFight
+version: 1.0-SNAPSHOT
+author: MrPowerGamerBR
+api-version: 1.13
+softdepend:
+  - DreamCore

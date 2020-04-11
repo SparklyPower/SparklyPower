@@ -1,0 +1,8 @@
+name: DreamTerrainAdditions
+main: net.perfectdreams.dreamterrainadditions.DreamTerrainAdditions
+version: 1.0-SNAPSHOT
+
+author: MrPowerGamerBR
+
+softdepend: [DreamCore]
+api-version: 1.13

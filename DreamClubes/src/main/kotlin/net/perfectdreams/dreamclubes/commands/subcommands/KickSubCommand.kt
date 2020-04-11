@@ -24,9 +24,18 @@ class KickSubCommand(val m: DreamClubes) : WithClubeSubCommand {
                 return@async
             }
 
-            val clubeMember = clube.retrieveMember(Bukkit.getPlayerUniqueId(playerName) ?: return@async) ?: return@async
+            val uniqueId = Bukkit.getPlayerUniqueId(playerName) ?: run {
+                player.sendMessage("${DreamClubes.PREFIX} §cO player não existe! Você tem certeza que colocou o nome certo?")
+                return@async
+            }
+
+            val clubeMember = clube.retrieveMember(uniqueId) ?: run {
+                player.sendMessage("${DreamClubes.PREFIX} §cO player não está no seu clube!")
+                return@async
+            }
 
             if (clubeMember.permissionLevel == ClubePermissionLevel.ADMIN || clubeMember.permissionLevel == ClubePermissionLevel.OWNER) {
+                player.sendMessage("${DreamClubes.PREFIX} §cO player tem permissão de administrador!")
                 return@async
             }
 

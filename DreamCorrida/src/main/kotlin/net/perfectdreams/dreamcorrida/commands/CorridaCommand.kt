@@ -11,6 +11,7 @@ import net.perfectdreams.dreamcorrida.DreamCorrida
 import net.perfectdreams.dreamcorrida.utils.Checkpoint
 import net.perfectdreams.dreamcorrida.utils.Corrida
 import net.perfectdreams.dreamcorrida.utils.toWrapper
+import org.bukkit.SoundCategory
 import org.bukkit.entity.Player
 import java.io.File
 
@@ -32,7 +33,10 @@ class CorridaCommand(val m: DreamCorrida) : SparklyCommand(arrayOf("corrida")) {
             return
         }
 
-        sender.teleport(m.eventoCorrida.corrida?.spawn?.toLocation())
+        val spawnLocation = m.eventoCorrida.corrida?.spawn?.toLocation()
+        sender.teleport(spawnLocation)
+
+        sender.playSound(spawnLocation, "perfectdreams.sfx.special_stage", SoundCategory.RECORDS, 1000f, 1f)
     }
 
     @Subcommand(["start"])

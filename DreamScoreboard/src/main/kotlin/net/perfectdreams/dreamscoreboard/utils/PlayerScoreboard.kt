@@ -182,16 +182,13 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 		var idx = _idx
 		phoenix.setText("§5➦ §d§lA seguir...", idx--)
 		val events = DreamCore.INSTANCE.dreamEventManager.getUpcomingEvents()
-				.sortedByDescending {
-					(it.delayBetween + it.lastTime) - System.currentTimeMillis()
-				}
 
 		if (events.isEmpty()) {
 			phoenix.setText("§dNenhum... :(", idx--)
 		} else {
 			val hasPlayers = events.filter { Bukkit.getOnlinePlayers().size >= it.requiredPlayers }
 			val notEnoughPlayers = events.filter { it.requiredPlayers > Bukkit.getOnlinePlayers().size }
-			for (ev in hasPlayers) {
+			for (ev in hasPlayers.sortedBy { (it.delayBetween + it.lastTime) - System.currentTimeMillis() }) {
 				val diff = (ev.delayBetween + ev.lastTime) - System.currentTimeMillis()
 				var fancy = ""
 				if (diff >= (60000 * 60)) {
@@ -215,7 +212,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 				}
 				phoenix.setText("§d" + ev.eventName + " (" + fancy + ")", idx--)
 			}
-			for (ev in notEnoughPlayers) {
+			for (ev in notEnoughPlayers.sortedBy { it.requiredPlayers }) {
 				val requiredCount = ev.requiredPlayers - Bukkit.getOnlinePlayers().size
 				val str = if (requiredCount == 1) "player" else "players"
 				phoenix.setText("§d" + ev.eventName + " (+$requiredCount $str)", idx--)
@@ -301,7 +298,11 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 			}
 
 			if (prefix.length > 16) {
-				prefix = prefix.stripColorCode()
+				prefix = prefix.replace(DreamScoreboard.FORMATTING_REGEX, "")
+			}
+
+			if (prefix.length > 16) {
+				prefix = prefix.stripColors() ?: "§f"
 			}
 
 			val teamPrefix = when {

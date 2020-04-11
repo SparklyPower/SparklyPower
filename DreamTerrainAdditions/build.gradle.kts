@@ -6,15 +6,15 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
 }
 
 dependencies {
     compile(kotlin("stdlib-jdk8"))
-    compile(project(":DreamCash"))
-    compile("com.destroystokyo.paper:paper:1.13-R0.1-SNAPSHOT")
+    compile(files("../libs/patched_1.15.1.jar"))
     compile(files("../libs/DreamCore-shadow.jar"))
-    compile(project(":DreamChat"))
-    compile(project(":DreamCash"))
+    compile(files("../libs/WorldGuard.jar"))
+    compileOnly("com.github.TechFortress:GriefPrevention:16.11.5")
 }
 
 tasks.withType<KotlinCompile> {

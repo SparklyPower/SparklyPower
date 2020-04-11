@@ -1,9 +1,13 @@
 package net.perfectdreams.dreamtorredamorte.utils
 
+import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.InstantFirework
 import net.perfectdreams.dreamcore.utils.PlayerUtils
+import net.perfectdreams.dreamcore.utils.balance
+import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
 import org.bukkit.*
@@ -11,6 +15,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import java.util.*
 
 class TorreDaMorte(val m: DreamTorreDaMorte) {
     var spawns = mutableListOf<Location>()
@@ -32,8 +37,17 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
         )
     }
     val lastHits = mutableMapOf<Player, Player>()
+    var isServerEvent = false
+    var currentEventId = UUID.randomUUID()
 
-    fun preStart() {
+    fun preStart(isServerEvent: Boolean) {
+        this.isServerEvent = isServerEvent
+        if (isServerEvent)
+            m.eventoTorreDaMorte.running = true
+
+        val eventId = UUID.randomUUID()
+        this.currentEventId = eventId
+
         spawns.clear()
         spawns.addAll(
             listOf(
@@ -55,16 +69,34 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
         canAttack = false
 
         scheduler().schedule(m) {
-            Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} §eA Torre da Morte irá iniciar em 30 segundos! (GUARDE OS ITENS ANTES DE ENTRAR VAI SE DÁ RUIM) §6/torre")
-            waitFor(30 * 20)
-            Bukkit.broadcastMessage("Torre Teste 2")
+            val startAt = if (isServerEvent) 60 else 30
+
+            for (i in startAt downTo 1) {
+                if (currentEventId != eventId) // Parece que o evento acabou e outro começou
+                    return@schedule
+
+                val announce = (i in 15..60 && i % 15 == 0) || (i in 0..14 && i % 5 == 0)
+
+                if (announce) {
+                    if (isServerEvent) {
+                        Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} O Evento Torre da Morte começará em $i segundos! Use §6/torre§e para entrar! (Guarde os itens antes de entrar, vai se dá problema)")
+                    } else {
+                        Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} A Torre da Morte *valendo nada* começará em $i segundos! Use §6/torre minigame§e para entrar! (Guarde os itens antes de entrar, vai se dá problema)")
+                    }
+                }
+
+                waitFor(20)
+            }
+
+            if (currentEventId != eventId) // Parece que o evento acabou e outro começou
+                return@schedule
 
             start()
         }
     }
 
     fun start() {
-        val validPlayersInQueue = playersInQueue.filter { it.world.name == "TorreDaMorte" }
+        val validPlayersInQueue = playersInQueue.filter { it.isValid && it.world.name == "TorreDaMorte" }
         playersInQueue.clear()
         playersInQueue.addAll(validPlayersInQueue)
 
@@ -73,7 +105,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             isPreStart = false
 
             playersInQueue.forEach { player ->
-                player.teleport(DreamCore.dreamConfig.spawn)
+                player.teleport(DreamCore.dreamConfig.getSpawn())
                 player.sendMessage("${DreamTorreDaMorte.PREFIX} §cA Torre da Morte foi cancelada devido a falta de players...")
             }
 
@@ -84,16 +116,15 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
         playersInQueue.forEachIndexed { index, player ->
             val locationToTeleportTo = spawns[index % spawns.size]
 
-            player.teleport(locationToTeleportTo)
             PlayerUtils.healAndFeed(player)
-            player.activePotionEffects.forEach {
-                player.removePotionEffect(it.type)
-            }
+            player.removeAllPotionEffects()
             players.add(player)
 
             storedPlayerInventory[player] = player.inventory.contents.clone()
             player.openInventory.close()
             player.inventory.clear()
+
+            player.teleport(locationToTeleportTo)
         }
 
         isPreStart = false
@@ -133,6 +164,19 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             }
 
             canAttack = true
+
+            while (isStarted) {
+                // A cada um segundo iremos verificar players inválidos que ainda estão no jogo
+                val invalidPlayers = players.filter { !it.isValid || it.location.world.name != "TorreDaMorte" }
+                invalidPlayers.forEach {
+                    removeFromGame(it)
+                }
+
+                if (players.size == 1)
+                    removeFromGame(players.first())
+
+                waitFor(20L)
+            }
         }
     }
 
@@ -145,17 +189,33 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
         storedPlayerInventory.clear()
         lastHits.clear()
 
-        Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} §b${player.displayName}§e venceu a Torre da Morte!")
+        if (isServerEvent) {
+            m.eventoTorreDaMorte.lastTime = System.currentTimeMillis()
+            m.eventoTorreDaMorte.running = false
+
+            val howMuchMoneyWillBeGiven = 15_000
+            val howMuchNightmaresWillBeGiven = 1
+
+            Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} §b${player.displayName}§e venceu a Torre da Morte! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
+
+            player.balance += howMuchMoneyWillBeGiven
+            scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                Cash.giveCash(player, howMuchNightmaresWillBeGiven.toLong())
+            }
+        } else {
+            Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} §b${player.displayName}§e venceu o Minigame da Torre da Morte! Parabéns!")
+        }
     }
 
-    fun removeFromGame(player: Player) {
+    fun removeFromGame(player: Player, teleportToSpawn: Boolean = true) {
         if (!players.contains(player))
             return
 
         // Você perdeu, que sad...
         players.remove(player)
 
-        player.teleport(DreamCore.dreamConfig.spawn)
+        if (teleportToSpawn)
+            player.teleport(DreamCore.dreamConfig.getSpawn())
 
         // Restaurar o inventário do player
         val storedInventory = storedPlayerInventory[player]
@@ -193,7 +253,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
         if (!playersInQueue.contains(player))
             return
 
-        player.teleport(DreamCore.dreamConfig.spawn)
+        player.teleport(DreamCore.dreamConfig.getSpawn())
         playersInQueue.remove(player)
     }
 

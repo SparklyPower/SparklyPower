@@ -1,24 +1,30 @@
 package net.perfectdreams.dreamtorredamorte.commands
 
-import net.perfectdreams.commands.annotation.Subcommand
-import net.perfectdreams.commands.bukkit.SparklyCommand
+import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
-import net.perfectdreams.dreamtorredamorte.utils.TorreDaMorte
-import org.bukkit.entity.Player
 
-class TorreCommand(val m: DreamTorreDaMorte) : SparklyCommand(arrayOf("torre", "dreamtorredamorte.use")) {
-    @Subcommand
-    fun torre(player: Player) {
-        if (m.torreDaMorte.isStarted && !m.torreDaMorte.isPreStart) {
-            player.sendMessage("Já está acontecendo, very sad né")
-            return
+object TorreCommand : DSLCommandBase<DreamTorreDaMorte> {
+    override fun command(plugin: DreamTorreDaMorte) = create(listOf("torre", "torredamorte")) {
+        permission = "dreamtorredamorte.joinevent"
+
+        executes {
+            if (plugin.torreDaMorte.isStarted && !plugin.torreDaMorte.isPreStart) {
+                player.sendMessage("${DreamTorreDaMorte.PREFIX} §cA Torre da Morte já começou!")
+                return@executes
+            }
+
+            if (!plugin.torreDaMorte.isStarted && !plugin.torreDaMorte.isPreStart) {
+                player.sendMessage("${DreamTorreDaMorte.PREFIX} §cO Evento Torre da Morte não está ocorrendo no momento! Se você quiser entrar na torre apenas para se divertir sem ganhar nenhuma recompensa, entre na §6/torre minigame")
+                return@executes
+            }
+
+            if (plugin.torreDaMorte.isServerEvent) {
+                player.sendMessage("${DreamTorreDaMorte.PREFIX} §eVocê entrou no evento da Torre da Morte!")
+                plugin.torreDaMorte.joinQueue(player)
+            } else {
+                player.sendMessage("${DreamTorreDaMorte.PREFIX} §cO Evento Torre da Morte não está ocorrendo no momento! Se você quiser entrar na torre apenas para se divertir sem ganhar nenhuma recompensa, entre na §6/torre minigame")
+                return@executes
+            }
         }
-
-        if (!m.torreDaMorte.isPreStart && !m.torreDaMorte.isStarted) {
-            m.torreDaMorte.preStart()
-        }
-
-        player.sendMessage("vixe rsrs entrou na partida")
-        m.torreDaMorte.joinQueue(player)
     }
 }

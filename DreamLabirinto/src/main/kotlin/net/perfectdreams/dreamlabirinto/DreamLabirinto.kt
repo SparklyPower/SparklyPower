@@ -8,6 +8,7 @@ import net.perfectdreams.dreamlabirinto.commands.DreamLabirintoCommand
 import net.perfectdreams.dreamlabirinto.commands.DreamLabirintoStartCommand
 import net.perfectdreams.dreamlabirinto.commands.LabirintoCommand
 import net.perfectdreams.dreamlabirinto.events.EventoLabirinto
+import net.perfectdreams.dreamlabirinto.listeners.TagListener
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
@@ -45,6 +46,7 @@ class DreamLabirinto : KotlinPlugin(), Listener {
         registerCommand(LabirintoCommand)
 
         registerEvents(this)
+        registerEvents(TagListener(this))
 
         registerServerEvent(event)
     }

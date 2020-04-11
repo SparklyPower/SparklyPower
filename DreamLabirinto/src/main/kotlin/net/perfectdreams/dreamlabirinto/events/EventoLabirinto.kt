@@ -12,6 +12,7 @@ import net.perfectdreams.dreamlabirinto.utils.MazeGenerator
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.SoundCategory
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
@@ -29,6 +30,8 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
     fun join(player: Player) {
         val spawn = Location(Bukkit.getWorld("Labirinto")!!, 2.0, 80.0, 2.0)
         player.teleport(spawn)
+
+        player.playSound(spawn, "perfectdreams.sfx.special_stage", SoundCategory.RECORDS, 1000f, 1f)
     }
 
     fun finish(winner: Player) {

@@ -18,6 +18,7 @@ import net.perfectdreams.dreamchat.dao.DiscordAccount
 import net.perfectdreams.dreamchat.events.ApplyPlayerTagsEvent
 import net.perfectdreams.dreamchat.tables.ChatUsers
 import net.perfectdreams.dreamchat.tables.DiscordAccounts
+import net.perfectdreams.dreamchat.tables.PremiumUsers
 import net.perfectdreams.dreamchat.utils.ChatUtils
 import net.perfectdreams.dreamchat.utils.DiscordAccountInfo
 import net.perfectdreams.dreamchat.utils.McMMOTagsUtils
@@ -408,6 +409,17 @@ class ChatListener(val m: DreamChat) : Listener {
 				"§c✗"
 			}
 
+			val isMinecraftPremium = transaction(Databases.databaseNetwork) {
+				PremiumUsers.select { PremiumUsers.crackedUniqueId eq player.uniqueId }
+					.count() != 0
+			}
+
+			val mcPremiumStatus = if (isMinecraftPremium) {
+				"§a✔"
+			} else {
+				"§c✗"
+			}
+
 			val aboutLines = mutableListOf(
 				"§6✪ §a§lSobre ${player.artigo} §r§b${toDisplay}§r §6✪",
 				"",
@@ -416,7 +428,8 @@ class ChatListener(val m: DreamChat) : Listener {
 				"§eKDR: §6PvP é para os fracos, 2bj :3",
 				"§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!",
 				"§eVersão: §6Minecraft ${player.version.getName()}",
-				"§eUsando a Resource Pack? $rpStatus"
+				"§eUsando a Resource Pack? $rpStatus",
+				"§eMinecraft Original? $mcPremiumStatus"
 			)
 
 			val discordAccount = transaction(Databases.databaseNetwork) {
@@ -461,55 +474,55 @@ class ChatListener(val m: DreamChat) : Listener {
 			)
 		}
 
-		textComponent += " §6➤ ".toBaseComponent()
+	textComponent += " §6➤ ".toBaseComponent()
 
-		val split = message.split("(?=\\b[ ])")
-		var previous: String? = null
-		for (piece in split) {
-			var editedPiece = piece
-			if (previous != null) {
-				editedPiece = "$previous$editedPiece"
-			}
-			textComponent += editedPiece.toBaseComponent()
-			previous = ChatColor.getLastColors(piece)
+	val split = message.split("(?=\\b[ ])")
+	var previous: String? = null
+	for (piece in split) {
+		var editedPiece = piece
+		if (previous != null) {
+			editedPiece = "$previous$editedPiece"
 		}
+		textComponent += editedPiece.toBaseComponent()
+		previous = ChatColor.getLastColors(piece)
+	}
 
-		if (DreamChat.mutedUsers.contains(player.name)) { // Usuário está silenciado
-			player.spigot().sendMessage(textComponent)
+	if (DreamChat.mutedUsers.contains(player.name)) { // Usuário está silenciado
+		player.spigot().sendMessage(textComponent)
 
-			for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission("pocketdreams.soustaff")}) {
-				staff.sendMessage("§8[§cSILENCIADO§8] §b${player.name}§c: $message")
-			}
+		for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission("pocketdreams.soustaff")}) {
+			staff.sendMessage("§8[§cSILENCIADO§8] §b${player.name}§c: $message")
+		}
+		return
+	}
+
+	for (onlinePlayer in Bukkit.getOnlinePlayers()) {
+		// Verificar se o player está ignorando o player que enviou a mensagem
+		val isIgnoringTheSender = m.userData.getStringList("ignore.${onlinePlayer.uniqueId}").contains(player.uniqueId.toString())
+
+		if (!isIgnoringTheSender)
+			onlinePlayer.spigot().sendMessage(textComponent)
+	}
+
+	val calendar = Calendar.getInstance()
+	m.chatLog.appendText("[${String.format("%02d", calendar[Calendar.DAY_OF_MONTH])}/${String.format("%02d", calendar[Calendar.MONTH] + 1)}/${String.format("%02d", calendar[Calendar.YEAR])} ${String.format("%02d", calendar[Calendar.HOUR_OF_DAY])}:${String.format("%02d", calendar[Calendar.MINUTE])}] ${player.name}: $message\n")
+
+	// Tudo OK? Então vamos verificar se a mensagem tem algo de importante para nós respondermos
+	for (response in DreamChat.botResponses) {
+		if (response.handleResponse(message, e)) {
+			val response = response.getResponse(message, e) ?: return
+			ChatUtils.sendResponseAsBot(player, response)
 			return
 		}
-
-		for (onlinePlayer in Bukkit.getOnlinePlayers()) {
-			// Verificar se o player está ignorando o player que enviou a mensagem
-			val isIgnoringTheSender = m.userData.getStringList("ignore.${onlinePlayer.uniqueId}").contains(player.uniqueId.toString())
-
-			if (!isIgnoringTheSender)
-				onlinePlayer.spigot().sendMessage(textComponent)
-		}
-
-		val calendar = Calendar.getInstance()
-		m.chatLog.appendText("[${String.format("%02d", calendar[Calendar.DAY_OF_MONTH])}/${String.format("%02d", calendar[Calendar.MONTH] + 1)}/${String.format("%02d", calendar[Calendar.YEAR])} ${String.format("%02d", calendar[Calendar.HOUR_OF_DAY])}:${String.format("%02d", calendar[Calendar.MINUTE])}] ${player.name}: $message\n")
-
-		// Tudo OK? Então vamos verificar se a mensagem tem algo de importante para nós respondermos
-		for (response in DreamChat.botResponses) {
-			if (response.handleResponse(message, e)) {
-				val response = response.getResponse(message, e) ?: return
-				ChatUtils.sendResponseAsBot(player, response)
-				return
-			}
-		}
-
-		// Vamos mandar no Biscord!
-		DreamChat.CHAT_WEBHOOK.send(
-			DiscordMessage(
-				username = player.name,
-				content = message.stripColorCode().replace(Regex("\\\\+@"), "@").replace("@", "@\u200B"),
-				avatar = "https://sparklypower.net/api/v1/render/avatar?name=${player.name}&scale=16"
-			)
-		)
 	}
+
+	// Vamos mandar no Biscord!
+	DreamChat.CHAT_WEBHOOK.send(
+	DiscordMessage(
+	username = player.name,
+	content = message.stripColorCode().replace(Regex("\\\\+@"), "@").replace("@", "@\u200B"),
+	avatar = "https://sparklypower.net/api/v1/render/avatar?name=${player.name}&scale=16"
+	)
+	)
+}
 }

@@ -12,8 +12,8 @@ class TagListener(val m: DreamLabirinto) : Listener {
         if (e.player.uniqueId == m.config.winner) {
             e.tags.add(
                 PlayerTag(
-                    "§a§lA",
-                    "§a§lAventureiro",
+                    "§e§lA",
+                    "§e§lAventureiro",
                     listOf(
                         "§r§b${e.player.displayName}§r§7 foi persistente e conseguiu ser o primeiro a vencer o evento labirinto!"
                     ),

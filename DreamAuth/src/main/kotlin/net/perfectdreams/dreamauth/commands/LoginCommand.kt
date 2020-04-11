@@ -4,18 +4,11 @@ import com.github.salomonbrys.kotson.jsonObject
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamauth.DreamAuth
-import net.perfectdreams.dreamauth.dao.AuthInfo
-import net.perfectdreams.dreamauth.tables.AuthStorage
 import net.perfectdreams.dreamauth.utils.PlayerStatus
-import net.perfectdreams.dreamauth.utils.ilike
-import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.network.DreamNetwork
-import net.perfectdreams.dreamcore.tables.Users
-import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.generateCommandInfo
 import net.perfectdreams.dreamcore.utils.scheduler
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
 
 object LoginCommand : DSLCommandBase<DreamAuth> {
@@ -26,10 +19,7 @@ object LoginCommand : DSLCommandBase<DreamAuth> {
             if (password == null) {
                 player.sendMessage(
                     generateCommandInfo("login",
-                        mapOf("Senha" to "A senha da sua conta"),
-                        listOf(
-                            "Esqueceu a sua senha? Então use §6/recuperar email"
-                        )
+                        mapOf("Senha" to "A senha da sua conta")
                     )
                 )
                 return@executes

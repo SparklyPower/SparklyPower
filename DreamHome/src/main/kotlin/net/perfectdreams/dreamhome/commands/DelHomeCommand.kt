@@ -49,7 +49,7 @@ class DelHomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("delhome", "delc
 
 				player.sendMessage("§aCasa deletada com sucesso!")
 
-				Webhooks.PANTUFA_INFO.send(DiscordMessage(
+				Webhooks.PANTUFA_INFO?.send(DiscordMessage(
 						content = "**${player.name}** deletou casa `${house.houseName}`. **Localização:** `${newLocation.world.name}` `${newLocation.x}`, `${newLocation.y}`, `${newLocation.z}`"
 				))
 			}

@@ -191,7 +191,7 @@ object McMMOTagsUtils {
             )
         }
 
-        if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.AXES].equals(e.player.name, true)) {
+        if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.WOODCUTTING].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lL",

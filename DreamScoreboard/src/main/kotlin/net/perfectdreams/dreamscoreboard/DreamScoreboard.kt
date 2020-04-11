@@ -6,6 +6,8 @@ import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreamscoreboard.commands.EventosCommand
+import net.perfectdreams.dreamscoreboard.commands.GlowingColorCommand
 import net.perfectdreams.dreamscoreboard.commands.GlowingCommand
 import net.perfectdreams.dreamscoreboard.utils.PlayerScoreboard
 import org.bukkit.Bukkit
@@ -36,6 +38,7 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 				"開", // lori feliz
 				"閊"  // pepo feliz
 		)
+		val FORMATTING_REGEX = Regex("§[k-or]")
 	}
 
 	val scoreboards = ConcurrentHashMap<Player, PlayerScoreboard>()
@@ -46,7 +49,9 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 		super.softEnable()
 		registerEvents(this)
 
-		registerCommand(GlowingCommand(this))
+		registerCommand(EventosCommand)
+		registerCommand(GlowingCommand)
+		registerCommand(GlowingColorCommand)
 
 		scheduler().schedule(this, SynchronizationContext.SYNC) {
 			while (true) {
