@@ -13,7 +13,7 @@ class DreamEventManager {
 				val upcoming = getUpcomingEvents()
 
 				for (event in upcoming) {
-					if (event.startNow()) {
+					if (event.startNow() && getRunningEvents().isEmpty()) {
 						event.preStart()
 					}
 				}
