@@ -1,0 +1,4 @@
+name: DreamBroadcast
+main: net.perfectdreams.dreambroadcast.DreamBroadcast
+version: 1.0.0
+softdepend: ["DreamCore"]
