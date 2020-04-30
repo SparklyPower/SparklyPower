@@ -65,9 +65,6 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     fun onMochilaPreTransaction(e: PreTransactionEvent) {
-        if (e.client.name != "MrPowerGamerBR" && e.client.name != "yNilzinha_")
-            return
-
         if (trackingMochilasPreTransactionsEvents.contains(e)) {
             trackingMochilasPreTransactionsEvents.remove(e)
             return
