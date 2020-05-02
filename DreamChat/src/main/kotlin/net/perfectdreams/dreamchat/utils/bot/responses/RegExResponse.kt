@@ -25,8 +25,8 @@ open class RegExResponse : PantufaResponse {
 
 	override fun getResponse(message: String, event: AsyncPlayerChatEvent): String? {
 		var reply = response
-		reply = reply.replace("{name}", event.player.name)
-		reply = reply.replace("{displayName}", event.player.displayName)
+		reply = reply.replace("{name}", "${event.player.name}§r")
+		reply = reply.replace("{displayName}", "${event.player.displayName}§r")
 
 		return reply
 	}
