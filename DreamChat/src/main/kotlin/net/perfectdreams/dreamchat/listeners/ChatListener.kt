@@ -474,55 +474,57 @@ class ChatListener(val m: DreamChat) : Listener {
 			)
 		}
 
-	textComponent += " §6➤ ".toBaseComponent()
+		textComponent += " §6➤ ".toBaseComponent()
 
-	val split = message.split("(?=\\b[ ])")
-	var previous: String? = null
-	for (piece in split) {
-		var editedPiece = piece
-		if (previous != null) {
-			editedPiece = "$previous$editedPiece"
+		val split = message.split("(?=\\b[ ])")
+		var previous: String? = null
+		for (piece in split) {
+			var editedPiece = piece
+			if (previous != null) {
+				editedPiece = "$previous$editedPiece"
+			}
+			textComponent += editedPiece.toBaseComponent()
+			previous = ChatColor.getLastColors(piece)
 		}
-		textComponent += editedPiece.toBaseComponent()
-		previous = ChatColor.getLastColors(piece)
-	}
 
-	if (DreamChat.mutedUsers.contains(player.name)) { // Usuário está silenciado
-		player.spigot().sendMessage(textComponent)
+		if (DreamChat.mutedUsers.contains(player.name)) { // Usuário está silenciado
+			player.spigot().sendMessage(textComponent)
 
-		for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission("pocketdreams.soustaff")}) {
-			staff.sendMessage("§8[§cSILENCIADO§8] §b${player.name}§c: $message")
-		}
-		return
-	}
-
-	for (onlinePlayer in Bukkit.getOnlinePlayers()) {
-		// Verificar se o player está ignorando o player que enviou a mensagem
-		val isIgnoringTheSender = m.userData.getStringList("ignore.${onlinePlayer.uniqueId}").contains(player.uniqueId.toString())
-
-		if (!isIgnoringTheSender)
-			onlinePlayer.spigot().sendMessage(textComponent)
-	}
-
-	val calendar = Calendar.getInstance()
-	m.chatLog.appendText("[${String.format("%02d", calendar[Calendar.DAY_OF_MONTH])}/${String.format("%02d", calendar[Calendar.MONTH] + 1)}/${String.format("%02d", calendar[Calendar.YEAR])} ${String.format("%02d", calendar[Calendar.HOUR_OF_DAY])}:${String.format("%02d", calendar[Calendar.MINUTE])}] ${player.name}: $message\n")
-
-	// Tudo OK? Então vamos verificar se a mensagem tem algo de importante para nós respondermos
-	for (response in DreamChat.botResponses) {
-		if (response.handleResponse(message, e)) {
-			val response = response.getResponse(message, e) ?: return
-			ChatUtils.sendResponseAsBot(player, response)
+			for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission("pocketdreams.soustaff")}) {
+				staff.sendMessage("§8[§cSILENCIADO§8] §b${player.name}§c: $message")
+			}
 			return
 		}
-	}
 
-	// Vamos mandar no Biscord!
-	DreamChat.CHAT_WEBHOOK.send(
-	DiscordMessage(
-	username = player.name,
-	content = message.stripColorCode().replace(Regex("\\\\+@"), "@").replace("@", "@\u200B"),
-	avatar = "https://sparklypower.net/api/v1/render/avatar?name=${player.name}&scale=16"
-	)
-	)
-}
+		for (onlinePlayer in Bukkit.getOnlinePlayers()) {
+			// Verificar se o player está ignorando o player que enviou a mensagem
+			val isIgnoringTheSender = m.userData.getStringList("ignore.${onlinePlayer.uniqueId}").contains(player.uniqueId.toString())
+
+			if (!isIgnoringTheSender)
+				onlinePlayer.spigot().sendMessage(textComponent)
+		}
+
+		val calendar = Calendar.getInstance()
+		m.chatLog.appendText("[${String.format("%02d", calendar[Calendar.DAY_OF_MONTH])}/${String.format("%02d", calendar[Calendar.MONTH] + 1)}/${String.format("%02d", calendar[Calendar.YEAR])} ${String.format("%02d", calendar[Calendar.HOUR_OF_DAY])}:${String.format("%02d", calendar[Calendar.MINUTE])}] ${player.name}: $message\n")
+
+		// Tudo OK? Então vamos verificar se a mensagem tem algo de importante para nós respondermos
+		for (response in DreamChat.botResponses) {
+			if (response.handleResponse(message, e)) {
+				val response = response.getResponse(message, e) ?: return
+				ChatUtils.sendResponseAsBot(player, response)
+				return
+			}
+		}
+
+		// Vamos mandar no Biscord!
+		if (m.config.getBoolean("enable-chat-relay", false)) {
+			DreamChat.CHAT_WEBHOOK.send(
+				DiscordMessage(
+					username = player.name,
+					content = message.stripColorCode().replace(Regex("\\\\+@"), "@").replace("@", "@\u200B"),
+					avatar = "https://sparklypower.net/api/v1/render/avatar?name=${player.name}&scale=16"
+				)
+			)
+		}
+	}
 }
