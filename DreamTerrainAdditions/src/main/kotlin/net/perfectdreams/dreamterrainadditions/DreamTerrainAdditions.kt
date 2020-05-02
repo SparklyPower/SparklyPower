@@ -107,7 +107,16 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		EntityType.GUARDIAN,
 		EntityType.ENDERMAN,
 		EntityType.BLAZE,
-		EntityType.GHAST
+		EntityType.GHAST,
+		EntityType.WITCH,
+		EntityType.ZOMBIE_VILLAGER,
+		EntityType.ZOMBIE_HORSE,
+		EntityType.PIG_ZOMBIE,
+		EntityType.EVOKER,
+		EntityType.ILLUSIONER,
+		EntityType.GHAST,
+		EntityType.HUSK,
+		EntityType.STRAY
 	)
 
 	@EventHandler
