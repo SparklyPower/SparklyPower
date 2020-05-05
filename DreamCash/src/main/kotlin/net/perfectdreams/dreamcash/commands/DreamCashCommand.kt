@@ -7,11 +7,14 @@ import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.commands.bukkit.SubcommandPermission
 import net.perfectdreams.dreamcash.DreamCash
 import net.perfectdreams.dreamcash.dao.CashInfo
+import net.perfectdreams.dreamcore.dao.User
+import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.scheduler
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
@@ -27,7 +30,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
 
             switchContext(SynchronizationContext.SYNC)
 
-            sender.sendMessage("${DreamCash.PREFIX} §eVocê tem §c${cash} pesadelos§e! Que tal gastar na nossa loja? §6/lojacash")
+            sender.sendMessage("${DreamCash.PREFIX} §eVocê tem §c${cash} pesadelos§e! Você pode comprar VIPs, sonhos e muito mais com pesadelos na §6/lojacash§e, dê uma passadinha lá!")
         }
     }
 
@@ -49,6 +52,16 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
     @Subcommand(["pagar", "pay"])
     fun payPlayerCash(sender: Player, name: String, howMuchString: String) {
         scheduler().schedule(m, SynchronizationContext.ASYNC) {
+            val receiverInfo = transaction(Databases.databaseNetwork) {
+                User.find { Users.username eq name }.firstOrNull()
+            }
+
+            if (receiverInfo == null) {
+                switchContext(SynchronizationContext.SYNC)
+                sender.sendMessage("${DreamCash.PREFIX} §b${name} §cnão existe! A não ser se você está tentando dar pesadelos para o vento")
+                return@schedule
+            }
+
             var yourCashInfo = transaction(Databases.databaseNetwork) {
                 CashInfo.findById(sender.uniqueId)
             }
@@ -136,7 +149,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
 
             val howMuch = howMuchString.toIntOrNull()
 
-            if (howMuch == null || 0 >= howMuch) {
+            if (howMuch == null || 0 > howMuch) {
                 switchContext(SynchronizationContext.SYNC)
                 sender.sendMessage("${DreamCash.PREFIX} §cQuantidade de pesadelos inválida!")
                 return@schedule

@@ -25,7 +25,7 @@ class FightArena(var m: DreamFight) {
     lateinit var pos2: Location
     lateinit var exit: Location
     var winner: Location? = null
-    var players = ArrayList<String>()
+    var players = ArrayList<Player>()
     var inventories = HashMap<Player, Array<ItemStack>>()
     var started = false
     var preStart = false
@@ -40,6 +40,7 @@ class FightArena(var m: DreamFight) {
     var prize = 75
     var multiplier = 1
     var winnerPrize = 15000
+    var isPvPStarted = false
 
     fun preStartFight() {
         // MettatonEX.reserveEvent()
@@ -65,6 +66,8 @@ class FightArena(var m: DreamFight) {
         /*
 		 * Remover conflitos de Modifiers
 		 */
+        // Ainda não é suportado
+        modifiers.remove(FightModifier.TWO_TEAM)
         if (modifiers.contains(FightModifier.KNOCKBACK)) {
             modifiers.remove(FightModifier.KNOCK_STICK)
             modifiers.remove(FightModifier.ONLY_HAND)
@@ -89,16 +92,16 @@ class FightArena(var m: DreamFight) {
     fun countdownPvP(count: Int, p1: Player, p2: Player) {
         object : BukkitRunnable() {
             override fun run() {
-                if (p1 == null || !players.contains(p1.name) || !p1.isOnline) {
+                if (p1 == null || !players.contains(p1) || !p1.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
-                    players.remove(p1.name)
+                    players.remove(p1)
                     preparePvP()
                     this.cancel()
                     return
                 }
-                if (p2 == null || !players.contains(p2.name) || !p2.isOnline) {
+                if (p2 == null || !players.contains(p2) || !p2.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
-                    players.remove(p2.name)
+                    players.remove(p2)
                     preparePvP()
                     this.cancel()
                     return
@@ -119,30 +122,30 @@ class FightArena(var m: DreamFight) {
     fun countdownPvPMulti(count: Int, p1: Player, p2: Player, p3: Player, p4: Player) {
         object : BukkitRunnable() {
             override fun run() {
-                if (p1 == null || !players.contains(p1.name) || !p1.isOnline) {
+                if (p1 == null || !players.contains(p1) || !p1.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
-                    players.remove(p1.name)
+                    players.remove(p1)
                     preparePvP()
                     this.cancel()
                     return
                 }
-                if (p2 == null || !players.contains(p2.name) || !p2.isOnline) {
+                if (p2 == null || !players.contains(p2) || !p2.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
-                    players.remove(p2.name)
+                    players.remove(p2)
                     preparePvP()
                     this.cancel()
                     return
                 }
-                if (p3 == null || !players.contains(p3.name) || !p3.isOnline) {
+                if (p3 == null || !players.contains(p3) || !p3.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
-                    players.remove(p3.name)
+                    players.remove(p3)
                     preparePvP()
                     this.cancel()
                     return
                 }
-                if (p4 == null || !players.contains(p4.name) || !p4.isOnline) {
+                if (p4 == null || !players.contains(p4) || !p4.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
-                    players.remove(p4.name)
+                    players.remove(p4)
                     preparePvP()
                     this.cancel()
                     return
@@ -217,9 +220,8 @@ class FightArena(var m: DreamFight) {
                         DreamFight.prefix + "§cInfelizmente o Evento Fight acabou devido a §lfalta de players§c..."
                     )
                 )
-            for (pStr in players) {
-                val p: Player? = Bukkit.getPlayerExact(pStr)
-                if (p != null) {
+            for (p in players) {
+                if (p.isValid) {
                     clearInventoryWithArmorOf(p)
                     p.removeAllPotionEffects()
                     p.healAndFeed()
@@ -242,40 +244,36 @@ class FightArena(var m: DreamFight) {
     }
 
     fun preparePvP() {
-        if (hasFightEnded()) {
+        if (hasFightEnded())
             return
-        }
-        var p1Str: String = players.random()
-        var p2Str: String = players.random()
-        var p3Str: String = players.random()
-        var p4Str: String = players.random()
-        var p1: Player? = Bukkit.getPlayerExact(p1Str)
-        var p2: Player? = Bukkit.getPlayerExact(p2Str)
-        var p3: Player? = Bukkit.getPlayerExact(p3Str)
-        var p4: Player? = Bukkit.getPlayerExact(p4Str)
+
+        var p1 = players.random()
+        var p2 = players.random()
+        var p3 = players.random()
+        var p4 = players.random()
 
         // Bukkit.broadcastMessage("1." + p1Str);
 // Bukkit.broadcastMessage("2." + p2Str);
-        while (p1 == null || p1Str == p2Str) {
-            if (hasFightEnded()) {
+        while (!p1.isValid || p1 == p2) {
+            if (hasFightEnded())
                 return
-            }
-            if (p1 == null) {
-                players.remove(p1Str)
-            }
-            p1Str = players.random()
-            p1 = Bukkit.getPlayerExact(p1Str)
+
+            if (!p1.isValid)
+                players.remove(p1)
+
+            p1 = players.random()
             // Bukkit.broadcastMessage("1." + p1Str);
 // Bukkit.broadcastMessage("2." + p2Str);
             if (modifiers.contains(FightModifier.TWO_TEAM)) {
                 if (3 >= players.size) { // Bukkit.broadcastMessage("Desativando 2v2!");
-/*
+                    /*
 					 * Desative o TWO_TEAM modifier caso o número de players seja pequeno
 					 */
                     modifiers.remove(FightModifier.TWO_TEAM)
                     /*
 					 * Pegue os players novamente...
-					 */preparePvP()
+					 */
+                    preparePvP()
                     return
                 }
             }
@@ -283,17 +281,15 @@ class FightArena(var m: DreamFight) {
         if (hasFightEnded()) {
             return
         }
-        while (p2 == null || p2Str == p1Str) {
-            if (hasFightEnded()) {
+        while (!p2.isValid || p1 == p2) {
+            if (hasFightEnded())
                 return
-            }
-            if (p2 == null) {
-                players.remove(p2Str)
-            }
-            p2Str = players.random()
-            p2 = Bukkit.getPlayerExact(p2Str)
-            // Bukkit.broadcastMessage("1." + p1Str);
-// Bukkit.broadcastMessage("2." + p2Str);
+
+            if (!p2.isValid)
+                players.remove(p2)
+
+            p2 = players.random()
+
             if (modifiers.contains(FightModifier.TWO_TEAM)) {
                 if (3 >= players.size) { // Bukkit.broadcastMessage("Desativando 2v2!");
 /*
@@ -307,14 +303,14 @@ class FightArena(var m: DreamFight) {
                 }
             }
         }
-        if (modifiers.contains(FightModifier.TWO_TEAM)) {
-            while (p3 == null || p3Str == p2Str || p3Str == p1Str || p3Str == p4Str) {
-                if (hasFightEnded()) {
+        /* if (modifiers.contains(FightModifier.TWO_TEAM)) {
+            while (!p3.isValid || p3 == p2 || p3 == p1 || p3 == p4) {
+                if (hasFightEnded())
                     return
-                }
-                if (p3 == null) {
+
+                if (!p3 == null)
                     players.remove(p1Str)
-                }
+
                 p3Str = players.random()
                 p3 = Bukkit.getPlayerExact(p3Str)
                 if (modifiers.contains(FightModifier.TWO_TEAM)) {
@@ -352,7 +348,7 @@ class FightArena(var m: DreamFight) {
                     }
                 }
             }
-        }
+        } */
         if (hasFightEnded()) {
             return
         }
@@ -403,6 +399,7 @@ class FightArena(var m: DreamFight) {
         initializeFightFor(p2)
         p1.teleport(pos1)
         p2.teleport(pos2)
+        isPvPStarted = true
     }
 
     fun startPvPBetween(p1: Player, p2: Player, p3: Player, p4: Player) {
@@ -497,7 +494,7 @@ class FightArena(var m: DreamFight) {
 
     fun hasFightEnded(): Boolean {
         if (players.size == 1) {
-            val winner: Player? = Bukkit.getPlayerExact(players[0])
+            val winner: Player? = players.firstOrNull()
             started = false
             preStart = false
             players.clear()
@@ -536,8 +533,7 @@ class FightArena(var m: DreamFight) {
      * Servidor está sendo desligado!
      */
     fun shutdownFight() {
-        for (pStr in players) {
-            val p: Player = Bukkit.getPlayerExact(pStr) ?: continue
+        for (p in players) {
             clearInventoryWithArmorOf(p)
             restoreInventoryOf(p)
             p.removeAllPotionEffects()
@@ -547,6 +543,7 @@ class FightArena(var m: DreamFight) {
     }
 
     fun setWinner(p: Player?, wr: WinReason) {
+        isPvPStarted = false
         val winner: Player? = p
         var loser: Player? = null
         loser = if (p1!!.equals(p)) {
@@ -575,7 +572,7 @@ class FightArena(var m: DreamFight) {
         loser.removeAllPotionEffects()
         winner.removeAllPotionEffects()
         winner.healAndFeed()
-        players.remove(loser.name)
+        players.remove(loser)
         restoreInventoryOf(loser)
         InstantFirework.spawn(
             winner.location,
@@ -601,8 +598,8 @@ class FightArena(var m: DreamFight) {
     }
 
     fun addToFight(p: Player) {
-        if (!players.contains(p.name)) {
-            players.add(p.name)
+        if (!players.contains(p)) {
+            players.add(p)
             p.teleport(lobby)
             storeInventoryOf(p)
             clearInventoryWithArmorOf(p)
@@ -641,7 +638,7 @@ class FightArena(var m: DreamFight) {
      * Somente utilizado quando o modifier TWO_TEAM está ativo.
      */
     fun shouldEndPvP(died: Player): Boolean {
-        players.remove(died.name)
+        players.remove(died)
         // Bukkit.broadcastMessage("1: " + p1.getName() + " Vivo? " + (players.contains(p1.getName()) ? "SIM" : "NÃO"));
 // Bukkit.broadcastMessage("2: " + p2.getName() + " Vivo? " + (players.contains(p2.getName()) ? "SIM" : "NÃO"));
 // Bukkit.broadcastMessage("3: " + p3.getName() + " Vivo? " + (players.contains(p3.getName()) ? "SIM" : "NÃO"));
@@ -652,22 +649,22 @@ class FightArena(var m: DreamFight) {
         restoreInventoryOf(died)
         died.teleport(exit)
         if (died === p1) {
-            if (p2 != null && !players.contains(p2!!.name)) {
+            if (p2 != null && !players.contains(p2!!)) {
                 return true
             }
         }
         if (died === p2) {
-            if (p1 != null && !players.contains(p1!!.name)) {
+            if (p1 != null && !players.contains(p1!!)) {
                 return true
             }
         }
         if (died === p3) {
-            if (p4 != null && !players.contains(p4!!.name)) {
+            if (p4 != null && !players.contains(p4!!)) {
                 return true
             }
         }
         if (died === p4) {
-            if (p3 != null && !players.contains(p3!!.name)) {
+            if (p3 != null && !players.contains(p3!!)) {
                 return true
             }
         }
@@ -681,22 +678,22 @@ class FightArena(var m: DreamFight) {
         var winner1: Player? = null
         var winner2: Player? = null
         val lost: ArrayList<Player?> = ArrayList<Player?>()
-        if (p1 != null && players.contains(p1!!.name)) {
+        if (p1 != null && players.contains(p1!!)) {
             winner1 = p1
         } else {
             lost.add(p1)
         }
-        if (p2 != null && players.contains(p2!!.name)) {
+        if (p2 != null && players.contains(p2!!)) {
             winner2 = p2
         } else {
             lost.add(p2)
         }
-        if (p3 != null && players.contains(p3!!.name)) {
+        if (p3 != null && players.contains(p3!!)) {
             winner1 = p3
         } else {
             lost.add(p3)
         }
-        if (p4 != null && players.contains(p4!!.name)) {
+        if (p4 != null && players.contains(p4!!)) {
             winner2 = p4
         } else {
             lost.add(p4)
@@ -739,7 +736,7 @@ class FightArena(var m: DreamFight) {
                 clearInventoryWithArmorOf(loser)
                 loser.removeAllPotionEffects()
                 loser.healAndFeed()
-                players.remove(loser.name)
+                players.remove(loser)
                 restoreInventoryOf(loser)
                 loser.teleport(exit)
             }

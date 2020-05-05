@@ -4,13 +4,11 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
-import net.perfectdreams.dreamcore.utils.InstantFirework
-import net.perfectdreams.dreamcore.utils.PlayerUtils
-import net.perfectdreams.dreamcore.utils.balance
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
-import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
 import org.bukkit.*
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
@@ -96,11 +94,16 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
     }
 
     fun start() {
+        isPreStart = false
+
         val validPlayersInQueue = playersInQueue.filter { it.isValid && it.world.name == "TorreDaMorte" }
         playersInQueue.clear()
         playersInQueue.addAll(validPlayersInQueue)
 
         if (1 >= playersInQueue.size) {
+            if (isServerEvent)
+                m.eventoTorreDaMorte.running = false
+
             isStarted = false
             isPreStart = false
 
@@ -125,9 +128,15 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             player.inventory.clear()
 
             player.teleport(locationToTeleportTo)
+            player.inventory.addItem(
+                ItemStack(Material.STICK)
+                    .rename("§c§lO Poder do Vieirinha")
+                    .apply {
+                        this.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1)
+                        this.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2)
+                    }
+            )
         }
-
-        isPreStart = false
 
         // Iniciar minigame... daqui a pouquitcho, yay!
 
@@ -171,9 +180,6 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
                 invalidPlayers.forEach {
                     removeFromGame(it)
                 }
-
-                if (players.size == 1)
-                    removeFromGame(players.first())
 
                 waitFor(20L)
             }

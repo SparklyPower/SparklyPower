@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.*
 
@@ -87,9 +88,8 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
                 return
             }
 
-            if (20 >= event.player.location.y) {
-                event.player.damage(1000000.0)
-            }
+            if (20 >= event.player.location.y)
+                m.torreDaMorte.removeFromGame(event.player)
         }
     }
 
@@ -107,5 +107,11 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
                 m.torreDaMorte.removeFromGame(event.player, false)
             }
         }
+    }
+
+    @EventHandler
+    fun onFoodChange(e: FoodLevelChangeEvent) {
+        if (e.entity.world.name == "TorreDaMorte")
+            e.isCancelled = true
     }
 }

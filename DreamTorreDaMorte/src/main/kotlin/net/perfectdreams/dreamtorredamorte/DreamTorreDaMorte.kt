@@ -31,5 +31,13 @@ class DreamTorreDaMorte : KotlinPlugin() {
 
     override fun softDisable() {
         super.softDisable()
+
+        if (torreDaMorte.isStarted) {
+            if (torreDaMorte.isPreStart) {
+                torreDaMorte.playersInQueue.toList().forEach { torreDaMorte.removeFromQueue(it) }
+            } else {
+                torreDaMorte.players.toList().forEach { torreDaMorte.removeFromGame(it) }
+            }
+        }
     }
 }

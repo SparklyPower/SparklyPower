@@ -136,7 +136,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
         if (spawnLocation.world.name != player.world.name)
             return
 
-        // e.isCancelled = true
+        e.isCancelled = true
 
         if (e.cause == EntityDamageEvent.DamageCause.FALL
             || e.cause == EntityDamageEvent.DamageCause.CONTACT
@@ -147,10 +147,8 @@ class PlayerListener(val m: DreamCorrida) : Listener {
             || e.cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
             || e.cause == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
             || e.cause == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK
-            || e.cause == EntityDamageEvent.DamageCause.DROWNING) {
-            e.isCancelled = true
+            || e.cause == EntityDamageEvent.DamageCause.DROWNING)
             return
-        }
 
         // Mas se for qualquer outra coisa...
         val currentPlayerCheckpoint = eventoCorrida.playerCheckpoints[player]
@@ -161,6 +159,6 @@ class PlayerListener(val m: DreamCorrida) : Listener {
         PlayerUtils.healAndFeed(player)
 
         player.teleport(teleportTo)
-        player.sendMessage("§cVocê levou dano e voltou ao último checkpoint! Não desista, continue correndo!")
+        player.sendMessage("§cVocê levou dano e voltou ao último checkpoint! Mas não desista, continue correndo!")
     }
 }

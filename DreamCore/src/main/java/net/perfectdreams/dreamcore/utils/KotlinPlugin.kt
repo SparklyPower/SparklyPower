@@ -51,7 +51,7 @@ open class KotlinPlugin : JavaPlugin() {
 			it.unregister(this)
 		}
 
-		for (serverEvent in serverEvents)
+		for (serverEvent in serverEvents.toList())
 			unregisterServerEvent(serverEvent)
 
 		// Problema resolvido!

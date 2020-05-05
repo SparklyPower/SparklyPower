@@ -26,34 +26,44 @@ import org.bukkit.inventory.meta.ItemMeta
 class DreamMoverSpawners : KotlinPlugin(), Listener {
     val onlyInWorld = listOf("world")
     val onlyInNether = listOf("nether")
+    val defaultBreakPermission = "dreammoverspawners.breakdefault"
+    val specialBreakPermission = "dreammoverspawners.breakspecial"
+
     val validSpawners = listOf(
         MobSpawnerBreakable(
             EntityType.ZOMBIE,
-            onlyInWorld
+            onlyInWorld,
+            defaultBreakPermission
         ),
         MobSpawnerBreakable(
             EntityType.CAVE_SPIDER,
-            onlyInWorld
+            onlyInWorld,
+            defaultBreakPermission
         ),
         MobSpawnerBreakable(
             EntityType.SPIDER,
-            onlyInWorld
+            onlyInWorld,
+            defaultBreakPermission
         ),
         MobSpawnerBreakable(
             EntityType.CREEPER,
-            onlyInWorld
+            onlyInWorld,
+            defaultBreakPermission
         ),
         MobSpawnerBreakable(
             EntityType.SKELETON,
-            onlyInWorld
+            onlyInWorld,
+            defaultBreakPermission
         ),
         MobSpawnerBreakable(
             EntityType.PIG_ZOMBIE,
-            onlyInNether
+            onlyInNether + onlyInWorld,
+            specialBreakPermission
         ),
         MobSpawnerBreakable(
             EntityType.BLAZE,
-            onlyInNether
+            onlyInNether + onlyInWorld,
+            specialBreakPermission
         )
     )
 
@@ -97,9 +107,9 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
             return
         }
 
-        if (e.block.world.name !in spawnerX.allowedWorlds) {
+        if (!e.player.hasPermission(spawnerX.requiredPermission)) {
             e.isCancelled = true
-            e.player.sendMessage("§cDesculpe, você não pode colocar esse spawner neste mundo...")
+            e.player.sendMessage("§cDesculpe, mas você não tem permissão para colocar esse spawner no chão... Ele é poderoso demais para você!")
             center.world.spawnParticle(Particle.SPELL_WITCH, center, 1)
             return
         }
@@ -138,6 +148,12 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
             val spawner = validSpawners.firstOrNull { it.type == type }
             if (spawner == null) {
                 e.player.sendMessage("§cDesculpe, mas o meu poder não permite quebrar esses tipos de spawners...")
+                center.world.spawnParticle(Particle.SPELL_WITCH, center, 1)
+                return
+            }
+
+            if (!e.player.hasPermission(spawner.requiredPermission)) {
+                e.player.sendMessage("§cDesculpe, mas você não tem permissão para quebrar esse spawner... Ele é poderoso demais para você!")
                 center.world.spawnParticle(Particle.SPELL_WITCH, center, 1)
                 return
             }
@@ -184,6 +200,7 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
 
     data class MobSpawnerBreakable(
         val type: EntityType,
-        val allowedWorlds: List<String>
+        val allowedWorlds: List<String>,
+        val requiredPermission: String
     )
 }

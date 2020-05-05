@@ -18,7 +18,9 @@ class FightListener(val m: DreamFight) : Listener {
     @EventHandler
     fun onDamage(e: EntityDamageEvent) {
         if (e.entity.world.name == "EventoFight")
-            if (e.entity != m.fight.p1 && e.entity != m.fight.p2 && e.entity != m.fight.p3 && e.entity != m.fight.p4)
+            if (m.fight.isPvPStarted)
+                e.isCancelled = e.entity != m.fight.p1 && e.entity != m.fight.p2 && e.entity != m.fight.p3 && e.entity != m.fight.p4
+            else
                 e.isCancelled = true
     }
 
@@ -85,7 +87,7 @@ class FightListener(val m: DreamFight) : Listener {
     @EventHandler
     fun onQuit(e: PlayerQuitEvent) {
         if (m.fight.started) {
-            if (m.fight.players.contains(e.player.name)) {
+            if (m.fight.players.contains(e.player)) {
                 if (!m.fight.modifiers.contains(
                         FightModifier.TWO_TEAM)) {
                     if (e.player.equals(m.fight.p1)) {
@@ -114,7 +116,7 @@ class FightListener(val m: DreamFight) : Listener {
                 m.fight.restoreInventoryOf(
                     e.player
                 )
-                m.fight.players.remove(e.player.name)
+                m.fight.players.remove(e.player)
                 e.player.teleport(m.fight.exit)
             }
         }

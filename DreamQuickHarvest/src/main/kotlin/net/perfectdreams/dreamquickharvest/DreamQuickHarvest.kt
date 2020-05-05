@@ -28,6 +28,7 @@ import kotlin.experimental.and
 
 class DreamQuickHarvest : KotlinPlugin(), Listener {
 	val useRadiusHarvest = true
+	val radius = 16
 
 	override fun softEnable() {
 		super.softEnable()
@@ -120,7 +121,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		var xpBlockPlant = 0
 
-		if(material != null){
+		if (material != null){
 			xpBlockPlant = when(material){
 				Material.PUMPKIN -> 20
 				Material.MELON -> 20
@@ -155,93 +156,103 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (!player.canBreakAt(block.location, type))
 			return
 
+		// A gente deixa na mesma altitude porque não tem problema se está tudo no mesmo chunk
+		val distance = player.location.distanceSquared(block.location.apply { this.y = player.location.y })
+
+		// Player está distante, 2304 = 48 ^ 2
+		if (distance > 2304)
+			return
+
 		if (useRadiusHarvest) {
-			for (x in block.x - 7..block.x + 7) {
-				for (z in block.z - 7..block.z + 7) {
-					val farmBlock = block.world.getBlockAt(x, block.y, z)
+			val coords = mutableListOf<Pair<Int, Int>>()
+			for (x in block.x - 15..block.x + 15)
+				for (z in block.z - 15..block.z + 15)
+					coords.add(Pair(x, z))
 
-					if (farmBlock.location.isChunkLoaded && farmBlock.type == type && player.canBreakAt(farmBlock.location, type)) {
-						val damage = farmBlock.data
+			for ((x, z) in coords.sortedBy { Math.abs(it.first) + Math.abs(it.second) }) {
+				val farmBlock = block.world.getBlockAt(x, block.y, z)
 
-						val fullyGrown = when (type) {
-							Material.MELON -> true
-							Material.PUMPKIN -> true
-							Material.NETHER_WART -> damage == 3.toByte()
-							Material.BEETROOTS -> damage == 3.toByte()
-							else -> damage == 7.toByte()
-						}
+				if (farmBlock.location.isChunkLoaded && farmBlock.type == type && player.canBreakAt(farmBlock.location, type)) {
+					val damage = farmBlock.data
 
-						if (!fullyGrown)
-							continue
-
-						val itemStack = ItemStack(
-							when (type) {
-								Material.WHEAT -> Material.WHEAT
-								Material.NETHER_WART -> Material.NETHER_WART
-								Material.CARROTS -> Material.CARROT
-								Material.POTATOES -> Material.POTATO
-								Material.BEETROOTS -> Material.BEETROOT
-								else -> type
-							},
-							when (type) {
-								Material.WHEAT -> 1
-								Material.NETHER_WART -> DreamUtils.random.nextInt(2, 5 + fortuneLevel)
-								Material.CARROTS -> DreamUtils.random.nextInt(1, 5)
-								Material.POTATOES -> DreamUtils.random.nextInt(1, 5)
-								Material.BEETROOTS -> DreamUtils.random.nextInt(1, 5)
-								else -> 1
-							}
-						)
-
-						if (!player.inventory.canHoldItem(itemStack)) {
-							player.sendTitle(
-								"",
-								"§cVocê está com o inventário cheio!",
-								0,
-								60,
-								10
-							)
-							return
-						}
-
-						player.inventory.addItem(itemStack)
-
-						if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
-							val seed = DreamUtils.random.nextInt(0, 4)
-							if (seed != 0) {
-								val seedItemStack = ItemStack(Material.WHEAT_SEEDS, seed)
-
-								if (player.inventory.canHoldItem(seedItemStack)) {
-									player.inventory.addItem(seedItemStack)
-								} else {
-									player.sendTitle(
-										"",
-										"§cVocê está com o inventário cheio!",
-										0,
-										60,
-										10
-									)
-									return
-								}
-							}
-						}
-
-						val changeTo = when (type) {
-							Material.PUMPKIN, Material.MELON -> Material.AIR
-							else -> type
-						}
-
-						farmBlock.type = changeTo
-						if (type != Material.MELON && type != Material.PUMPKIN) {
-							val ageable = farmBlock.blockData as Ageable
-							ageable.age = 0
-							farmBlock.blockData = ageable
-						}
-
-						giveMcMMOHerbalismXP(player, block, type) // mcMMO EXP
-
-						player.world.spawnParticle(Particle.VILLAGER_HAPPY, farmBlock.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
+					val fullyGrown = when (type) {
+						Material.MELON -> true
+						Material.PUMPKIN -> true
+						Material.NETHER_WART -> damage == 3.toByte()
+						Material.BEETROOTS -> damage == 3.toByte()
+						else -> damage == 7.toByte()
 					}
+
+					if (!fullyGrown)
+						continue
+
+					val itemStack = ItemStack(
+						when (type) {
+							Material.WHEAT -> Material.WHEAT
+							Material.NETHER_WART -> Material.NETHER_WART
+							Material.CARROTS -> Material.CARROT
+							Material.POTATOES -> Material.POTATO
+							Material.BEETROOTS -> Material.BEETROOT
+							else -> type
+						},
+						when (type) {
+							Material.WHEAT -> 1
+							Material.NETHER_WART -> DreamUtils.random.nextInt(2, 5 + fortuneLevel)
+							Material.CARROTS -> DreamUtils.random.nextInt(1, 5)
+							Material.POTATOES -> DreamUtils.random.nextInt(1, 5)
+							Material.BEETROOTS -> DreamUtils.random.nextInt(1, 5)
+							else -> 1
+						}
+					)
+
+					if (!player.inventory.canHoldItem(itemStack)) {
+						player.sendTitle(
+							"",
+							"§cVocê está com o inventário cheio!",
+							0,
+							60,
+							10
+						)
+						return
+					}
+
+					player.inventory.addItem(itemStack)
+
+					if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
+						val seed = DreamUtils.random.nextInt(0, 4)
+						if (seed != 0) {
+							val seedItemStack = ItemStack(Material.WHEAT_SEEDS, seed)
+
+							if (player.inventory.canHoldItem(seedItemStack)) {
+								player.inventory.addItem(seedItemStack)
+							} else {
+								player.sendTitle(
+									"",
+									"§cVocê está com o inventário cheio!",
+									0,
+									60,
+									10
+								)
+								return
+							}
+						}
+					}
+
+					val changeTo = when (type) {
+						Material.PUMPKIN, Material.MELON -> Material.AIR
+						else -> type
+					}
+
+					farmBlock.type = changeTo
+					if (type != Material.MELON && type != Material.PUMPKIN) {
+						val ageable = farmBlock.blockData as Ageable
+						ageable.age = 0
+						farmBlock.blockData = ageable
+					}
+
+					giveMcMMOHerbalismXP(player, block, type) // mcMMO EXP
+
+					player.world.spawnParticle(Particle.VILLAGER_HAPPY, farmBlock.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
 				}
 			}
 		} else {
@@ -332,10 +343,19 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (!player.canBreakAt(block.location, block.type))
 			return
 
+		// A gente deixa na mesma altitude porque não tem problema se está tudo no mesmo chunk
+		val distance = player.location.distanceSquared(block.location.apply { this.y = player.location.y })
+
+		// Player está distante, 2304 = 48 ^ 2
+		if (distance > 2304)
+			return
+
 		val itemStack = ItemStack(Material.COCOA_BEANS, DreamUtils.random.nextInt(2, 4))
 
-		if (!player.inventory.canHoldItem(itemStack))
+		if (!player.inventory.canHoldItem(itemStack)) {
+			sendInventoryFullTitle(player)
 			return
+		}
 
 		player.inventory.addItem(itemStack)
 
@@ -381,6 +401,13 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (!player.canBreakAt(block.location, block.type))
 			return
 
+		// A gente deixa na mesma altitude porque não tem problema se está tudo no mesmo chunk
+		val distance = player.location.distanceSquared(block.location.apply { this.y = player.location.y })
+
+		// Player está distante, 2304 = 48 ^ 2
+		if (distance > 2304)
+			return
+
 		e.isCancelled = true
 
 		// Pegar a posição no topo da sugar cane
@@ -397,8 +424,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				Material.SUGAR_CANE, 1
 			)
 
-			if (!player.inventory.canHoldItem(itemStack))
+			if (!player.inventory.canHoldItem(itemStack)) {
+				sendInventoryFullTitle(player)
 				return
+			}
 
 			player.inventory.addItem(itemStack)
 
@@ -421,5 +450,15 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_WEST))
 		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH_EAST))
 		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_EAST))
+	}
+
+	fun sendInventoryFullTitle(player: Player) {
+		player.sendTitle(
+			"",
+			"§cVocê está com o inventário cheio!",
+			0,
+			60,
+			10
+		)
 	}
 }
