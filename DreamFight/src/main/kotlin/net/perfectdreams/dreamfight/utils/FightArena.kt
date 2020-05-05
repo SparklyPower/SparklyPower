@@ -476,6 +476,7 @@ class FightArena(var m: DreamFight) {
         p.inventory.leggings = leggings
         p.inventory.boots = boots
         p.inventory.addItem(sword)
+        p.inventory.setItemInOffHand(ItemStack(Material.SHIELD))
 
         if (modifiers.contains(FightModifier.SUPER_SPEED)) {
             p.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 1000000, 2))
