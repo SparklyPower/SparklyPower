@@ -116,7 +116,8 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		EntityType.ILLUSIONER,
 		EntityType.GHAST,
 		EntityType.HUSK,
-		EntityType.STRAY
+		EntityType.STRAY,
+		EntityType.SLIME
 	)
 
 	@EventHandler
