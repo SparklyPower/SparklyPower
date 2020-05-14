@@ -69,6 +69,9 @@ class DreamElevador : KotlinPlugin(), Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     fun onClick(e: PlayerInteractEvent) {
+        if (e.player.isSneaking)
+            return
+
         val clickedBlock = e.clickedBlock
 
         val material = clickedBlock?.type ?: return
@@ -86,12 +89,8 @@ class DreamElevador : KotlinPlugin(), Listener {
 
         e.isCancelled = true
 
-        if (action == Action.RIGHT_CLICK_BLOCK)
-            if (player.isSneaking)
-                handleDown(player, sign)
-            else
-                handleUp(player, sign)
-        else if (action == Action.LEFT_CLICK_BLOCK && !e.player.isSneaking) handleDown(player, sign)
+        if (action == Action.RIGHT_CLICK_BLOCK) handleUp(player, sign)
+        else if (action == Action.LEFT_CLICK_BLOCK) handleDown(player, sign)
     }
 
     fun handleUp(player: Player, sign: Sign) {
