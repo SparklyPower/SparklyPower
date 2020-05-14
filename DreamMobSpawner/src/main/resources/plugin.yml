@@ -1,0 +1,8 @@
+name: DreamMobSpawner
+main: net.perfectdreams.dreammobspawner.DreamMobSpawner
+version: 1.0-SNAPSHOT
+
+author: MrGaabriel
+
+softdepend: [DreamCore]
+api-version: 1.13
