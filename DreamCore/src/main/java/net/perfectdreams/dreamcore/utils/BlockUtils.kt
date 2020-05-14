@@ -7,9 +7,11 @@ import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack
 import org.bukkit.craftbukkit.v1_15_R1.util.CraftMagicNumbers
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.Entity
 import org.bukkit.inventory.ItemStack
 import java.util.*
 
@@ -28,15 +30,14 @@ object BlockUtils {
 		return s.block
 	}
 
-	fun getDropCount(enchantmentLevel: Int, block: Block): Int {
+	fun getDrops(block: Block, entity: Entity?, itemStack: ItemStack): List<ItemStack> {
 		val nmsWorld = (block.world as CraftWorld).handle
-		if (!block.type.name.contains("ORE")) {
-			return 1
-		}
-		// TODO: Fix
-        val nmsBlock = CraftMagicNumbers.getBlock(block.type)
-        // return nmsBlock.getDropCount(nmsBlock.blockData, enchantmentLevel, nmsWorld, BlockPosition(block.x, block.y, block.z), DreamUtils.SLOW_RANDOM)
-		return 1
+		val nmsBlock = CraftMagicNumbers.getBlock(block.type)
+
+		return net.minecraft.server.v1_15_R1.Block.getDrops(nmsBlock.blockData, nmsWorld, BlockPosition(block.x, block.y, block.z), null, (entity as? CraftEntity)?.handle, CraftItemStack.asNMSCopy(itemStack))
+			.map {
+				it.bukkitStack
+			}
 	}
 
 	@Deprecated("NMS now uses ItemStacks")

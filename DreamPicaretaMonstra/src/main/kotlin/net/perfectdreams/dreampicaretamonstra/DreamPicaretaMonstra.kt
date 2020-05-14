@@ -1,5 +1,6 @@
 package net.perfectdreams.dreampicaretamonstra
 
+import net.minecraft.server.v1_15_R1.BlockPosition
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
@@ -10,7 +11,12 @@ import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.block.Block
+import org.bukkit.craftbukkit.v1_15_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_15_R1.util.CraftMagicNumbers
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ExperienceOrb
 import org.bukkit.entity.Player
@@ -71,6 +77,16 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 		else isValidShovellingBlock(block)
 	}
 
+	fun getDrops(block: Block, entity: Entity?, itemStack: ItemStack): List<ItemStack> {
+		val nmsWorld = (block.world as CraftWorld).handle
+		val nmsBlock = CraftMagicNumbers.getBlock(block.type)
+
+		return net.minecraft.server.v1_15_R1.Block.getDrops(nmsBlock.blockData, nmsWorld, BlockPosition(block.x, block.y, block.z), null, (entity as? CraftEntity)?.handle, CraftItemStack.asNMSCopy(itemStack))
+			.map {
+				it.bukkitStack
+			}
+	}
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onBreak(e: BlockBreakEvent) {
 		val inHand = e.player.inventory.itemInMainHand
@@ -106,19 +122,17 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 				if ((below || location.blockY > e.player.location.y - 1.0) && location.block.type !== Material.AIR && location.block.type !== Material.BEDROCK && isValidForHeldItem(heldItemType, location.block)) {
 					val center = location.add(0.0, 0.5, 0.0)
 					if (PlayerUtils.canBreakAt(location, e.player, location.block.type)) {
-						val count = BlockUtils.getDropCount(enchantmentLevel, location.block)
+						val drops = getDrops(location.block, e.player, inHand)
 						val exp = BlockUtils.getExpCount(location.block, enchantmentLevel)
-						val mat = location.block.type // Bloco original
-						var material = BlockUtils.getDropType(mat) // Novo tipo
-
-						if (mat == Material.STONE)
-							material = Material.COBBLESTONE
-						if (mat == Material.GRASS_BLOCK)
-							material = Material.DIRT
 
 						location.block.type = Material.AIR
 
-						location.world.dropItemNaturally(location, ItemStack(if (isSilky) mat else material, if (isSilky) 1 else count))
+						drops.forEach {
+							location.world.dropItemNaturally(
+								location,
+								it
+							)
+						}
 
 						if (exp > 0 && !isSilky) {
 							val orb = location.block.world.spawnEntity(center, EntityType.EXPERIENCE_ORB) as ExperienceOrb
@@ -144,7 +158,7 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 							e.player.inventory.removeItem(inHand)
 						}
 
-						if (mat.name.contains("ORE")) {
+						if (location.block.type != Material.AIR) {
 							if (shouldPlay) {
 								e.player.world.playSound(broken.location, Sound.ENTITY_PLAYER_LEVELUP, 0.15f, 1.25f)
 								shouldPlay = false
