@@ -1,0 +1,5 @@
+name: DreamReparar
+main: net.perfectdreams.dreamreparar.DreamReparar
+version: 1.0.0
+softdepend: ["DreamCore"]
+api-version: 1.13
