@@ -15,6 +15,7 @@ dependencies {
     compile(files("../libs/patched_1.15.1.jar"))
     compile(files("../libs/DreamCore-shadow.jar"))
     compile(files("../libs/mcMMO.jar"))
+    compile(project(":DreamMochilas"))
 }
 
 tasks.withType<KotlinCompile> {

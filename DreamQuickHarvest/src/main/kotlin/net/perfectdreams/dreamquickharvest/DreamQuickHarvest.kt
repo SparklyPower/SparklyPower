@@ -3,15 +3,16 @@ package net.perfectdreams.dreamquickharvest
 import com.gmail.nossr50.api.ExperienceAPI
 import com.gmail.nossr50.mcMMO
 import com.okkero.skedule.BukkitDispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import net.perfectdreams.dreamcore.utils.DreamUtils
-import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.canHoldItem
+import com.okkero.skedule.SynchronizationContext
+import com.okkero.skedule.schedule
+import kotlinx.coroutines.*
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
-import net.perfectdreams.dreamcore.utils.registerEvents
+import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
+import net.perfectdreams.dreammochilas.dao.Mochila
+import net.perfectdreams.dreammochilas.listeners.InventoryListener
+import net.perfectdreams.dreammochilas.tables.Mochilas
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.block.Block
@@ -23,11 +24,13 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.concurrent.TimeUnit
 import kotlin.experimental.and
 
 class DreamQuickHarvest : KotlinPlugin(), Listener {
-	val useRadiusHarvest = true
 	val radius = 16
 
 	override fun softEnable() {
@@ -46,6 +49,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (e.player.isSneaking)
 			return
 
+		val plugin = this
+
 		if (e.block.type == Material.WHEAT // Crops
 			|| e.block.type == Material.NETHER_WART
 			|| e.block.type == Material.CARROTS
@@ -58,8 +63,31 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 			e.isCancelled = true
 
-			GlobalScope.launch(BukkitDispatcher(this)) {
-				doQuickHarvestOnCrop(e.player, e.block, e.block.type, e.player.inventory.itemInMainHand?.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS) ?: 0)
+			GlobalScope.launch(BukkitDispatcher(plugin)) {
+				val (inventoryTarget, mochila) = getInventoryTarget(e)
+
+				if (mochila != null)
+					InventoryListener.savingMochilas.add(mochila.id.value)
+
+				doQuickHarvestOnCrop(
+					e.player,
+					e.block,
+					e.block.type,
+					e.player.inventory.itemInMainHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS),
+					inventoryTarget
+				)
+
+				if (mochila != null) {
+					val base64Mochila = inventoryTarget.toBase64(1)
+
+					withContext(BukkitDispatcher(plugin, true)) {
+						transaction(Databases.databaseNetwork) {
+							mochila.content = base64Mochila
+						}
+					}
+
+					InventoryListener.savingMochilas.remove(mochila.id.value)
+				}
 			}
 			return
 		}
@@ -71,7 +99,26 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			GlobalScope.launch(BukkitDispatcher(this)) {
-				doQuickHarvestOnCocoa(e, e.player, e.block)
+				val (inventoryTarget, mochila) = getInventoryTarget(e)
+
+				if (mochila != null)
+					InventoryListener.savingMochilas.add(mochila.id.value)
+
+				val ttl = System.nanoTime()
+				doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget)
+				println("Took ${System.nanoTime() - ttl}ns to harvest cocoa")
+
+				if (mochila != null) {
+					val base64Mochila = inventoryTarget.toBase64(1)
+
+					withContext(BukkitDispatcher(plugin, true)) {
+						transaction(Databases.databaseNetwork) {
+							mochila.content = base64Mochila
+						}
+					}
+
+					InventoryListener.savingMochilas.remove(mochila.id.value)
+				}
 			}
 			return
 		}
@@ -80,10 +127,62 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			GlobalScope.launch(BukkitDispatcher(this)) {
-				doQuickHarvestOnSugarCane(e, e.player, e.block)
+				val (inventoryTarget, mochila) = getInventoryTarget(e)
+
+				if (mochila != null)
+					InventoryListener.savingMochilas.add(mochila.id.value)
+
+				doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget)
+
+				if (mochila != null) {
+					val base64Mochila = inventoryTarget.toBase64(1)
+
+					withContext(BukkitDispatcher(plugin, true)) {
+						transaction(Databases.databaseNetwork) {
+							mochila.content = base64Mochila
+						}
+					}
+
+					InventoryListener.savingMochilas.remove(mochila.id.value)
+				}
 			}
 			return
 		}
+	}
+
+	suspend fun getInventoryTarget(e: BlockBreakEvent): Pair<Inventory, Mochila?> {
+		var inventoryTarget: Inventory = e.player.inventory
+		var mochila: Mochila? = null
+		val item = e.player.inventory.itemInMainHand
+
+		if (item.type == Material.CARROT_ON_A_STICK) {
+			val isMochilaItem = item.getStoredMetadata("isMochila")?.toBoolean() ?: false
+			val mochilaId = item.getStoredMetadata("mochilaId")?.toLong()
+
+			if (isMochilaItem) {
+				mochila = withContext(BukkitDispatcher(this, true)) {
+					println(Bukkit.isPrimaryThread().toString())
+					val mochila = transaction(Databases.databaseNetwork) {
+						Mochila.find { Mochilas.id eq mochilaId }
+							.firstOrNull()
+					}
+
+					if (mochila == null) {
+						e.player.sendMessage("§cEssa mochila não existe!")
+						return@withContext null
+					}
+
+					mochila
+				}
+
+				println(Bukkit.isPrimaryThread().toString())
+
+				if (mochila != null)
+					inventoryTarget = mochila.createMochilaInventory()
+			}
+		}
+
+		return Pair(inventoryTarget, mochila)
 	}
 
 	fun shouldCancelCropEvent(e: BlockBreakEvent, block: Block): Boolean {
@@ -115,7 +214,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		return true
 	}
 
-	fun giveMcMMOHerbalismXP(player: Player, block: Block, material: Material? = null){
+	fun giveMcMMOHerbalismXP(player: Player, block: Block, material: Material? = null) {
 		if (mcMMO.getPlaceStore().isTrue(block.state))
 			return
 
@@ -143,7 +242,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		ExperienceAPI.addXP(player, "herbalism", xpValue)
 	}
 
-	suspend fun doQuickHarvestOnCrop(player: Player, block: Block, type: Material, fortuneLevel: Int) {
+	suspend fun doQuickHarvestOnCrop(player: Player, block: Block, type: Material, fortuneLevel: Int, inventory: Inventory) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
 
@@ -163,174 +262,111 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (distance > 2304)
 			return
 
-		if (useRadiusHarvest) {
-			val coords = mutableListOf<Pair<Int, Int>>()
-			for (x in block.x - 15..block.x + 15)
-				for (z in block.z - 15..block.z + 15)
-					coords.add(Pair(x, z))
+		val coords = mutableListOf<Pair<Int, Int>>()
+		for (x in block.x - 15..block.x + 15)
+			for (z in block.z - 15..block.z + 15)
+				coords.add(Pair(x, z))
 
-			for ((x, z) in coords.sortedBy { Math.abs(it.first) + Math.abs(it.second) }) {
-				val farmBlock = block.world.getBlockAt(x, block.y, z)
+		for ((x, z) in coords.sortedBy { Math.abs(it.first) + Math.abs(it.second) }) {
+			val farmBlock = block.world.getBlockAt(x, block.y, z)
 
-				if (farmBlock.location.isChunkLoaded && farmBlock.type == type && player.canBreakAt(farmBlock.location, type)) {
-					val damage = farmBlock.data
+			if (farmBlock.location.isChunkLoaded && farmBlock.type == type && player.canBreakAt(
+					farmBlock.location,
+					type
+				)
+			) {
+				val damage = farmBlock.data
 
-					val fullyGrown = when (type) {
-						Material.MELON -> true
-						Material.PUMPKIN -> true
-						Material.NETHER_WART -> damage == 3.toByte()
-						Material.BEETROOTS -> damage == 3.toByte()
-						else -> damage == 7.toByte()
-					}
+				val fullyGrown = when (type) {
+					Material.MELON -> true
+					Material.PUMPKIN -> true
+					Material.NETHER_WART -> damage == 3.toByte()
+					Material.BEETROOTS -> damage == 3.toByte()
+					else -> damage == 7.toByte()
+				}
 
-					if (!fullyGrown)
-						continue
+				if (!fullyGrown)
+					continue
 
-					val itemStack = ItemStack(
-						when (type) {
-							Material.WHEAT -> Material.WHEAT
-							Material.NETHER_WART -> Material.NETHER_WART
-							Material.CARROTS -> Material.CARROT
-							Material.POTATOES -> Material.POTATO
-							Material.BEETROOTS -> Material.BEETROOT
-							else -> type
-						},
-						when (type) {
-							Material.WHEAT -> 1
-							Material.NETHER_WART -> DreamUtils.random.nextInt(2, 5 + fortuneLevel)
-							Material.CARROTS -> DreamUtils.random.nextInt(1, 5)
-							Material.POTATOES -> DreamUtils.random.nextInt(1, 5)
-							Material.BEETROOTS -> DreamUtils.random.nextInt(1, 5)
-							else -> 1
-						}
-					)
-
-					if (!player.inventory.canHoldItem(itemStack)) {
-						player.sendTitle(
-							"",
-							"§cVocê está com o inventário cheio!",
-							0,
-							60,
-							10
-						)
-						return
-					}
-
-					player.inventory.addItem(itemStack)
-
-					if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
-						val seed = DreamUtils.random.nextInt(0, 4)
-						if (seed != 0) {
-							val seedItemStack = ItemStack(Material.WHEAT_SEEDS, seed)
-
-							if (player.inventory.canHoldItem(seedItemStack)) {
-								player.inventory.addItem(seedItemStack)
-							} else {
-								player.sendTitle(
-									"",
-									"§cVocê está com o inventário cheio!",
-									0,
-									60,
-									10
-								)
-								return
-							}
-						}
-					}
-
-					val changeTo = when (type) {
-						Material.PUMPKIN, Material.MELON -> Material.AIR
+				val itemStack = ItemStack(
+					when (type) {
+						Material.WHEAT -> Material.WHEAT
+						Material.NETHER_WART -> Material.NETHER_WART
+						Material.CARROTS -> Material.CARROT
+						Material.POTATOES -> Material.POTATO
+						Material.BEETROOTS -> Material.BEETROOT
 						else -> type
+					},
+					when (type) {
+						Material.WHEAT -> 1
+						Material.NETHER_WART -> DreamUtils.random.nextInt(2, 5 + fortuneLevel)
+						Material.CARROTS -> DreamUtils.random.nextInt(1, 5)
+						Material.POTATOES -> DreamUtils.random.nextInt(1, 5)
+						Material.BEETROOTS -> DreamUtils.random.nextInt(1, 5)
+						else -> 1
 					}
+				)
 
-					farmBlock.type = changeTo
-					if (type != Material.MELON && type != Material.PUMPKIN) {
-						val ageable = farmBlock.blockData as Ageable
-						ageable.age = 0
-						farmBlock.blockData = ageable
-					}
-
-					giveMcMMOHerbalismXP(player, block, type) // mcMMO EXP
-
-					player.world.spawnParticle(Particle.VILLAGER_HAPPY, farmBlock.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
+				if (!inventory.canHoldItem(itemStack)) {
+					player.sendTitle(
+						"",
+						"§cVocê está com o inventário cheio!",
+						0,
+						60,
+						10
+					)
+					return
 				}
-			}
-		} else {
-			val damage = block.data
 
-			val fullyGrown = when (type) {
-				Material.MELON -> true
-				Material.PUMPKIN -> true
-				Material.NETHER_WART -> damage == 3.toByte()
-				Material.BEETROOTS -> damage == 3.toByte()
-				else -> damage == 7.toByte()
-			}
+				inventory.addItem(itemStack)
 
-			if (!fullyGrown)
-				return
+				if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
+					val seed = DreamUtils.random.nextInt(0, 4)
+					if (seed != 0) {
+						val seedItemStack = ItemStack(Material.WHEAT_SEEDS, seed)
 
-			val itemStack = ItemStack(
-				when (type) {
-					Material.WHEAT -> Material.WHEAT
-					Material.NETHER_WART -> Material.NETHER_WART
-					Material.CARROTS -> Material.CARROT
-					Material.POTATOES -> Material.POTATO
-					Material.BEETROOTS -> Material.BEETROOT
+						if (inventory.canHoldItem(seedItemStack)) {
+							inventory.addItem(seedItemStack)
+						} else {
+							player.sendTitle(
+								"",
+								"§cVocê está com o inventário cheio!",
+								0,
+								60,
+								10
+							)
+							return
+						}
+					}
+				}
+
+				val changeTo = when (type) {
+					Material.PUMPKIN, Material.MELON -> Material.AIR
 					else -> type
-				},
-				when (type) {
-					Material.WHEAT -> 1
-					Material.NETHER_WART -> DreamUtils.random.nextInt(2, 5 + fortuneLevel)
-					Material.CARROTS -> DreamUtils.random.nextInt(1, 5)
-					Material.POTATOES -> DreamUtils.random.nextInt(1, 5)
-					Material.BEETROOTS -> DreamUtils.random.nextInt(1, 5)
-					else -> 1
 				}
-			)
 
-			if (!player.inventory.canHoldItem(itemStack))
-				return
-
-			player.inventory.addItem(itemStack)
-
-			if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
-				val seed = DreamUtils.random.nextInt(0, 4)
-				if (seed != 0) {
-					val seedItemStack = ItemStack(Material.WHEAT_SEEDS, seed)
-
-					if (player.inventory.canHoldItem(seedItemStack)) {
-						player.inventory.addItem(seedItemStack)
-					} else {
-						block.world.dropItemNaturally(block.location, seedItemStack)
-					}
+				farmBlock.type = changeTo
+				if (type != Material.MELON && type != Material.PUMPKIN) {
+					val ageable = farmBlock.blockData as Ageable
+					ageable.age = 0
+					farmBlock.blockData = ageable
 				}
+
+				giveMcMMOHerbalismXP(player, block, type) // mcMMO EXP
+
+				player.world.spawnParticle(
+					Particle.VILLAGER_HAPPY,
+					farmBlock.location.add(0.5, 0.5, 0.5),
+					3,
+					0.5,
+					0.5,
+					0.5
+				)
 			}
-
-			val changeTo = when (type) {
-				Material.PUMPKIN, Material.MELON -> Material.AIR
-				else -> type
-			}
-
-			block.type = changeTo
-			if (type != Material.MELON && type != Material.PUMPKIN) {
-				val ageable = block.blockData as Ageable
-				ageable.age = 0
-				block.blockData = ageable
-			}
-
-			giveMcMMOHerbalismXP(player, block, type) // mcMMO EXP
-
-			player.world.spawnParticle(Particle.VILLAGER_HAPPY, block.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
-
-			delay(100)
-			doQuickHarvestOnCrop(player, block.getRelative(BlockFace.NORTH), type, fortuneLevel)
-			doQuickHarvestOnCrop(player, block.getRelative(BlockFace.SOUTH), type, fortuneLevel)
-			doQuickHarvestOnCrop(player, block.getRelative(BlockFace.EAST), type, fortuneLevel)
-			doQuickHarvestOnCrop(player, block.getRelative(BlockFace.WEST), type, fortuneLevel)
 		}
 	}
 
-	suspend fun doQuickHarvestOnCocoa(e: BlockBreakEvent, player: Player, block: Block) {
+	suspend fun doQuickHarvestOnCocoa(e: BlockBreakEvent, player: Player, block: Block, inventory: Inventory) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
 
@@ -352,12 +388,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		val itemStack = ItemStack(Material.COCOA_BEANS, DreamUtils.random.nextInt(2, 4))
 
-		if (!player.inventory.canHoldItem(itemStack)) {
+		if (!inventory.canHoldItem(itemStack)) {
 			sendInventoryFullTitle(player)
 			return
 		}
 
-		player.inventory.addItem(itemStack)
+		inventory.addItem(itemStack)
 
 		val rotation = block.data and 3
 
@@ -374,21 +410,21 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		delay(100)
 
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH))
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH))
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.EAST))
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.WEST))
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH_EAST))
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH_WEST))
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH_EAST))
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH_WEST))
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.UP))
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.DOWN))
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH), inventory)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH), inventory)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.EAST), inventory)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.WEST), inventory)
+		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH_EAST), inventory)
+		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH_WEST), inventory)
+		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH_EAST), inventory)
+		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH_WEST), inventory)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.UP), inventory)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.DOWN), inventory)
 
 		giveMcMMOHerbalismXP(player, block) // mcMMO EXP
 	}
 
-	suspend fun doQuickHarvestOnSugarCane(e: BlockBreakEvent, player: Player, block: Block) {
+	suspend fun doQuickHarvestOnSugarCane(e: BlockBreakEvent, player: Player, block: Block, inventory: Inventory) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
 
@@ -424,12 +460,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				Material.SUGAR_CANE, 1
 			)
 
-			if (!player.inventory.canHoldItem(itemStack)) {
+			if (!inventory.canHoldItem(itemStack)) {
 				sendInventoryFullTitle(player)
 				return
 			}
 
-			player.inventory.addItem(itemStack)
+			inventory.addItem(itemStack)
 
 			giveMcMMOHerbalismXP(player, bottom) // mcMMO EXP
 
@@ -442,14 +478,14 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		delay(100)
 
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH))
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH))
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.EAST))
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.WEST))
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH_WEST))
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_WEST))
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH_EAST))
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_EAST))
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH), inventory)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH), inventory)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.EAST), inventory)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.WEST), inventory)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH_WEST), inventory)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_WEST), inventory)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH_EAST), inventory)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_EAST), inventory)
 	}
 
 	fun sendInventoryFullTitle(player: Player) {

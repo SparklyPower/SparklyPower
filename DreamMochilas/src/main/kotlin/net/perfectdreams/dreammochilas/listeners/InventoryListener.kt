@@ -36,10 +36,12 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class InventoryListener(val m: DreamMochilas) : Listener {
-    val savingMochilas = Collections.newSetFromMap(ConcurrentHashMap<Long, Boolean>())
-    val savingUntrackedMochilas = Collections.newSetFromMap(ConcurrentHashMap<Player, Boolean>())
-    val loadedMochilaInventories = ConcurrentHashMap<Long, Inventory>()
-    val trackingMochilasPreTransactionsEvents = Collections.newSetFromMap(ConcurrentHashMap<PreTransactionEvent, Boolean>())
+    companion object {
+        val savingMochilas = Collections.newSetFromMap(ConcurrentHashMap<Long, Boolean>())
+        val savingUntrackedMochilas = Collections.newSetFromMap(ConcurrentHashMap<Player, Boolean>())
+        val loadedMochilaInventories = ConcurrentHashMap<Long, Inventory>()
+        val trackingMochilasPreTransactionsEvents = Collections.newSetFromMap(ConcurrentHashMap<PreTransactionEvent, Boolean>())
+    }
 
     val chestShopSpamClickProtectorMap by lazy {
         val protector = PreTransactionEvent.getHandlerList().registeredListeners.first {
