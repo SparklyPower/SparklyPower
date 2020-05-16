@@ -62,6 +62,12 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
                 return@schedule
             }
 
+            if (sender.name.equals(name, true)) {
+                switchContext(SynchronizationContext.SYNC)
+                sender.sendMessage("${DreamCash.PREFIX} §cQual é a graça de dar pesadelos para você mesmo? Você só vai continuar com a mesma quantidade!")
+                return@schedule
+            }
+
             var yourCashInfo = transaction(Databases.databaseNetwork) {
                 CashInfo.findById(sender.uniqueId)
             }
