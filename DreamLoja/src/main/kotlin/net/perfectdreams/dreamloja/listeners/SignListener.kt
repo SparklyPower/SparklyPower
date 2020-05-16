@@ -150,7 +150,7 @@ class SignListener(val m: DreamLoja) : Listener {
                 val diff = System.currentTimeMillis() - shopVote.receivedAt
 
                 if (300_000 > diff) {
-                    e.player.sendMessage("${DreamLoja.PREFIX} §cVocê tem que esperar ${DateUtils.formatDateDiff(Calendar.getInstance(), Calendar.getInstance().apply { this.timeInMillis = shopVote.receivedAt })} antes de tirar o seu voto! Que tal conversar com o proprietário da loja para ver se vocês resolvem as suas diferenças?")
+                    e.player.sendMessage("${DreamLoja.PREFIX} §cVocê tem que esperar ${DateUtils.formatDateDiff(shopVote.receivedAt + 300_000L)} antes de tirar o seu voto! Que tal conversar com o proprietário da loja para ver se vocês resolvem as suas diferenças?")
                     return@schedule
                 }
 
