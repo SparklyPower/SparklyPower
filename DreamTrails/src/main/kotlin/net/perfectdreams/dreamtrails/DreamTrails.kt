@@ -20,6 +20,7 @@ import org.bukkit.Particle
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.LeatherArmorMeta
+import org.bukkit.potion.PotionEffectType
 import java.io.File
 import java.util.*
 
@@ -111,7 +112,7 @@ class DreamTrails : KotlinPlugin() {
 					playerTrails.remove(it.uniqueId)
 				}
 
-				for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission(USE_TRAILS_PERMISSION) }.filter { it.location.world.name != "Quiz" }) {
+				for (player in Bukkit.getOnlinePlayers().asSequence().filter { it.location.world.name != "Quiz" }.filter { it.hasPermission(USE_TRAILS_PERMISSION) }.filter { hasParticlesEnabled(it) }) {
 					val trailData = playerTrails[player.uniqueId] ?: continue
 					val activeHalo = trailData.activeHalo
 					if (activeHalo != null) {
@@ -148,6 +149,8 @@ class DreamTrails : KotlinPlugin() {
 			}
 		}
 	}
+
+	fun hasParticlesEnabled(player: Player) = !player.hasPotionEffect(PotionEffectType.INVISIBILITY)
 
 	override fun softDisable() {
 		super.softDisable()
