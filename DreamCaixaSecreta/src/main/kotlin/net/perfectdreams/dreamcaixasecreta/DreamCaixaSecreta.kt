@@ -275,7 +275,9 @@ class DreamCaixaSecreta : KotlinPlugin() {
 			RandomItem(
 				ItemStack(
 					Material.CHAINMAIL_CHESTPLATE
-				), chance
+				).rename("§6§lJetpack")
+					.storeMetadata("isJetpack", "true")
+				, chance
 			)
 		)
 		chance = 3.0
