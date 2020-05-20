@@ -1,0 +1,5 @@
+name: KotlinRuntime
+main: net.perfectdreams.kotlinruntime.KotlinRuntimeBukkit
+version: 1.0.0
+load: STARTUP
+api-version: 1.13
