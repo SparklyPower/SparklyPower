@@ -36,7 +36,10 @@ jobs:
       run: java -Dpaperclip.patchonly=true -jar tuinity-paperclip.jar
       
     - name: Copy Patched JAR
-      run: cp cache/patched_1.15.1.jar libs/
+      run: cp cache/patched_1.15.2.jar libs/
+    
+    - name: Clone Patched JAR becase some plugins are dumb
+      run: cp cache/patched_1.15.2.jar libs/patched_1.15.1.jar
     
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
