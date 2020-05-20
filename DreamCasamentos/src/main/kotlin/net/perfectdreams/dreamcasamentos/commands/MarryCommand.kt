@@ -14,8 +14,8 @@ import net.perfectdreams.dreamcasamentos.dao.Request
 import net.perfectdreams.dreamcasamentos.tables.Adoptions
 import net.perfectdreams.dreamcasamentos.utils.MarriageParty
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreammeninaapi.utils.extensions.artigo
-import net.perfectdreams.dreammeninaapi.utils.extensions.girl
+import net.perfectdreams.dreamcore.utils.extensions.artigo
+import net.perfectdreams.dreamcore.utils.extensions.girl
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -42,6 +42,13 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
 
         if (sender == player) {
             sender.sendMessage("$PREFIX Você não pode casar consigo mesm${sender.artigo}, bobinh${sender.artigo}!")
+            return
+        }
+
+        val selfMarriage = m.getMarriageFor(sender)
+
+        if (selfMarriage != null) {
+            sender.sendMessage("$PREFIX §cVocê já está casado! Se você quer casar com outra pessoa, use §6/marry divorciar§c para divorciar!")
             return
         }
 
