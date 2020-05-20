@@ -30,6 +30,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.concurrent.TimeUnit
 import kotlin.experimental.and
 
+@OptIn(InternalCoroutinesApi::class)
 class DreamQuickHarvest : KotlinPlugin(), Listener {
 	val radius = 16
 
@@ -44,7 +45,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	@InternalCoroutinesApi
 	fun onBreak(e: BlockBreakEvent) {
 		if (e.player.isSneaking)
 			return
