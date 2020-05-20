@@ -12,6 +12,7 @@ import com.greatmancode.craftconomy3.groups.WorldGroupsManager
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamchat.commands.*
+import net.perfectdreams.dreamchat.dao.ChatUser
 import net.perfectdreams.dreamchat.dao.DiscordAccount
 import net.perfectdreams.dreamchat.dao.EventMessage
 import net.perfectdreams.dreamchat.listeners.ChatListener
@@ -91,6 +92,12 @@ class DreamChat : KotlinPlugin() {
 		INSTANCE = this
 		dataFolder.mkdirs()
 
+		// Fuck this
+		val knownCommands = Bukkit.getCommandMap().knownCommands
+		knownCommands.filter { it.value.label == "dreamchat" || it.value.label == "ignore" || it.value.label == "mute" || it.value.label == "nick" || it.value.label == "querotag" || it.value.label == "quicreply" || it.value.label == "tell" }.forEach {
+			knownCommands.remove(it.key)
+		}
+
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
 				ChatUsers,
@@ -120,19 +127,25 @@ class DreamChat : KotlinPlugin() {
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
 			while (true) {
 				// UPDATE ONLINE PLAYER TIME
-				Bukkit.getOnlinePlayers().forEach { player ->
+				switchContext(SynchronizationContext.SYNC)
+				// Running in a async thread may cause issues
+				val onlinePlayers = Bukkit.getOnlinePlayers().toList()
+				switchContext(SynchronizationContext.ASYNC)
+
+				onlinePlayers.forEach { player ->
 					transaction(Databases.databaseNetwork) {
-						ChatUsers.upsert(ChatUsers.id) {
-							it[ChatUsers.playOneMinute] = player.getStatistic(Statistic.PLAY_ONE_MINUTE)
-						}
+						val chatUser = ChatUser.findById(player.uniqueId) ?: ChatUser.new(player.uniqueId) {}
+
+						chatUser.playOneMinute = player.getStatistic(Statistic.PLAY_ONE_MINUTE)
 					}
 				}
 
 				// GET TOP PLAYERS
 				oldestPlayers = transaction(Databases.databaseNetwork) {
-					ChatUsers.selectAll().orderBy(ChatUsers.playOneMinute, false)
+					ChatUsers.selectAll()
+						.orderBy(ChatUsers.playOneMinute, false)
 						.limit(10)
-						.map { it[ChatUsers._id] to (it[ChatUsers.playOneMinute] ?: 0) }
+						.map { it[ChatUsers.id].value to (it[ChatUsers.playOneMinute] ?: 0) }
 				}
 				waitFor(20 * 15)
 			}

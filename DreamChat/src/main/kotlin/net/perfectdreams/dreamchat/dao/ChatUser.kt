@@ -11,4 +11,5 @@ class ChatUser(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var nickname by ChatUsers.nickname
     var tag by ChatUsers.tag
+    var playOneMinute by ChatUsers.playOneMinute
 }
