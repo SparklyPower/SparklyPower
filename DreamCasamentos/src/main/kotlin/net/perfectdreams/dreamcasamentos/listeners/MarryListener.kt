@@ -4,7 +4,7 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcasamentos.DreamCasamentos
 import net.perfectdreams.dreamcasamentos.DreamCasamentos.Companion.PREFIX
-import net.perfectdreams.dreammeninaapi.MeninaAPI
+import net.perfectdreams.dreamcore.utils.MeninaAPI
 import org.bukkit.Bukkit
 import org.bukkit.Particle
 import org.bukkit.entity.Player
