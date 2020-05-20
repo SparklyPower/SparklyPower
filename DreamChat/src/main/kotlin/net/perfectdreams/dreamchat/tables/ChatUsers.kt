@@ -15,4 +15,5 @@ object ChatUsers : IdTable<UUID>() {
 
 	val nickname = text("nickname").nullable()
 	val tag = text("tag").nullable()
+	val playOneMinute = integer("play_one_minute").nullable().index()
 }

@@ -26,11 +26,12 @@ import net.perfectdreams.dreamchat.utils.chatevent.EventoChatHandler
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.discord.DiscordWebhook
+import net.perfectdreams.dreamcore.utils.exposed.upsert
 import org.bukkit.Bukkit
+import org.bukkit.Statistic
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.entity.Player
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.util.*
@@ -48,7 +49,7 @@ class DreamChat : KotlinPlugin() {
 		var BOT_NAME = "§ePantufa"
 		var LORITTA_NAME = "§b§lLoritta §3§lMorenitta"
 		val CHAT_WEBHOOK by lazy {
-			DiscordWebhook(INSTANCE.getConfig().getString("relay-chat-webhook-url"))
+			DiscordWebhook(INSTANCE.getConfig().getString("relay-chat-webhook-url") ?: "")
 		}
 		lateinit var INSTANCE: DreamChat
 		const val LAST_CHAT_WINNER_PATH = "last-chat-winner"
@@ -61,6 +62,7 @@ class DreamChat : KotlinPlugin() {
 	var topPlayerSkills = mutableMapOf<PrimarySkillType, String?>()
 	var lockedTells = WeakHashMap<Player, String>()
 	var quickReply = WeakHashMap<Player, Player>()
+	var oldestPlayers = listOf<Pair<UUID, Int>>()
 
 	val eventoChat = EventoChatHandler()
 
@@ -114,6 +116,27 @@ class DreamChat : KotlinPlugin() {
 		loadResponses()
 
 		eventoChat.randomMessagesEvent.loadDatabaseMessages()
+
+		scheduler().schedule(this, SynchronizationContext.ASYNC) {
+			while (true) {
+				// UPDATE ONLINE PLAYER TIME
+				Bukkit.getOnlinePlayers().forEach { player ->
+					transaction(Databases.databaseNetwork) {
+						ChatUsers.upsert(ChatUsers.id) {
+							it[ChatUsers.playOneMinute] = player.getStatistic(Statistic.PLAY_ONE_MINUTE)
+						}
+					}
+				}
+
+				// GET TOP PLAYERS
+				oldestPlayers = transaction(Databases.databaseNetwork) {
+					ChatUsers.selectAll().orderBy(ChatUsers.playOneMinute, false)
+						.limit(10)
+						.map { it[ChatUsers._id] to (it[ChatUsers.playOneMinute] ?: 0) }
+				}
+				waitFor(20 * 15)
+			}
+		}
 
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
 			while (true) {
@@ -207,7 +230,7 @@ class DreamChat : KotlinPlugin() {
 		reloadConfig()
 		replacers.clear()
 
-		val yamlReplacers = config.getConfigurationSection("replacers").getValues(false)
+		val yamlReplacers = config.getConfigurationSection("replacers")!!.getValues(false)
 
 		yamlReplacers.forEach {
 			replacers[it.key.toRegex(RegexOption.IGNORE_CASE)] = it.value as String
