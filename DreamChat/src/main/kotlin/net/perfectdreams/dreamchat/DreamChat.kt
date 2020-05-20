@@ -92,7 +92,7 @@ class DreamChat : KotlinPlugin() {
 		dataFolder.mkdirs()
 
 		transaction(Databases.databaseNetwork) {
-			SchemaUtils.create(
+			SchemaUtils.createMissingTablesAndColumns(
 				ChatUsers,
 				EventMessages
 			)
