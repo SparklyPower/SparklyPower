@@ -2,6 +2,8 @@ package net.perfectdreams.dreamcasamentos
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.gson.Gson
+import com.okkero.skedule.SynchronizationContext
+import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcasamentos.commands.MarryCommand
 import net.perfectdreams.dreamcasamentos.dao.Adoption
 import net.perfectdreams.dreamcasamentos.dao.Marriage
@@ -12,11 +14,13 @@ import net.perfectdreams.dreamcasamentos.tables.Marriages
 import net.perfectdreams.dreamcasamentos.utils.MarriageParty
 import net.perfectdreams.dreamcore.utils.*
 import org.bukkit.Bukkit
+import org.bukkit.Particle
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 class DreamCasamentos : KotlinPlugin() {
@@ -25,9 +29,9 @@ class DreamCasamentos : KotlinPlugin() {
     val requests = mutableListOf<Request>()
 
     val marriedUsers = Caffeine.newBuilder()
-            .expireAfterWrite(30, TimeUnit.MINUTES)
-            .build<Player, Player>()
-            .asMap()
+        .expireAfterWrite(30, TimeUnit.MINUTES)
+        .build<Player, Optional<Player>>()
+        .asMap()
 
     companion object {
         const val PREFIX = "§8[§d§lCasamento§8]§e"
@@ -41,8 +45,8 @@ class DreamCasamentos : KotlinPlugin() {
 
         transaction(Databases.databaseServer) {
             SchemaUtils.createMissingTablesAndColumns(
-                    Marriages,
-                    Adoptions
+                Marriages,
+                Adoptions
             )
         }
 
@@ -58,6 +62,39 @@ class DreamCasamentos : KotlinPlugin() {
         }
 
         config = Gson().fromJson(file.readText(), Config::class.java)
+
+        // Spawn hearts around married players
+        schedule {
+            while (true) {
+                switchContext(SynchronizationContext.SYNC)
+                val onlinePlayers = Bukkit.getOnlinePlayers().toList()
+                switchContext(SynchronizationContext.ASYNC)
+
+                val checkedPlayers = mutableListOf<Player>()
+
+                onlinePlayers.forEach {
+                    val optionalMarriedPlayer = marriedUsers.getOrPut(it) {
+                        Optional.ofNullable(
+                            Bukkit.getPlayer(getMarriageFor(it)?.getPartnerOf(it))
+                        )
+                    }
+
+                    switchContext(SynchronizationContext.SYNC)
+
+                    optionalMarriedPlayer.ifPresent { marriedPlayer ->
+                        if (!checkedPlayers.contains(marriedPlayer) && marriedPlayer.isOnline && marriedPlayer.world == it.world && 128 >= it.location.distanceSquared(marriedPlayer.location)) {
+                            it.world.spawnParticle(Particle.HEART, it.location.clone().add(0.0, 1.0, 0.0), 3, 2.0, 2.0, 2.0)
+                            marriedPlayer.world.spawnParticle(Particle.HEART, marriedPlayer.location.clone().add(0.0, 1.0, 0.0), 3, 2.0, 2.0, 2.0)
+
+                            checkedPlayers.add(it)
+                            checkedPlayers.add(marriedPlayer)
+                        }
+                    }
+                }
+
+                waitFor(20)
+            }
+        }
     }
 
     fun getShipName(player1: String, player2: String): String {
