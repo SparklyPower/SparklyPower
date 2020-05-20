@@ -15,7 +15,6 @@ import org.bukkit.inventory.EquipmentSlot
 import java.util.*
 
 class MarryListener(val m: DreamCasamentos) : Listener {
-
     @EventHandler
     fun onKiss(e: PlayerInteractEntityEvent) {
         if (e.hand != EquipmentSlot.HAND)

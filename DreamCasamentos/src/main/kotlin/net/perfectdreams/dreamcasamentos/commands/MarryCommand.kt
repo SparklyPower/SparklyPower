@@ -324,6 +324,9 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
 
             val offlinePlayer = Bukkit.getOfflinePlayer(partnerId) // Sempre assumir que o player está offline para não dar erro se o cara não tiver online
             Bukkit.broadcastMessage("$PREFIX §b${sender.name}§e se divorciou de §b${offlinePlayer.name}§e! :(")
+
+            m.marriedUsers.remove(sender)
+            m.marriedUsers.remove(partner)
         }
     }
 
