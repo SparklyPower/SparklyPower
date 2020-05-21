@@ -1,7 +1,7 @@
 package net.perfectdreams.dreammini.utils
 
 import net.perfectdreams.dreammini.DreamMini
-import org.apache.commons.lang3.StringUtils
+import org.apache.commons.text.similarity.LevenshteinDistance
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -32,7 +32,7 @@ class UnknownCommandListener(val m: DreamMini) : Listener {
 				continue
 
 			val theCmd = test.key
-			val now = StringUtils.getLevenshteinDistance(cmd, theCmd)
+			val now = LevenshteinDistance().apply(cmd, theCmd)
 
 			if (distance <= now)
 				continue
