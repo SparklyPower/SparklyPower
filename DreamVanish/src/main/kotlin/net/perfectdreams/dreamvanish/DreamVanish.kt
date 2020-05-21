@@ -29,7 +29,7 @@ class DreamVanish : KotlinPlugin() {
 					val isVanished = DreamVanishAPI.isVanished(it)
 					val isQueroTrabalhar = DreamVanishAPI.isQueroTrabalhar(it)
 
-					if (isVanished || isQueroTrabalhar)
+					if (isVanished && isQueroTrabalhar)
 						it.sendActionBar("§aVocê está invisível e no modo quero trabalhar!")
 					else if (isVanished)
 						it.sendActionBar("§aVocê está invisível! Vanish Poder O2~")
