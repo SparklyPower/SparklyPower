@@ -112,9 +112,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                     }
 
                     val r = preparePreTransactionEventMethod.invoke(null as Any?, sign, player, action) as PreTransactionEvent?
-
-                    if (r == null)
-                        return@schedule
+                        ?: return@schedule
 
                     val mochilaInventory = mochila.createMochilaInventory()
                     r.clientInventory = mochilaInventory
