@@ -13,10 +13,10 @@ object VanishCommand : DSLCommandBase<DreamVanish> {
         executes {
             if (DreamVanishAPI.isVanished(this.player)) {
                 DreamVanishAPI.setVanishedStatus(this.player, false)
-                player.sendMessage("§aVocê agora está §linvisível§a!")
+                player.sendMessage("§aVocê agora está §lvísível§a!")
             } else {
                 DreamVanishAPI.setVanishedStatus(this.player, true)
-                player.sendMessage("§aVocê agora está §lvísível§a!")
+                player.sendMessage("§aVocê agora está §linvisível§a!")
             }
         }
     }
