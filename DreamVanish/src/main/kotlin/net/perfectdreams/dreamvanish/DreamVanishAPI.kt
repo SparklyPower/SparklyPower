@@ -16,6 +16,13 @@ object DreamVanishAPI {
 
     fun setVanishedStatus(player: Player, enabled: Boolean) {
         if (enabled) {
+            Bukkit.getOnlinePlayers().forEach {
+                if (!it.hasPermission("dreamvanish.bypassvanish")) {
+                    // Can't bypass the vanish status, so...
+                    it.hidePlayer(DreamVanish.INSTANCE, player)
+                }
+            }
+
             vanishedPlayers.add(player)
         } else {
             Bukkit.getOnlinePlayers().forEach {

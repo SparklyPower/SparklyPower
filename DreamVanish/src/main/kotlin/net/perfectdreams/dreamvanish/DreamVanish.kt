@@ -31,7 +31,7 @@ class DreamVanish : KotlinPlugin() {
 
 					if (isVanished || isQueroTrabalhar)
 						it.sendActionBar("§aVocê está invisível e no modo quero trabalhar!")
-					if (isVanished)
+					else if (isVanished)
 						it.sendActionBar("§aVocê está invisível! Vanish Poder O2~")
 					else if (isQueroTrabalhar)
 						it.sendActionBar("§aVocê está no modo quero trabalhar! Apenas trabalho, sem diversão hein grrr")
