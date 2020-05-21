@@ -39,8 +39,6 @@ class DreamMini : KotlinPlugin(), Listener {
 	var currentLeftSchedule: CoroutineTask? = null
 	var tpaManager = TpaManager()
 
-	val vanished = mutableSetOf<Player>()
-	val queroTrabalhar = mutableSetOf<Player>()
 	val dropsBlacklist = mutableMapOf<Player, Inventory>()
 	val phantomWhitelist = mutableSetOf<UUID>()
 	val weatherBlacklist = mutableSetOf<UUID>()
@@ -106,8 +104,6 @@ class DreamMini : KotlinPlugin(), Listener {
 		registerCommand(LixeiraCommand(this))
 		registerCommand(DreamMiniCommand(this))
 
-		registerCommand(QueroTrabalharCommand(this))
-		registerCommand(VanishCommand(this))
 		registerCommand(TopCommand(this))
 		registerCommand(SpeedCommand(this))
 		registerCommand(FlyCommand(this))
@@ -220,12 +216,6 @@ class DreamMini : KotlinPlugin(), Listener {
 			fireworkMeta.addEffect(fireworkEffect)
 
 			firework.fireworkMeta = fireworkMeta
-		}
-
-		for (player in server.onlinePlayers) {
-			if (vanished.contains(player)) {
-				e.player.hidePlayer(this, player)
-			}
 		}
 	}
 

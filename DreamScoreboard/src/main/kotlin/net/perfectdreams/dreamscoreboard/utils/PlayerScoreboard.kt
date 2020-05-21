@@ -4,6 +4,7 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamscoreboard.DreamScoreboard
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import net.perfectdreams.dreamvote.DreamVote
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -141,7 +142,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 
 	private fun setupStaff(_idx: Int): Int {
 		var idx = _idx
-		val staffs = onlinePlayers().filter { it.hasPermission("pocketdreams.soustaff") }
+		val staffs = onlinePlayers().filter { it.hasPermission("pocketdreams.soustaff") && !DreamVanishAPI.isQueroTrabalhar(it) }
 
 		phoenix.setText("§6➦ §e§lStaff Online", idx--)
 
@@ -338,7 +339,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 
 			if (player.hasPermission("dreamscoreboard.glowing")) {
 				t.color = when {
-					m.coloredGlow.containsKey(player.uniqueId) -> m.coloredGlow[player.uniqueId]
+					m.coloredGlow.containsKey(player.uniqueId) -> m.coloredGlow[player.uniqueId]!!
 					player.hasPermission("group.dono") -> ChatColor.GREEN
 					player.hasPermission("group.admin") -> ChatColor.RED
 					player.hasPermission("group.moderador") -> ChatColor.DARK_AQUA

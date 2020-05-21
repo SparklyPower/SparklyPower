@@ -12,7 +12,7 @@ dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile(project(":DreamCash"))
     compile("com.destroystokyo.paper:paper:1.13-R0.1-SNAPSHOT")
-    compile("net.perfectdreams.dreamcore:DreamCore:1.0-SNAPSHOT")
+    compile(files("../libs/DreamCore-shadow.jar"))
     compile("net.perfectdreams.dreamcorreios:DreamCorreios:1.0-SNAPSHOT")
     compile("net.perfectdreams.dreamcasamentos:DreamCasamentos:1.0-SNAPSHOT")
     compile(project(":DreamClubes"))
@@ -21,7 +21,7 @@ dependencies {
     compile("net.milkbowl.vault:VaultAPI:1.6")
     compile("com.greatmancode:craftconomy3:3.3.1")
     compile(project(":DreamVote"))
-    compile("net.perfectdreams.dreammini:DreamMini:1.0-SNAPSHOT")
+    compile(project(":DreamVanish"))
     compile("net.luckperms:api:5.0")
 }
 

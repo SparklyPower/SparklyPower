@@ -6,12 +6,9 @@ import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamchat.tables.ChatUsers
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.ExecutedCommandException
 import net.perfectdreams.dreamcore.utils.exposed.upsert
-import net.perfectdreams.dreamcore.utils.generateCommandInfo
-import net.perfectdreams.dreamcore.utils.scheduler
-import net.perfectdreams.dreamcore.utils.stripColorCode
-import net.perfectdreams.dreamcore.utils.translateColorCodes
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -38,7 +35,7 @@ class QueroTagCommand(val m: DreamChat) : SparklyCommand(arrayOf("querotag"), "d
 		}
 
 		val colorizedUsername = newUsername.translateColorCodes()
-		val realLength = colorizedUsername.stripColorCode().length
+		val realLength = colorizedUsername.stripColors()!!.length
 
 		if (realLength > 16)
 			throw ExecutedCommandException("§cSua nova tag é grande demais!")

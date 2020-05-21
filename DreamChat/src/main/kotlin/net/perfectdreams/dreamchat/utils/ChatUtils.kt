@@ -12,7 +12,7 @@ import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.network.socket.SocketUtils
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreammini.DreamMini
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.boss.BarColor
@@ -24,7 +24,7 @@ object ChatUtils {
 	fun beautifyMessage(sender: Player, str: String): String {
 		var message = str
 
-		for (player in Bukkit.getOnlinePlayers().filterNot { DreamMini.INSTANCE.queroTrabalhar.contains(it) }) {
+		for (player in Bukkit.getOnlinePlayers().filterNot { DreamVanishAPI.isQueroTrabalhar(it) }) {
 			val regex = Regex(".*\\b${player.name}\\b.*")
 			if (message.matches(regex)) {
 				message = message.replace(Regex("\\b${player.name}\\b", RegexOption.IGNORE_CASE), "§3${player.displayName}§f")
@@ -162,8 +162,8 @@ object ChatUtils {
 	}
 
 	fun sendTell(sender: Player, receiver: Player, message: String) {
-		val fromCanBeSeen = sender.displayName.stripColorCode().contains(sender.name)
-		val toCanBeSeen = receiver.displayName.stripColorCode().contains(receiver.name)
+		val fromCanBeSeen = sender.displayName.stripColors()!!.contains(sender.name)
+		val toCanBeSeen = receiver.displayName.stripColors()!!.contains(receiver.name)
 		val isIgnoringTheSender = DreamChat.INSTANCE.userData.getStringList("ignore.${receiver.uniqueId}").contains(sender.uniqueId.toString())
 
 		val fromName = if (!fromCanBeSeen) {

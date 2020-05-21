@@ -9,7 +9,7 @@ import net.perfectdreams.dreamcore.utils.commands.annotation.InjectArgument
 import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
 import net.perfectdreams.dreamcore.utils.generateCommandInfo
 import net.perfectdreams.dreammeninaapi.utils.extensions.artigo
-import net.perfectdreams.dreammini.DreamMini
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import kotlin.collections.set
@@ -52,7 +52,7 @@ class TellCommand(val m: DreamChat) : AbstractCommand("tell", listOf("msg", "pm"
 		if (receiver == null)
 			throw ExecutedCommandException("§cJogador não existe ou está offline!")
 
-		if (DreamMini.INSTANCE.queroTrabalhar.contains(receiver)) {
+		if (DreamVanishAPI.isQueroTrabalhar(receiver)) {
 			receiver.sendMessage("§c${sender.displayName}§c tentou te enviar §e${message}§c!")
 			throw ExecutedCommandException("§cJogador não existe ou está offline!")
 		}

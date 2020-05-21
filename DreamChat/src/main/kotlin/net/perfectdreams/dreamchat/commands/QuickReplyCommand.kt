@@ -8,10 +8,11 @@ import net.perfectdreams.dreamcore.utils.commands.annotation.ArgumentType
 import net.perfectdreams.dreamcore.utils.commands.annotation.InjectArgument
 import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
 import net.perfectdreams.dreamcore.utils.generateCommandInfo
-import net.perfectdreams.dreammini.DreamMini
+import net.perfectdreams.dreamvanish.DreamVanish
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.entity.Player
 
-class QuickReplyCommand(val m: DreamChat) : AbstractCommand("quicreply", listOf("r")) {
+class QuickReplyCommand(val m: DreamChat) : AbstractCommand("quickreply", listOf("r")) {
 	@Subcommand
 	fun root(p0: Player) {
 		p0.sendMessage(
@@ -35,7 +36,7 @@ class QuickReplyCommand(val m: DreamChat) : AbstractCommand("quicreply", listOf(
 		if (!receiver.isOnline)
 			throw ExecutedCommandException("§cInfelizmente o player que estava falando com você não está mais online...")
 
-		if (DreamMini.INSTANCE.queroTrabalhar.contains(receiver)) {
+		if (DreamVanishAPI.isQueroTrabalhar(receiver)) {
 			receiver.sendMessage("§c${p0.displayName}§c tentou te enviar §e${message}§c!")
 			throw ExecutedCommandException("§cInfelizmente o player que estava falando com você não está mais online...")
 		}

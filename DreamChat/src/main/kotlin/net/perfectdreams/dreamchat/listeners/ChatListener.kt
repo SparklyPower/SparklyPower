@@ -394,7 +394,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "${player.name} ")
 			var toDisplay = player.displayName
 
-			if (!player.displayName.stripColorCode().contains(player.name)) {
+			if (!player.displayName.stripColors()!!.contains(player.name)) {
 				toDisplay = player.displayName + " §a(§b${player.name}§a)§r"
 			}
 
@@ -521,7 +521,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			DreamChat.CHAT_WEBHOOK.send(
 				DiscordMessage(
 					username = player.name,
-					content = message.stripColorCode().replace(Regex("\\\\+@"), "@").replace("@", "@\u200B"),
+					content = message.stripColors()!!.replace(Regex("\\\\+@"), "@").replace("@", "@\u200B"),
 					avatar = "https://sparklypower.net/api/v1/render/avatar?name=${player.name}&scale=16"
 				)
 			)

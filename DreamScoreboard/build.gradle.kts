@@ -15,6 +15,7 @@ dependencies {
     compile(files("../libs/DreamCore-shadow.jar"))
     compile(project(":DreamClubes"))
     compile(project(":DreamVote"))
+    compile(project(":DreamVanish"))
 }
 
 tasks.withType<KotlinCompile> {
