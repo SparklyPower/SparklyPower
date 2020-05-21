@@ -1,7 +1,6 @@
 package net.perfectdreams.dreamvanish
 
 import org.bukkit.Bukkit
-import org.bukkit.craftbukkit.v1_13_R1.entity.CraftPlayer
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffectType
 import java.util.*
