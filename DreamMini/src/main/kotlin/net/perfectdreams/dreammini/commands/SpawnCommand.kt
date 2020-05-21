@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.utils.commands.ExecutedCommandException
 import net.perfectdreams.dreamcore.utils.commands.annotation.ArgumentType
 import net.perfectdreams.dreamcore.utils.commands.annotation.InjectArgument
 import net.perfectdreams.dreamcore.utils.commands.annotation.SubcommandPermission
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreammini.DreamMini
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -15,7 +16,7 @@ class SpawnCommand(val m: DreamMini) : SparklyCommand(arrayOf("spawn")) {
 
 	@Subcommand
 	fun spawn(sender: Player) {
-		sender.teleport(DreamCore.dreamConfig.spawn)
+		sender.teleportToServerSpawn()
 	}
 
 	@Subcommand(["teleport"])
@@ -24,7 +25,7 @@ class SpawnCommand(val m: DreamMini) : SparklyCommand(arrayOf("spawn")) {
 		if (player == null)
 			throw ExecutedCommandException("§cPlayer está offline!")
 
-		player.teleport(DreamCore.dreamConfig.spawn)
+		player.teleportToServerSpawn()
 
 		sender.sendMessage("§6§lTeleportado!")
 	}
