@@ -13,6 +13,7 @@ dependencies {
     compile(kotlin("stdlib-jdk8"))
     compile(files("../libs/patched_1.15.1.jar"))
     compile("net.perfectdreams.dreamcore:DreamCore:1.0-SNAPSHOT")
+    compile(project(":DreamVanish"))
 }
 
 tasks.withType<KotlinCompile> {

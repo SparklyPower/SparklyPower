@@ -13,6 +13,7 @@ import net.perfectdreams.dreamtrails.listeners.MoveListener
 import net.perfectdreams.dreamtrails.utils.ColoredArmorData
 import net.perfectdreams.dreamtrails.utils.Halo
 import net.perfectdreams.dreamtrails.utils.PlayerTrailsData
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
@@ -150,7 +151,7 @@ class DreamTrails : KotlinPlugin() {
 		}
 	}
 
-	fun hasParticlesEnabled(player: Player) = !player.hasPotionEffect(PotionEffectType.INVISIBILITY)
+	fun hasParticlesEnabled(player: Player) = !DreamVanishAPI.isVanishedOrInvisible(player)
 
 	override fun softDisable() {
 		super.softDisable()
