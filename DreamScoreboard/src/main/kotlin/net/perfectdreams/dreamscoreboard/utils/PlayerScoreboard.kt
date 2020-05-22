@@ -265,19 +265,6 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 	}
 
 	private fun setupTeams() {
-		/* val mainScoreboard = Bukkit.getScoreboardManager().mainScoreboard
-
-		for (team in mainScoreboard.teams) {
-			val t = phoenix.scoreboard.getTeam(team.name) ?: phoenix.scoreboard.registerNewTeam(team.name)
-			t.prefix = team.prefix
-			t.suffix = team.suffix
-			t.displayName = team.displayName
-			t.color = team.color
-			for (player in team.players) {
-				t.addPlayer(player)
-			}
-		} */
-
 		for (player in Bukkit.getOnlinePlayers()) {
 			val tabPrefixColor = when {
 				m.coloredGlow.containsKey(player.uniqueId) -> m.coloredGlow[player.uniqueId]
@@ -364,6 +351,14 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 
 			if (!t.hasPlayer(player))
 				t.addPlayer(player)
+
+			if (player.hasPermission("sparklypower.soustaff")) {
+				val staffTeam = phoenix.scoreboard.getTeam("0_SparklyStaff") ?: phoenix.scoreboard.registerNewTeam("0_SparklyStaff")
+				staffTeam.setCanSeeFriendlyInvisibles(true)
+
+				if (!staffTeam.hasPlayer(player))
+					staffTeam.addPlayer(player)
+			}
 		}
 
 		player.scoreboard = phoenix.scoreboard

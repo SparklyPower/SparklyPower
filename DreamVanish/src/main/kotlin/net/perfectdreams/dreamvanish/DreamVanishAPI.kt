@@ -2,6 +2,7 @@ package net.perfectdreams.dreamvanish
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.util.*
 
@@ -22,11 +23,15 @@ object DreamVanishAPI {
                 }
             }
 
+            player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 20 * 86400, 0, true, false))
+
             vanishedPlayers.add(player)
         } else {
             Bukkit.getOnlinePlayers().forEach {
                 it.showPlayer(DreamVanish.INSTANCE, player)
             }
+
+            player.removePotionEffect(PotionEffectType.INVISIBILITY)
 
             vanishedPlayers.remove(player)
         }
