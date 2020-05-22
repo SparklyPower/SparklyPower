@@ -35,12 +35,12 @@ class LorittaAssinaResponse : RegExResponse() {
 				if (targetBlock.type != Material.AIR) { // Olhando para um bloco sólido...
 					if (targetBlock.getRelative(BlockFace.UP).type == Material.AIR)	{ // E o bloco acima é ar!
 						signBlock = targetBlock.getRelative(BlockFace.UP)
-						if (!event.player.canPlaceAt(signBlock.location, Material.SIGN))  {
+						if (!event.player.canPlaceAt(signBlock.location, Material.OAK_SIGN))  {
 							ChatUtils.sendResponseAsLoritta(player, "§b${player.displayName}§a, eu não consegui colocar uma placa aonde você está...")
 							return@schedule
 						}
 
-						signBlock.type = Material.SIGN
+						signBlock.type = Material.OAK_SIGN
 						val face = LocationUtils.yawToFace((player.location.yaw + 90) % 360, true).oppositeFace
 						val blockData = signBlock.blockData as org.bukkit.block.data.type.Sign
 						blockData.rotation = face
@@ -48,7 +48,7 @@ class LorittaAssinaResponse : RegExResponse() {
 					} else { // Se o de cima não for ar, então o usuário quer assinar em uma parede!
 						val face = LocationUtils.yawToFace((player.location.yaw + 90) % 360, true).oppositeFace
 						val emptySpace = targetBlock.getRelative(face)
-						if (!event.player.canPlaceAt(emptySpace.location, Material.SIGN))  {
+						if (!event.player.canPlaceAt(emptySpace.location, Material.OAK_SIGN))  {
 							ChatUtils.sendResponseAsLoritta(player, "§b${player.displayName}§a, eu não consegui colocar uma placa aonde você está...")
 							return@schedule
 						}
@@ -80,7 +80,7 @@ class LorittaAssinaResponse : RegExResponse() {
 
 	fun hasSign(player: Player): Boolean {
 		player.inventory.forEach {
-			if (it != null && it.type == Material.SIGN) {
+			if (it != null && it.type == Material.OAK_SIGN) {
 				return true
 			}
 		}
@@ -89,7 +89,7 @@ class LorittaAssinaResponse : RegExResponse() {
 
 	fun removeAnySign(player: Player) {
 		player.inventory.forEach {
-			if (it != null && it.type == Material.SIGN) {
+			if (it != null && it.type == Material.OAK_SIGN) {
 				it.amount -= 1
 				return
 			}

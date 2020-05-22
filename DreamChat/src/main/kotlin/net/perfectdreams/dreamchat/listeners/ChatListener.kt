@@ -66,8 +66,8 @@ class ChatListener(val m: DreamChat) : Listener {
 				val result = ChatUsers.select { ChatUsers.id eq e.player.uniqueId }.firstOrNull() ?: return@transaction
 				val nickname = result[ChatUsers.nickname] ?: return@transaction
 
-				e.player.displayName = nickname
-				e.player.playerListName = nickname
+				e.player.setDisplayName(nickname)
+				e.player.setPlayerListName(nickname)
 			}
 		}
 	}
@@ -232,8 +232,8 @@ class ChatListener(val m: DreamChat) : Listener {
 				transaction(Databases.databaseNetwork) {
 					chatUser.nickname = null
 				}
-				e.player.displayName = null
-				e.player.playerListName = null
+				e.player.setDisplayName(null)
+				e.player.setPlayerListName(null)
 			}
 
 			if (chatUser.tag != null && !e.player.hasPermission("dreamchat.querotag")) {

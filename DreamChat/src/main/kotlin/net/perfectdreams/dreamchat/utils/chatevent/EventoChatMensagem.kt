@@ -41,15 +41,21 @@ class EventoChatMensagem : IEventoChat {
 
 		if (lastRecord != null && lastRecord > timeElapsed) {
 			// Novo recorde, woo!
-			Bukkit.broadcastMessage("§c(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ §aNOVO RECORDE! §c✧ﾟ･: *ヽ(◕ヮ◕ヽ)".centralize())
-			val player = Bukkit.getOfflinePlayer(currentMessage.bestWinner)
+			val bestWinner = currentMessage.bestWinner
+			if (bestWinner != null) {
+				Bukkit.broadcastMessage("§c(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ §aNOVO RECORDE! §c✧ﾟ･: *ヽ(◕ヮ◕ヽ)".centralize())
+				val player = Bukkit.getOfflinePlayer(bestWinner)
 
-			val faster = lastRecord.toDouble() / timeElapsed.toDouble()
-			Bukkit.broadcastMessage("§b${winner.displayName}§r§a bateu o recorde de §b${player?.name ?: "???"}§r§a! §3(${faster}x mais rápido!)".centralize())
+				val faster = lastRecord.toDouble() / timeElapsed.toDouble()
+				Bukkit.broadcastMessage(
+					"§b${winner.displayName}§r§a bateu o recorde de §b${player?.name
+						?: "???"}§r§a! §3(${faster}x mais rápido!)".centralize()
+				)
 
-			val seconds = lastRecord / 1000L
-			val milli = lastRecord % 1000L
-			Bukkit.broadcastMessage(("§6Antigo recorde: §e$seconds segundos§6 e §e$milli milissegundos§6!").centralize())
+				val seconds = lastRecord / 1000L
+				val milli = lastRecord % 1000L
+				Bukkit.broadcastMessage(("§6Antigo recorde: §e$seconds segundos§6 e §e$milli milissegundos§6!").centralize())
+			}
 		}
 	}
 

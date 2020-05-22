@@ -13,9 +13,9 @@ class SignListener(val m: DreamChat) : Listener {
 
             m.replacers.forEach {
                 if (it.value.length == 1) { // Emojis normalmente são apenas um caractere
-                    line = line.replace(it.key, "§f" + it.value + "§0")
+                    line = line?.replace(it.key, "§f" + it.value + "§0") ?: ""
                 } else {
-                    line = line.replace(it.key, it.value)
+                    line = line?.replace(it.key, it.value) ?: ""
                 }
             }
 

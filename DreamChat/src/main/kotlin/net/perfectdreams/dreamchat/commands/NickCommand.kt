@@ -24,8 +24,8 @@ class NickCommand(val m: DreamChat) : AbstractCommand("nick", listOf("nickname")
 		if (newUsername == "off" || newUsername == "tirar" || newUsername == "remover") {
 			sender.sendMessage("§aSeu nickname personalizado foi retirado!")
 
-			sender.displayName = null
-			sender.playerListName = null
+			sender.setDisplayName(null)
+			sender.setPlayerListName(null)
 
 			scheduler().schedule(m, SynchronizationContext.ASYNC) {
 				transaction {
@@ -43,8 +43,8 @@ class NickCommand(val m: DreamChat) : AbstractCommand("nick", listOf("nickname")
 		if (realLength > 32)
 			throw ExecutedCommandException("§cSeu novo nickname é grande demais!")
 
-		sender.displayName = colorizedUsername
-		sender.playerListName = colorizedUsername
+		sender.setDisplayName(colorizedUsername)
+		sender.setPlayerListName(colorizedUsername)
 
 		sender.sendMessage("§aSeu nickname foi alterado para \"${colorizedUsername}§r§a\"!")
 
