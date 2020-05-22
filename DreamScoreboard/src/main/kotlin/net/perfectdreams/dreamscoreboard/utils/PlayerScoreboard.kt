@@ -191,27 +191,36 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 			val notEnoughPlayers = events.filter { it.requiredPlayers > Bukkit.getOnlinePlayers().size }
 			for (ev in hasPlayers.sortedBy { (it.delayBetween + it.lastTime) - System.currentTimeMillis() }) {
 				val diff = (ev.delayBetween + ev.lastTime) - System.currentTimeMillis()
-				var fancy = ""
-				if (diff >= (60000 * 60)) {
-					val minutes = ((diff / (1000 * 60)) % 60)
-					val hours = ((diff / (1000 * 60 * 60)) % 24)
-					fancy = String.format("%dh%dm",
+
+				if (0 >= diff) {
+					var fancy = ""
+					if (diff >= (60000 * 60)) {
+						val minutes = ((diff / (1000 * 60)) % 60)
+						val hours = ((diff / (1000 * 60 * 60)) % 24)
+						fancy = String.format(
+							"%dh%dm",
 							hours,
 							minutes
-					)
-				} else if (diff >= 60000) {
-					fancy = String.format("%dm",
+						)
+					} else if (diff >= 60000) {
+						fancy = String.format(
+							"%dm",
 							TimeUnit.MILLISECONDS.toMinutes(diff),
 							TimeUnit.MILLISECONDS.toSeconds(diff) -
 									TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(diff))
-					)
-				} else {
-					fancy = String.format("%ds",
+						)
+					} else {
+						fancy = String.format(
+							"%ds",
 							TimeUnit.MILLISECONDS.toSeconds(diff) -
 									TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(diff))
-					)
+						)
+					}
+					phoenix.setText("§d" + ev.eventName + " (" + fancy + ")", idx--)
+				} else {
+					// It will start soon!!
+					phoenix.setText("§d" + ev.eventName, idx--)
 				}
-				phoenix.setText("§d" + ev.eventName + " (" + fancy + ")", idx--)
 			}
 			for (ev in notEnoughPlayers.sortedBy { it.requiredPlayers }) {
 				val requiredCount = ev.requiredPlayers - Bukkit.getOnlinePlayers().size

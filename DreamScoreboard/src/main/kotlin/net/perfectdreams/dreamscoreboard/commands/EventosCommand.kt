@@ -25,27 +25,36 @@ object EventosCommand : DSLCommandBase<DreamScoreboard> {
             val notEnoughPlayers = upcomingEvents.filter { it.requiredPlayers > Bukkit.getOnlinePlayers().size }
             for (ev in hasPlayers.sortedBy { (it.delayBetween + it.lastTime) - System.currentTimeMillis() }) {
                 val diff = (ev.delayBetween + ev.lastTime) - System.currentTimeMillis()
-                var fancy = ""
-                if (diff >= (60000 * 60)) {
-                    val minutes = ((diff / (1000 * 60)) % 60)
-                    val hours = ((diff / (1000 * 60 * 60)) % 24)
-                    fancy = String.format("%dh%dm",
-                        hours,
-                        minutes
-                    )
-                } else if (diff >= 60000) {
-                    fancy = String.format("%dm",
-                        TimeUnit.MILLISECONDS.toMinutes(diff),
-                        TimeUnit.MILLISECONDS.toSeconds(diff) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(diff))
-                    )
+
+                if (0 >= diff) {
+                    var fancy = ""
+                    if (diff >= (60000 * 60)) {
+                        val minutes = ((diff / (1000 * 60)) % 60)
+                        val hours = ((diff / (1000 * 60 * 60)) % 24)
+                        fancy = String.format(
+                            "%dh%dm",
+                            hours,
+                            minutes
+                        )
+                    } else if (diff >= 60000) {
+                        fancy = String.format(
+                            "%dm",
+                            TimeUnit.MILLISECONDS.toMinutes(diff),
+                            TimeUnit.MILLISECONDS.toSeconds(diff) -
+                                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(diff))
+                        )
+                    } else {
+                        fancy = String.format(
+                            "%ds",
+                            TimeUnit.MILLISECONDS.toSeconds(diff) -
+                                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(diff))
+                        )
+                    }
+                    sender.sendMessage("§d" + ev.eventName + " (" + fancy + ")")
                 } else {
-                    fancy = String.format("%ds",
-                        TimeUnit.MILLISECONDS.toSeconds(diff) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(diff))
-                    )
+                    // It will start soon!!
+                    sender.sendMessage("§d" + ev.eventName)
                 }
-                sender.sendMessage("§d" + ev.eventName + " (" + fancy + ")")
             }
             for (ev in notEnoughPlayers.sortedBy { it.requiredPlayers }) {
                 val requiredCount = ev.requiredPlayers - Bukkit.getOnlinePlayers().size
