@@ -49,6 +49,7 @@ dependencies {
     implementation("org.apache.commons:commons-text:1.8")
     compileOnly("com.greatmancode:craftconomy3:3.3.1")
     compileOnly("me.lucko.luckperms:luckperms-api:4.3")
+    testCompile(files("../libs/patched_1.15.1.jar"))
     testCompile("org.junit.jupiter:junit-jupiter-api:5.3.0-M1")
     testCompile("org.junit.jupiter:junit-jupiter-engine:5.3.0-M1")
     testCompile("io.mockk:mockk:1.9")
