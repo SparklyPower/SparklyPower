@@ -7,6 +7,7 @@ import net.perfectdreams.dreamfight.utils.FightArena
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamfight.event.EventoFight
+import net.perfectdreams.dreamfight.handlers.TagListener
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
 
@@ -34,6 +35,7 @@ class DreamFight : KotlinPlugin() {
         // conf.save()
 
         registerEvents(FightListener(this))
+        registerEvents(TagListener())
 
         if (userData.contains("Fight")) {
             fight.lobby = userData.getLocation("Fight.Lobby")!!

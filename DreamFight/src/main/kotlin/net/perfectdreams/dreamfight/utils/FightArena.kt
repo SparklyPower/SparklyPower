@@ -3,17 +3,17 @@ package net.perfectdreams.dreamfight.utils
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
-import net.perfectdreams.dreamcore.utils.InstantFirework
-import net.perfectdreams.dreamcore.utils.balance
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamfight.DreamFight
-import net.perfectdreams.dreamcore.utils.chance
 import net.perfectdreams.dreamcore.utils.extensions.girl
 import net.perfectdreams.dreamcore.utils.extensions.healAndFeed
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
-import net.perfectdreams.dreamcore.utils.scheduler
 import org.bukkit.*
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.PotionMeta
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
@@ -431,45 +431,78 @@ class FightArena(var m: DreamFight) {
             leggings = ItemStack(Material.IRON_LEGGINGS)
             boots = ItemStack(Material.IRON_BOOTS)
 
-            if (modifiers.contains(FightModifier.FULL_DIAMOND)) { // helmet = new ItemStackBuilder(Material.DIAMOND_HELMET).build();
+            if (modifiers.contains(FightModifier.FULL_DIAMOND)) {
                 helmet = ItemStack(Material.DIAMOND_HELMET)
                 chestplate = ItemStack(Material.DIAMOND_CHESTPLATE)
                 leggings = ItemStack(Material.DIAMOND_LEGGINGS)
                 boots = ItemStack(Material.DIAMOND_BOOTS)
             }
 
+            if (modifiers.contains(FightModifier.THORNS_STRATEGY)) {
+                helmet.addUnsafeEnchantment(Enchantment.THORNS, 4)
+                chestplate.addUnsafeEnchantment(Enchantment.THORNS, 4)
+                leggings.addUnsafeEnchantment(Enchantment.THORNS, 4)
+                boots.addUnsafeEnchantment(Enchantment.THORNS, 4)
+            }
+
             sword = ItemStack(Material.IRON_SWORD)
+
+            if (modifiers.contains(FightModifier.KNOCKBACK)) {
+                sword.addUnsafeEnchantment(Enchantment.KNOCKBACK, 2)
+            }
         }
-        if (modifiers.contains(FightModifier.DIAMOND_SWORD)) { // sword = new ItemStackBuilder(Material.DIAMOND_SWORD).build();
+        if (modifiers.contains(FightModifier.DIAMOND_SWORD)) {
             sword = ItemStack(Material.DIAMOND_SWORD)
         }
-        if (modifiers.contains(FightModifier.KNOCK_STICK)) { // sword = new ItemStackBuilder(Material.STICK).buildMeta().withEnchant(Enchantment.KNOCKBACK, 4, true).ItemStack().build();
+        if (modifiers.contains(FightModifier.KNOCK_STICK)) {
+            sword = ItemStack(Material.STICK)
+                .rename("§4§lSuper Palito")
+                .apply {
+                    addUnsafeEnchantment(Enchantment.KNOCKBACK, 4)
+                }
         }
         if (modifiers.contains(FightModifier.HAMBURGER_POWER)) { // sword = new ItemStackBuilder(Material.BREAD).buildMeta().withDisplayName("§6✪_§f䰛_§a§lSuper_Hamburger_da_Casa_do_João_§f䰛_§6✪").withLore("§7Ele voltou.").withEnchant(Enchantment.DAMAGE_ALL, 5, true).ItemStack().build();
-        }
-        if (modifiers.contains(FightModifier.THORNS_STRATEGY)) { // helmet = new ItemStackBuilder(Material.IRON_HELMET).buildMeta().withEnchant(Enchantment.THORNS, 2, true).ItemStack().build();
-// chestplate = new ItemStackBuilder(Material.IRON_CHESTPLATE).buildMeta().withEnchant(Enchantment.THORNS, 2, true).ItemStack().build();
-// leggings = new ItemStackBuilder(Material.IRON_LEGGINGS).buildMeta().withEnchant(Enchantment.THORNS, 2, true).ItemStack().build();
-// boots = new ItemStackBuilder(Material.IRON_BOOTS).buildMeta().withEnchant(Enchantment.THORNS, 2, true).ItemStack().build();
+            sword = ItemStack(Material.BREAD)
+                .rename("§6✪ §a§lSuper Hamburger da Casa do João §6✪")
+                .lore("§7Ele voltou.")
+                .apply {
+                    this.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 5)
+                }
         }
         p.removeAllPotionEffects()
         clearInventoryWithArmorOf(p)
         p.healAndFeed()
-        if (modifiers.contains(FightModifier.KNOCKBACK)) { // sword.setItemStackMeta(new MetaBuilder().forItemStack(sword).withEnchant(Enchantment.KNOCKBACK, 2, true).build());
-        }
-        // p.getInventory().addItemStack(sword);
+
         if (modifiers.contains(FightModifier.GOLDEN_APPLES)) {
             p.inventory.addItem(golden)
         }
+
         if (modifiers.contains(FightModifier.BOW)) {
-            // p.getInventory().addItemStack(new ItemStackBuilder(Material.BOW).buildMeta().withEnchant(Enchantment.ARROW_INFINITE, 1, true).ItemStack().build());
-            // p.getInventory().addItemStack(new ItemStackBuilder(Material.ARROW).build());
+            p.inventory.addItem(
+                ItemStack(Material.BOW)
+                    .apply {
+                        this.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
+                        this.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 1)
+                    }
+            )
+
+            p.inventory.addItem(
+                ItemStack(Material.ARROW)
+            )
         }
         if (modifiers.contains(FightModifier.DAMAGE_POTION)) {
-            p.inventory.addItem(ItemStack(Material.POTION, 1, 16428.toShort()))
+            p.inventory.addItem(
+                ItemStack(Material.SPLASH_POTION).meta<PotionMeta> {
+                    this.addCustomEffect(PotionEffect(PotionEffectType.HARM, 20 * 5, 0), true)
+                }
+            )
         }
         if (modifiers.contains(FightModifier.HEAL_POTION)) {
-            p.inventory.addItem(ItemStack(Material.POTION, 1, 8229.toShort()))
+            p.inventory.addItem(
+                ItemStack(Material.POTION).meta<PotionMeta> {
+                    this.addCustomEffect(PotionEffect(PotionEffectType.HEAL, 20 * 15, 0), true)
+                }
+            )
         }
         p.inventory.helmet = helmet
         p.inventory.chestplate = chestplate
@@ -478,15 +511,15 @@ class FightArena(var m: DreamFight) {
         p.inventory.addItem(sword)
         p.inventory.setItemInOffHand(ItemStack(Material.SHIELD))
 
-        if (modifiers.contains(FightModifier.SUPER_SPEED)) {
+        if (modifiers.contains(FightModifier.SUPER_SPEED))
             p.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 1000000, 2))
-        }
-        if (modifiers.contains(FightModifier.HIGH_JUMP)) {
+
+        if (modifiers.contains(FightModifier.HIGH_JUMP))
             p.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 1000000, 2))
-        }
-        if (modifiers.contains(FightModifier.SLOWNESS)) {
+
+        if (modifiers.contains(FightModifier.SLOWNESS))
             p.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 2))
-        }
+
         if (modifiers.contains(FightModifier.ONE_HIT_KILL)) {
             p.health = 2.0
             p.foodLevel = 10
