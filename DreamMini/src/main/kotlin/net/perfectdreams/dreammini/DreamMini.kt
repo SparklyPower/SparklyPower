@@ -124,6 +124,7 @@ class DreamMini : KotlinPlugin(), Listener {
 		registerCommand(SpawnCommand(this))
 		registerCommand(CalculatorCommand(this))
 		registerCommand(OpenInvCommand(this))
+		registerCommand(OpenEcCommand(this))
 		registerCommand(DoNotPickupCommand(this))
 		registerCommand(CraftCommand(this))
 	}
