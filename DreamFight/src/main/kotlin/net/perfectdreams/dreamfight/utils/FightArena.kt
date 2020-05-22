@@ -177,7 +177,7 @@ class FightArena(var m: DreamFight) {
                         }
                         text = "(" + names.joinToString(", ").toString() + ") "
                     }
-                    Bukkit.broadcastMessage("${DreamFight.prefix}§eEvento Fight " + text + "irá iniciar em §l" + i + " segundos§e! §e/fight §e(Guarde os itens antes de entrar, vai se dá problema)")
+                    Bukkit.broadcastMessage("${DreamFight.prefix}§eEvento Fight " + text + "irá iniciar em §l" + i + " segundos§e! §e/fight")
                 }
 
                 waitFor(20)
