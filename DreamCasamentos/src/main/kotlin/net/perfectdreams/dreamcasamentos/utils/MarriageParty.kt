@@ -62,49 +62,49 @@ object MarriageParty {
         if (player.girl) {
             val helmet = ItemStack(Material.LEATHER_HELMET)
             (helmet.itemMeta as LeatherArmorMeta).apply {
-                color = Color.fromRGB(255, 255, 255)
+                this.setColor(Color.fromRGB(255, 255, 255))
                 helmet.itemMeta = this
             }
             replaceArmorAndStore(player, helmet, EquipmentSlot.HEAD)
 
             val chestplate = ItemStack(Material.LEATHER_CHESTPLATE)
             (chestplate.itemMeta as LeatherArmorMeta).apply {
-                color = Color.fromRGB(255, 255, 255)
+                this.setColor(Color.fromRGB(255, 255, 255))
                 chestplate.itemMeta = this
             }
             replaceArmorAndStore(player, chestplate, EquipmentSlot.CHEST)
 
             val leggings = ItemStack(Material.LEATHER_LEGGINGS)
             (leggings.itemMeta as LeatherArmorMeta).apply {
-                color = Color.fromRGB(255, 255, 255)
+                this.setColor(Color.fromRGB(255, 255, 255))
                 leggings.itemMeta = this
             }
             replaceArmorAndStore(player, leggings, EquipmentSlot.LEGS)
 
             val boots = ItemStack(Material.LEATHER_BOOTS)
             (boots.itemMeta as LeatherArmorMeta).apply {
-                color = Color.fromRGB(255, 255, 255)
+                this.setColor(Color.fromRGB(255, 255, 255))
                 boots.itemMeta = this
             }
             replaceArmorAndStore(player, boots, EquipmentSlot.FEET)
         } else {
             val chestplate = ItemStack(Material.LEATHER_CHESTPLATE)
             (chestplate.itemMeta as LeatherArmorMeta).apply {
-                color = Color.fromRGB(0, 0, 0)
+                this.setColor(Color.fromRGB(0, 0, 0))
                 chestplate.itemMeta = this
             }
             replaceArmorAndStore(player, chestplate, EquipmentSlot.CHEST)
 
             val leggings = ItemStack(Material.LEATHER_LEGGINGS)
             (leggings.itemMeta as LeatherArmorMeta).apply {
-                color = Color.fromRGB(0, 0, 0)
+                this.setColor(Color.fromRGB(0, 0, 0))
                 leggings.itemMeta = this
             }
             replaceArmorAndStore(player, leggings, EquipmentSlot.LEGS)
 
             val boots = ItemStack(Material.LEATHER_BOOTS)
             (boots.itemMeta as LeatherArmorMeta).apply {
-                color = Color.fromRGB(0, 0, 0)
+                this.setColor(Color.fromRGB(0, 0, 0))
                 boots.itemMeta = this
             }
             replaceArmorAndStore(player, boots, EquipmentSlot.FEET)
@@ -116,28 +116,28 @@ object MarriageParty {
             EquipmentSlot.HEAD -> {
                 if (player.inventory.canHoldItem(item)) {
                     if (player.inventory.helmet != null)
-                        player.inventory.addItem(player.inventory.helmet)
+                        player.inventory.addItem(player.inventory.helmet!!)
                     player.inventory.helmet = item
                 }
             }
             EquipmentSlot.CHEST -> {
                 if (player.inventory.canHoldItem(item)) {
                     if (player.inventory.chestplate != null)
-                        player.inventory.addItem(player.inventory.chestplate)
+                        player.inventory.addItem(player.inventory.chestplate!!)
                     player.inventory.chestplate = item
                 }
             }
             EquipmentSlot.LEGS -> {
                 if (player.inventory.canHoldItem(item)) {
                     if (player.inventory.leggings != null)
-                        player.inventory.addItem(player.inventory.leggings)
+                        player.inventory.addItem(player.inventory.leggings!!)
                     player.inventory.leggings = item
                 }
             }
             EquipmentSlot.FEET -> {
                 if (player.inventory.canHoldItem(item)) {
                     if (player.inventory.boots != null)
-                        player.inventory.addItem(player.inventory.boots)
+                        player.inventory.addItem(player.inventory.boots!!)
                     player.inventory.boots = item
                 }
             }

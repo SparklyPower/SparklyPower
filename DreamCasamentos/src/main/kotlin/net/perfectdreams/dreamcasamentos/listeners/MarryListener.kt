@@ -32,10 +32,9 @@ class MarryListener(val m: DreamCasamentos) : Listener {
             scheduler.schedule(m, SynchronizationContext.ASYNC) {
                 val optionalMarriedPlayer = m.marriedUsers.getOrPut(e.player) {
                     Optional.ofNullable(
-                        Bukkit.getPlayer(m.getMarriageFor(e.player)?.getPartnerOf(e.player))
+                        m.getMarriageFor(e.player)?.getPartnerOf(e.player)?.let { Bukkit.getPlayer(it) }
                     )
                 }
-
                 switchContext(SynchronizationContext.SYNC)
 
                 optionalMarriedPlayer.ifPresent { marriedPlayer ->

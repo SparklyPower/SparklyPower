@@ -33,6 +33,6 @@ class Marriage(id: EntityID<Long>) : LongEntity(id) {
     }
 
     fun getHomeLocation(): Location {
-        return Location(Bukkit.getWorld(homeWorld), homeX!!, homeY!!, homeZ!!)
+        return Location(Bukkit.getWorld(homeWorld!!), homeX!!, homeY!!, homeZ!!)
     }
 }

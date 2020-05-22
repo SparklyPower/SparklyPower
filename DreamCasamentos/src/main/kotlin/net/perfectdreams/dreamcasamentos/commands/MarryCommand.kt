@@ -254,6 +254,11 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
             val partnerId = marriage.getPartnerOf(sender)
             val partner = Bukkit.getPlayer(partnerId)
 
+            if (partner == null) {
+                sender.sendMessage("$PREFIX §cSeu parceiro está offline!")
+                return@schedule
+            }
+
             if (partner.location.blacklistedTeleport) {
                 sender.sendMessage("$PREFIX §b${partner.name}§e está em um lugar que o sistema de GPS não consegue te encontrar!")
                 return@schedule
@@ -265,6 +270,7 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
             }
 
             sender.teleport(partner)
+
             sender.sendMessage("$PREFIX Você foi até §b${partner.name}§e!")
         }
     }

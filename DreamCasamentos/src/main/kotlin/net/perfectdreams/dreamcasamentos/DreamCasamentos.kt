@@ -13,6 +13,7 @@ import net.perfectdreams.dreamcasamentos.tables.Adoptions
 import net.perfectdreams.dreamcasamentos.tables.Marriages
 import net.perfectdreams.dreamcasamentos.utils.MarriageParty
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.Particle
 import org.bukkit.entity.Player
@@ -75,14 +76,14 @@ class DreamCasamentos : KotlinPlugin() {
                 onlinePlayers.forEach {
                     val optionalMarriedPlayer = marriedUsers.getOrPut(it) {
                         Optional.ofNullable(
-                            Bukkit.getPlayer(getMarriageFor(it)?.getPartnerOf(it))
+                            getMarriageFor(it)?.getPartnerOf(it)?.let { it1 -> Bukkit.getPlayer(it1) }
                         )
                     }
 
                     switchContext(SynchronizationContext.SYNC)
 
                     optionalMarriedPlayer.ifPresent { marriedPlayer ->
-                        if (!checkedPlayers.contains(marriedPlayer) && marriedPlayer.isOnline && marriedPlayer.world == it.world && 128 >= it.location.distanceSquared(marriedPlayer.location)) {
+                        if (!checkedPlayers.contains(marriedPlayer) && marriedPlayer.isOnline && !DreamVanishAPI.isVanishedOrInvisible(it) && !DreamVanishAPI.isVanishedOrInvisible(marriedPlayer) && marriedPlayer.world == it.world && 128 >= it.location.distanceSquared(marriedPlayer.location)) {
                             it.world.spawnParticle(Particle.HEART, it.location.clone().add(0.0, 1.0, 0.0), 3, 2.0, 2.0, 2.0)
                             marriedPlayer.world.spawnParticle(Particle.HEART, marriedPlayer.location.clone().add(0.0, 1.0, 0.0), 3, 2.0, 2.0, 2.0)
 
