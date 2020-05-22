@@ -26,7 +26,7 @@ object EventosCommand : DSLCommandBase<DreamScoreboard> {
             for (ev in hasPlayers.sortedBy { (it.delayBetween + it.lastTime) - System.currentTimeMillis() }) {
                 val diff = (ev.delayBetween + ev.lastTime) - System.currentTimeMillis()
 
-                if (0 >= diff) {
+                if (diff >= 0) {
                     var fancy = ""
                     if (diff >= (60000 * 60)) {
                         val minutes = ((diff / (1000 * 60)) % 60)
