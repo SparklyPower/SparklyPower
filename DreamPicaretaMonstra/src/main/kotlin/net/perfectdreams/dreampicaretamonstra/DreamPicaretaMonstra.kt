@@ -1,32 +1,34 @@
 package net.perfectdreams.dreampicaretamonstra
 
+import com.gmail.nossr50.datatypes.player.McMMOPlayer
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType
+import com.gmail.nossr50.mcMMO
+import com.gmail.nossr50.skills.mining.MiningManager
+import com.gmail.nossr50.util.player.UserManager
 import net.minecraft.server.v1_15_R1.BlockPosition
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.Particle
-import org.bukkit.Sound
+import org.bukkit.*
 import org.bukkit.block.Block
+import org.bukkit.block.BlockState
 import org.bukkit.craftbukkit.v1_15_R1.CraftWorld
 import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity
 import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack
 import org.bukkit.craftbukkit.v1_15_R1.util.CraftMagicNumbers
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.entity.Entity
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.ExperienceOrb
-import org.bukkit.entity.Player
+import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
+import org.jetbrains.annotations.NotNull
 
 class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 	companion object {
@@ -125,14 +127,16 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 						val drops = getDrops(location.block, e.player, inHand)
 						val exp = BlockUtils.getExpCount(location.block, enchantmentLevel)
 
-						location.block.type = Material.AIR
-
-						drops.forEach {
+						val dropsAsItems =  drops.map {
 							location.world.dropItemNaturally(
 								location,
 								it
 							)
 						}
+
+						doMcMMOStuff(e.player, e.block.state, dropsAsItems)
+
+						location.block.type = Material.AIR
 
 						if (exp > 0 && !isSilky) {
 							val orb = location.block.world.spawnEntity(center, EntityType.EXPERIENCE_ORB) as ExperienceOrb
@@ -178,4 +182,35 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 			}
 		}
 	}
+
+	fun doMcMMOStuff(player: Player, blockState: BlockState, drops: List<Item>) {
+		val mcMMOPlayer: McMMOPlayer = UserManager.getPlayer(player) ?: return
+
+		val heldItem = player.inventory.itemInMainHand
+
+		if (com.gmail.nossr50.util.BlockUtils.affectedBySuperBreaker(blockState) && com.gmail.nossr50.util.ItemUtils.isPickaxe(heldItem) && PrimarySkillType.MINING.getPermissions(
+				player
+			) && !mcMMO.getPlaceStore().isTrue(blockState)
+		) {
+			val miningManager: MiningManager = mcMMOPlayer.miningManager
+			miningManager.miningBlockCheck(blockState)
+
+			// For my friend mcMMO xoxo
+			Bukkit.getPluginManager().callEvent(
+				FakeBlockDropItemEvent(
+					blockState.block,
+					blockState,
+					player,
+					drops
+				)
+			)
+		}
+	}
+
+	class FakeBlockDropItemEvent(
+		block: Block,
+		blockState: BlockState,
+		player:  Player,
+		items: List<Item>
+	) : BlockDropItemEvent(block, blockState, player, items)
 }
