@@ -156,7 +156,7 @@ class DreamReparar : KotlinPlugin(), Listener {
 		}
 
 		if (itemStack.getStoredMetadata("isMonsterPickaxe") == "true") { // Picareta Monstra
-			price *= 4f
+			price *= 27f
 		}
 
 		when {
@@ -169,6 +169,6 @@ class DreamReparar : KotlinPlugin(), Listener {
 	}
 
 	fun canRepair(`is`: ItemStack): Boolean {
-		return `is`.type.name.contains("SWORD") || `is`.type.name.contains("AXE") || `is`.type.name.contains("HOE") || `is`.type.name.contains("SHOVEL") || `is`.type.name.contains("HOE") || `is`.type.name.contains("PICKAXE") || `is`.type.name.contains("CHESTPLATE") || `is`.type.name.contains("BOOTS") || `is`.type.name.contains("HELMET") || `is`.type.name.contains("BARDING") || `is`.type.name.contains("LEGGINGS") || `is`.type == Material.FISHING_ROD || `is`.type == Material.BOW || `is`.type == Material.FLINT_AND_STEEL || `is`.type == Material.SHEARS || `is`.type == Material.SHIELD || `is`.type == Material.ELYTRA
+		return `is`.type.name.contains("SWORD") || `is`.type.name.contains("AXE") || `is`.type.name.contains("HOE") || `is`.type.name.contains("SHOVEL") || `is`.type.name.contains("HOE") || `is`.type.name.contains("PICKAXE") || `is`.type.name.contains("CHESTPLATE") || `is`.type.name.contains("BOOTS") || `is`.type.name.contains("HELMET") || `is`.type.name.contains("BARDING") || `is`.type.name.contains("LEGGINGS") || `is`.type == Material.FISHING_ROD || `is`.type == Material.BOW || `is`.type == Material.FLINT_AND_STEEL || `is`.type == Material.SHEARS || `is`.type == Material.SHIELD || `is`.type == Material.CROSSBOW || `is`.type == Material.TRIDENT
 	}
 }
