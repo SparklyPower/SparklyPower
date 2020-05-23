@@ -5,7 +5,6 @@ import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.skills.mining.MiningManager
 import com.gmail.nossr50.util.player.UserManager
-import net.minecraft.server.v1_15_R1.BlockPosition
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
@@ -14,12 +13,11 @@ import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.block.BlockState
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftEntity
-import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_15_R1.util.CraftMagicNumbers
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.entity.*
+import org.bukkit.entity.EntityType
+import org.bukkit.entity.ExperienceOrb
+import org.bukkit.entity.Item
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -28,7 +26,6 @@ import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
-import org.jetbrains.annotations.NotNull
 
 class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 	companion object {
@@ -79,16 +76,6 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 		else isValidShovellingBlock(block)
 	}
 
-	fun getDrops(block: Block, entity: Entity?, itemStack: ItemStack): List<ItemStack> {
-		val nmsWorld = (block.world as CraftWorld).handle
-		val nmsBlock = CraftMagicNumbers.getBlock(block.type)
-
-		return net.minecraft.server.v1_15_R1.Block.getDrops(nmsBlock.blockData, nmsWorld, BlockPosition(block.x, block.y, block.z), null, (entity as? CraftEntity)?.handle, CraftItemStack.asNMSCopy(itemStack))
-			.map {
-				it.bukkitStack
-			}
-	}
-
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onBreak(e: BlockBreakEvent) {
 		val inHand = e.player.inventory.itemInMainHand
@@ -124,7 +111,7 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 				if ((below || location.blockY > e.player.location.y - 1.0) && location.block.type !== Material.AIR && location.block.type !== Material.BEDROCK && isValidForHeldItem(heldItemType, location.block)) {
 					val center = location.add(0.0, 0.5, 0.0)
 					if (PlayerUtils.canBreakAt(location, e.player, location.block.type)) {
-						val drops = getDrops(location.block, e.player, inHand)
+						val drops = location.block.getDrops(inHand)
 						val exp = BlockUtils.getExpCount(location.block, enchantmentLevel)
 
 						val dropsAsItems =  drops.map {

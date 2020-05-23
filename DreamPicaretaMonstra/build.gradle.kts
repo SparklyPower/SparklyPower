@@ -14,6 +14,7 @@ dependencies {
     compile(files("../libs/patched_1.15.1.jar"))
     compile(files("../libs/DreamCore-shadow.jar"))
     compile(files("../libs/WorldGuard.jar"))
+    compile(files("../libs/mcMMO.jar"))
 }
 
 tasks.withType<KotlinCompile> {
