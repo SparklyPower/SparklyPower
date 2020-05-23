@@ -55,6 +55,15 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
         Material.DIAMOND_AXE
     )
 
+    private val logToSapling = mapOf(
+        Material.ACACIA_LOG to Material.ACACIA_SAPLING,
+        Material.BIRCH_LOG to Material.BIRCH_SAPLING,
+        Material.DARK_OAK_LOG to Material.DARK_OAK_SAPLING,
+        Material.JUNGLE_LOG to Material.JUNGLE_SAPLING,
+        Material.OAK_LOG to Material.OAK_SAPLING,
+        Material.SPRUCE_LOG to Material.SPRUCE_SAPLING
+    )
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onPlace(e: BlockPlaceEvent) {
         if (e.block.type !in logs)
@@ -119,6 +128,9 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
 
         getAllBlocksFromTree(player, block, block, blocksToBeDestroyed)
 
+        val lowestLog = blocksToBeDestroyed.asSequence().filter { it.type in logs }.minBy { it.y }
+        val lowestLogType = lowestLog?.type
+
         for ((index, blockToBeDestroyed) in blocksToBeDestroyed.withIndex()) {
             val drops = blockToBeDestroyed.getDrops(heldItem)
 
@@ -146,6 +158,13 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
             }
 
             blockToBeDestroyed.type = Material.AIR
+        }
+
+        if (lowestLog != null && lowestLogType != null && lowestLog.type == Material.AIR && (lowestLog.getRelative(BlockFace.DOWN).type == Material.GRASS_BLOCK || lowestLog.getRelative(BlockFace.DOWN).type == Material.DIRT)) {
+            val saplingType = logToSapling[lowestLogType]
+
+            if (saplingType != null)
+                lowestLog.type = saplingType
         }
     }
 

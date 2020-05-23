@@ -39,7 +39,7 @@ class DreamTreeAssist : KotlinPlugin(), Listener {
 						if (it.ticksLived >= (20 * 15) && it.itemStack.type in saplings) { // 15s
 							val blockAtDrop = it.location.block
 
-							if (blockAtDrop.type == Material.AIR && blockAtDrop.getRelative(BlockFace.DOWN).type == Material.GRASS_BLOCK) {
+							if (blockAtDrop.type == Material.AIR && (blockAtDrop.getRelative(BlockFace.DOWN).type == Material.GRASS_BLOCK || blockAtDrop.getRelative(BlockFace.DOWN).type == Material.DIRT)) {
 								blockAtDrop.type = it.itemStack.type
 
 								if (it.itemStack.amount == 1)
