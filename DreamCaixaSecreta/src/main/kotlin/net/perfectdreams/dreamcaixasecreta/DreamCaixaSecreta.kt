@@ -14,7 +14,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.io.File
 
-class DreamCaixaSecreta : KotlinPlugin() {
+class    DreamCaixaSecreta : KotlinPlugin() {
 	lateinit var itemReceived: Song
 	var prizes = mutableListOf<RandomItem>()
 
@@ -318,9 +318,8 @@ class DreamCaixaSecreta : KotlinPlugin() {
 		prizes.add(
 			RandomItem(
 				ItemStack(
-					Material.QUARTZ_BLOCK,
-					16,
-					1.toShort()
+					Material.CHISELED_QUARTZ_BLOCK,
+					16
 				), chance
 			)
 		)
@@ -328,9 +327,8 @@ class DreamCaixaSecreta : KotlinPlugin() {
 		prizes.add(
 			RandomItem(
 				ItemStack(
-					Material.QUARTZ_BLOCK,
-					16,
-					2.toShort()
+					Material.QUARTZ_PILLAR,
+					16
 				), chance
 			)
 		)
