@@ -25,7 +25,7 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
     init {
         // TODO: Cancelar task automática
         this.delayBetween = 3600000 * 6 // 6 horas
-        this.requiredPlayers = 60
+        this.requiredPlayers = 70
         this.discordAnnouncementRole = "538805118384996392"
     }
 
@@ -174,21 +174,23 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
                 }
 
                 // Atualizar bossbar
-                bossBar1?.progress = 1.0 - (elapsedTicks.toDouble() / fourMinutes.toDouble())
-                bossBar1?.title = "§e§lMina §6§lR§e§le§6§lc§e§lh§6§le§e§la§6§ld§e§la§8"
+                if (elapsedTicks % 100 == 0) {
+                    bossBar1?.progress = 1.0 - (elapsedTicks.toDouble() / fourMinutes.toDouble())
+                    bossBar1?.title = "§e§lMina §6§lR§e§le§6§lc§e§lh§6§le§e§la§6§ld§e§la§8"
 
-                val blockCount = getBlockCount()
-                val blockRatio = blockCount.second.toDouble() / blockCount.first.toDouble()
+                    val blockCount = getBlockCount()
+                    val blockRatio = blockCount.second.toDouble() / blockCount.first.toDouble()
 
-                bossBar2?.progress = blockRatio
+                    bossBar2?.progress = blockRatio
 
-                when {
-                    blockRatio >= 0.75 -> bossBar2?.color = BarColor.WHITE
-                    blockRatio >= 0.5 -> bossBar2?.color = BarColor.BLUE
-                    blockRatio >= 0.25 -> bossBar2?.color = BarColor.PINK
-                    else -> bossBar2?.color = BarColor.PURPLE
+                    when {
+                        blockRatio >= 0.75 -> bossBar2?.color = BarColor.WHITE
+                        blockRatio >= 0.5 -> bossBar2?.color = BarColor.BLUE
+                        blockRatio >= 0.25 -> bossBar2?.color = BarColor.PINK
+                        else -> bossBar2?.color = BarColor.PURPLE
+                    }
+                    bossBar2?.title = "§e${String.format("%.2f", brokenBlocksRatio * 100)}% §ablocos quebrados"
                 }
-                bossBar2?.title = "§e${String.format("%.2f", brokenBlocksRatio * 100)}% §ablocos quebrados"
 
                 // Depois de três minutos
                 if (elapsedTicks == (60 * 3) * 20) {
@@ -230,8 +232,8 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
                     bossBar1?.color = BarColor.GREEN
                 }
 
-                waitFor(5L)
-                elapsedTicks += 5
+                waitFor(20L)
+                elapsedTicks += 20
             }
         }
     }
