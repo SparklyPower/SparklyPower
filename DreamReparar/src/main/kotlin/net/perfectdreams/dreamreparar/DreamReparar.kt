@@ -129,12 +129,12 @@ class DreamReparar : KotlinPlugin(), Listener {
 
 	fun getPriceOfMaterialFor(type: Material): Double {
 		return when {
-			type.name.endsWith("DIAMOND_") || type == Material.ELYTRA || type == Material.TRIDENT -> 1200.0
+			type.name.contains("DIAMOND") || type == Material.ELYTRA || type == Material.TRIDENT -> 1200.0
 			type.name.startsWith("CHAINMAIL_") -> 350.0
-			type.name.endsWith("GOLD_") -> 642.0
-			type.name.endsWith("IRON_") || type == Material.CROSSBOW -> 128.0
-			type.name.endsWith("STONE_") -> 0.4
-			type.name.endsWith("WOOD_") -> 1.0
+			type.name.contains("GOLDEN") -> 642.0
+			type.name.contains("IRON") || type == Material.CROSSBOW -> 128.0
+			type.name.contains("STONE") -> 0.4
+			type.name.contains("WOODEN") -> 1.0
 			else -> 128.0
 		}
 	}
