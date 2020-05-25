@@ -118,15 +118,17 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
         if (m.placedLogs.contains(position)) // If it is a player placed block, break it normally
             return
 
-        e.isCancelled = true
-
-        processTree(e.player, heldItem, e.block)
+        val result = processTree(e.player, heldItem, e.block)
+        e.isCancelled = result
     }
 
-    private fun processTree(player: Player, heldItem: ItemStack, block: Block) {
+    private fun processTree(player: Player, heldItem: ItemStack, block: Block): Boolean {
         val blocksToBeDestroyed = mutableListOf<Block>()
 
         getAllBlocksFromTree(player, block, block, blocksToBeDestroyed)
+
+        if (!blocksToBeDestroyed.any { it.type in leaves })
+            return false
 
         val lowestLog = blocksToBeDestroyed.asSequence().filter { it.type in logs }.minBy { it.y }
         val lowestLogType = lowestLog?.type
@@ -149,7 +151,7 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
 
                     if (damageable.damage > heldItem.type.maxDurability) {
                         player.inventory.removeItem(heldItem)
-                        return
+                        return true
                     }
                 }
 
@@ -166,6 +168,8 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
             if (saplingType != null)
                 lowestLog.type = saplingType
         }
+
+        return true
     }
 
     private fun getAllBlocksFromTree(player: Player, initialBlock: Block, block: Block, list: MutableList<Block>): List<Block> {
