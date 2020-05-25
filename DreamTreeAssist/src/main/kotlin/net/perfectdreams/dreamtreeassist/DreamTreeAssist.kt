@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamtreeassist
 
 import com.okkero.skedule.schedule
+import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamtreeassist.listeners.PlayerListener
@@ -10,6 +11,8 @@ import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Item
 import org.bukkit.event.Listener
+import org.bukkit.metadata.FixedMetadataValue
+import org.bukkit.metadata.MetadataValue
 
 class DreamTreeAssist : KotlinPlugin(), Listener {
 	private val saplings = listOf(
@@ -35,17 +38,24 @@ class DreamTreeAssist : KotlinPlugin(), Listener {
 				if (defaultWorld != null) {
 					val droppedItems = defaultWorld.getEntitiesByClass(Item::class.java)
 
-					droppedItems.forEach {
-						if (it.ticksLived >= (20 * 15) && it.itemStack.type in saplings) { // 15s
-							val blockAtDrop = it.location.block
+					for (droppedItem in droppedItems) {
+						if (droppedItem.ticksLived >= (20 * 15) && droppedItem.itemStack.type in saplings && !droppedItem.hasMetadata("checkedTree")) { // 15s
+							val blockAtDrop = droppedItem.location.block
+
+							droppedItem.setMetadata("checkedTree", FixedMetadataValue(this@DreamTreeAssist, true))
 
 							if (blockAtDrop.type == Material.AIR && (blockAtDrop.getRelative(BlockFace.DOWN).type == Material.GRASS_BLOCK || blockAtDrop.getRelative(BlockFace.DOWN).type == Material.DIRT)) {
-								blockAtDrop.type = it.itemStack.type
+								val claim = GriefPrevention.instance.dataStore.getClaimAt(blockAtDrop.location, false, null)
 
-								if (it.itemStack.amount == 1)
-									it.remove()
+								if (claim != null) // Do not transform into sapling if it is a protected terrain
+									continue
+
+								blockAtDrop.type = droppedItem.itemStack.type
+
+								if (droppedItem.itemStack.amount == 1)
+									droppedItem.remove()
 								else
-									it.itemStack.amount -= 1
+									droppedItem.itemStack.amount -= 1
 							}
 						}
 					}
