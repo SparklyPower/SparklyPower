@@ -38,7 +38,7 @@ class MarryListener(val m: DreamCasamentos) : Listener {
                 switchContext(SynchronizationContext.SYNC)
 
                 optionalMarriedPlayer.ifPresent { marriedPlayer ->
-                    if (optionalMarriedPlayer == e.rightClicked) {
+                    if (marriedPlayer == e.rightClicked) {
                         player.world.spawnParticle(Particle.HEART, player.location.clone().add(0.0, 2.0, 0.0), 1)
                         player.world.spawnParticle(Particle.HEART, rightClicked.location.clone().add(0.0, 2.0, 0.0), 1)
 

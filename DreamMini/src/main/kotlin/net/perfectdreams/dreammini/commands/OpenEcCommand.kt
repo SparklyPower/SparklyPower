@@ -6,7 +6,7 @@ import net.perfectdreams.dreammini.DreamMini
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
-class OpenEcCommand(val m: DreamMini) : SparklyCommand(arrayOf("openec", "openenderchest", "ec"), permission = "dreammini.openinventory"){
+class OpenEcCommand(val m: DreamMini) : SparklyCommand(arrayOf("openec", "openenderchest", "ec"), permission = "dreammini.enderchest") {
 	@Subcommand(["lookup"])
 	@SubcommandPermission("dreammini.seechest")
 	fun root(sender: Player, playerName: String? = null){
