@@ -113,11 +113,11 @@ class DreamCasamentos : KotlinPlugin() {
     }
 
     fun getMarriageRequestFor(player: Player): Request? {
-        return requests.firstOrNull { it.type == Request.RequestKind.MARRIAGE && (it.sender == player || it.target == player) }
+        return requests.firstOrNull { it.type == Request.RequestKind.MARRIAGE && it.target == player }
     }
 
     fun getAdoptionRequestFor(player: Player): Request? {
-        return requests.firstOrNull { it.type == Request.RequestKind.ADOPTION && (it.sender == player || it.target == player) }
+        return requests.firstOrNull { it.type == Request.RequestKind.ADOPTION && it.target == player }
     }
 
     fun getAdoptionStatus(player: Player): Adoption? {

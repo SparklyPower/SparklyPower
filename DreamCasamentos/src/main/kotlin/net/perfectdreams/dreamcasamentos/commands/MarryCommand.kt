@@ -65,6 +65,13 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
             return
         }
 
+        val selfRequest = m.getMarriageRequestFor(sender)
+
+        if (selfRequest != null) {
+            sender.sendMessage("$PREFIX §cVocê já tem um pedido de casamento ativo!")
+            return
+        }
+
         if (sender.balance < 7500) {
             sender.sendMessage("$PREFIX É, casamentos são caros e necessitam de dinheiro para serem mantidos. Você precisa de mais §b${7500 - sender.balance}§e sonhos para se casar!")
             return
@@ -97,44 +104,7 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
         val request = m.getMarriageRequestFor(sender)
 
         if (request == null) {
-            val request = m.getAdoptionRequestFor(sender)
-
-            if (request != null) {
-                val requestSender = request.sender
-
-                m.requests.remove(request)
-
-                scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                    val marriage = m.getMarriageFor(requestSender)
-
-                    if (marriage == null) {
-                        sender.sendMessage("$PREFIX Pelo visto a pessoa que queria te adotar não está casada!")
-                        return@schedule
-                    }
-
-                    val adoption = transaction(Databases.databaseServer) {
-                        Adoption.new {
-                            this.player = sender.uniqueId
-                            this.adotedAt = System.currentTimeMillis()
-                            this.adoptedBy = marriage
-                        }
-                    }
-
-                    switchContext(SynchronizationContext.SYNC)
-
-                    sender.balance -= 7500
-                    requestSender.balance -= 7500
-
-                    sender.sendMessage("$PREFIX Você aceitou o pedido de adoção de §b${requestSender.name}§e!")
-                    requestSender.sendMessage("$PREFIX §b${sender.name}§e aceitou o seu pedido de adoção!")
-
-                    Bukkit.broadcastMessage("$PREFIX §b${sender.name}§e aceitou o pedido de adoção de §b${requestSender.name}§e!")
-                }
-                return
-            }
-
             sender.sendMessage("$PREFIX Você não tem nenhum pedido de casamento ou de adoção pendente!")
-
             return
         }
 
@@ -360,81 +330,7 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
         }
     }
 
-    @Subcommand(["adotar", "adopt", "filho", "filha"])
-    fun adotar(sender: Player) {
-        sender.sendMessage("§cMas você vai adotar quem?")
-    }
-
-
-    @Subcommand(["adotar", "adopt", "filho", "filha"])
-    fun adotar(sender: Player, playerName: String) {
-        val player = Bukkit.getPlayer(playerName)
-
-        if (player == null) {
-            sender.sendMessage("$PREFIX Este jogador não foi encontrado!")
-            return
-        }
-
-        if (sender == player) {
-            sender.sendMessage("$PREFIX Você não pode adotar você mesm${sender.artigo}, bobinh${sender.artigo}!")
-            return
-        }
-
-        scheduler().schedule(m, SynchronizationContext.ASYNC) {
-            val adoptionStatus = canAdopt(sender, player)
-
-            switchContext(SynchronizationContext.SYNC)
-
-            when (adoptionStatus) {
-                AdoptReturn.ALREADY_ADOPTED -> {
-                    sender.sendMessage("$PREFIX §b${player.name}§e já tem uma família... que pena.")
-                    return@schedule
-                }
-                else -> {
-                }
-            }
-
-            val request = Request(Request.RequestKind.ADOPTION, sender, player)
-            m.requests.add(request)
-
-            sender.sendMessage("$PREFIX Proposta enviada para §b${player.name}§e, boa sorte!")
-            player.sendMessage("$PREFIX Você recebeu um pedido de adoção de §b${sender.name}§e, você deseja aceitar (§a§n/marry aceitar§r§e) ou recusar (§c§n/marry recusar§r§e)?")
-
-            scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                waitFor(20 * 60)
-
-                if (m.getAdoptionRequestFor(sender) != null) {
-                    sender.sendMessage("$PREFIX A proposta de adoção expirou pois passou-se um minuto e não houve resposta!")
-
-                    m.requests.remove(request)
-                }
-            }
-        }
-    }
-
     fun getGenderSymbol(player: Player): String {
         return if (!player.girl) { "§3♂" } else { "§d♀" }
-    }
-
-    fun canAdopt(adopter: Player, adoptee: Player): AdoptReturn {
-        DreamUtils.assertAsyncThread()
-
-        val adopteeMarriage = m.getMarriageFor(adoptee)
-
-        if (adopteeMarriage != null && (adopteeMarriage.player1 == adopter.uniqueId || adopteeMarriage.player2 == adopter.uniqueId))
-            return AdoptReturn.ALREADY_MARRIED
-
-        val adoption = m.getAdoptionStatus(adoptee)
-
-        if (adoption != null)
-            return AdoptReturn.ALREADY_ADOPTED
-
-        return AdoptReturn.ALLOWED
-    }
-
-    enum class AdoptReturn {
-        ALREADY_MARRIED,
-        ALREADY_ADOPTED,
-        ALLOWED
     }
 }
