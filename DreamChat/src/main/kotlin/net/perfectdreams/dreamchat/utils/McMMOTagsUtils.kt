@@ -29,7 +29,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lAc",
-                    "§e§lAcrobátic${e.player.girl}",
+                    "§e§lAcrobátic${e.player.artigo}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 de acrobacia do McMMO!"
                     ),
