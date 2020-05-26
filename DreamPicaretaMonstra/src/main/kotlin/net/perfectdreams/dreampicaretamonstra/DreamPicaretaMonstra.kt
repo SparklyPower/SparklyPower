@@ -2,6 +2,8 @@ package net.perfectdreams.dreampicaretamonstra
 
 import com.gmail.nossr50.datatypes.player.McMMOPlayer
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
+import com.gmail.nossr50.events.skills.repair.McMMOPlayerRepairCheckEvent
+import com.gmail.nossr50.events.skills.salvage.McMMOPlayerSalvageCheckEvent
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.skills.mining.MiningManager
 import com.gmail.nossr50.util.player.UserManager
@@ -74,6 +76,22 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 		return if (material == Material.DIAMOND_PICKAXE)
 			isValidMiningBlock(block)
 		else isValidShovellingBlock(block)
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	fun onRepair(e: McMMOPlayerRepairCheckEvent) {
+		if (e.repairedObject.getStoredMetadata("isMonsterPickaxe") == "true") {
+			e.isCancelled = true
+			e.player.sendMessage("§cVocê não pode reparar uma ferramenta monstra!")
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	fun onSalvage(e: McMMOPlayerSalvageCheckEvent) {
+		if (e.salvageItem.getStoredMetadata("isMonsterPickaxe") == "true") {
+			e.isCancelled = true
+			e.player.sendMessage("§cVocê não pode salvar uma ferramenta monstra!")
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

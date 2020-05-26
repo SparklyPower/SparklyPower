@@ -1,17 +1,17 @@
 package net.perfectdreams.dreammoverspawners
 
+import com.gmail.nossr50.events.skills.repair.McMMOPlayerRepairCheckEvent
+import com.gmail.nossr50.events.skills.salvage.McMMOPlayerSalvageCheckEvent
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.block.CreatureSpawner
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -21,7 +21,6 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
 
 class DreamMoverSpawners : KotlinPlugin(), Listener {
     val onlyInWorld = listOf("world")
@@ -89,6 +88,22 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
         })
 
         registerEvents(this)
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onRepair(e: McMMOPlayerRepairCheckEvent) {
+        if (e.repairedObject.getStoredMetadata("isMoveSpawners") == "true") {
+            e.isCancelled = true
+            e.player.sendMessage("§cVocê não pode reparar uma picareta de mover spawners!")
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onSalvage(e: McMMOPlayerSalvageCheckEvent) {
+        if (e.salvageItem.getStoredMetadata("isMoveSpawners") == "true") {
+            e.isCancelled = true
+            e.player.sendMessage("§cVocê não pode salvar uma picareta de mover spawners!")
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
