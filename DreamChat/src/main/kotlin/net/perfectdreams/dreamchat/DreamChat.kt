@@ -163,7 +163,7 @@ class DreamChat : KotlinPlugin() {
 
 				// MCMMO - TOP
 				topMcMMOPlayer = getTopPlayerInMcMMOSkill(null)
-				for (skill in PrimarySkillType.values().filter { it != PrimarySkillType.REPAIR && it != PrimarySkillType.SALVAGE && it != PrimarySkillType.SMELTING }) {
+				for (skill in PrimarySkillType.values().filter { it != PrimarySkillType.SALVAGE && it != PrimarySkillType.SMELTING }) {
 					topPlayerSkills[skill] = getTopPlayerInMcMMOSkill(skill)
 				}
 
