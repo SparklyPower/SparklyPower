@@ -9,6 +9,8 @@ import org.bukkit.event.player.AsyncPlayerChatEvent
 
 object McMMOTagsUtils {
     fun addTags(e: AsyncPlayerChatEvent, playerTagsEvent: ApplyPlayerTagsEvent) {
+        val nothingOrArtigo = if (e.player.girl) "a" else ""
+
         if (DreamChat.INSTANCE.topMcMMOPlayer.equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
@@ -27,7 +29,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lAc",
-                    "§e§lAcrobático",
+                    "§e§lAcrobátic${e.player.girl}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 de acrobacia do McMMO!"
                     ),
@@ -55,7 +57,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lAr",
-                    "§e§lArqueiro",
+                    "§e§lArqueir${e.player.artigo}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 arqueiro do McMMO!"
                     ),
@@ -83,7 +85,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lEsc",
-                    "§e§lEscavador",
+                    "§e§lEscavador$nothingOrArtigo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 escavador do McMMO!"
                     ),
@@ -97,7 +99,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lP",
-                    "§e§lPescador",
+                    "§e§lPescador$nothingOrArtigo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 pescador do McMMO!"
                     ),
@@ -125,7 +127,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lM",
-                    "§e§lMinerador",
+                    "§e§lMinerador$nothingOrArtigo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 minerador do McMMO!"
                     ),
@@ -139,7 +141,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lR",
-                    "§e§lReparador",
+                    "§e§lReparador$nothingOrArtigo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 reparador do McMMO!"
                     ),
@@ -167,7 +169,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lV",
-                    "§e§lVeterinário",
+                    "§e§lVeterinári${e.player.artigo}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 de domesticar animais do McMMO!"
                     ),
@@ -181,7 +183,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lD",
-                    "§e§lDesarmado",
+                    "§e§lDesarmad${e.player.artigo}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 desarmado do McMMO!"
                     ),
@@ -195,7 +197,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lL",
-                    "§e§lLenhador",
+                    "§e§lLenhador$nothingOrArtigo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 lenhador do McMMO!"
                     ),
