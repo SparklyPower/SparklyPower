@@ -119,6 +119,7 @@ class DreamChat : KotlinPlugin() {
 		registerCommand(DreamChatCommand(this))
 		registerCommand(QueroTagCommand(this))
 		registerCommand(IgnoreCommand(this))
+		registerCommand(OnlineCommand)
 		reload()
 		loadResponses()
 
@@ -142,7 +143,7 @@ class DreamChat : KotlinPlugin() {
 
 				// GET TOP PLAYERS
 				oldestPlayers = transaction(Databases.databaseNetwork) {
-					ChatUsers.selectAll()
+					ChatUsers.select { ChatUsers.playOneMinute.isNotNull() }
 						.orderBy(ChatUsers.playOneMinute, false)
 						.limit(10)
 						.map { it[ChatUsers.id].value to (it[ChatUsers.playOneMinute] ?: 0) }

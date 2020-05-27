@@ -304,6 +304,54 @@ class ChatListener(val m: DreamChat) : Listener {
 
 		McMMOTagsUtils.addTags(e, event)
 
+		if (m.oldestPlayers.getOrNull(0)?.first == e.player.uniqueId) {
+			event.tags.add(
+				PlayerTag(
+					"§4§lV",
+					"§4§lViciad${player.artigo}",
+					listOf(
+						"§r§b${player.displayName}§r§7 é a pessoa com mais tempo online no §4§lSparkly§b§lPower§r§7!",
+						"",
+						"§7Eu duvido você conseguir passar del${if (player.girl) "a" else "e"}, será que você tem as habilidades para conseguir? ;)"
+					),
+					"/online",
+					true
+				)
+			)
+		}
+
+		if (m.oldestPlayers.getOrNull(1)?.first == e.player.uniqueId) {
+			event.tags.add(
+				PlayerTag(
+					"§4§lD",
+					"§4§lDevotad${player.artigo}",
+					listOf(
+						"§r§b${player.displayName}§r§7 é a segunda pessoa com mais tempo online no §4§lSparkly§b§lPower§r§7!",
+						"",
+						"§7Eu duvido você conseguir passar del${if (player.girl) "a" else "e"}, será que você tem as habilidades para conseguir? ;)"
+					),
+					"/online",
+					true
+				)
+			)
+		}
+
+		if (m.oldestPlayers.getOrNull(1)?.first == e.player.uniqueId) {
+			event.tags.add(
+				PlayerTag(
+					"§4§lF",
+					"§4§lFanátic${player.artigo}",
+					listOf(
+						"§r§b${player.displayName}§r§7 é a terceira pessoa com mais tempo online no §4§lSparkly§b§lPower§r§7!",
+						"",
+						"§7Eu duvido você conseguir passar del${if (player.girl) "a" else "e"}, será que você tem as habilidades para conseguir? ;)"
+					),
+					"/online",
+					true
+				)
+			)
+		}
+
 		if (event.tags.isNotEmpty()) {
 			// omg tags!
 			// Exemplos:
