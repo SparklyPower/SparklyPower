@@ -4,6 +4,8 @@ import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.eventmanager.DreamEventManager
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.gson
 import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
@@ -74,7 +76,13 @@ class DreamVote : KotlinPlugin() {
 
 		scheduler().schedule(this) {
 			while (true) {
-				waitFor(36_000)
+				// One hour
+				waitFor(3600 * 20)
+
+				// Only broadcast if there aren't any events happening, this avoids a huge title showing up in the user's screen while they are
+				// participating in an event
+				while (DreamCore.INSTANCE.dreamEventManager.getRunningEvents().isNotEmpty())
+					waitFor(20L)
 
 				broadcastPleaseVoteMessage()
 			}
