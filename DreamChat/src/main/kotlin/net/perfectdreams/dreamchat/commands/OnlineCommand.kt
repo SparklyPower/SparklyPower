@@ -4,7 +4,9 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamcore.dao.User
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
+import org.jetbrains.exposed.sql.transactions.transaction
 
 object OnlineCommand : DSLCommandBase<DreamChat> {
     override fun command(plugin: DreamChat) = create(listOf("online")) {
@@ -13,7 +15,9 @@ object OnlineCommand : DSLCommandBase<DreamChat> {
 
             plugin.schedule(SynchronizationContext.ASYNC) {
                 val userData = oldestPlayers.map {
-                    User.findById(it.first)
+                    transaction(Databases.databaseNetwork) {
+                        User.findById(it.first)
+                    }
                 }
 
                 switchContext(SynchronizationContext.SYNC)
