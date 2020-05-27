@@ -48,6 +48,9 @@ class DreamVote : KotlinPlugin() {
 
 		dataFolder.mkdirs()
 
+		lastVoter = this.config.getString("last-voter")
+		earnedMoney = this.config.getDouble("earned-money", 0.0)
+
 		alwaysAwards = gson.fromJson(File(dataFolder, "alwaysawards.json").readText())
 		randomAwards = gson.fromJson(File(dataFolder, "randomawards.json").readText())
 
@@ -80,6 +83,10 @@ class DreamVote : KotlinPlugin() {
 
 	override fun softDisable() {
 		super.softDisable()
+
+		this.config.set("last-voter", lastVoter)
+		this.config.set("earned-money", earnedMoney)
+		this.saveConfig()
 	}
 
 	fun getVoteCount(player: Player) = getVoteCount(player.uniqueId)
