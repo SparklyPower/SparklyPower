@@ -132,5 +132,6 @@ class DreamCore : JavaPlugin() {
 	}
 
 	override fun onDisable() {
+		dreamScriptManager.unloadScripts()
 	}
 }
