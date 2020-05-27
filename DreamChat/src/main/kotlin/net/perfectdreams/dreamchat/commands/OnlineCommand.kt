@@ -30,7 +30,7 @@ object OnlineCommand : DSLCommandBase<DreamChat> {
                     val numberOfHours = input % 86400 / 3600
                     val numberOfMinutes = input % 86400 % 3600 / 60
 
-                    player.sendMessage("§e${index + 1}. §b${userName} §ecom §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§6 online!")
+                    sender.sendMessage("§e${index + 1}. §b${userName} §ecom §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§6 online!")
                 }
             }
         }
