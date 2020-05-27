@@ -336,7 +336,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			)
 		}
 
-		if (m.oldestPlayers.getOrNull(1)?.first == e.player.uniqueId) {
+		if (m.oldestPlayers.getOrNull(2)?.first == e.player.uniqueId) {
 			event.tags.add(
 				PlayerTag(
 					"§4§lF",
