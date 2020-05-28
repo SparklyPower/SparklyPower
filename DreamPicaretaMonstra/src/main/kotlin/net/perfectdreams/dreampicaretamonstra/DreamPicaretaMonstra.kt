@@ -25,6 +25,9 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.PrepareAnvilEvent
+import org.bukkit.inventory.AnvilInventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
@@ -92,6 +95,13 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 			e.isCancelled = true
 			e.player.sendMessage("§cVocê não pode salvar uma ferramenta monstra!")
 		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	fun onAnvilRepair(e: PrepareAnvilEvent) {
+		val inventory = e.inventory
+		if (e.result?.getStoredMetadata("isMonsterPickaxe") == "true")
+			inventory.repairCost *= 16
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
