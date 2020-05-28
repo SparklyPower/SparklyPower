@@ -37,6 +37,12 @@ object DreamVanishAPI {
         }
     }
 
+    /**
+     * Checks if a player is vanished or invisible
+     *
+     * @param player the player
+     * @return if the player is vanished or invisible
+     */
     fun isVanishedOrInvisible(player: Player): Boolean {
         return isVanished(player) || player.hasPotionEffect(PotionEffectType.INVISIBILITY)
     }

@@ -83,7 +83,7 @@ class DreamCasamentos : KotlinPlugin() {
                     switchContext(SynchronizationContext.SYNC)
 
                     optionalMarriedPlayer.ifPresent { marriedPlayer ->
-                        if (!checkedPlayers.contains(marriedPlayer) && marriedPlayer.isOnline && !DreamVanishAPI.isVanishedOrInvisible(it) && !DreamVanishAPI.isVanishedOrInvisible(marriedPlayer) && marriedPlayer.world == it.world && 128 >= it.location.distanceSquared(marriedPlayer.location)) {
+                        if (!checkedPlayers.contains(marriedPlayer) && marriedPlayer.isOnline && !DreamVanishAPI.isVanishedOrInvisible(it) && it.canSee(marriedPlayer) && marriedPlayer.canSee(it) && marriedPlayer.world == it.world && 128 >= it.location.distanceSquared(marriedPlayer.location)) {
                             it.world.spawnParticle(Particle.HEART, it.location.clone().add(0.0, 1.0, 0.0), 3, 2.0, 2.0, 2.0)
                             marriedPlayer.world.spawnParticle(Particle.HEART, marriedPlayer.location.clone().add(0.0, 1.0, 0.0), 3, 2.0, 2.0, 2.0)
 
