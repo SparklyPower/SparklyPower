@@ -73,7 +73,16 @@ class CarHandlerPacketAdapter(val m: DreamFusca) : PacketAdapter(m,
 			vehicle.velocity = velocity
 
 			if (sendParticles) {
-				vehicle.world.spawnParticle(Particle.SMOKE_NORMAL, vehicle.location.clone().add(velocity.multiply(-2)), 10)
+				vehicle.world.spawnParticle(
+					Particle.CAMPFIRE_COSY_SMOKE,
+					vehicle.location.clone().add(
+						velocity.multiply(-2)
+					),
+					0,
+					0.0,
+					0.01,
+					0.0
+				)
 			}
 		}
 	}
