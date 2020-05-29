@@ -9,8 +9,8 @@ object DreamChatCommand : DSLCommandBase<DreamChat> {
 
         executes {
             sender.sendMessage("§6/dreamchat start")
-            sender.sendMessage("§6/dreamchat tellon")
-            sender.sendMessage("§6/dreamchat telloff")
+            sender.sendMessage("§6/dreamchat seetell")
+            sender.sendMessage("§6/dreamchat reload")
         }
     }
 }
