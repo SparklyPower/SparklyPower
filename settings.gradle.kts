@@ -19,6 +19,7 @@ pluginManagement {
 rootProject.name = "sparklypower-parent"
 
 include(":KotlinRuntime")
+include(":DreamAntiAFK")
 include(":DreamCore")
 include(":DreamAuth")
 include(":DreamCash")
