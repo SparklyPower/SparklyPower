@@ -197,7 +197,7 @@ object ChatUtils {
 			SocketUtils.send(json, port = 60799)
 		}
 
-		for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission("dreamchat.snoop") }) {
+		for (staff in Bukkit.getOnlinePlayers().asSequence().filter { it.hasPermission("dreamchat.snoop") }.filter { it !in DreamChat.INSTANCE.hideTells }) {
 			staff.sendMessage("§7[${sender.name} » ${receiver.name}] $message")
 		}
 

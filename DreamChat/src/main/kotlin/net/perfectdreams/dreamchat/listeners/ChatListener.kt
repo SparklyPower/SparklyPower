@@ -77,6 +77,7 @@ class ChatListener(val m: DreamChat) : Listener {
 		m.lockedTells.remove(e.player)
 		chatCooldownCache.remove(e.player)
 		lastMessageCache.remove(e.player)
+		m.hideTells.remove(e.player)
 	}
 
 	@EventHandler

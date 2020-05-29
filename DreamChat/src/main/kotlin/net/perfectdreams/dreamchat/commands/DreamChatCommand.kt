@@ -1,26 +1,16 @@
 package net.perfectdreams.dreamchat.commands
 
-import net.perfectdreams.commands.annotation.Subcommand
-import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamchat.DreamChat
-import org.bukkit.command.CommandSender
+import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 
-class DreamChatCommand(val m: DreamChat) : SparklyCommand(arrayOf("dreamchat"), permission = "dreamchat.setup") {
-	@Subcommand
-	fun root(p0: CommandSender) {
-		p0.sendMessage("§6/dreamchat start")
-	}
+object DreamChatCommand : DSLCommandBase<DreamChat> {
+    override fun command(plugin: DreamChat) = create(listOf("dreamchat")) {
+        permission = "dreamchat.setup"
 
-	@Subcommand(["start"])
-	fun argument(p0: CommandSender) {
-		p0.sendMessage("Iniciando o evento chat...")
-		m.eventoChat.preStart()
-	}
-
-	@Subcommand(["reload"])
-	fun reload(p0: CommandSender) {
-		m.reload()
-
-		p0.sendMessage("Reload concluido!")
-	}
+        executes {
+            sender.sendMessage("§6/dreamchat start")
+            sender.sendMessage("§6/dreamchat tellon")
+            sender.sendMessage("§6/dreamchat telloff")
+        }
+    }
 }

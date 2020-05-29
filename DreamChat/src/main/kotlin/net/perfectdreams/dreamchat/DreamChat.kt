@@ -7,6 +7,7 @@ import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.string
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.mcMMO
+import com.google.common.collect.Sets
 import com.greatmancode.craftconomy3.Common
 import com.greatmancode.craftconomy3.groups.WorldGroupsManager
 import com.okkero.skedule.SynchronizationContext
@@ -27,7 +28,6 @@ import net.perfectdreams.dreamchat.utils.chatevent.EventoChatHandler
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.discord.DiscordWebhook
-import net.perfectdreams.dreamcore.utils.exposed.upsert
 import org.bukkit.Bukkit
 import org.bukkit.Statistic
 import org.bukkit.configuration.file.YamlConfiguration
@@ -64,7 +64,7 @@ class DreamChat : KotlinPlugin() {
 	var lockedTells = WeakHashMap<Player, String>()
 	var quickReply = WeakHashMap<Player, Player>()
 	var oldestPlayers = listOf<Pair<UUID, Int>>()
-
+	val hideTells = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
 	val eventoChat = EventoChatHandler()
 
 	val replacers = mutableMapOf<Regex, String>()
@@ -116,9 +116,12 @@ class DreamChat : KotlinPlugin() {
 		registerCommand(TellCommand(this))
 		registerCommand(QuickReplyCommand(this))
 		registerCommand(NickCommand(this))
-		registerCommand(DreamChatCommand(this))
 		registerCommand(QueroTagCommand(this))
 		registerCommand(IgnoreCommand(this))
+		registerCommand(DreamChatCommand)
+		registerCommand(DreamChatReloadCommand)
+		registerCommand(DreamChatSeeTellCommand)
+		registerCommand(DreamChatStartCommand)
 		registerCommand(OnlineCommand)
 		reload()
 		loadResponses()
