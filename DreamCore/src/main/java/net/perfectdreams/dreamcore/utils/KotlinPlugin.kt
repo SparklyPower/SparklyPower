@@ -31,13 +31,7 @@ open class KotlinPlugin : JavaPlugin() {
 
 	override fun onDisable() {
 		softDisable()
-	}
 
-	open fun softEnable() {
-
-	}
-
-	open fun softDisable() {
 		// Primeiro nós iremos desregistrar todos os comandos deste plugin
 		commandList.forEach {
 			it.unregister()
@@ -55,6 +49,14 @@ open class KotlinPlugin : JavaPlugin() {
 			unregisterServerEvent(serverEvent)
 
 		// Problema resolvido!
+	}
+
+	open fun softEnable() {
+
+	}
+
+	open fun softDisable() {
+
 	}
 
 	/**
