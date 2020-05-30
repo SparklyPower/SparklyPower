@@ -30,7 +30,7 @@ class DreamCasamentos : KotlinPlugin() {
     val requests = mutableListOf<Request>()
 
     val marriedUsers = Caffeine.newBuilder()
-        .expireAfterWrite(30, TimeUnit.MINUTES)
+        .expireAfterWrite(1, TimeUnit.MINUTES)
         .build<Player, Optional<Player>>()
         .asMap()
 
