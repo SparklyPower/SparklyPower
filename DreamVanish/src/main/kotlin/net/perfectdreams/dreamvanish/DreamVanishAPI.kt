@@ -23,15 +23,11 @@ object DreamVanishAPI {
                 }
             }
 
-            player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 20 * 86400, 0, true, false))
-
             vanishedPlayers.add(player)
         } else {
             Bukkit.getOnlinePlayers().forEach {
                 it.showPlayer(DreamVanish.INSTANCE, player)
             }
-
-            player.removePotionEffect(PotionEffectType.INVISIBILITY)
 
             vanishedPlayers.remove(player)
         }
