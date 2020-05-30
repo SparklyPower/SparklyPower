@@ -1,0 +1,5 @@
+name: DreamBrisa
+main: net.perfectdreams.dreambrisa.DreamBrisa
+version: 1.0.0
+api-version: 1.13
+softdepend: ["DreamCore"]
