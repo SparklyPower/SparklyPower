@@ -1,0 +1,5 @@
+name: DreamVIPStuff
+main: net.perfectdreams.dreamvipstuff.DreamVIPStuff
+version: 1.0.0
+softdepend: ["DreamCore"]
+api-version: 1.13
