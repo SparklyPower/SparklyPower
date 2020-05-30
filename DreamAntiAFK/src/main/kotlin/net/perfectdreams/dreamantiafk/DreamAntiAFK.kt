@@ -98,7 +98,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 											|§aFicar parado por muito tempo!§f
 											|
 											|§6(§eObs:§6 Não precisa ficar preocupado!
-											|§6Você ainda pode entrar no PerfectDreams! Nada irá acontecer!)""".trimMargin()
+											|§6Você ainda pode entrar no SparklyPower! Nada irá acontecer!)""".trimMargin()
 								)
 
 								for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission(isStaffPermission) }) {
