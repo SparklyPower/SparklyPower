@@ -46,7 +46,7 @@ object ChatUtils {
 		}
 
 		if (message.contains("/")) {
-			message = Regex("\b/\\w+\b").replace(message, "§6$0§f")
+			message = Regex("(^| )(/\\w+)\\b").replace(message, "§6$0§f")
 		}
 
 		return message
