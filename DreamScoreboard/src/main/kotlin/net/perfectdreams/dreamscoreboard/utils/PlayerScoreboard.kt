@@ -351,14 +351,6 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 
 			if (!t.hasPlayer(player))
 				t.addPlayer(player)
-
-			if (player.hasPermission("sparklypower.soustaff")) {
-				val staffTeam = phoenix.scoreboard.getTeam("0_SparklyStaff") ?: phoenix.scoreboard.registerNewTeam("0_SparklyStaff")
-				staffTeam.setCanSeeFriendlyInvisibles(true)
-
-				if (!staffTeam.hasPlayer(player))
-					staffTeam.addPlayer(player)
-			}
 		}
 
 		player.scoreboard = phoenix.scoreboard
