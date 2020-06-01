@@ -74,6 +74,8 @@ class DreamCasamentos : KotlinPlugin() {
                 val checkedPlayers = mutableListOf<Player>()
 
                 onlinePlayers.forEach {
+                    switchContext(SynchronizationContext.ASYNC)
+                    
                     val optionalMarriedPlayer = marriedUsers.getOrPut(it) {
                         Optional.ofNullable(
                             getMarriageFor(it)?.getPartnerOf(it)?.let { it1 -> Bukkit.getPlayer(it1) }
