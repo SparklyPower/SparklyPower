@@ -1,0 +1,5 @@
+name: DreamChatTags
+main: net.perfectdreams.dreamchattags.DreamChatTags
+version: 1.0.0
+softdepend: ["DreamCore"]
+api-version: 1.13
