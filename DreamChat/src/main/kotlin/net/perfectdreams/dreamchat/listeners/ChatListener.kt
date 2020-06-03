@@ -101,9 +101,6 @@ class ChatListener(val m: DreamChat) : Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onChat(e: AsyncPlayerChatEvent) {
-		// TODO: Remover
-		m.loadResponses()
-
 		e.isCancelled = true
 
 		val lockedTellPlayer = m.lockedTells[e.player]
