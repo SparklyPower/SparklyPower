@@ -10,7 +10,7 @@ repositories {
 
 dependencies {
     compile(kotlin("stdlib-jdk8"))
-    compile("com.destroystokyo.paper:paper:1.13-R0.1-SNAPSHOT")
+    compile(files("../libs/patched_1.15.1.jar"))
     compile("net.perfectdreams.dreamcore:DreamCore:1.0-SNAPSHOT")
     compile("net.luckperms:api:5.0")
     compile(project(":DreamClubes"))

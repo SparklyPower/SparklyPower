@@ -78,36 +78,36 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             generateItemAt(1, 1, Material.MYCELIUM, "§e16000 blocos de proteção", 30) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 16000")
             }
-            generateItemAt(2, 1, Material.GRASS, "§e24000 blocos de proteção", 45) {
+            generateItemAt(2, 1, Material.GRASS_BLOCK, "§e24000 blocos de proteção", 45) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 24000")
             }
 
             // Money
-            generateItemAt(0, 2, Material.SIGN, "§a234375 Sonhos", 265) {
+            generateItemAt(0, 2, Material.OAK_SIGN, "§a234375 Sonhos", 265) {
                 sender.balance += 234375
             }
-            generateItemAt(1, 2, Material.SIGN, "§a468750 Sonhos", 530) {
+            generateItemAt(1, 2, Material.OAK_SIGN, "§a468750 Sonhos", 530) {
                 sender.balance += 468750
             }
-            generateItemAt(2, 2, Material.SIGN, "§a937500 Sonhos", 1045) {
+            generateItemAt(2, 2, Material.OAK_SIGN, "§a937500 Sonhos", 1045) {
                 sender.balance += 937500
             }
-            generateItemAt(3, 2, Material.SIGN, "§a1875000 Sonhos", 2090) {
+            generateItemAt(3, 2, Material.OAK_SIGN, "§a1875000 Sonhos", 2090) {
                 sender.balance += 1875000
             }
-            generateItemAt(4, 2, Material.SIGN, "§a3750000 Sonhos", 4165) {
+            generateItemAt(4, 2, Material.OAK_SIGN, "§a3750000 Sonhos", 4165) {
                 sender.balance += 3750000
             }
-            generateItemAt(5, 2, Material.SIGN, "§a7500000 Sonhos", 8325) {
+            generateItemAt(5, 2, Material.OAK_SIGN, "§a7500000 Sonhos", 8325) {
                 sender.balance += 7500000
             }
-            generateItemAt(6, 2, Material.SIGN, "§a15000000 Sonhos", 16650) {
+            generateItemAt(6, 2, Material.OAK_SIGN, "§a15000000 Sonhos", 16650) {
                 sender.balance += 15000000
             }
-            generateItemAt(7, 2, Material.SIGN, "§a30000000 Sonhos", 33300) {
+            generateItemAt(7, 2, Material.OAK_SIGN, "§a30000000 Sonhos", 33300) {
                 sender.balance += 30000000
             }
-            generateItemAt(8, 2, Material.SIGN, "§a60000000 Sonhos", 66600) {
+            generateItemAt(8, 2, Material.OAK_SIGN, "§a60000000 Sonhos", 66600) {
                 sender.balance += 60000000
             }
 
