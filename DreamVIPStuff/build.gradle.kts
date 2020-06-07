@@ -7,6 +7,7 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
+    maven("https://repo.citizensnpcs.co/")
 }
 
 dependencies {
@@ -14,7 +15,8 @@ dependencies {
     implementation(files("../libs/patched_1.15.1.jar"))
     implementation(files("../libs/DreamCore-shadow.jar"))
     implementation(files("../libs/WorldGuard.jar"))
-    implementation(files("../libs/ChestShop.jar"))
+    implementation("net.citizensnpcs:citizens:2.0.26-SNAPSHOT")
+    implementation("net.luckperms:api:5.0")
 }
 
 tasks.withType<KotlinCompile> {
