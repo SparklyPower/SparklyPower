@@ -28,12 +28,12 @@ class CorridaCommand(val m: DreamCorrida) : SparklyCommand(arrayOf("corrida")) {
             return
         }
 
-        if (m.eventoCorrida.wonPlayers.contains(sender.player.uniqueId)) {
+        if (m.eventoCorrida.wonPlayers.contains(sender.uniqueId)) {
             sender.sendMessage("${DreamCorrida.PREFIX}§c Você já venceu a corrida atual!")
             return
         }
 
-        val spawnLocation = m.eventoCorrida.corrida?.spawn?.toLocation()
+        val spawnLocation = m.eventoCorrida.corrida?.spawn?.toLocation()!!
         sender.teleport(spawnLocation)
 
         sender.playSound(spawnLocation, "perfectdreams.sfx.special_stage", SoundCategory.RECORDS, 1000f, 1f)

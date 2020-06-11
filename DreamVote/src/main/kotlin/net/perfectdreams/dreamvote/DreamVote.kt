@@ -191,15 +191,19 @@ class DreamVote : KotlinPlugin() {
 			VaultUtils.econ.depositPlayer(offlinePlayer, money)
 
 			if (broadcast) {
-				lastVoter = offlinePlayer.name
-				val prizes = "§9" + giveAwards.filter { !it.hidden }.joinToString("§e, §9", transform = { it.name })
+				val lastVoter = offlinePlayer.name
+				this@DreamVote.lastVoter = lastVoter
 
-				// Como o player pode estar (ou não!) online, nós iremos pegar o displayName apenas caso o player esteja online
-				val player = getPlayerExact(lastVoter)
-				val playerName = player?.displayName ?: lastVoter
+				if (lastVoter != null) {
+					val prizes = "§9" + giveAwards.filter { !it.hidden }.joinToString("§e, §9", transform = { it.name })
 
-				Bukkit.broadcastMessage("§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e e ganhou $prizes§e! Vote você também! §6/votar")
-				player?.sendTitle("§aParabéns!", "§eVocê ganhou $prizes", 10, 60, 10)
+					// Como o player pode estar (ou não!) online, nós iremos pegar o displayName apenas caso o player esteja online
+					val player = getPlayerExact(lastVoter)
+					val playerName = player?.displayName ?: lastVoter
+
+					Bukkit.broadcastMessage("§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e e ganhou $prizes§e! Vote você também! §6/votar")
+					player?.sendTitle("§aParabéns!", "§eVocê ganhou $prizes", 10, 60, 10)
+				}
 			}
 
 			switchContext(SynchronizationContext.ASYNC)
