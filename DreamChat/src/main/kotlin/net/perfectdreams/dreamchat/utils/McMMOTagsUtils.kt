@@ -155,7 +155,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lEsp",
-                    "§e§lEspadas",
+                    "§e§lEspadachim",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 espadas do McMMO!"
                     ),
@@ -182,8 +182,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.UNARMED].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lD",
-                    "§e§lDesarmad${e.player.artigo}",
+                    "§e§lB",
+                    "§e§Boxeador${nothingOrArtigo}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 desarmado do McMMO!"
                     ),
