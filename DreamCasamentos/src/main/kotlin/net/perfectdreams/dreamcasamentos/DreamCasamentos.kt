@@ -31,7 +31,7 @@ class DreamCasamentos : KotlinPlugin() {
 
     val marriedUsers = Caffeine.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES)
-        .build<Player, Optional<Player>>()
+        .build<UUID, Optional<UUID>>()
         .asMap()
 
     companion object {
@@ -76,16 +76,18 @@ class DreamCasamentos : KotlinPlugin() {
                 onlinePlayers.forEach {
                     switchContext(SynchronizationContext.ASYNC)
                     
-                    val optionalMarriedPlayer = marriedUsers.getOrPut(it) {
+                    val optionalMarriedPlayer = marriedUsers.getOrPut(it.uniqueId) {
                         Optional.ofNullable(
-                            getMarriageFor(it)?.getPartnerOf(it)?.let { it1 -> Bukkit.getPlayer(it1) }
+                            getMarriageFor(it)?.getPartnerOf(it)
                         )
                     }
 
                     switchContext(SynchronizationContext.SYNC)
 
-                    optionalMarriedPlayer.ifPresent { marriedPlayer ->
-                        if (!checkedPlayers.contains(marriedPlayer) && marriedPlayer.isOnline && !DreamVanishAPI.isVanishedOrInvisible(it) && it.canSee(marriedPlayer) && marriedPlayer.canSee(it) && marriedPlayer.world == it.world && 128 >= it.location.distanceSquared(marriedPlayer.location)) {
+                    optionalMarriedPlayer.ifPresent { marriedPlayerUniqueId ->
+                        val marriedPlayer = Bukkit.getPlayer(marriedPlayerUniqueId)
+
+                        if (marriedPlayer != null && !checkedPlayers.contains(marriedPlayer) && marriedPlayer.isOnline && !DreamVanishAPI.isVanishedOrInvisible(it) && it.canSee(marriedPlayer) && marriedPlayer.canSee(it) && marriedPlayer.world == it.world && 128 >= it.location.distanceSquared(marriedPlayer.location)) {
                             it.world.spawnParticle(Particle.HEART, it.location.clone().add(0.0, 1.0, 0.0), 3, 2.0, 2.0, 2.0)
                             marriedPlayer.world.spawnParticle(Particle.HEART, marriedPlayer.location.clone().add(0.0, 1.0, 0.0), 3, 2.0, 2.0, 2.0)
 

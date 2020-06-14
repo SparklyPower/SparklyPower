@@ -30,14 +30,16 @@ class MarryListener(val m: DreamCasamentos) : Listener {
         if (e.rightClicked is Player) {
             val rightClicked = e.rightClicked as Player
             scheduler.schedule(m, SynchronizationContext.ASYNC) {
-                val optionalMarriedPlayer = m.marriedUsers.getOrPut(e.player) {
+                val optionalMarriedPlayer = m.marriedUsers.getOrPut(e.player.uniqueId) {
                     Optional.ofNullable(
-                        m.getMarriageFor(e.player)?.getPartnerOf(e.player)?.let { Bukkit.getPlayer(it) }
+                        m.getMarriageFor(e.player)?.getPartnerOf(e.player)
                     )
                 }
                 switchContext(SynchronizationContext.SYNC)
 
-                optionalMarriedPlayer.ifPresent { marriedPlayer ->
+                optionalMarriedPlayer.ifPresent { marriedPlayerUniqueId ->
+                    val marriedPlayer = Bukkit.getPlayer(marriedPlayerUniqueId)
+
                     if (marriedPlayer == e.rightClicked) {
                         player.world.spawnParticle(Particle.HEART, player.location.clone().add(0.0, 2.0, 0.0), 1)
                         player.world.spawnParticle(Particle.HEART, rightClicked.location.clone().add(0.0, 2.0, 0.0), 1)
