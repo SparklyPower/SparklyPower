@@ -75,7 +75,7 @@ class BlockListener(val m: DreamEnchant) : Listener {
 					return
 				}
 
-				val enchantment = Enchantment.getByName(enchantWith)
+				val enchantment = Enchantment.getByName(enchantWith)!!
 
 				val hasConflict = heldItem.enchantments.any {
 					it.key != enchantment && it.key.conflictsWith(enchantment)

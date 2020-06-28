@@ -55,7 +55,7 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
             defaultBreakPermission
         ),
         MobSpawnerBreakable(
-            EntityType.PIG_ZOMBIE,
+            EntityType.PIGLIN,
             onlyInNether + onlyInWorld,
             specialBreakPermission
         ),
@@ -190,7 +190,7 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
             e.player.inventory.itemInMainHand.durability = newDurability
 
             if (newDurability >= 32.toShort()) {
-                e.player.inventory.itemInMainHand = ItemStack(Material.AIR)
+                e.player.inventory.setItemInMainHand(ItemStack(Material.AIR))
                 e.player.sendMessage("§cSua picareta de mover spawners quebrou!")
             }
 

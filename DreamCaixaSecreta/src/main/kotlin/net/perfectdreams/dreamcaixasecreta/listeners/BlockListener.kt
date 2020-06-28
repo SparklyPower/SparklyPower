@@ -28,11 +28,11 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 		if (e.item?.type != Material.CHEST)
 			return
 
-		val data = e.item.getStoredMetadata("caixaSecretaLevel") ?: return
+		val data = e.item!!.getStoredMetadata("caixaSecretaLevel") ?: return
 		val level = data.toInt()
 
 		e.isCancelled = true
-		e.item.amount -= 1
+		e.item!!.amount -= 1
 
 		val items = mutableListOf<ItemStack>()
 		var amount = 0
@@ -64,7 +64,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 			}
 		}
 
-		val location = e.clickedBlock.location.add(0.5, 1.0, 0.5)
+		val location = e.clickedBlock!!.location.add(0.5, 1.0, 0.5)
 		if (items.isNotEmpty()) {
 			items.forEach {
 				e.player.world.dropItemNaturally(location, it)

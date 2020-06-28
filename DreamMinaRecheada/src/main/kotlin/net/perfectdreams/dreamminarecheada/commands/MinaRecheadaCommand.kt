@@ -44,7 +44,7 @@ class MinaRecheadaCommand(internal var m: DreamMinaRecheada) : SparklyCommand(ar
     fun goToMina(player: Player) {
         if (m.minaRecheada.running) {
             player.sendMessage(DreamMinaRecheada.PREFIX + "§aVocê entrou na Mina Recheada, divirta-se!")
-            player.teleport(m.minaRecheada.minaRecheadaData.spawn)
+            player.teleport(m.minaRecheada.minaRecheadaData.spawn!!)
         } else {
             player.sendMessage(DreamMinaRecheada.PREFIX + "§cAtualmente há nenhum Evento Mina Recheada acontecendo...")
         }

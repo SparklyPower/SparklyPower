@@ -43,14 +43,14 @@ class InteractListener(internal val m: DreamMinaRecheada) : Listener {
                     player.inventory.setItem(firstEmpty, player.inventory.itemInMainHand)
                     val ironPickaxe = ItemStack(Material.IRON_PICKAXE, 1)
                     ironPickaxe.meta<ItemMeta> {
-                        this.displayName = "§fPicareta da §e§lMina §6§lR§e§le§6§lc§e§lh§6§le§e§la§6§ld§e§la§8"
+                        this.setDisplayName("§fPicareta da §e§lMina §6§lR§e§le§6§lc§e§lh§6§le§e§la§6§ld§e§la§8")
                         this.lore = listOf("§7Para pobres que não possuem uma picareta!")
                     }
 
                     val itemMeta = ironPickaxe.itemMeta
                     itemMeta.isUnbreakable = true
                     ironPickaxe.itemMeta = itemMeta
-                    player.inventory.itemInMainHand = ironPickaxe
+                    player.inventory.setItemInMainHand(ironPickaxe)
                 }
             }
         }
@@ -75,11 +75,10 @@ class InteractListener(internal val m: DreamMinaRecheada) : Listener {
     @EventHandler
     fun onInteract(e: PlayerInteractEvent) {
         if (e.player.world.name != "MinaRecheada") {
-            if (e.item != null && e.item.type == Material.IRON_PICKAXE) {
-                val itemStack = e.item
-
+            val itemStack = e.item
+            if (itemStack != null && itemStack.type == Material.IRON_PICKAXE) {
                 if (itemStack.hasItemMeta() && itemStack.itemMeta.hasLore()) {
-                    if (itemStack.itemMeta.lore[0] == "§7Para pobres que não possuem uma picareta!") {
+                    if (itemStack.itemMeta.lore?.getOrNull(0) == "§7Para pobres que não possuem uma picareta!") {
                         e.isCancelled = true
                         e.player.sendMessage(DreamMinaRecheada.PREFIX + "§cEsta picareta é peculiar... ela possui um poder que apenas permite você utiliza-lá na Mina Recheada!")
                     }

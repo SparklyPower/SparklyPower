@@ -6,7 +6,6 @@ import net.perfectdreams.dreamcasamentos.dao.Marriage
 import net.perfectdreams.dreamcore.utils.InstantFirework
 import net.perfectdreams.dreamcore.utils.canHoldItem
 import net.perfectdreams.dreamcore.utils.extensions.girl
-import org.apache.commons.io.FileUtils.waitFor
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot

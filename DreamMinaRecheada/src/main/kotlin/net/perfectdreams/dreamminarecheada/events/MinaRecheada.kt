@@ -11,6 +11,7 @@ import net.perfectdreams.dreamminarecheada.utils.MinaRecheadaData
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.World
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.boss.BossBar
@@ -21,6 +22,8 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
     private var location2: Location? = null
     var bossBar1: BossBar? = null
     var bossBar2: BossBar? = null
+    val minaRecheadaWorld: World
+        get() = Bukkit.getWorld("MinaRecheada")!!
 
     init {
         // TODO: Cancelar task automática
@@ -47,10 +50,10 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
         running = true
 
         val bossBar1 = Bukkit.createBossBar("§e§lMina §6§lR§e§le§6§lc§e§lh§6§le§e§la§6§ld§e§la§8", BarColor.PINK, BarStyle.SOLID)
-        Bukkit.getWorld("MinaRecheada").players.forEach { bossBar1.addPlayer(it) }
+        minaRecheadaWorld.players.forEach { bossBar1.addPlayer(it) }
         this.bossBar1 = bossBar1
         val bossBar2 = Bukkit.createBossBar("§aPreparem-se, para um dos melhores eventos do servidor! ʕ•ᴥ•ʔ", BarColor.BLUE, BarStyle.SOLID)
-        Bukkit.getWorld("MinaRecheada").players.forEach { bossBar2.addPlayer(it) }
+        minaRecheadaWorld.players.forEach { bossBar2.addPlayer(it) }
         this.bossBar2 = bossBar2
 
         countdown()
@@ -125,11 +128,11 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
     fun eventLoop() {
         val fourMinutes = (60 * 4) * 20
 
-        Bukkit.getWorld("MinaRecheada").playSound(
-                Location(Bukkit.getWorld("MinaRecheada"), 0.5, 80.0, 0.5),
-                "perfectdreams.sfx.special_stage",
-                10000f,
-                1f
+        minaRecheadaWorld.playSound(
+            Location(minaRecheadaWorld, 0.5, 80.0, 0.5),
+            "perfectdreams.sfx.special_stage",
+            10000f,
+            1f
         )
 
         scheduler().schedule(DreamMinaRecheada.INSTANCE) {
@@ -165,18 +168,18 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
 
                 if (elapsedTicks == 2680) {
                     // tocar novamente a super musiquinha
-                    Bukkit.getWorld("MinaRecheada").playSound(
-                            Location(Bukkit.getWorld("MinaRecheada"), 0.5, 80.0, 0.5),
-                            "perfectdreams.sfx.special_stage",
-                            10000f,
-                            1f
+                    minaRecheadaWorld.playSound(
+                        Location(Bukkit.getWorld("MinaRecheada"), 0.5, 80.0, 0.5),
+                        "perfectdreams.sfx.special_stage",
+                        10000f,
+                        1f
                     )
                 }
 
                 // Atualizar bossbar
                 if (elapsedTicks % 100 == 0) {
                     bossBar1?.progress = 1.0 - (elapsedTicks.toDouble() / fourMinutes.toDouble())
-                    bossBar1?.title = "§e§lMina §6§lR§e§le§6§lc§e§lh§6§le§e§la§6§ld§e§la§8"
+                    bossBar1?.setTitle("§e§lMina §6§lR§e§le§6§lc§e§lh§6§le§e§la§6§ld§e§la§8")
 
                     val blockCount = getBlockCount()
                     val blockRatio = blockCount.second.toDouble() / blockCount.first.toDouble()
@@ -189,12 +192,12 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
                         blockRatio >= 0.25 -> bossBar2?.color = BarColor.PINK
                         else -> bossBar2?.color = BarColor.PURPLE
                     }
-                    bossBar2?.title = "§e${String.format("%.2f", brokenBlocksRatio * 100)}% §ablocos quebrados"
+                    bossBar2?.setTitle("§e${String.format("%.2f", brokenBlocksRatio * 100)}% §ablocos quebrados")
                 }
 
                 // Depois de três minutos
                 if (elapsedTicks == (60 * 3) * 20) {
-                    Bukkit.getWorld("MinaRecheada").players.forEach { it.sendMessage(DreamMinaRecheada.PREFIX + "§aAlguns blocos começam a mudar... Faltam um minuto para acabar a Mina Recheada!") }
+                    minaRecheadaWorld.players.forEach { it.sendMessage(DreamMinaRecheada.PREFIX + "§aAlguns blocos começam a mudar... Faltam um minuto para acabar a Mina Recheada!") }
 
                     fixAllMinas(Material.STONE, 7.0)
                     fixAllMinas(Material.COAL_ORE, 5.0)
@@ -210,7 +213,7 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
 
                 // Depois de dois minutos
                 if (elapsedTicks == (60 * 2) * 20) {
-                    Bukkit.getWorld("MinaRecheada").players.forEach { it.sendMessage(DreamMinaRecheada.PREFIX + "§aAlguns blocos começam a mudar... Faltam dois minutos para acabar a Mina Recheada!") }
+                    minaRecheadaWorld.players.forEach { it.sendMessage(DreamMinaRecheada.PREFIX + "§aAlguns blocos começam a mudar... Faltam dois minutos para acabar a Mina Recheada!") }
 
                     fixAllMinas(Material.STONE, 7.0)
                     fixAllMinas(Material.COAL_ORE, 5.0)
@@ -223,7 +226,7 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
 
                 // Depois de um minuto
                 if (elapsedTicks == 60 * 20) {
-                    Bukkit.getWorld("MinaRecheada").players.forEach { it.sendMessage(DreamMinaRecheada.PREFIX + "§aAlguns blocos começam a mudar... Faltam três minutos para acabar a Mina Recheada!") }
+                    minaRecheadaWorld.players.forEach { it.sendMessage(DreamMinaRecheada.PREFIX + "§aAlguns blocos começam a mudar... Faltam três minutos para acabar a Mina Recheada!") }
 
                     fixAllMinas(Material.STONE, 7.0)
                     fixAllMinas(Material.COAL_ORE, 5.0)

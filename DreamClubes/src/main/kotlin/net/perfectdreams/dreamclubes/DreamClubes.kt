@@ -3,8 +3,6 @@ package net.perfectdreams.dreamclubes
 import net.perfectdreams.dreamclubes.commands.ClubeChatCommand
 import net.perfectdreams.dreamclubes.commands.ClubesCommand
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamclubes.listeners.BlockListener
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.tables.Clubes
 import net.perfectdreams.dreamclubes.tables.ClubesHomes
@@ -24,7 +22,6 @@ class DreamClubes : KotlinPlugin() {
 
 		registerCommand(ClubesCommand(this))
 		registerCommand(ClubeChatCommand(this))
-		registerEvents(BlockListener(this))
 
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(

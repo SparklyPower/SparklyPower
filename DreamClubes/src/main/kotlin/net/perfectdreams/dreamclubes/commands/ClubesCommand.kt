@@ -205,7 +205,7 @@ class ClubesCommand(val m: DreamClubes) : SparklyCommand(arrayOf("clube", "clube
             val coloredTag = tag.translateColorCodes()
             val coloredName = name.translateColorCodes()
             val cleanName = name.stripColorCode()
-            val cleanTag = ChatColor.stripColor(coloredTag)
+            val cleanTag = ChatColor.stripColor(coloredTag)!!
 
             if (!ClubeAPI.checkIfClubeCanUseTagAndSendMessages(player, clube, coloredTag))
                 return@async

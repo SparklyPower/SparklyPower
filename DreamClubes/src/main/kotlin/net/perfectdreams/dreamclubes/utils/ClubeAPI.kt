@@ -125,11 +125,11 @@ object ClubeAPI {
 }
 
 fun async(callback: suspend com.okkero.skedule.BukkitSchedulerController.() -> kotlin.Unit) {
-    scheduler().schedule(Bukkit.getPluginManager().getPlugin("DreamClubes"), SynchronizationContext.ASYNC, callback)
+    scheduler().schedule(Bukkit.getPluginManager().getPlugin("DreamClubes")!!, SynchronizationContext.ASYNC, callback)
 }
 
 fun sync(callback: suspend com.okkero.skedule.BukkitSchedulerController.() -> kotlin.Unit) {
-    scheduler().schedule(Bukkit.getPluginManager().getPlugin("DreamClubes"), SynchronizationContext.SYNC, callback)
+    scheduler().schedule(Bukkit.getPluginManager().getPlugin("DreamClubes")!!, SynchronizationContext.SYNC, callback)
 }
 
 suspend fun BukkitSchedulerController.toAsync() {

@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class KickSubCommand(val m: DreamClubes) : WithClubeSubCommand {
     override fun execute(player: Player, clube: Clube, selfMember: ClubeMember, args: Array<String>) {
-        val playerName = args.getOrNull(0)
+        val playerName = args.getOrNull(0) ?: return
 
         async {
             if (!selfMember.canExecute(ClubePermissionLevel.ADMIN)) {

@@ -79,7 +79,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 						continue
 					}
 
-					val chestplate = player.inventory.chestplate
+					val chestplate = player.inventory.chestplate ?: continue
 					val isJetpack = isJetpack(player, chestplate)
 
 					if (!isJetpack) {
@@ -163,11 +163,13 @@ class DreamJetpack : KotlinPlugin(), Listener {
 						val minutes = timeRemaining / 60
 						val seconds = timeRemaining % 60
 
-						if (applyDamage == 0) {
-							bossBar.title = "§dWoosh! §aVocê pode voar por mais §e∞§a!"
-						} else {
-							bossBar.title = "§dWoosh! §aVocê pode voar por mais §e$minutes minutos e $seconds segundos§a!"
-						}
+						bossBar.setTitle(
+							if (applyDamage == 0) {
+								"§dWoosh! §aVocê pode voar por mais §e∞§a!"
+							} else {
+								"§dWoosh! §aVocê pode voar por mais §e$minutes minutos e $seconds segundos§a!"
+							}
+						)
 					}
 
 					player.world.spawnParticle(Particle.SMOKE_NORMAL, player.location, 20, 1.0, 1.0, 1.0)
