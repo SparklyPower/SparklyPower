@@ -1,14 +1,14 @@
 package net.perfectdreams.dreamcore.utils
 
-import net.minecraft.server.v1_15_R1.EntityFireworks
-import net.minecraft.server.v1_15_R1.PacketPlayOutEntityStatus
-import net.minecraft.server.v1_15_R1.World
+import net.minecraft.server.v1_16_R1.EntityFireworks
+import net.minecraft.server.v1_16_R1.PacketPlayOutEntityStatus
+import net.minecraft.server.v1_16_R1.World
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_15_R1.CraftWorld
-import org.bukkit.craftbukkit.v1_15_R1.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_16_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_16_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack
 import org.bukkit.entity.Firework
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack

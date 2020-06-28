@@ -62,10 +62,18 @@ class SetHomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("sethome", "setc
 					player.sendMessage("§aCasa remarcada com sucesso!")
 				}
 
-				val claim = GriefPrevention.instance.dataStore.getClaimAt(newLocation, false, null)
+				if (player.world.name == "Resources") {
+					player.sendMessage("§c")
+					player.sendMessage("§cVocê marcou o teletransporte rápido no mundo de recursos. O mundo de recursos é regenerado constantemente!")
+					player.sendMessage("§cNão construa coisas importantes no mundo de recursos! Se você quer construir a sua humilde residência, construa")
+					player.sendMessage("§cna §6/warp survival§c!")
+					player.sendMessage("§cO seu teletransporte rápido será automaticamente deletado quando o mundo de recursos for resetado!")
+				} else {
+					val claim = GriefPrevention.instance.dataStore.getClaimAt(newLocation, false, null)
 
-				if (claim == null) {
-					player.sendMessage("§eParece que você ainda não protegeu o terreno aonde você marcou o teletransporte rápido! Para evitar griefings e roubos, use a pá de ouro do §6/kit noob§e para proteger!")
+					if (claim == null) {
+						player.sendMessage("§eParece que você ainda não protegeu o terreno aonde você marcou o teletransporte rápido! Para evitar griefings e roubos, use a pá de ouro do §6/kit noob§e para proteger!")
+					}
 				}
 			}
 		}

@@ -11,7 +11,9 @@ import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamterrainadditions.commands.*
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntitySpawnEvent
@@ -111,7 +113,8 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		EntityType.WITCH,
 		EntityType.ZOMBIE_VILLAGER,
 		EntityType.ZOMBIE_HORSE,
-		EntityType.PIG_ZOMBIE,
+		EntityType.PIGLIN,
+		EntityType.ZOMBIFIED_PIGLIN,
 		EntityType.EVOKER,
 		EntityType.ILLUSIONER,
 		EntityType.GHAST,
@@ -135,14 +138,20 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 			e.isCancelled = true
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.HIGHEST)
 	fun onDamage(e: EntityDamageByEntityEvent) {
 		val damager = e.damager
 		val entity = e.entity
 
-		if (damager is Player && entity is Player) {
+		val realDamager = if (damager is Projectile) {
+			if (damager.shooter is Player) {
+				damager.shooter as Player
+			} else damager
+		} else damager
+
+		if (realDamager is Player && entity is Player) {
 			val entityClaim = GriefPrevention.instance.dataStore.getClaimAt(e.entity.location, false, null) ?: return
-			val damagerClaim = GriefPrevention.instance.dataStore.getClaimAt(e.damager.location, false, null) ?: return
+			val damagerClaim = GriefPrevention.instance.dataStore.getClaimAt(realDamager.location, false, null) ?: return
 
 			if (entityClaim == damagerClaim) {
 				val claimAdditions = getClaimAdditionsById(entityClaim.id)

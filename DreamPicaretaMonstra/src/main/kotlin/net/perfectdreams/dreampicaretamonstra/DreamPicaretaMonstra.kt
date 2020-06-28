@@ -139,25 +139,6 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 				if ((below || location.blockY > e.player.location.y - 1.0) && location.block.type !== Material.AIR && location.block.type !== Material.BEDROCK && isValidForHeldItem(heldItemType, location.block)) {
 					val center = location.add(0.0, 0.5, 0.0)
 					if (PlayerUtils.canBreakAt(location, e.player, location.block.type)) {
-						val drops = location.block.getDrops(inHand)
-						val exp = BlockUtils.getExpCount(location.block, enchantmentLevel)
-
-						val dropsAsItems =  drops.map {
-							location.world.dropItemNaturally(
-								location,
-								it
-							)
-						}
-
-						doMcMMOStuff(e.player, e.block.state, dropsAsItems)
-
-						location.block.type = Material.AIR
-
-						if (exp > 0 && !isSilky) {
-							val orb = location.block.world.spawnEntity(center, EntityType.EXPERIENCE_ORB) as ExperienceOrb
-							orb.experience = exp
-						}
-
 						val damageable = inHand.itemMeta as Damageable
 						if (chance(100.0 / (efficiencyLevel + 1))) {
 							if ((damageable.damage + 1) == inHand.type.maxDurability.toInt()) {
@@ -175,6 +156,25 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 						}
 						if (damageable.damage > inHand.type.maxDurability) {
 							e.player.inventory.removeItem(inHand)
+						}
+
+						val drops = location.block.getDrops(inHand)
+						val exp = BlockUtils.getExpCount(location.block, enchantmentLevel)
+
+						val dropsAsItems =  drops.map {
+							location.world.dropItemNaturally(
+								location,
+								it
+							)
+						}
+
+						doMcMMOStuff(e.player, e.block.state, dropsAsItems)
+
+						location.block.type = Material.AIR
+
+						if (exp > 0 && !isSilky) {
+							val orb = location.block.world.spawnEntity(center, EntityType.EXPERIENCE_ORB) as ExperienceOrb
+							orb.experience = exp
 						}
 
 						if (location.block.type != Material.AIR) {

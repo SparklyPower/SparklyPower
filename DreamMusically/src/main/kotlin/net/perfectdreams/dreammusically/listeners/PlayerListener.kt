@@ -81,24 +81,24 @@ class PlayerListener(val m: DreamMusically) : Listener {
                     return
 
                 // Uma gambiarra, já que Spigot não deixa colocar itens que não sejam records dentro de jukeboxes
-                val nmsWorld = (e.player.world as org.bukkit.craftbukkit.v1_15_R1.CraftWorld).getHandle() as net.minecraft.server.v1_15_R1.World
-                val tileEntity = nmsWorld.getTileEntity(net.minecraft.server.v1_15_R1.BlockPosition(clickedBlock.x, clickedBlock.y, clickedBlock.z))
+                val nmsWorld = (e.player.world as org.bukkit.craftbukkit.v1_16_R1.CraftWorld).getHandle() as net.minecraft.server.v1_16_R1.World
+                val tileEntity = nmsWorld.getTileEntity(net.minecraft.server.v1_16_R1.BlockPosition(clickedBlock.x, clickedBlock.y, clickedBlock.z))
 
                 val copyOfItemInMainHand = e.player.inventory.itemInMainHand.clone()
 
                 m.schedule {
                     waitFor(1)
-                    val nmsJukebox = tileEntity as net.minecraft.server.v1_15_R1.TileEntityJukeBox
+                    val nmsJukebox = tileEntity as net.minecraft.server.v1_16_R1.TileEntityJukeBox
                     nmsWorld.setTypeAndData(
                         nmsJukebox.getPosition(),
-                        net.minecraft.server.v1_15_R1.Blocks.JUKEBOX.getBlockData().set(
-                            net.minecraft.server.v1_15_R1.BlockJukeBox.HAS_RECORD,
+                        net.minecraft.server.v1_16_R1.Blocks.JUKEBOX.getBlockData().set(
+                            net.minecraft.server.v1_16_R1.BlockJukeBox.HAS_RECORD,
                             true
-                        ) as net.minecraft.server.v1_15_R1.IBlockData,
+                        ) as net.minecraft.server.v1_16_R1.IBlockData,
                         3
                     )
 
-                    nmsJukebox.setRecord(org.bukkit.craftbukkit.v1_15_R1.inventory.CraftItemStack.asNMSCopy(copyOfItemInMainHand))
+                    nmsJukebox.setRecord(org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack.asNMSCopy(copyOfItemInMainHand))
                     e.player.inventory.setItemInMainHand(copyOfItemInMainHand.clone().apply { this.amount-- })
                     e.player.world.playSound(clickedBlock.location, customPlayingSong.play, SoundCategory.RECORDS, 4f, 1f)
 

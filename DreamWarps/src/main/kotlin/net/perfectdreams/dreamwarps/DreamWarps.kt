@@ -76,7 +76,9 @@ class DreamWarps : KotlinPlugin(), Listener {
 	}
 
 	fun loadConfig() {
+		warps.clear()
 		reloadConfig()
+
 		val warpsFolder = File(dataFolder, "warps")
 		warpsFolder.mkdirs()
 
