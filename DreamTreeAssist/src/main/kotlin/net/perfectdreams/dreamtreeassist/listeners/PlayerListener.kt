@@ -52,7 +52,8 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
         Material.STONE_AXE,
         Material.IRON_AXE,
         Material.GOLDEN_AXE,
-        Material.DIAMOND_AXE
+        Material.DIAMOND_AXE,
+        Material.NETHERITE_AXE
     )
 
     private val logToSapling = mapOf(

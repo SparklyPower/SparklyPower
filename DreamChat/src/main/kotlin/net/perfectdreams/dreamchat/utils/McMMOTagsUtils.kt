@@ -183,7 +183,7 @@ object McMMOTagsUtils {
             playerTagsEvent.tags.add(
                 PlayerTag(
                     "§e§lB",
-                    "§e§Boxeador${nothingOrArtigo}",
+                    "§e§lBoxeador${nothingOrArtigo}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 desarmado do McMMO!"
                     ),

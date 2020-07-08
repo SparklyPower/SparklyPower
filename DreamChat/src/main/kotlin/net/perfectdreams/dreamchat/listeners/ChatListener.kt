@@ -432,7 +432,8 @@ class ChatListener(val m: DreamChat) : Listener {
 			val heart = "§4❤ ".toTextComponent()
 			val offlinePlayer1 = Bukkit.getOfflinePlayer(casal.player1)
 			val offlinePlayer2 = Bukkit.getOfflinePlayer(casal.player2)
-			heart.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "§4❤ §d§l${DreamCasamentos.INSTANCE.getShipName(offlinePlayer1?.name ?: "???", offlinePlayer2?.name ?: "???")} §4❤\n\n§6Casado com: §b${Bukkit.getOfflinePlayer(casal.getPartnerOf(player))?.name ?: "???"}".toBaseComponent())
+
+			heart.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "§4❤ §d§l${DreamCasamentos.INSTANCE.getShipName(offlinePlayer1?.name ?: "???", offlinePlayer2?.name ?: "???")} §4❤\n\n§6Casad${MeninaAPI.getArtigo(player)} com: §b${Bukkit.getOfflinePlayer(casal.getPartnerOf(player))?.name ?: "???"}".toBaseComponent())
 			textComponent += heart
 		}
 

@@ -13,7 +13,7 @@ dependencies {
     compile("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.1")
     compile(project(":DreamCash"))
     compile(files("../libs/patched_1.15.1.jar"))
-    compile("net.perfectdreams.dreamcore:DreamCore:1.0-SNAPSHOT")
+    compile(files("../libs/DreamCore-shadow.jar"))
     compile("net.perfectdreams.dreamchat:DreamChat:1.0-SNAPSHOT")
 }
 

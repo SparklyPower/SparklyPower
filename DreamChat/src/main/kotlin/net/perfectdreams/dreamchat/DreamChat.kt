@@ -301,7 +301,7 @@ class DreamChat : KotlinPlugin() {
 			it.regex.mapTo(it.patterns) { it.toPattern(Pattern.CASE_INSENSITIVE) }
 		}
 
-		botResponses.add(VoteCountResponse())
+		// botResponses.add(VoteCountResponse())
 		botResponses.add(MarriedResponse())
 		botResponses.add(LorittaAssinaResponse())
 		botResponses.add(AssinaResponse())

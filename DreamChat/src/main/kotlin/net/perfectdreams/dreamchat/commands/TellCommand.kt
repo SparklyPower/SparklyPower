@@ -7,8 +7,8 @@ import net.perfectdreams.dreamcore.utils.commands.ExecutedCommandException
 import net.perfectdreams.dreamcore.utils.commands.annotation.ArgumentType
 import net.perfectdreams.dreamcore.utils.commands.annotation.InjectArgument
 import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
+import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.generateCommandInfo
-import net.perfectdreams.dreammeninaapi.utils.extensions.artigo
 import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player

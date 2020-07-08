@@ -10,6 +10,8 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.DisplaySlot
+import org.bukkit.scoreboard.RenderType
+import org.bukkit.scoreboard.Team
 import java.text.DecimalFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -30,20 +32,29 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 
 		phoenix.setTitle("§6✪ §r$randomEmote §4§lSparkly§b§lPower §r$randomEmote §6✪")
 
+		val noCollisionTeam = phoenix.scoreboard.getTeam("nocoll") ?: phoenix.scoreboard.registerNewTeam("nocoll")
+		noCollisionTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER)
+
+		if (!noCollisionTeam.hasEntry(player.name))
+			noCollisionTeam.addEntry(player.name)
+
 		if (phoenix.scoreboard.getObjective("healthBelowName") == null) {
 			val healthObj = phoenix.scoreboard.registerNewObjective("healthBelowName", "health", "§c♥")
 			healthObj.displaySlot = DisplaySlot.BELOW_NAME
+			healthObj.renderType = RenderType.HEARTS
 		}
 
-		if (phoenix.scoreboard.getObjective("healthPlayerList") == null) {
-			val healthObj = phoenix.scoreboard.registerNewObjective("healthPlayerList", "health", "§c♥")
+		// Removed because it was kinda bad tbh
+		if (phoenix.scoreboard.getObjective("pingPlayerList") == null) {
+			val healthObj = phoenix.scoreboard.registerNewObjective("pingPlayerList", "dummy", "ms")
 			healthObj.displaySlot = DisplaySlot.PLAYER_LIST
+			healthObj.renderType = RenderType.INTEGER
 		}
 
 		setupTeams()
 
 		player.setPlayerListHeaderFooter(
-				"""§4§k||§c§k|§f§k|§b§k|§3§k|| §6»»§e»»§f»» §8§l[ §4§lSparkly§b§lPower §8§l] §f««§e««§6«« §4§k||§c§k|§f§k|§b§k|§3§k||
+			"""§4§k||§c§k|§f§k|§b§k|§3§k|| §6»»§e»»§f»» §8§l[ §4§lSparkly§b§lPower §8§l] §f««§e««§6«« §4§k||§c§k|§f§k|§b§k|§3§k||
     |§3§omc.sparklypower.net
     |§3§m✦-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-✦
     |§e§lSeja bem-vind${player.artigo} ${player.displayName}§e§l!
@@ -53,7 +64,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
     |§6§lAlguma dúvida? §6§oPergunte no chat!
     |§8§m-§3§m-§b§m-§f§m-§b§m-§3§m-§8§m-
 """.trimMargin().toBaseComponent(),
-				"""§8§m-§3§m-§b§m-§f§m-§b§m-§3§m-§8§m
+			"""§8§m-§3§m-§b§m-§f§m-§b§m-§3§m-§8§m
     |§f锈 §bQuer ajudar o servidor? Então compre VIP! §f锈
     |§3https://sparklypower.net/loja
     |
@@ -265,6 +276,10 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 	}
 
 	private fun setupTeams() {
+		val scoreboard = phoenix.scoreboard
+		if (phoenix.scoreboard != player.scoreboard)
+			player.scoreboard = scoreboard
+
 		for (player in Bukkit.getOnlinePlayers()) {
 			val tabPrefixColor = when {
 				m.coloredGlow.containsKey(player.uniqueId) -> m.coloredGlow[player.uniqueId]
@@ -288,6 +303,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 				player.hasPermission("group.vip") -> "§b[VIP§b] "
 				else -> "§f"
 			}
+
 			val clubePrefix = m.cachedClubesPrefixes[player]
 
 			if (clubePrefix != null) {
@@ -310,6 +326,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 				player.hasPermission("group.vip++") -> "4"
 				player.hasPermission("group.vip+") -> "5"
 				player.hasPermission("group.vip") -> "6"
+				clubePrefix != null -> "8"
 				else -> "9"
 			}
 			val suffix = when {
@@ -324,14 +341,20 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 			}
 
 			var teamName = player.name
+			// Group users in the same clube together
+			if (clubePrefix != null)
+				teamName += clubePrefix.stripColors().hashCode().toString().toCharArray().take(3).joinToString("")
+
 			if (teamName.length > 15) {
 				teamName = teamName.substring(0, 14)
 			}
 
 			teamName = teamPrefix + teamName
-			val t = phoenix.scoreboard.getTeam(teamName) ?: phoenix.scoreboard.registerNewTeam(teamName)
+			val t = scoreboard.getTeam(teamName) ?: scoreboard.registerNewTeam(teamName)
 			t.prefix = prefix
 			t.suffix = suffix
+			// Disable collision
+			t.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER)
 
 			if (player.hasPermission("dreamscoreboard.glowing")) {
 				t.color = when {
@@ -349,10 +372,14 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 				player.isGlowing = false
 			}
 
-			if (!t.hasPlayer(player))
-				t.addPlayer(player)
-		}
+			if (!t.hasEntry(player.name))
+				t.addEntry(player.name)
 
-		player.scoreboard = phoenix.scoreboard
+			val p = phoenix.scoreboard.getObjective("pingPlayerList")
+			if (p != null) {
+				val score = p.getScore(player.name)
+				score.score = player.spigot().ping
+			}
+		}
 	}
 }

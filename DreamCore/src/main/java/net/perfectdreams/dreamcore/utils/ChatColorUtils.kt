@@ -46,8 +46,10 @@ object ChatColorUtils {
 
 }
 
+// Bukkit's "stripColor" can be null because it accepts a null input
+// We don't care about it, so "!!"
 fun String.colorize(ch: Char = '&') = ChatColor.translateAlternateColorCodes(ch, this)
-fun String.stripColors(ch: Char = '&') = ChatColor.stripColor(translateColorCodes(ch))
+fun String.stripColors(ch: Char = '&') = ChatColor.stripColor(translateColorCodes(ch))!!
 
 fun String.translateColorCodes(ch: Char = '&') = ChatColor.translateAlternateColorCodes(ch, this)
-fun String.stripColorCode(ch: Char= '&') = ChatColor.stripColor(translateColorCodes(ch))
+fun String.stripColorCode(ch: Char= '&') = ChatColor.stripColor(translateColorCodes(ch))!!

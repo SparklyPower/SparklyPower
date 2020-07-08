@@ -1,4 +1,4 @@
-package net.perfectdreams.dreamchat.utils.bot.responses
+/* package net.perfectdreams.dreamchat.utils.bot.responses
 
 import net.perfectdreams.dreamvote.DreamVote
 import org.bukkit.event.player.AsyncPlayerChatEvent
@@ -28,4 +28,4 @@ class VoteCountResponse : RegExResponse() {
 		}
 		return "§b" + event.player.displayName + "§a, você já votou §9${vote} vezes§a! §7${response}§a Você também pode ver seus votos no §6/votar§a! ;)"
 	}
-}
+} */

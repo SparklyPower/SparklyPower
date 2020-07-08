@@ -13,7 +13,7 @@ dependencies {
     compile(project(":DreamCash"))
     compile(project(":DreamVanish"))
     compileOnly(files("../libs/patched_1.15.1.jar"))
-    compile("net.perfectdreams.dreamcore:DreamCore:1.0-SNAPSHOT")
+    compile(files("../libs/DreamCore-shadow.jar"))
 }
 
 tasks.withType<KotlinCompile> {

@@ -5,6 +5,7 @@ import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
+import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreamkits.commands.KitCommand
 import net.perfectdreams.dreamkits.tables.Kits
 import net.perfectdreams.dreamkits.utils.Kit
@@ -51,7 +52,7 @@ class DreamKits : KotlinPlugin(), Listener {
 	}
 
 	fun giveKit(player: Player, kit: Kit) {
-		// DreamCorreios.addItems(player.name, true, false, *kit.items.toTypedArray())
+		DreamCorreios.addItems(player.name, true, false, *kit.items.toTypedArray())
 	}
 
 	fun loadKits() {

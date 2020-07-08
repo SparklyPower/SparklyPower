@@ -79,10 +79,10 @@ class DreamJetpack : KotlinPlugin(), Listener {
 						continue
 					}
 
-					val chestplate = player.inventory.chestplate ?: continue
+					val chestplate = player.inventory.chestplate
 					val isJetpack = isJetpack(player, chestplate)
 
-					if (!isJetpack) {
+					if (!isJetpack || chestplate == null) {
 						toBeRemoved.add(player)
 						bossBars[player]?.removeAll()
 						bossBars.remove(player)

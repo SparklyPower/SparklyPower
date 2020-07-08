@@ -63,6 +63,11 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
             EntityType.BLAZE,
             onlyInNether + onlyInWorld,
             specialBreakPermission
+        ),
+        MobSpawnerBreakable(
+            EntityType.MAGMA_CUBE,
+            onlyInNether + onlyInWorld,
+            specialBreakPermission
         )
     )
 
