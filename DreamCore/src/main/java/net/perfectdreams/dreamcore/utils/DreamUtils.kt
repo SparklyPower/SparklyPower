@@ -46,8 +46,8 @@ import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.PluginManager
 import org.bukkit.scheduler.BukkitScheduler
-import protocolsupport.api.ProtocolSupportAPI
-import protocolsupport.api.ProtocolVersion
+// import protocolsupport.api.ProtocolSupportAPI
+// import protocolsupport.api.ProtocolVersion
 import java.util.*
 import java.util.logging.Level
 
@@ -424,9 +424,6 @@ val isPrimaryThread: Boolean
 
 val withoutPermission: String
 	get() = DreamCore.dreamConfig.strings.withoutPermission
-
-val Player.version: ProtocolVersion
-	get() = ProtocolSupportAPI.getProtocolVersion(this)
 
 val serverName: String
 	get() = DreamCore.dreamConfig.serverName

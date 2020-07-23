@@ -5,12 +5,14 @@ import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamcore.utils.lore
 import net.perfectdreams.dreamcore.utils.registerEvents
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.inventory.PrepareAnvilEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 
@@ -31,6 +33,23 @@ class DreamBlockVIPItems : KotlinPlugin(), Listener {
 			e.isCancelled = true
 			e.player.sendMessage("§cVocê não tem poder para usar este item! Que tal comprar VIP para poder usar ele? ;)")
 		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	fun onAnvilRepair(e: PrepareAnvilEvent) {
+		val inventory = e.inventory
+		if (e.result?.getStoredMetadata("isMonsterPickaxe") == "true")
+			inventory.repairCost *= 16
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	fun onInteract(e: PrepareAnvilEvent) {
+		// If the item is in the second slots, players can remove the lore
+		// So we are going to block anvil events with VIP items in the second slot
+		val secondItem = e.inventory.secondItem
+
+		if (secondItem != null && isAVIPOnlyItem(secondItem))
+			e.result = ItemStack(Material.AIR)
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -111,5 +130,16 @@ class DreamBlockVIPItems : KotlinPlugin(), Listener {
 				.lore(itemStack.lore!! + "§7" + "§7Item de §a${player.name}")
 				.storeMetadata("itemOwner", player.uniqueId.toString())
 		)
+	}
+
+	fun isAVIPOnlyItem(itemStack: ItemStack): Boolean {
+		val requiredPermission = when {
+			itemStack.lore?.any { it.contains("§7Apenas §b§lVIPs§7") } == true -> "group.vip"
+			itemStack.lore?.any { it.contains("§7Apenas §b§lVIPs§e§l+§7") } == true  -> "group.vip+"
+			itemStack.lore?.any { it.contains("§7Apenas §b§lVIPs§e§l++§7") } == true -> "group.vip++"
+			else -> null
+		}
+
+		return requiredPermission != null
 	}
 }

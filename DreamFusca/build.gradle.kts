@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     compile(kotlin("stdlib-jdk8"))
-    compileOnly("com.comphenix.protocol:ProtocolLib:4.4.0-SNAPSHOT")
+    compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
     compile(files("../libs/patched_1.15.1.jar"))
     compile(files("../libs/DreamCore-shadow.jar"))
     compile(files("../libs/WorldGuard.jar"))

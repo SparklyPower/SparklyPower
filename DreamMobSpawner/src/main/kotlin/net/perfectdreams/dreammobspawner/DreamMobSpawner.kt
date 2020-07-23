@@ -10,15 +10,14 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Entity
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Player
+import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.entity.EntitySpawnEvent
+import org.bukkit.event.entity.ExplosionPrimeEvent
 import java.io.File
 
 class DreamMobSpawner : KotlinPlugin(), Listener {
@@ -58,7 +57,9 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 					if (shouldSpawn) {
 						while (3 > spawner.spawnedMobs.size) {
 							override = true
-							val spawned = spawner.spawn.world.spawnEntity(spawner.spawn.clone().add(0.0, 1.0, 0.0), spawner.type)
+							val randomX = DreamUtils.random.nextInt(-3, 4)
+							val randomZ = DreamUtils.random.nextInt(-3, 4)
+							val spawned = spawner.spawn.world.spawnEntity(spawner.spawn.clone().add(0.0 + randomX.toDouble(), 1.0, 0.0 + randomZ.toDouble()), spawner.type)
 							override = false
 							spawner.spawnedMobs.add(spawned)
 						}
@@ -74,10 +75,20 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 			event.isCancelled = false
 	}
 
+	@EventHandler(priority = EventPriority.NORMAL)
+	fun onSpawn(event: ExplosionPrimeEvent) {
+		if (spawners.any { event.entity in it.spawnedMobs })
+			event.isCancelled = true
+	}
+
 	@EventHandler(ignoreCancelled = true)
 	fun onDamage(event: EntityDamageByEntityEvent) {
 		val entity = event.entity
-		val damager = event.damager
+		val _damager = event.damager
+
+		val damager = if (_damager is Projectile) {
+			_damager.shooter as Entity
+		} else _damager
 
 		if (damager is Player && entity is LivingEntity) {
 			val isDead = 0 >= entity.health - event.finalDamage

@@ -474,7 +474,6 @@ class ChatListener(val m: DreamChat) : Listener {
 				"§eGrana: §6${player.balance} Sonhos",
 				"§eKDR: §6PvP é para os fracos, 2bj :3",
 				"§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!",
-				"§eVersão: §6Minecraft ${player.version.getName()}",
 				"§eUsando a Resource Pack? $rpStatus",
 				"§eMinecraft Original? $mcPremiumStatus"
 			)

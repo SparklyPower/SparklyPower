@@ -110,10 +110,9 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
 
             switchContext(SynchronizationContext.SYNC)
 
-            sender.sendMessage("${DreamCash.PREFIX} §aProntinho! Você pagou §c${howMuch} pesadelos§a para §b${name}§a, agora você tem §c${howMuch} pesadelos ${sender.name}§a!")
+            sender.sendMessage("${DreamCash.PREFIX} §aProntinho! Você pagou §c${howMuch} pesadelos§a para §b${name}§a, agora você tem §c${yourCashInfo.cash} pesadelos, ${sender.name}§a!")
             val receivedPlayer = Bukkit.getPlayer(receiverCashInfo.id.value)
-            if (receivedPlayer != null)
-                receivedPlayer.sendMessage("${DreamCash.PREFIX} §aVocê recebeu §c${howMuch} pesadelos§a de §b${sender.name}§a, agora você tem §c${receiverCashInfo.cash} pesadelos§a! Então, que tal comprar VIP? §6/lojacash")
+            receivedPlayer?.sendMessage("${DreamCash.PREFIX} §aVocê recebeu §c${howMuch} pesadelos§a de §b${sender.name}§a, agora você tem §c${receiverCashInfo.cash} pesadelos§a! Então, que tal comprar VIP? §6/lojacash")
         }
     }
 

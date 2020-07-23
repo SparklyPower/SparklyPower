@@ -120,7 +120,8 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		EntityType.GHAST,
 		EntityType.HUSK,
 		EntityType.STRAY,
-		EntityType.SLIME
+		EntityType.SLIME,
+		EntityType.MAGMA_CUBE
 	)
 
 	@EventHandler

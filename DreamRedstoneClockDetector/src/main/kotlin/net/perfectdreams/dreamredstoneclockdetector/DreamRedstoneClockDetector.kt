@@ -1,4 +1,4 @@
-package net.perfectdreams.dreamvipstuff
+package net.perfectdreams.dreamredstoneclockdetector
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
@@ -11,7 +11,6 @@ import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamvipstuff.commands.CabecasPersonalizadasCommand
-import net.perfectdreams.dreamvipstuff.commands.RenomearCommand
 import net.perfectdreams.dreamvipstuff.listeners.PlayerListener
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -41,7 +40,6 @@ class DreamVIPStuff : KotlinPlugin(), Listener {
 
 		registerEvents(PlayerListener(this))
 		registerCommand(CabecasPersonalizadasCommand)
-		registerCommand(RenomearCommand)
 
 		schedule {
 			while (true) {
@@ -93,15 +91,11 @@ class DreamVIPStuff : KotlinPlugin(), Listener {
 			val npc = npcs.firstOrNull() ?: continue
 			val userData = userDatas.firstOrNull { it.id.value == uniqueId } ?: continue
 
-			if (!npc.isSpawned) {
-				logger.info { "Spawning $npc for $uniqueId because the NPC was despawned..." }
+			if (!npc.isSpawned)
 				npc.spawn(npc.storedLocation)
-			}
 
-			if (npc.name != userData.username) {
-				logger.info { "Updating $npc name to be $uniqueId's name (${userData.username}) because the NPC has a different name ${npc.name}..." }
+			if (npc.name != userData.username)
 				npc.name = userData.username
-			}
 
 			alreadyCheckedUsers.add(uniqueId)
 			npcs.remove(npc)

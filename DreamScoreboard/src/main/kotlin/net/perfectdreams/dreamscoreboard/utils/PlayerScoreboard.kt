@@ -285,8 +285,10 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 				m.coloredGlow.containsKey(player.uniqueId) -> m.coloredGlow[player.uniqueId]
 				player.hasPermission("group.dono") -> ChatColor.GREEN
 				player.hasPermission("group.admin") -> ChatColor.RED
+				player.hasPermission("group.coordenador") -> ChatColor.DARK_PURPLE
 				player.hasPermission("group.moderador") -> ChatColor.DARK_AQUA
 				player.hasPermission("group.suporte") -> ChatColor.GOLD
+				player.hasPermission("group.construtor") -> ChatColor.WHITE
 				player.hasPermission("group.vip++") -> ChatColor.AQUA
 				player.hasPermission("group.vip+") -> ChatColor.AQUA
 				player.hasPermission("group.vip") -> ChatColor.AQUA
@@ -296,8 +298,10 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 			var prefix = when {
 				player.hasPermission("group.dono") -> "§a§l[Dono] "
 				player.hasPermission("group.admin") -> "§4§l[Admin] "
+				player.hasPermission("group.coordenador") -> "§5[Construtor] "
 				player.hasPermission("group.moderador") -> "§9§l[Moderador] "
 				player.hasPermission("group.suporte") -> "§6§l[Suporte] "
+				player.hasPermission("group.construtor") -> "§l[Construtor] "
 				player.hasPermission("group.vip++") -> "§b[VIP§6++§b] "
 				player.hasPermission("group.vip+") -> "§b[VIP§6+§b] "
 				player.hasPermission("group.vip") -> "§b[VIP§b] "
@@ -323,9 +327,10 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 				player.hasPermission("group.admin") -> "1"
 				player.hasPermission("group.moderador") -> "2"
 				player.hasPermission("group.suporte") -> "3"
-				player.hasPermission("group.vip++") -> "4"
-				player.hasPermission("group.vip+") -> "5"
-				player.hasPermission("group.vip") -> "6"
+				player.hasPermission("group.construtor") -> "4"
+				player.hasPermission("group.vip++") -> "5"
+				player.hasPermission("group.vip+") -> "6"
+				player.hasPermission("group.vip") -> "7"
 				clubePrefix != null -> "8"
 				else -> "9"
 			}
@@ -334,6 +339,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 				player.hasPermission("group.admin") -> " §f閌"
 				player.hasPermission("group.moderador") -> " §f閌"
 				player.hasPermission("group.suporte") -> " §f閌"
+				player.hasPermission("group.construtor") -> " §f閌"
 				player.hasPermission("group.vip++") -> " §f娀"
 				player.hasPermission("group.vip+") -> " §f閍"
 				player.hasPermission("group.vip") -> " §f锈"
@@ -361,8 +367,10 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 					m.coloredGlow.containsKey(player.uniqueId) -> m.coloredGlow[player.uniqueId]!!
 					player.hasPermission("group.dono") -> ChatColor.GREEN
 					player.hasPermission("group.admin") -> ChatColor.RED
+					player.hasPermission("group.coordenador") -> ChatColor.DARK_PURPLE
 					player.hasPermission("group.moderador") -> ChatColor.DARK_AQUA
 					player.hasPermission("group.suporte") -> ChatColor.GOLD
+					player.hasPermission("group.construtor") -> ChatColor.WHITE
 					player.hasPermission("group.vip++") -> ChatColor.AQUA
 					player.hasPermission("group.vip+") -> ChatColor.AQUA
 					player.hasPermission("group.vip") -> ChatColor.AQUA

@@ -15,6 +15,7 @@ allprojects {
     repositories {
         mavenLocal()
 
+        maven("https://repo.dmulloy2.net/nexus/repository/public/")
         maven("https://dl.bintray.com/kotlin/kotlin-dev/")
         maven("https://dl.bintray.com/kotlin/kotlin-eap/")
         maven("https://jcenter.bintray.com")
@@ -23,10 +24,10 @@ allprojects {
         maven("https://dl.bintray.com/kotlin/exposed/")
         maven("https://nexus.wesjd.net/repository/thirdparty/")
         // maven("http://nexus.okkero.com/repository/maven-releases/")
-        maven("http://repo.dmulloy2.net/nexus/repository/public/")
         maven("https://raw.github.com/MascusJeoraly/LanguageUtils/mvn-repo/")
         maven("https://maven.sk89q.com/repo/")
         maven("https://repo.aikar.co/content/groups/aikar/")
+        maven("https://dl.bintray.com/ichbinjoe/public/")
         // maven("https://repo.bstats.org/content/repositories/releases/")
         // maven("http://repo.ess3.net/content/repositories/bukkitsnapshot/")
         maven("https://jitpack.io")

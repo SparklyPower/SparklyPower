@@ -35,7 +35,7 @@ class TagSubCommand(val m: DreamClubes) : WithClubeSubCommand {
 
             transaction(Databases.databaseNetwork) {
                 clube.shortName = colorizedTag
-                clube.cleanName = colorizedTag.stripColorCode()
+                clube.cleanShortName = colorizedTag.stripColorCode()
             }
 
             toSync()

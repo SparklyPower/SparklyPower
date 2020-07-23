@@ -16,7 +16,7 @@ dependencies {
     compile(files("../libs/DreamCorreios.jar"))
     compile(project(":DreamCasamentos"))
     compile(project(":DreamClubes"))
-    compileOnly(files("../libs/ProtocolSupport.jar"))
+    // compileOnly(files("../libs/ProtocolSupport.jar"))
     compileOnly(files("../libs/mcMMO.jar"))
     compile("net.milkbowl.vault:VaultAPI:1.6")
     compile("com.greatmancode:craftconomy3:3.3.1")

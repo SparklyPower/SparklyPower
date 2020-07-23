@@ -16,7 +16,7 @@ dependencies {
     compile(files("../libs/DreamCorreios.jar"))
     compile(project(":DreamChat"))
     compile("net.milkbowl.vault:VaultAPI:1.6")
-    compile("com.vexsoftware:nuvotifier-bukkit:2.5.1-SNAPSHOT")
+    compile("com.vexsoftware:nuvotifier-bukkit:2.6.0")
 }
 
 tasks.withType<KotlinCompile> {

@@ -15,7 +15,7 @@ dependencies {
     compileOnly(kotlin("stdlib-jdk8"))
     compileOnly(kotlin("reflect"))
     compileOnly(files("../libs/patched_1.15.1.jar"))
-    compileOnly(files("../libs/ProtocolSupport.jar"))
+    // compileOnly(files("../libs/ProtocolSupport.jar"))
     compileOnly("com.comphenix.protocol:ProtocolLib:4.4.0-SNAPSHOT")
     compileOnly(files("../libs/WorldEdit.jar"))
     compileOnly(files("../libs/WorldGuard.jar"))
