@@ -13,7 +13,7 @@ open class ServerEvent(val eventName: String, val prefix: String) {
 	var running = false
 	var countingDown = false
 	var command = "/loritta"
-	var delayBetween: Long = 0L
+	open var delayBetween: Long = 0L
 	var requiredPlayers: Int = 0
 	var discordAnnouncementRole: String? = null
 	var discordChannelId: String? = null

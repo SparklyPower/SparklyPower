@@ -43,6 +43,7 @@ dependencies {
     implementation("club.minnced:discord-webhooks:0.1.5")
     implementation("com.github.ben-manes.caffeine:caffeine:2.6.2")
     implementation("org.apache.commons:commons-text:1.8")
+    implementation("club.minnced:discord-webhooks:0.3.2")
     compileOnly("com.greatmancode:craftconomy3:3.3.1")
     compileOnly("me.lucko.luckperms:luckperms-api:4.3")
     testCompile(files("../libs/patched_1.15.1.jar"))

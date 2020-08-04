@@ -16,7 +16,7 @@ class DreamMinaRecheada : KotlinPlugin() {
         const val PREFIX = "§8[§e§lMina §6§lR§e§le§6§lc§e§lh§6§le§e§la§6§ld§e§la§8] "
     }
 
-    val minaRecheada = MinaRecheada()
+    val minaRecheada = MinaRecheada(this)
 
     override fun softEnable() {
         INSTANCE = this
@@ -30,5 +30,10 @@ class DreamMinaRecheada : KotlinPlugin() {
 
         registerEvents(InteractListener(this))
         registerCommand(MinaRecheadaCommand(this))
+    }
+
+    override fun softDisable() {
+        super.softDisable()
+        DreamCore.INSTANCE.dreamEventManager.events.remove(minaRecheada)
     }
 }

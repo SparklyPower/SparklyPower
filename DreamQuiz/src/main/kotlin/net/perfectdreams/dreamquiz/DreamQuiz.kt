@@ -14,7 +14,6 @@ import net.perfectdreams.dreamquiz.utils.QuizQuestion
 import java.io.File
 
 class DreamQuiz : KotlinPlugin() {
-
     companion object {
         val PREFIX = "§8[§5§lQuiz§8]§e"
 

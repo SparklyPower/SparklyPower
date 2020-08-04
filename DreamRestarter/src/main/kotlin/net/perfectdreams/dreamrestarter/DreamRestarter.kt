@@ -22,7 +22,7 @@ class DreamRestarter : KotlinPlugin() {
 		registerCommand(RestartCommand(this))
 
 		scheduler().schedule(this) {
-			waitFor(1)
+			waitFor(20L) // wait one second just to avoid other plugins still "setting up" after server load
 
 			DreamNetwork.PERFECTDREAMS_LOBBY.sendAsync(
 				jsonObject(
@@ -33,17 +33,21 @@ class DreamRestarter : KotlinPlugin() {
 
 			// Enviar para o BungeeCord que já pode transferir todos os players de volta para o servidor :3
 			if (storedPlayerRestart.exists()) {
+				storedPlayerRestart.delete()
+
 				val uniqueIds = storedPlayerRestart.readLines().map { UUID.fromString(it) }
 
-				DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(
-					jsonObject(
-						"type" to "transferPlayersByUUID",
-						"bungeeServer" to DreamCore.dreamConfig.bungeeName,
-						"players" to uniqueIds.map { it.toString() }.toJsonArray()
+				for (uniqueId in uniqueIds) {
+					DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(
+						jsonObject(
+							"type" to "transferPlayersByUUID",
+							"bungeeServer" to DreamCore.dreamConfig.bungeeName,
+							"players" to listOf(uniqueId).toJsonArray()
+						)
 					)
-				)
+				}
 
-				storedPlayerRestart.delete()
+				waitFor(10L)
 			}
 		}
 	}

@@ -10,6 +10,7 @@ import net.perfectdreams.dreamcore.listeners.EntityListener
 import net.perfectdreams.dreamcore.listeners.SocketListener
 import net.perfectdreams.dreamcore.network.socket.SocketServer
 import net.perfectdreams.dreamcore.scriptmanager.DreamScriptManager
+import net.perfectdreams.dreamcore.tables.EventVictories
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.DreamCommandManager
@@ -61,7 +62,10 @@ class DreamCore : JavaPlugin() {
 		logger.info { "Starting Database... Database type: $databaseType" }
 
 		transaction(Databases.databaseNetwork) {
-			SchemaUtils.createMissingTablesAndColumns(Users)
+			SchemaUtils.createMissingTablesAndColumns(
+				Users,
+				EventVictories
+			)
 		}
 
 		logger.info { "Preparing no flicker scoreboard in a separate thread..." }

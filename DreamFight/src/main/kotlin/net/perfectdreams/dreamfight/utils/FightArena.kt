@@ -3,6 +3,7 @@ package net.perfectdreams.dreamfight.utils
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamfight.DreamFight
 import net.perfectdreams.dreamcore.utils.extensions.girl
@@ -548,7 +549,13 @@ class FightArena(var m: DreamFight) {
                     )
                 )
                 winner.balance += winnerPrize
+
                 scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                    DreamCore.INSTANCE.dreamEventManager.addEventVictory(
+                        winner,
+                        "Fight"
+                    )
+
                     Cash.giveCash(winner, 1)
                 }
                 // VaultUtils.econ.depositPlayer(winner, winnerPrize);

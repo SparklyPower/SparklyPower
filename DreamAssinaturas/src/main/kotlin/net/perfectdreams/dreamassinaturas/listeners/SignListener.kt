@@ -29,12 +29,20 @@ class SignListener(val m: DreamAssinaturas) : Listener {
         if (e.lines[0] != "*assinatura*")
             return
 
+        // Don't allow users to create signatures that contain "SparklyShop" in the sign signature
+        if (e.lines.any { it.contains("SparklyShop", true) })
+            return
+
         // Parece ser uma assinatura...
         val template = m.storedTemplates[e.player.uniqueId]
 
         if (template != null) {
             // Assinatura, wow!
             val lines = e.lines.copyOf()
+            // Don't allow users to create signatures that contain "SparklyShop" in the sign template
+            if (lines.any { it.contains("SparklyShop", true) })
+                return
+
             val split = template.split("\n")
 
             for ((index, str) in split.withIndex())

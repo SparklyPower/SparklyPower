@@ -2,24 +2,36 @@ package net.perfectdreams.dreamscoreboard
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamchat.utils.PlayerTag
+import net.perfectdreams.dreamclubes.dao.Clube
+import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
+import net.perfectdreams.dreamcore.tables.EventVictories
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
-import net.perfectdreams.dreamscoreboard.commands.EventosCommand
-import net.perfectdreams.dreamscoreboard.commands.GlowingColorCommand
-import net.perfectdreams.dreamscoreboard.commands.GlowingCommand
+import net.perfectdreams.dreamscoreboard.commands.*
+import net.perfectdreams.dreamscoreboard.listeners.TagListener
 import net.perfectdreams.dreamscoreboard.utils.PlayerScoreboard
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
+import org.bukkit.Statistic
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.scoreboard.Team
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.Instant
+import java.time.ZoneId
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.and
 
 class DreamScoreboard : KotlinPlugin(), Listener {
 	companion object {
@@ -41,6 +53,7 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 		)
 		val FORMATTING_REGEX = Regex("§[k-or]")
 	}
+	val lastOnlineTimeCheck = mutableMapOf<Player, Int>()
 
 	val scoreboards = ConcurrentHashMap<Player, PlayerScoreboard>()
 	val coloredGlow = ConcurrentHashMap<UUID, ChatColor>()
@@ -49,10 +62,15 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 	override fun softEnable() {
 		super.softEnable()
 		registerEvents(this)
+		registerEvents(TagListener(this))
 
 		registerCommand(EventosCommand)
+		registerCommand(EventosTopCommand)
+		registerCommand(EventosTopClubesCommand)
+		registerCommand(EventosTopMeuClubeCommand)
 		registerCommand(GlowingCommand)
 		registerCommand(GlowingColorCommand)
+		registerCommand(AmenoCommand)
 
 		scheduler().schedule(this, SynchronizationContext.SYNC) {
 			while (true) {
@@ -99,6 +117,98 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 					}
 				}
 				waitFor(20)
+			}
+		}
+
+		schedule {
+			while (true) {
+				switchContext(SynchronizationContext.SYNC)
+
+				val totalOneHourPlayers = Bukkit.getOnlinePlayers()
+					.filter {
+						val lastTimeCheck = lastOnlineTimeCheck[it]
+
+						if (lastTimeCheck != null) {
+							val modBefore = (((lastOnlineTimeCheck[it]!!) / 20) / 60) % 60
+							val modNow = (((it.getStatistic(Statistic.PLAY_ONE_MINUTE)) / 20) / 60) % 120
+
+							if (modBefore > modNow) {
+								logger.info("${it.name} matches! Mod before is $modBefore, Mod now is $modNow")
+								return@filter true
+							}
+						}
+						return@filter false
+					}
+
+				logger.info("Total one hour player right now: ${totalOneHourPlayers.joinToString { it.name }}")
+
+				switchContext(SynchronizationContext.ASYNC)
+				val userCount = EventVictories.user.count()
+
+				val start = getMonthStartInMillis()
+
+				val end = Instant.now()
+					.atZone(ZoneId.of("America/Sao_Paulo"))
+					.toEpochSecond() * 1000
+
+				val results = transaction(Databases.databaseNetwork) {
+					EventVictories.slice(EventVictories.user, userCount).select {
+						EventVictories.wonAt greaterEq start
+					}.groupBy(EventVictories.user)
+						.orderBy(userCount to SortOrder.DESC)
+						.limit(3)
+						.toList()
+				}
+
+				val averageWins = getTopClubeVictoriesOnAverageOnThisMonth()
+
+				val bestClube = averageWins.firstOrNull()
+
+				val top1 = results.getOrNull(0)
+				val top2 = results.getOrNull(1)
+				val top3 = results.getOrNull(2)
+
+				switchContext(SynchronizationContext.SYNC)
+
+				totalOneHourPlayers
+					.forEach {
+						if (top1 != null && top1[EventVictories.user] == it.uniqueId) {
+							switchContext(SynchronizationContext.ASYNC)
+							Cash.giveCash(it, 4)
+							logger.info("Giving 4 pesadelos to ${it.name} because they are top 1 in event victories!")
+							it.sendMessage("§aVocê ganhou quatro pesadelos por ser top 1 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
+							switchContext(SynchronizationContext.SYNC)
+						}
+						if (top2 != null && top2[EventVictories.user] == it.uniqueId) {
+							switchContext(SynchronizationContext.ASYNC)
+							Cash.giveCash(it, 2)
+							logger.info("Giving 2 pesadelos to ${it.name} because they are top 2 in event victories!")
+							it.sendMessage("§aVocê ganhou dois pesadelos por ser top 2 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
+							switchContext(SynchronizationContext.SYNC)
+						}
+						if (top3 != null && top3[EventVictories.user] == it.uniqueId) {
+							switchContext(SynchronizationContext.ASYNC)
+							Cash.giveCash(it, 1)
+							logger.info("Giving 1 pesadelos to ${it.name} because they are top 3 in event victories!")
+							it.sendMessage("§aVocê ganhou um pesadelo por ser top 3 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
+							switchContext(SynchronizationContext.SYNC)
+						}
+						switchContext(SynchronizationContext.ASYNC)
+						if (bestClube != null && bestClube.first.id.value == ClubeAPI.getPlayerClube(it)?.id?.value) {
+							switchContext(SynchronizationContext.ASYNC)
+							Cash.giveCash(it, 1)
+							logger.info("Giving 1 pesadelos to ${it.name} because they are top 3 in event victories!")
+							it.sendMessage("§aVocê ganhou um pesadelo pois o seu clube está em top 1 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
+							switchContext(SynchronizationContext.SYNC)
+						}
+						switchContext(SynchronizationContext.SYNC)
+					}
+
+				Bukkit.getOnlinePlayers().forEach {
+					lastOnlineTimeCheck[it] = it.getStatistic(Statistic.PLAY_ONE_MINUTE)
+				}
+
+				waitFor(20 * 60)
 			}
 		}
 	}
@@ -154,5 +264,76 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 	@EventHandler
 	fun onQuit(e: PlayerQuitEvent) {
 		scoreboards.remove(e.player)
+	}
+
+	fun getMonthStartInMillis(): Long {
+		return Instant.now()
+			.atZone(ZoneId.of("America/Sao_Paulo"))
+			.withDayOfMonth(1)
+			.withHour(0)
+			.withMinute(0)
+			.withSecond(0)
+			.toEpochSecond() * 1000
+	}
+
+	fun getClubeVictoriesOnThisMonth(clube: Clube): MutableMap<UUID, Int> {
+		val start = getMonthStartInMillis()
+
+		val clubeMembersWithVictories = transaction(Databases.databaseNetwork) {
+			ClubeMembers.join(EventVictories, JoinType.INNER, ClubeMembers.id, EventVictories.user).select {
+				EventVictories.wonAt greaterEq start and (ClubeMembers.clube eq clube.id)
+			}.toList()
+		}
+
+		val clubeVictoriesByPlayer = mutableMapOf<UUID, Int>()
+
+		val members = clube.retrieveMembers()
+
+		members.forEach { clubeMember ->
+			// We need to retrieve the member list because we need to make an average of EVERYONE
+			// If we only used the "list", we would ignore members that do not have any victories
+			clubeVictoriesByPlayer[clubeMember.id.value] = clubeMembersWithVictories.count { it[ClubeMembers.id].value == clubeMember.id.value }
+		}
+
+		return clubeVictoriesByPlayer
+	}
+
+	fun getTopClubeVictoriesOnAverageOnThisMonth(): List<Pair<Clube, Double>> {
+		val start = getMonthStartInMillis()
+
+		val clubeMembersWithVictories = transaction(Databases.databaseNetwork) {
+			ClubeMembers.join(EventVictories, JoinType.INNER, ClubeMembers.id, EventVictories.user).select {
+				EventVictories.wonAt greaterEq start
+			}.toList()
+		}
+
+		val groupedByClubes = clubeMembersWithVictories.groupBy { it[ClubeMembers.clube] }
+
+		val clubeVictoriesByPlayer = mutableMapOf<Clube, MutableList<Int>>()
+
+		groupedByClubes.forEach { clubeId, list ->
+			val clube = transaction(Databases.databaseNetwork) { Clube.findById(clubeId)!! }
+			val members = clube.retrieveMembers()
+
+			// Only clubes with more than 5 members yay
+			if (members.size >= 5) {
+				val times = mutableSetOf<Long>()
+				val entry = clubeVictoriesByPlayer.getOrPut(clube) { mutableListOf() }
+
+				members.forEach { clubeMember ->
+					// We need to retrieve the member list because we need to make an average of EVERYONE
+					// If we only used the "list", we would ignore members that do not have any victories
+					entry.add(list.filter { it[EventVictories.wonAt] !in times }.count { it[ClubeMembers.id].value == clubeMember.id.value })
+
+					list.filter { it[ClubeMembers.id].value == clubeMember.id.value }.forEach {
+						times.add(it[EventVictories.wonAt])
+					}
+				}
+			}
+		}
+
+		return clubeVictoriesByPlayer.map {
+			it.key to it.value.average()
+		}.sortedByDescending { it.second }
 	}
 }

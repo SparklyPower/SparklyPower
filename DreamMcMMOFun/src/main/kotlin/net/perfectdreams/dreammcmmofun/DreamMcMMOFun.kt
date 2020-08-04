@@ -1,6 +1,7 @@
 package net.perfectdreams.dreammcmmofun
 
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
+import com.gmail.nossr50.events.chat.McMMOPartyChatEvent
 import com.gmail.nossr50.mcMMO
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
@@ -20,6 +21,13 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 	@EventHandler
 	fun onQuit(e: PlayerQuitEvent) {
 		lastOnlineTimeCheck.remove(e.player)
+	}
+
+	@EventHandler
+	fun onChat(e: McMMOPartyChatEvent) {
+		for (staff in Bukkit.getOnlinePlayers().asSequence().filter { it.hasPermission("dreammcmmofun.snoop") }) {
+			staff.sendMessage("§7[${e.sender} » Party ${e.party}] ${e.message}")
+		}
 	}
 
 	override fun softEnable() {

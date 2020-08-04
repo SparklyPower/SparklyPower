@@ -129,6 +129,7 @@ class DreamReparar : KotlinPlugin(), Listener {
 
 	fun getPriceOfMaterialFor(type: Material): Double {
 		return when {
+			type.name.contains("NETHERITE") -> 2544.0
 			type.name.contains("DIAMOND") || type == Material.ELYTRA || type == Material.TRIDENT -> 1200.0
 			type.name.startsWith("CHAINMAIL_") -> 350.0
 			type.name.contains("GOLDEN") -> 642.0

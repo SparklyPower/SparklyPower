@@ -8,6 +8,7 @@ import net.perfectdreams.dreamloja.commands.LojaCommand
 import net.perfectdreams.dreamloja.commands.SetLojaCommand
 import net.perfectdreams.dreamloja.dao.UserShopVote
 import net.perfectdreams.dreamloja.listeners.SignListener
+import net.perfectdreams.dreamloja.listeners.TagListener
 import net.perfectdreams.dreamloja.tables.Shops
 import net.perfectdreams.dreamloja.tables.UserShopVotes
 import net.perfectdreams.dreamloja.tables.VoteSigns
@@ -49,6 +50,7 @@ class DreamLoja : KotlinPlugin() {
 		registerCommand(DelLojaCommand(this))
 
 		registerEvents(SignListener(this))
+		registerEvents(TagListener())
 
 		scheduler().schedule(this, SynchronizationContext.SYNC) {
 			val itemQueue = mutableListOf<ItemStack>()

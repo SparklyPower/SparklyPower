@@ -4,6 +4,7 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamchat.DreamChat
+import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.extensions.centralize
@@ -96,6 +97,10 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 		player.inventory.addItem(currentPrize)
 
 		scheduler().schedule(DreamChat.INSTANCE, SynchronizationContext.ASYNC) {
+			DreamCore.INSTANCE.dreamEventManager.addEventVictory(
+				player,
+				"Chat"
+			)
 			Cash.giveCash(player, 1L)
 			DreamChat.INSTANCE.userData.save(DreamChat.INSTANCE.dataYaml)
 			event.postEndAsync(player, diff)

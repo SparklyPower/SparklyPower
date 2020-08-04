@@ -15,8 +15,10 @@ import org.bukkit.World
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.boss.BossBar
+import java.time.Instant
+import java.time.ZoneId
 
-class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
+class MinaRecheada(val m: DreamMinaRecheada) : ServerEvent("Mina Recheada", "/mina") {
     var minaRecheadaData = MinaRecheadaData()
     private var location1: Location? = null
     private var location2: Location? = null
@@ -24,12 +26,43 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
     var bossBar2: BossBar? = null
     val minaRecheadaWorld: World
         get() = Bukkit.getWorld("MinaRecheada")!!
+    val timeZone = ZoneId.of("America/Sao_Paulo")
+    override var delayBetween: Long
+        get() {
+            val lastMinaRecheadaInMillis = m.config.getLong("last-mina-recheada", 0L)
+            val lastMinaRecheada = Instant.ofEpochMilli(lastMinaRecheadaInMillis)
+                .atZone(timeZone)
+            val now = Instant.now()
+                .atZone(timeZone)
+
+            val minaRecheadaHappenedToday = (lastMinaRecheada.dayOfMonth == now.dayOfMonth && lastMinaRecheada.year == now.year && lastMinaRecheada.monthValue == now.monthValue)
+            return if (minaRecheadaHappenedToday)
+                now.toOffsetDateTime()
+                    .withHour(0)
+                    .withMinute(0)
+                    .withSecond(0)
+                    .toEpochSecond() * 1000
+            else
+                now.toEpochSecond() * 1000
+        }
+        set(value) {}
 
     init {
-        // TODO: Cancelar task automática
-        this.delayBetween = 3600000 * 6 // 6 horas
-        this.requiredPlayers = 70
+        this.requiredPlayers = 60
         this.discordAnnouncementRole = "538805118384996392"
+    }
+
+    override fun startNow(): Boolean {
+        val lastMinaRecheadaInMillis = m.config.getLong("last-mina-recheada", 0L)
+        val lastMinaRecheada = Instant.ofEpochMilli(lastMinaRecheadaInMillis)
+            .atZone(timeZone)
+        val now = Instant.now()
+            .atZone(timeZone)
+
+        // Mina Recheada can happen once every day
+        val minaRecheadaHappenedToday = (lastMinaRecheada.dayOfMonth == now.dayOfMonth && lastMinaRecheada.year == now.year && lastMinaRecheada.monthValue == now.monthValue)
+
+        return !minaRecheadaHappenedToday && Bukkit.getOnlinePlayers().size >= requiredPlayers
     }
 
     override fun getWarmUpAnnouncementMessage(idx: Int): String {
@@ -38,6 +71,9 @@ class MinaRecheada : ServerEvent("Mina Recheada", "/mina") {
 
     override fun preStart() {
         running = true
+        m.config.set("last-mina-recheada", System.currentTimeMillis())
+        m.saveConfig()
+
         if (minaRecheadaData.pos1 == null)
             return
         if (minaRecheadaData.pos2 == null)

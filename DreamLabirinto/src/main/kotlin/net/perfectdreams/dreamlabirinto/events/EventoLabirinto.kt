@@ -6,13 +6,11 @@ import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamlabirinto.DreamLabirinto
 import net.perfectdreams.dreamlabirinto.utils.MazeGenerator
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.SoundCategory
+import org.bukkit.*
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
@@ -27,8 +25,18 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         this.requiredPlayers = 40 // 40 players
     }
 
+    var startLocation: Location? = null
+    var startCooldown = 15
+    val coolWallColors = listOf(
+        Material.ORANGE_CONCRETE,
+        Material.MAGENTA_CONCRETE,
+        Material.LIGHT_BLUE_CONCRETE,
+        Material.YELLOW_CONCRETE,
+        Material.LIME_CONCRETE
+    )
+
     fun join(player: Player) {
-        val spawn = Location(Bukkit.getWorld("Labirinto")!!, 2.0, 80.0, 2.0)
+        val spawn = startLocation!!
         player.teleport(spawn)
 
         player.playSound(spawn, "perfectdreams.sfx.special_stage", SoundCategory.RECORDS, 1000f, 1f)
@@ -47,6 +55,12 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
         winner.balance += howMuchMoneyWillBeGiven
         scheduler().schedule(plugin, SynchronizationContext.ASYNC) {
+            if (wonPlayers.size == 1)
+                DreamCore.INSTANCE.dreamEventManager.addEventVictory(
+                    winner,
+                    "Labirinto"
+                )
+
             Cash.giveCash(winner, howMuchNightmaresWillBeGiven.toLong())
         }
 
@@ -88,6 +102,35 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         var idx = 0
 
         val world = Bukkit.getWorld("Labirinto")!!
+
+        scheduler().schedule(plugin) {
+            while (startCooldown > 0) {
+                world.players.forEach {
+                    it.sendTitle("§aLabirinto irá começar em...", "§c${startCooldown}s", 0, 20, 0)
+                    it.playSound(it.location, Sound.UI_BUTTON_CLICK, SoundCategory.PLAYERS, 1f, 1f)
+
+                    it.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
+                }
+
+                waitFor(20) // 1 segundo
+                startCooldown--
+            }
+
+            world.players.forEach {
+                it.sendTitle("§aCorra e se aventure!", "§bBoa sorte!", 0, 20, 0)
+                it.playSound(it.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
+
+                it.removeAllPotionEffects()
+                it.fallDistance = 0.0f
+                it.fireTicks = 0
+                PlayerUtils.healAndFeed(it)
+                it.activePotionEffects.filter { it.type != PotionEffectType.SPEED && it.type != PotionEffectType.JUMP } .forEach { effect ->
+                    it.removePotionEffect(effect.type)
+                }
+
+                it.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 1, false, false))
+            }
+        }
 
         scheduler().schedule(plugin) {
             while (running) {
@@ -230,16 +273,19 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
             )
 
             lines.forEachIndexed { y, line ->
+                // Choose the type for each line
+                val wallType = coolWallColors.random()
+
                 line.forEachIndexed { x, char ->
                     val blockLocation = Location(world, x.toDouble(), 80.0, currentBlockY.toDouble())
 
                     val distance = blockLocation.distanceSquared(endPlate1)
 
                     val type = when {
-                        256 >= distance -> Material.GREEN_STAINED_GLASS
-                        676 >= distance -> Material.YELLOW_STAINED_GLASS
-                        1296 >= distance -> Material.ORANGE_STAINED_GLASS
-                        2116 >= distance -> Material.GRAY_STAINED_GLASS
+                        // 256 >= distance -> Material.GREEN_STAINED_GLASS
+                        // 676 >= distance -> Material.YELLOW_STAINED_GLASS
+                        // 1296 >= distance -> Material.ORANGE_STAINED_GLASS
+                        // 2116 >= distance -> Material.GRAY_STAINED_GLASS
                         else -> Material.BLACK_STAINED_GLASS
                     }
 
@@ -249,15 +295,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                     repeat(5) {
                         val blockLocation = Location(world, x.toDouble(), 79.0 + it, currentBlockY.toDouble())
                         if (char == '+' || char == '-' || char == '|') {
-                            val type = when {
-                                256 >= distance -> Material.GREEN_CONCRETE
-                                676 >= distance -> Material.YELLOW_CONCRETE
-                                1296 >= distance -> Material.ORANGE_CONCRETE
-                                2116 >= distance -> Material.GRAY_CONCRETE
-                                else -> Material.BLACK_CONCRETE
-                            }
-
-                            blockLocation.block.type = type
+                            blockLocation.block.type = wallType
                         } else {
                             if (it == 2 && chance(1.0)) {
                                 val blocc = BlockUtils.attachWallSignAt(blockLocation)
@@ -281,27 +319,72 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                 currentBlockY++
             }
 
-            val startPlates = listOf(
-                Location(world, 1.0, 79.0, 1.0),
-                Location(world, 2.0, 79.0, 1.0),
-                Location(world, 1.0, 79.0, 2.0),
-                Location(world, 2.0, 79.0, 2.0)
+            // Start and End plates can be in different parts of the map each time
+            val possiblePlates = mutableListOf(
+                LabirintoPlate(
+                    listOf(
+                        Location(world, 1.0, 79.0, 1.0),
+                        Location(world, 2.0, 79.0, 1.0),
+                        Location(world, 1.0, 79.0, 2.0),
+                        Location(world, 2.0, 79.0, 2.0)
+                    ),
+                    Location(world, 2.0, 80.0, 2.0, 270f, 0f)
+                ),
+                LabirintoPlate(
+                    listOf(
+                        Location(world, 56.0, 79.0, 56.0),
+                        Location(world, 55.0, 79.0, 56.0),
+                        Location(world, 56.0, 79.0, 55.0),
+                        Location(world, 55.0, 79.0, 55.0)
+                    ),
+                    Location(world, 56.0, 80.0, 56.0, 90f, 0f)
+                ),
+                LabirintoPlate(
+                    listOf(
+                        Location(world, 1.0, 79.0, 56.0),
+                        Location(world, 1.0, 79.0, 55.0),
+                        Location(world, 2.0, 79.0, 56.0),
+                        Location(world, 2.0, 79.0, 55.0)
+                    ),
+                    Location(world, 56.0, 80.0, 2.0, 0f, 0f)
+                ),
+                LabirintoPlate(
+                    listOf(
+                        Location(world, 56.0, 79.0, 2.0),
+                        Location(world, 55.0, 79.0, 2.0),
+                        Location(world, 56.0, 79.0, 1.0),
+                        Location(world, 55.0, 79.0, 1.0)
+                    ),
+                    Location(world, 2.0, 80.0, 56.0, 180f, 0f)
+                )
             )
 
-            val endPlates = listOf(
-                Location(world, 56.0, 79.0, 56.0),
-                Location(world, 55.0, 79.0, 56.0),
-                Location(world, 56.0, 79.0, 55.0),
-                Location(world, 55.0, 79.0, 55.0)
-            )
+            possiblePlates.forEach {
+                it.blocks.forEach {
+                    it.block.type = Material.SEA_LANTERN
+                }
+            }
 
-            startPlates.forEach {
+            val startPlates = possiblePlates.random()
+            // After getting the start plate, we remove the start plate from the list to avoid the end plate being in the same place
+            possiblePlates.remove(startPlates)
+
+            val endPlates = possiblePlates.random()
+
+            startPlates.blocks.forEach {
                 it.block.type = Material.DIAMOND_BLOCK
             }
 
-            endPlates.forEach {
+            endPlates.blocks.forEach {
                 it.block.type = Material.EMERALD_BLOCK
             }
+
+            startLocation = startPlates.startingPosition
         }
     }
+
+    class LabirintoPlate(
+        val blocks: List<Location>,
+        val startingPosition: Location
+    )
 }

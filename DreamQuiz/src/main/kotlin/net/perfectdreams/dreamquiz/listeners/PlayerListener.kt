@@ -33,7 +33,7 @@ class PlayerListener(val m: DreamQuiz) : Listener {
     @EventHandler
     fun onSpawn(e: PlayerQuitEvent) {
         if (e.player.world.name == "Quiz") {
-            e.player.teleport(DreamCore.dreamConfig.spawn)
+            e.player.teleport(DreamCore.dreamConfig.getSpawn())
         }
     }
 

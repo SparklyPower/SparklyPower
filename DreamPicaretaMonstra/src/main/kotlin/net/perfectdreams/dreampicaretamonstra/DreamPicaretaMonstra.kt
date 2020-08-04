@@ -7,6 +7,7 @@ import com.gmail.nossr50.events.skills.salvage.McMMOPlayerSalvageCheckEvent
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.skills.mining.MiningManager
 import com.gmail.nossr50.util.player.UserManager
+import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
@@ -117,6 +118,14 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 		if (e.block.world.name == "MinaRecheada")
 			return
 
+		val claim = GriefPrevention.instance.dataStore
+			.getClaimAt(e.block.location, false, null)
+
+		if (e.block.world.name == "world" && claim == null) {
+			e.player.sendMessage("§cVocê só pode usar a picareta monstra no seu terreno! Se você quer sair quebrando tudo, proteja o terreno ou vá no mundo de recursos, §6/warp recursos")
+			return
+		}
+
 		val broken = e.block
 		val heldItemType = e.player.inventory.itemInMainHand?.type
 
@@ -138,7 +147,10 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 			for (location in blocks) {
 				if ((below || location.blockY > e.player.location.y - 1.0) && location.block.type !== Material.AIR && location.block.type !== Material.BEDROCK && isValidForHeldItem(heldItemType, location.block)) {
 					val center = location.add(0.0, 0.5, 0.0)
-					if (PlayerUtils.canBreakAt(location, e.player, location.block.type)) {
+					val claim = GriefPrevention.instance.dataStore
+						.getClaimAt(location, false, null)
+
+					if (PlayerUtils.canBreakAt(location, e.player, location.block.type) && (e.player.world.name != "world" || (e.player.world.name == "world" && claim != null))) {
 						val damageable = inHand.itemMeta as Damageable
 						if (chance(100.0 / (efficiencyLevel + 1))) {
 							if ((damageable.damage + 1) == inHand.type.maxDurability.toInt()) {

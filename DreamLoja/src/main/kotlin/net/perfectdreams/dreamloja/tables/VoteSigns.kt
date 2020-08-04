@@ -5,7 +5,7 @@ import org.jetbrains.exposed.dao.LongIdTable
 
 object VoteSigns : LongIdTable() {
     override val tableName: String
-        get() = "${DreamCore.dreamConfig.tablePrefix}_votesigns"
+        get() = "${DreamCore.dreamConfig.getTablePrefix()}_votesigns"
 
     val owner = uuid("owner").index()
     val worldName = text("world_name")

@@ -11,6 +11,8 @@ object EventosCommand : DSLCommandBase<DreamScoreboard> {
     override fun command(plugin: DreamScoreboard) = create(listOf("eventos")) {
         executes {
             sender.sendMessage("§8[ §bEventos do SparklyPower §8]".centralizeHeader())
+            sender.sendMessage("§eVeja os jogadores que venceram mais eventos neste mês em §6/eventos top")
+            sender.sendMessage("§7")
 
             val events = DreamCore.INSTANCE.dreamEventManager.getRunningEvents()
             if (events.isNotEmpty()) {

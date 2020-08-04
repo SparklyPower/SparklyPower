@@ -62,11 +62,14 @@ class InteractListener(internal val m: DreamMinaRecheada) : Listener {
             return
 
         if (e.player.world.name == "MinaRecheada") {
-            if (!WorldGuardUtils.isWithinRegion(e.block.location, "minarecheada")) {
+            if (WorldGuardUtils.isWithinRegion(e.block.location, "minarecheada")) {
                 val type = e.block.type
-                if (type == Material.QUARTZ_BLOCK || type == Material.QUARTZ_PILLAR || type == Material.CHISELED_QUARTZ_BLOCK || type == Material.LADDER)
-                    return
 
+                if (type == Material.QUARTZ_BLOCK || type == Material.QUARTZ_PILLAR || type == Material.CHISELED_QUARTZ_BLOCK || type == Material.LADDER) {
+                    e.isCancelled = true
+                    return
+                }
+            } else {
                 e.isCancelled = true
             }
         }

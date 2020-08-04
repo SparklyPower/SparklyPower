@@ -60,8 +60,15 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                     e.player.playSound(e.player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
 
                     if (index + 1 == corrida.checkpoints.size) {
-                        if (eventoCorrida.wonPlayers.size == 0)
+                        if (eventoCorrida.wonPlayers.size == 0) {
                             m.lastWinner = e.player.uniqueId
+                            scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                                DreamCore.INSTANCE.dreamEventManager.addEventVictory(
+                                    e.player,
+                                    "Corrida"
+                                )
+                            }
+                        }
 
                         // Player venceu a corrida!
                         eventoCorrida.wonPlayers.add(e.player.uniqueId)
@@ -77,7 +84,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                         e.player.fireTicks = 0
                         PlayerUtils.healAndFeed(e.player)
 
-                        e.player.teleport(DreamCore.dreamConfig.spawn)
+                        e.player.teleport(DreamCore.dreamConfig.getSpawn())
 
                         Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
 
@@ -89,7 +96,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                                 it.fireTicks = 0
                                 PlayerUtils.healAndFeed(it)
 
-                                it.teleport(DreamCore.dreamConfig.spawn)
+                                it.teleport(DreamCore.dreamConfig.getSpawn())
                             }
 
                             eventoCorrida.running = false
@@ -116,7 +123,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
         val isWithinACorridaWorld = m.availableCorridas.any { it.spawn.world == e.player.world.name }
 
         if (isWithinACorridaWorld) {
-            e.player.teleport(DreamCore.dreamConfig.spawn)
+            e.player.teleport(DreamCore.dreamConfig.getSpawn())
         }
     }
 
