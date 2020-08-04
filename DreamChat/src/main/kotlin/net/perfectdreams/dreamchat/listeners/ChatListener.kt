@@ -101,7 +101,7 @@ class ChatListener(val m: DreamChat) : Listener {
 	fun onJoin(e: PlayerCommandPreprocessEvent) {
 		if (!m.eventoChat.running)
 			return
-		
+
 		val cmd = e.message
 			.split(" ")[0]
 			.substring(1)
