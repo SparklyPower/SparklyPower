@@ -39,10 +39,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.player.AsyncPlayerChatEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.player.PlayerResourcePackStatusEvent
+import org.bukkit.event.player.*
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
@@ -98,6 +95,20 @@ class ChatListener(val m: DreamChat) : Listener {
 				)
 			)
 		}
+	}
+
+	@EventHandler
+	fun onJoin(e: PlayerCommandPreprocessEvent) {
+		if (!m.eventoChat.running)
+			return
+		
+		val cmd = e.message
+			.split(" ")[0]
+			.substring(1)
+			.toLowerCase()
+
+		if (cmd == "calc" || cmd == "calculadora")
+			e.isCancelled = true
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
