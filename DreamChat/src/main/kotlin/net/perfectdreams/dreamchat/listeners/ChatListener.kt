@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamchat.listeners
 
+import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.kevinsawicki.http.HttpRequest
 import com.github.salomonbrys.kotson.get
@@ -564,13 +565,15 @@ class ChatListener(val m: DreamChat) : Listener {
 
 		// Vamos mandar no Biscord!
 		if (m.config.getBoolean("enable-chat-relay", false)) {
-			DreamChat.CHAT_WEBHOOK.send(
-				DiscordMessage(
-					username = player.name,
-					content = message.stripColors()!!.replace(Regex("\\\\+@"), "@").replace("@", "@\u200B"),
-					avatar = "https://sparklypower.net/api/v1/render/avatar?name=${player.name}&scale=16"
-				)
+			val currentWebhook = DreamChat.chatWebhooks[DreamChat.currentWebhookIdx % DreamChat.chatWebhooks.size]!!
+			currentWebhook.send(
+				WebhookMessageBuilder()
+					.setUsername(player.name)
+					.setAvatarUrl("https://sparklypower.net/api/v1/render/avatar?name=${player.name}&scale=16")
+					.setContent(message.stripColors()!!.replace(Regex("\\\\+@"), "@").replace("@", "@\u200B"))
+					.build()
 			)
+			DreamChat.currentWebhookIdx++
 		}
 	}
 }

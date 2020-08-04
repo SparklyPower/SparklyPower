@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamchat
 
+import club.minnced.discord.webhook.WebhookClient
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.kevinsawicki.http.HttpRequest
 import com.github.salomonbrys.kotson.array
@@ -49,9 +50,8 @@ class DreamChat : KotlinPlugin() {
 		var LORITTA_PREFIX = "§8[§d§lDeusa Suprema§8] "
 		var BOT_NAME = "§ePantufa"
 		var LORITTA_NAME = "§b§lLoritta §3§lMorenitta"
-		val CHAT_WEBHOOK by lazy {
-			DiscordWebhook(INSTANCE.getConfig().getString("relay-chat-webhook-url") ?: "")
-		}
+		val chatWebhooks = mutableListOf<WebhookClient>()
+		var currentWebhookIdx = 0
 		lateinit var INSTANCE: DreamChat
 		const val LAST_CHAT_WINNER_PATH = "last-chat-winner"
 	}
@@ -251,6 +251,12 @@ class DreamChat : KotlinPlugin() {
 
 		yamlReplacers.forEach {
 			replacers[it.key.toRegex(RegexOption.IGNORE_CASE)] = it.value as String
+		}
+
+		// Shutdown all current active webhooks
+		chatWebhooks.forEach { it.close() }
+		config.getStringList("chat-webhooks").forEach {
+			chatWebhooks += WebhookClient.withUrl(it)
 		}
 
 		// Evento Chat
