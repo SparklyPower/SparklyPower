@@ -61,7 +61,11 @@ class EventoChatDesembaralhar : IEventoChat {
 		"COORDENADOR",
 		"DONO",
 		"FÚRIA",
-		"PAI"
+		"PAI",
+		"ENDERMAN",
+		"METADE",
+		"BATMAN",
+		"DINAMITE"
 	)
 
 	var currentWord: String? = null

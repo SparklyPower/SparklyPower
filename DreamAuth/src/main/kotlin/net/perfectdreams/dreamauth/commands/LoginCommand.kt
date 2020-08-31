@@ -40,12 +40,12 @@ object LoginCommand : DSLCommandBase<DreamAuth> {
                     val count = plugin.wrongPasswordCount.getOrDefault(player.address.address, 0) + 1
                     plugin.wrongPasswordCount[player.address.address] = count
 
-                    if (count == 10) {
+                    if (count == 25 && !player.address.address.hostAddress.startsWith("127.0.0.1")) { // Geyser
                         plugin.logger.info { "$player errou a senha vezes demais! Irei banir ele..." }
 
                         DreamNetwork.PANTUFA.sendMessageAsync(
                             "477902981606408222",
-                            """<a:yoshi_pulsando:594962593161150483> **|** **`${player.name}`** errou a senha ao logar! Ele errou mais de 10 vezes, então irei banir ele! Nesta tentativa, tentou usar a senha: `$password`)
+                            """<a:yoshi_pulsando:594962593161150483> **|** **`${player.name}`** errou a senha ao logar! Ele errou mais de 25 vezes, então irei banir ele! Nesta tentativa, tentou usar a senha: `$password`)
 						  |<:lori_morre_diabo:540656812836519936> **|** **IP do usuário:** ${player.address.address.hostAddress}
 						""".trimMargin()
                         )

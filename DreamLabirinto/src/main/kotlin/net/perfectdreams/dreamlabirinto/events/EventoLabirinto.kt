@@ -39,6 +39,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         val spawn = startLocation!!
         player.teleport(spawn)
 
+        player.removeAllPotionEffects()
         player.playSound(spawn, "perfectdreams.sfx.special_stage", SoundCategory.RECORDS, 1000f, 1f)
     }
 
@@ -97,6 +98,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
     }
 
     override fun start() {
+        startCooldown = 15
         generateMaze()
 
         var idx = 0
@@ -106,7 +108,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         scheduler().schedule(plugin) {
             while (startCooldown > 0) {
                 world.players.forEach {
-                    it.sendTitle("§aLabirinto irá começar em...", "§c${startCooldown}s", 0, 20, 0)
+                    it.sendTitle("§aLabirinto irá começar em...", "§c${startCooldown}s", 0, 100, 0)
                     it.playSound(it.location, Sound.UI_BUTTON_CLICK, SoundCategory.PLAYERS, 1f, 1f)
 
                     it.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
@@ -117,7 +119,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
             }
 
             world.players.forEach {
-                it.sendTitle("§aCorra e se aventure!", "§bBoa sorte!", 0, 20, 0)
+                it.sendTitle("§aCorra e se aventure!", "§bBoa sorte!", 0, 60, 20)
                 it.playSound(it.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
 
                 it.removeAllPotionEffects()
@@ -138,16 +140,17 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                     Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} Evento Labirinto começou! §6/labirinto")
                 }
 
-                world.players.forEach {
-                    it.fallDistance = 0.0f
-                    it.fireTicks = 0
-                    PlayerUtils.healAndFeed(it)
-                    it.activePotionEffects.filter { it.type != PotionEffectType.SPEED && it.type != PotionEffectType.JUMP } .forEach { effect ->
-                        it.removePotionEffect(effect.type)
-                    }
+                if (0 >= startCooldown)
+                    world.players.forEach {
+                        it.fallDistance = 0.0f
+                        it.fireTicks = 0
+                        PlayerUtils.healAndFeed(it)
+                        it.activePotionEffects.filter { it.type != PotionEffectType.SPEED && it.type != PotionEffectType.JUMP } .forEach { effect ->
+                            it.removePotionEffect(effect.type)
+                        }
 
-                    it.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 1, false, false))
-                }
+                        it.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 1, false, false))
+                    }
 
                 waitFor(100) // 5 segundos
                 idx++
@@ -346,7 +349,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                         Location(world, 2.0, 79.0, 56.0),
                         Location(world, 2.0, 79.0, 55.0)
                     ),
-                    Location(world, 56.0, 80.0, 2.0, 0f, 0f)
+                    Location(world, 2.0, 80.0, 56.0, 180f, 0f)
                 ),
                 LabirintoPlate(
                     listOf(
@@ -355,7 +358,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                         Location(world, 56.0, 79.0, 1.0),
                         Location(world, 55.0, 79.0, 1.0)
                     ),
-                    Location(world, 2.0, 80.0, 56.0, 180f, 0f)
+                    Location(world, 56.0, 80.0, 2.0, 0f, 0f)
                 )
             )
 

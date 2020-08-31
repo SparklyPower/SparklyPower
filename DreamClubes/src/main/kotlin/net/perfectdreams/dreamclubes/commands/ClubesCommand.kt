@@ -41,6 +41,14 @@ class ClubesCommand(val m: DreamClubes) : SparklyCommand(arrayOf("clube", "clube
                         args.toMutableList().apply { this.removeAt(0) }.toTypedArray()
                     )
                     return@async
+                } else if (arg0 == "dono") {
+                    DonoSubCommand(m).execute(
+                        player,
+                        clube,
+                        selfMember,
+                        args.toMutableList().apply { this.removeAt(0) }.toTypedArray()
+                    )
+                    return@async
                 } else if (arg0 == "tag") {
                     TagSubCommand(m).execute(
                         player,
@@ -155,6 +163,7 @@ class ClubesCommand(val m: DreamClubes) : SparklyCommand(arrayOf("clube", "clube
             if (hasClan && isOwner) {
                 player.sendMessage("/clube deletar - Exclui o seu clube")
                 player.sendMessage("/clube admin - Deixa um player como admin")
+                player.sendMessage("/clube dono - Transfere a posse do clube para outro player")
             }
             if (hasClan) {
                 player.sendMessage("/clube coords - Mostra as coordenadas dos seus amigos")

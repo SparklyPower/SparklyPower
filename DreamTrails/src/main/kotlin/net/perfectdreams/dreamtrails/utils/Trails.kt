@@ -219,6 +219,24 @@ object Trails {
             "§cTown Aura",
             Material.JUNGLE_WOOD,
             Particle.TOWN_AURA
+        ),
+        TrailData(
+            "§bAlma",
+            Material.SOUL_LANTERN,
+            Particle.SOUL,
+            0,
+            0.0,
+            0.1,
+            0.0
+        ),
+        TrailData(
+            "§bAlma",
+            Material.SOUL_CAMPFIRE,
+            Particle.SOUL_FIRE_FLAME,
+            0,
+            0.0,
+            0.1,
+            0.0
         )
     )
 

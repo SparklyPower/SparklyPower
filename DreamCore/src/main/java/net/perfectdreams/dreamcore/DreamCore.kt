@@ -68,6 +68,10 @@ class DreamCore : JavaPlugin() {
 			)
 		}
 
+		logger.info { "Loading locales..." }
+		TranslationUtils.loadLocale(dataFolder, "en_us")
+		TranslationUtils.loadLocale(dataFolder, "pt_br")
+
 		logger.info { "Preparing no flicker scoreboard in a separate thread..." }
 
 		thread {

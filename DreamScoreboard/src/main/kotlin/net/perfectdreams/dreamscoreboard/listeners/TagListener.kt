@@ -61,7 +61,7 @@ class TagListener(val plugin: DreamScoreboard) : Listener {
             )
         }
 
-        val averageWins = plugin.getTopClubeVictoriesOnAverageOnThisMonth()
+        /* val averageWins = plugin.getTopClubeVictoriesOnAverageOnThisMonth()
 
         val bestClube = averageWins.firstOrNull()
 
@@ -82,6 +82,6 @@ class TagListener(val plugin: DreamScoreboard) : Listener {
                     true
                 )
             )
-        }
+        } */
     }
 }

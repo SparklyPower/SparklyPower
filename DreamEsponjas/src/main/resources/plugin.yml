@@ -1,0 +1,5 @@
+name: DreamEsponjas
+main: net.perfectdreams.dreamesponjas.DreamEsponjas
+version: 1.0.0
+api-version: 1.13
+softdepend: ["DreamCore"]

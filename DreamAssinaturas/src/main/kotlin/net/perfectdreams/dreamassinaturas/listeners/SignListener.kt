@@ -39,11 +39,12 @@ class SignListener(val m: DreamAssinaturas) : Listener {
         if (template != null) {
             // Assinatura, wow!
             val lines = e.lines.copyOf()
-            // Don't allow users to create signatures that contain "SparklyShop" in the sign template
-            if (lines.any { it.contains("SparklyShop", true) })
-                return
 
             val split = template.split("\n")
+
+            // Don't allow users to create signatures that contain "SparklyShop" in the sign template
+            if (split.any { it.contains("SparklyShop", true) })
+                return
 
             for ((index, str) in split.withIndex())
                 e.setLine(

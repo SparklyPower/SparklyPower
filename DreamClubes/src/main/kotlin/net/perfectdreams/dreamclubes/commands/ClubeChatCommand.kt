@@ -35,7 +35,7 @@ class ClubeChatCommand(val m: DreamClubes) : SparklyCommand(arrayOf(".")) {
 
                     val onlineMembers = members.mapNotNull { Bukkit.getPlayer(it.id.value) }
                     onlineMembers.forEach { clubeOnlinePlayer ->
-                        clubeOnlinePlayer.sendMessage("§6$tag §3${player.displayName} §6» §3$message")
+                        clubeOnlinePlayer.sendMessage("§6$tag §3${player.displayName} §6» §x§0§0§d§d§f§f$message")
                     }
 
                     for (staff in Bukkit.getOnlinePlayers().asSequence().filter { it.hasPermission("dreamclubes.snoop") }) {

@@ -108,6 +108,10 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 					damager.sendMessage("§7Você pagou §2${spawner.price} Sonhos§7 para matar este pobre animal!")
 				}
 			}
+		} else if (damager is Tameable && entity is LivingEntity) {
+			val spawner = spawners.firstOrNull { WorldGuardUtils.isWithinRegion(entity.location, it.region) } ?: return
+
+			event.isCancelled = true
 		}
 	}
 

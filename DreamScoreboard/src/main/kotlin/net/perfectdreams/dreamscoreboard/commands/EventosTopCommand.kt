@@ -23,8 +23,8 @@ object EventosTopCommand : DSLCommandBase<DreamScoreboard> {
     override fun command(plugin: DreamScoreboard) = create(listOf("eventos top")) {
         executes {
             sender.sendMessage("§8[ §bTop Vencedores de Evento do Mês §8]".centralizeHeader())
-            sender.sendMessage("§eVeja os clubes que venceram mais eventos neste mês em §6/eventos top clubes")
-            sender.sendMessage("§7")
+            // sender.sendMessage("§eVeja os clubes que venceram mais eventos neste mês em §6/eventos top clubes")
+            // sender.sendMessage("§7")
 
             async {
                 val start = plugin.getMonthStartInMillis()

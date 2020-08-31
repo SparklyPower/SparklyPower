@@ -20,10 +20,7 @@ import net.perfectdreams.dreamchat.events.ApplyPlayerTagsEvent
 import net.perfectdreams.dreamchat.tables.ChatUsers
 import net.perfectdreams.dreamchat.tables.DiscordAccounts
 import net.perfectdreams.dreamchat.tables.PremiumUsers
-import net.perfectdreams.dreamchat.utils.ChatUtils
-import net.perfectdreams.dreamchat.utils.DiscordAccountInfo
-import net.perfectdreams.dreamchat.utils.McMMOTagsUtils
-import net.perfectdreams.dreamchat.utils.PlayerTag
+import net.perfectdreams.dreamchat.utils.*
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
@@ -365,11 +362,9 @@ class ChatListener(val m: DreamChat) : Listener {
 		if (event.tags.isNotEmpty()) {
 			// omg tags!
 			// Exemplos:
-			// Apenas tag estendida
+			// Apenas uma tag
 			// [Último Votador]
-			// Tag estendida + tag pequena
-			// [Último Votador DS]
-			// Apenas tags pequena
+			// Duas tags
 			// [DS]
 			//
 			// Para não encher o chat de tags
@@ -395,7 +390,43 @@ class ChatListener(val m: DreamChat) : Listener {
 					textTags += textTag
 				}
 			} else {
-				for (tag in tags) {
+				// We have multiple tags that can be used, we will select the one that has the most tags assigned to it
+				val wordTags = listOf(
+					WordTagFitter("SPARKLYPOWER"),
+					WordTagFitter("SPARKLY"),
+					WordTagFitter("POWER"),
+					WordTagFitter("LORITTA"),
+					WordTagFitter("PANTUFA"),
+					WordTagFitter("FELIZ"),
+					WordTagFitter("DILMA"),
+					WordTagFitter("CRAFT"),
+					WordTagFitter("LORI"),
+					WordTagFitter("MINE"),
+					WordTagFitter("DIMA")
+				)
+
+				wordTags.forEach { wordTag ->
+					tags.forEach { tag ->
+						wordTag.tryFittingInto(tag)
+					}
+				}
+
+				val whatTagShouldBeUsed = wordTags.maxBy {
+					it.tagPositions.filterNotNull().distinct().size
+				}
+
+				// Add the tags from the whatTagShouldBeUsed tag fitter to a "displayInOrderTags"
+				// Then we append the player's tags and do a .distinct() over it
+				// So technically the "word tag fitter" will form a entire word, woo!
+				val displayInOrderTags = if (whatTagShouldBeUsed == null)
+					tags
+				else (
+						whatTagShouldBeUsed.tagPositions
+							.filterNotNull()
+								+ tags
+						).distinct()
+
+				for (tag in displayInOrderTags) {
 					textTags += tag.small.toTextComponent().apply {
 						if (tag.description != null) {
 							hoverEvent = HoverEvent(

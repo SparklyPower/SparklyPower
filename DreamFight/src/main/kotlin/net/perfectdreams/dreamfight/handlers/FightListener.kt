@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.utils.extensions.healAndFeed
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
@@ -15,7 +16,7 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
 class FightListener(val m: DreamFight) : Listener {
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     fun onDamage(e: EntityDamageEvent) {
         if (e.entity.world.name == "EventoFight")
             if (m.fight.isPvPStarted)
@@ -24,40 +25,15 @@ class FightListener(val m: DreamFight) : Listener {
                 e.isCancelled = true
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     fun onDamage(e: EntityDamageByEntityEvent) {
-        if (m.fight.started) {
+        if (e.entity.world.name == "EventoFight") {
             if (e.damager is Player && e.entity is Player) {
-                if (m.fight.modifiers.contains(
-                        FightModifier.TWO_TEAM)) {
-                    if (e.damager.equals(m.fight.p1) && e.entity.equals(
-                            m.fight.p2
-                        )
-                    ) {
-                        (e.damager as Player).sendMessage(FancyAsriel.fancy("§cEle é do seu §ltime§c safado!"))
-                        e.isCancelled = true
-                    }
-                    if (e.entity.equals(m.fight.p1) && e.damager.equals(
-                            m.fight.p2
-                        )
-                    ) {
-                        (e.damager as Player).sendMessage(FancyAsriel.fancy("§cEle é do seu §ltime§c safado!"))
-                        e.isCancelled = true
-                    }
-                    if (e.damager.equals(m.fight.p3) && e.entity.equals(
-                            m.fight.p4
-                        )
-                    ) {
-                        (e.damager as Player).sendMessage(FancyAsriel.fancy("§cEle é do seu §ltime§c safado!"))
-                        e.isCancelled = true
-                    }
-                    if (e.entity.equals(m.fight.p3) && e.damager.equals(
-                            m.fight.p4
-                        )
-                    ) {
-                        (e.damager as Player).sendMessage(FancyAsriel.fancy("§cEle é do seu §ltime§c safado!"))
-                        e.isCancelled = true
-                    }
+                if (m.fight.isPvPStarted && ((e.damager == m.fight.p1 && e.entity == m.fight.p2) || (e.entity == m.fight.p1 && e.damager == m.fight.p2))) {
+                    // Yeah they are fighting boiii
+                } else {
+                    // They are not fighting, sad sad
+                    e.isCancelled = true
                 }
             }
         }
@@ -68,11 +44,11 @@ class FightListener(val m: DreamFight) : Listener {
         if (m.fight.started) {
             if (!m.fight.modifiers.contains(
                     FightModifier.TWO_TEAM)) {
-                if (e.entity.equals(m.fight.p1)) {
+                if (e.entity == m.fight.p1) {
                     m.fight.setWinner(
                         m.fight.p2, WinReason.DEATH)
                 }
-                if (e.entity.equals(m.fight.p2)) {
+                if (e.entity == m.fight.p2) {
                     m.fight.setWinner(
                         m.fight.p1, WinReason.DEATH)
                 }

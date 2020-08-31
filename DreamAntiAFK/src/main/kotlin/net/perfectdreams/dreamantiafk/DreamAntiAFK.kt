@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamantiafk
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.*
@@ -11,15 +12,18 @@ import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.player.AsyncPlayerChatEvent
-import org.bukkit.event.player.PlayerCommandPreprocessEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.*
 import java.io.File
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class DreamAntiAFK : KotlinPlugin(), Listener {
 	val players = WeakHashMap<Player, PlayerAFKInfo>()
+	val logoutTime = Caffeine.newBuilder()
+		.expireAfterWrite(1, TimeUnit.MINUTES)
+		.build<UUID, Long>()
+		.asMap()
+
 	var blockedWorlds = setOf<String>()
 
 	override fun softEnable() {
@@ -67,6 +71,13 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 							val location = player.location
 							val lastLocation = pair.location
 
+							if (location.world != lastLocation.world) {
+								// If the worlds are different, we are going to reset the AFK score and update the location
+								pair.score = 0
+								pair.location = location
+								continue
+							}
+
 							val distance = location.distance(lastLocation)
 							val distanceSameYLevel = location.clone().apply { this.y = lastLocation.y }
 								.distance(lastLocation)
@@ -100,6 +111,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 											|§6(§eObs:§6 Não precisa ficar preocupado!
 											|§6Você ainda pode entrar no SparklyPower! Nada irá acontecer!)""".trimMargin()
 								)
+								logoutTime[player.uniqueId] = System.currentTimeMillis()
 
 								for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission(isStaffPermission) }) {
 									staff.sendMessage("§b${player.name} §3foi kickado por ficar parado por mais de 10 minutos!")
@@ -115,10 +127,21 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 								}
 							}
 						} else {
-							players.put(player, PlayerAFKInfo(player.location, 0))
+							players[player] = PlayerAFKInfo(player.location, 0)
 						}
 					} catch (e: IllegalArgumentException) {} // Mundos diferentes
 				}
+			}
+		}
+	}
+
+	@EventHandler
+	fun onJoin(e: PlayerJoinEvent) {
+		val whenLoggedOutDueToAfkKick = logoutTime[e.player.uniqueId]
+
+		if (whenLoggedOutDueToAfkKick != null) {
+			for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission(isStaffPermission) }) {
+				staff.sendMessage("§b${staff.name} §3foi kickado por AFK, mas ele voltou em menos de um minuto! Talvez ele esteja tentando burlar o sistema de AFK!!")
 			}
 		}
 	}
@@ -140,7 +163,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 	fun onCommand(e: PlayerCommandPreprocessEvent) {
 		if (players.containsKey(e.player)) {
 			val info = players[e.player]!!
-			info.score = Math.max(info.score - 5, 0)
+			info.score = Math.max(info.score - 3, 0)
 		}
 	}
 
@@ -148,7 +171,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 	fun onInteract(e: PlayerInteractEvent) {
 		if (players.containsKey(e.player) && (e.rightClick || e.leftClick)) {
 			val info = players[e.player]!!
-			info.score = Math.max(info.score - 5, 0)
+			info.score = Math.max(info.score - 1, 0)
 		}
 	}
 

@@ -14,7 +14,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.io.File
 
-class    DreamCaixaSecreta : KotlinPlugin() {
+class DreamCaixaSecreta : KotlinPlugin() {
 	lateinit var itemReceived: Song
 	var prizes = mutableListOf<RandomItem>()
 
@@ -604,7 +604,7 @@ class    DreamCaixaSecreta : KotlinPlugin() {
 		super.softDisable()
 	}
 
-	fun generateCaixaSecreta(_level: Int? = null): ItemStack {
+	fun generateCaixaSecreta(_level: Int? = null, worldName: String? = null): ItemStack {
 		val level = _level ?: DreamUtils.random.nextInt(0, 5)
 
 		var caixa = ItemStack(Material.CHEST).rename("§6✪ §a§lCaixa Secreta §6✪")
@@ -620,6 +620,8 @@ class    DreamCaixaSecreta : KotlinPlugin() {
 
 		caixa = caixa.lore("§7Mas... o que será que tem aqui dentro?", "§7", "§3Coloque no chão e descubra!", "§7", "§7Nível de raridade: ${rarityLevel}")
 		caixa = caixa.storeMetadata("caixaSecretaLevel", level.toString())
+		if (worldName != null)
+			caixa = caixa.storeMetadata("caixaSecretaWorld", worldName)
 
 		return caixa
 	}

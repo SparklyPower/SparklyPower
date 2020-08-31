@@ -11,16 +11,39 @@ import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcorrida.DreamCorrida
 import org.bukkit.Bukkit
+import org.bukkit.GameMode
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.entity.EntityToggleGlideEvent
+import org.bukkit.event.player.PlayerChangedWorldEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
 class PlayerListener(val m: DreamCorrida) : Listener {
+    @EventHandler
+    fun onGoingToCorridaTeleport(e: PlayerChangedWorldEvent) {
+        if (!m.eventoCorrida.running)
+            return
+
+        val eventoCorrida = m.eventoCorrida
+        val corrida = eventoCorrida.corrida ?: return
+        val spawnLocation = corrida.spawn.toLocation()
+
+        if (e.from.name != "Corrida" && e.player.world.name == "Corrida")
+            e.player.gameMode = GameMode.ADVENTURE
+    }
+
+    @EventHandler
+    fun onLeavingCorridaTeleport(e: PlayerChangedWorldEvent) {
+        if (e.from.name == "Corrida" && e.player.world.name != "Corrida")
+            e.player.gameMode = GameMode.SURVIVAL
+    }
+
     @EventHandler
     fun onElytra(e: EntityToggleGlideEvent) {
         if (!m.eventoCorrida.running)
@@ -34,6 +57,40 @@ class PlayerListener(val m: DreamCorrida) : Listener {
             return
 
         e.isCancelled = true
+    }
+
+    @EventHandler
+    fun onShoot(e: EntityShootBowEvent) {
+        if (!m.eventoCorrida.running)
+            return
+
+        val eventoCorrida = m.eventoCorrida
+        val corrida = eventoCorrida.corrida ?: return
+        val spawnLocation = corrida.spawn.toLocation()
+
+        if (spawnLocation.world.name != e.entity.world.name)
+            return
+
+        e.isCancelled = true
+    }
+
+    @EventHandler
+    fun onMovePreStart(e: PlayerMoveEvent) {
+        if (!m.eventoCorrida.running)
+            return
+
+        if (!e.displaced)
+            return
+
+        val eventoCorrida = m.eventoCorrida
+        val corrida = eventoCorrida.corrida ?: return
+        val spawnLocation = corrida.spawn.toLocation()
+
+        if (spawnLocation.world.name != e.player.world.name)
+            return
+
+        if (m.eventoCorrida.startCooldown > 0)
+            e.isCancelled = true
     }
 
     @EventHandler
@@ -103,6 +160,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                             eventoCorrida.playerCheckpoints.clear()
                             eventoCorrida.lastTime = System.currentTimeMillis()
                             eventoCorrida.wonPlayers.clear()
+                            eventoCorrida.damageCooldown.clear()
                         }
                         return
                     }
@@ -138,34 +196,46 @@ class PlayerListener(val m: DreamCorrida) : Listener {
         val player = e.entity as Player
         val eventoCorrida = m.eventoCorrida
         val corrida = eventoCorrida.corrida ?: return
-        val spawnLocation = corrida.spawn.toLocation() ?: return
+        val spawnLocation = corrida.spawn.toLocation()
 
         if (spawnLocation.world.name != player.world.name)
             return
 
         e.isCancelled = true
 
-        if (e.cause == EntityDamageEvent.DamageCause.FALL
-            || e.cause == EntityDamageEvent.DamageCause.CONTACT
-            || e.cause == EntityDamageEvent.DamageCause.CRAMMING
-            || e.cause == EntityDamageEvent.DamageCause.CUSTOM
-            || e.cause == EntityDamageEvent.DamageCause.FALLING_BLOCK
-            || e.cause == EntityDamageEvent.DamageCause.SUFFOCATION
-            || e.cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK
-            || e.cause == EntityDamageEvent.DamageCause.ENTITY_EXPLOSION
-            || e.cause == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK
-            || e.cause == EntityDamageEvent.DamageCause.DROWNING)
+        if (e.cause == EntityDamageEvent.DamageCause.VOID
+            || e.cause == EntityDamageEvent.DamageCause.LAVA
+            || e.cause == EntityDamageEvent.DamageCause.FIRE_TICK) {
+
+            val diff = System.currentTimeMillis() - (eventoCorrida.damageCooldown[player] ?: 0)
+
+            if (diff >= 3_000) {
+                eventoCorrida.damageCooldown[player] = System.currentTimeMillis()
+
+                // Mas se for qualquer outra coisa...
+                val currentPlayerCheckpoint = eventoCorrida.playerCheckpoints[player]
+                val teleportTo = currentPlayerCheckpoint?.spawn?.toLocation() ?: corrida.spawn.toLocation()
+
+                player.fallDistance = 0.0f
+                player.fireTicks = 0
+                PlayerUtils.healAndFeed(player)
+
+                player.teleport(teleportTo)
+                player.sendMessage("§cVocê levou dano e voltou ao último checkpoint! Mas não desista, continue correndo!")
+            }
+        }
+    }
+
+    @EventHandler
+    fun onInteract(e: PlayerInteractEvent) {
+        val eventoCorrida = m.eventoCorrida
+        val corrida = eventoCorrida.corrida ?: return
+        val spawnLocation = corrida.spawn.toLocation()
+
+        if (spawnLocation.world.name != e.player.world.name || e.player.hasPermission("dreamcorrida.bypass"))
             return
 
-        // Mas se for qualquer outra coisa...
-        val currentPlayerCheckpoint = eventoCorrida.playerCheckpoints[player]
-        val teleportTo = currentPlayerCheckpoint?.spawn?.toLocation() ?: corrida.spawn.toLocation()
-
-        player.fallDistance = 0.0f
-        player.fireTicks = 0
-        PlayerUtils.healAndFeed(player)
-
-        player.teleport(teleportTo)
-        player.sendMessage("§cVocê levou dano e voltou ao último checkpoint! Mas não desista, continue correndo!")
+        // Block all item interaction in the event
+        e.isCancelled = true
     }
 }

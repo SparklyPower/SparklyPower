@@ -33,9 +33,9 @@ class DreamRestarter : KotlinPlugin() {
 
 			// Enviar para o BungeeCord que já pode transferir todos os players de volta para o servidor :3
 			if (storedPlayerRestart.exists()) {
-				storedPlayerRestart.delete()
-
 				val uniqueIds = storedPlayerRestart.readLines().map { UUID.fromString(it) }
+
+				storedPlayerRestart.delete()
 
 				for (uniqueId in uniqueIds) {
 					DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(

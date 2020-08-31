@@ -151,7 +151,9 @@ class DreamTrails : KotlinPlugin() {
 		}
 	}
 
-	fun hasParticlesEnabled(player: Player) = !DreamVanishAPI.isVanishedOrInvisible(player)
+	fun hasParticlesEnabled(player: Player) =
+		player.location.world.name !in listOf("Quiz", "Labirinto", "EventoFight", "Corrida", "MinaRecheada", "TorreDaMorte", "ArenasPvP")
+				&& !DreamVanishAPI.isVanishedOrInvisible(player)
 
 	override fun softDisable() {
 		super.softDisable()

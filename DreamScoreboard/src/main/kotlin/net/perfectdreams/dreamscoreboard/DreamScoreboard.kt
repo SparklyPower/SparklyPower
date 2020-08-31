@@ -66,8 +66,8 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 		registerCommand(EventosCommand)
 		registerCommand(EventosTopCommand)
-		registerCommand(EventosTopClubesCommand)
-		registerCommand(EventosTopMeuClubeCommand)
+		// registerCommand(EventosTopClubesCommand)
+		// registerCommand(EventosTopMeuClubeCommand)
 		registerCommand(GlowingCommand)
 		registerCommand(GlowingColorCommand)
 		registerCommand(AmenoCommand)
@@ -193,7 +193,7 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 							it.sendMessage("§aVocê ganhou um pesadelo por ser top 3 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
 							switchContext(SynchronizationContext.SYNC)
 						}
-						switchContext(SynchronizationContext.ASYNC)
+						/* switchContext(SynchronizationContext.ASYNC)
 						if (bestClube != null && bestClube.first.id.value == ClubeAPI.getPlayerClube(it)?.id?.value) {
 							switchContext(SynchronizationContext.ASYNC)
 							Cash.giveCash(it, 1)
@@ -201,7 +201,7 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 							it.sendMessage("§aVocê ganhou um pesadelo pois o seu clube está em top 1 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
 							switchContext(SynchronizationContext.SYNC)
 						}
-						switchContext(SynchronizationContext.SYNC)
+						switchContext(SynchronizationContext.SYNC) */
 					}
 
 				Bukkit.getOnlinePlayers().forEach {

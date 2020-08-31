@@ -71,7 +71,7 @@ object ItemUtils {
 	fun getTranslatedDisplayName(itemStack: ItemStack, locale: String): String {
 		if (itemStack.itemMeta.hasDisplayName())
 			return itemStack.itemMeta.displayName
-		return TranslationAPI.getTranslationString(locale, MaterialUtils.getTranslationKey(itemStack.type))
+		return TranslationAPI.getTranslationString(locale, MaterialUtils.getTranslationKey(itemStack.type))!!
 	}
 }
 

@@ -25,7 +25,7 @@ class PlayerListener(val m: DreamQuiz) : Listener {
 
     @EventHandler
     fun onInteract(e: PlayerInteractEvent) {
-        if (e.player.world.name == "Quiz") {
+        if (e.player.world.name == "Quiz" && !e.player.hasPermission("sparklypower.soustaff")) {
             e.isCancelled = true
         }
     }

@@ -7,6 +7,7 @@ import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.commands.bukkit.SubcommandPermission
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.blacklistedTeleport
+import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcorrida.DreamCorrida
 import net.perfectdreams.dreamcorrida.utils.Checkpoint
 import net.perfectdreams.dreamcorrida.utils.Corrida
@@ -34,7 +35,9 @@ class CorridaCommand(val m: DreamCorrida) : SparklyCommand(arrayOf("corrida")) {
         }
 
         val spawnLocation = m.eventoCorrida.corrida?.spawn?.toLocation()!!
+
         sender.teleport(spawnLocation)
+        sender.removeAllPotionEffects()
 
         sender.playSound(spawnLocation, "perfectdreams.sfx.special_stage", SoundCategory.RECORDS, 1000f, 1f)
     }

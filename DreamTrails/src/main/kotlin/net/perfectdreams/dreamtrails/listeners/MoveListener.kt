@@ -14,7 +14,7 @@ class MoveListener(val m: DreamTrails) : Listener {
 		if (!e.displaced)
 			return
 
-		if (e.player.location.world.name == "Quiz" || !m.hasParticlesEnabled(e.player))
+		if (!m.hasParticlesEnabled(e.player))
 			return
 
 		val activeTrails = m.playerTrails[e.player.uniqueId] ?: return

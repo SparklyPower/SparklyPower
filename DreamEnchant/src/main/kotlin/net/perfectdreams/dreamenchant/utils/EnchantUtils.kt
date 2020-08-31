@@ -7,6 +7,8 @@ import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import protocolsupport.api.TranslationAPI
+
 // import protocolsupport.api.TranslationAPI
 
 object EnchantUtils {
@@ -85,8 +87,8 @@ object EnchantUtils {
                 }
 
                 val localeKey = "enchantment.minecraft.${enchant.key.key}"
-                val ptEnchantment = enchant.key.key /* TranslationAPI.getTranslationString("pt_br", localeKey) */
-                val usEnchantment = enchant.key.key /* TranslationAPI.getTranslationString("us", localeKey) */
+                val ptEnchantment = TranslationAPI.getTranslationString("pt_br", localeKey)
+                val usEnchantment = TranslationAPI.getTranslationString("en_us", localeKey)
 
                 val multiplier = getLevelMultiplierForPlayer(player)
 

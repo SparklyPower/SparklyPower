@@ -1,15 +1,13 @@
 package net.perfectdreams.dreamcaixasecreta.listeners
 
+import com.okkero.skedule.SynchronizationContext
+import com.okkero.skedule.schedule
 import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer
 import net.perfectdreams.dreamcaixasecreta.DreamCaixaSecreta
-import net.perfectdreams.dreamcore.utils.DreamUtils
-import net.perfectdreams.dreamcore.utils.InstantFirework
-import net.perfectdreams.dreamcore.utils.chance
+import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import org.bukkit.Color
-import org.bukkit.FireworkEffect
-import org.bukkit.Material
-import org.bukkit.Particle
+import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -29,6 +27,8 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 			return
 
 		val data = e.item!!.getStoredMetadata("caixaSecretaLevel") ?: return
+		val caixaSecretaWorld = e.item!!.getStoredMetadata("caixaSecretaWorld")
+
 		val level = data.toInt()
 
 		e.isCancelled = true
@@ -37,26 +37,53 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 		val items = mutableListOf<ItemStack>()
 		var amount = 0
 
-		for (item in m.prizes) {
-			var chance = item.chance
+		if (caixaSecretaWorld == "Resources") {
+			val sonhosChance = chanceMultiplied(1.0, level)
+			val pesadelosChance = chanceMultiplied(0.1, level)
+			val nitroClassicChance = chanceMultiplied(0.01, level)
 
-			when (level) {
-				4 -> chance *= 2
-				3 -> chance *= 1.75
-				2 -> chance *= 1.5
-				1 -> chance *= 1.25
+			if (chance(nitroClassicChance)) {
+				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §x§3§8§2§b§0§0Um Nitro Classic§a pela caixa secreta! Parabéns!!")
+				items.add(
+					ItemStack(Material.TRIPWIRE_HOOK)
+						.rename("§x§3§8§2§b§0§0Nitro Classic")
+						.lore("§aPara receber o seu prêmio, contate", "§aa equipe do SparklyPower no", "§anosso Discord!", "§a", "§7Prêmio de §b${e.player.name}")
+				)
 			}
+
+			if (chance(pesadelosChance)) {
+				val pesadelos = DreamUtils.random.nextInt(25, 51)
+
+				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §c§l$pesadelos Pesadelos§a pela caixa secreta! Parabéns!!")
+
+				scheduler().schedule(m, SynchronizationContext.ASYNC) {
+					Cash.giveCash(e.player, pesadelos.toLong())
+				}
+			}
+
+			if (chance(sonhosChance)) {
+				val sonhos = DreamUtils.random.nextInt(25_000, 50_001)
+
+				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §2§l$sonhos sonhos§a pela caixa secreta! Parabéns!!")
+
+				e.player.balance += sonhos
+			}
+		}
+
+		for (item in m.prizes) {
+			val chance = chanceMultiplied(item.chance, level)
+
 			if (chance(chance)) {
 				val itemStack = item.itemStack.clone()
 
 				if (item.randomEnchant) {
 					Enchantment.values()
-							.filter { it.canEnchantItem(itemStack) }
-							.forEach {
-								if (chance(25 * chance)) {
-									itemStack.addEnchantment(it, DreamUtils.random.nextInt(1, it.maxLevel + 1))
-								}
+						.filter { it.canEnchantItem(itemStack) }
+						.forEach {
+							if (chance(25 * chance)) {
+								itemStack.addEnchantment(it, DreamUtils.random.nextInt(1, it.maxLevel + 1))
 							}
+						}
 				}
 
 				items.add(item.itemStack)
@@ -88,7 +115,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 		if (e.block.type != Material.STONE)
 			return
 
-		if (e.player.inventory.itemInMainHand?.containsEnchantment(Enchantment.SILK_TOUCH) == true)
+		if (e.player.inventory.itemInMainHand.containsEnchantment(Enchantment.SILK_TOUCH))
 			return
 
 		val chance = 0.8
@@ -104,9 +131,25 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 				else -> 0
 			}
 
-			val item = m.generateCaixaSecreta(level)
+			val item = m.generateCaixaSecreta(
+				level,
+				e.player.world.name
+			)
 
 			e.player.world.dropItemNaturally(e.block.location, item)
 		}
+	}
+
+	private fun chanceMultiplied(value: Double, level: Int): Double {
+		var chance = value
+
+		when (level) {
+			4 -> chance *= 2
+			3 -> chance *= 1.75
+			2 -> chance *= 1.5
+			1 -> chance *= 1.25
+		}
+
+		return chance
 	}
 }

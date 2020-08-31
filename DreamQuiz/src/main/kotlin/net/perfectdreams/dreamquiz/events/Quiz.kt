@@ -49,6 +49,7 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
 
     override fun start() {
         winners.clear()
+        alreadyAskedQuestionsToPlayer.clear()
         started = true
 
         players.forEach {
@@ -110,7 +111,6 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
                     it.sendTitle(Title("§7E o resultado é...", question.answer.prettyBoolean().toUpperCase(), 0, 60, 0))
                 }
 
-                waitFor(20 * 2) // smol 2s delay
                 players.forEach {
                     val question = playerQuestions[it] ?: DreamQuiz.CONFIG.questions.first()
 
@@ -155,6 +155,8 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
 
                     return@schedule
                 }
+
+                waitFor(20 * 2) // smol 2s delay
 
                 players.forEach {
                     it.teleport(DreamQuiz.CONFIG.spawn.toLocation())

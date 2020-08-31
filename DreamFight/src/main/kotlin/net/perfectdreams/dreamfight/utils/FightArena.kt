@@ -93,14 +93,14 @@ class FightArena(var m: DreamFight) {
     fun countdownPvP(count: Int, p1: Player, p2: Player) {
         object : BukkitRunnable() {
             override fun run() {
-                if (p1 == null || !players.contains(p1) || !p1.isOnline) {
+                if (!players.contains(p1) || !p1.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
                     players.remove(p1)
                     preparePvP()
                     this.cancel()
                     return
                 }
-                if (p2 == null || !players.contains(p2) || !p2.isOnline) {
+                if (!players.contains(p2) || !p2.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
                     players.remove(p2)
                     preparePvP()
@@ -123,28 +123,28 @@ class FightArena(var m: DreamFight) {
     fun countdownPvPMulti(count: Int, p1: Player, p2: Player, p3: Player, p4: Player) {
         object : BukkitRunnable() {
             override fun run() {
-                if (p1 == null || !players.contains(p1) || !p1.isOnline) {
+                if (!players.contains(p1) || !p1.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
                     players.remove(p1)
                     preparePvP()
                     this.cancel()
                     return
                 }
-                if (p2 == null || !players.contains(p2) || !p2.isOnline) {
+                if (!players.contains(p2) || !p2.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
                     players.remove(p2)
                     preparePvP()
                     this.cancel()
                     return
                 }
-                if (p3 == null || !players.contains(p3) || !p3.isOnline) {
+                if (!players.contains(p3) || !p3.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
                     players.remove(p3)
                     preparePvP()
                     this.cancel()
                     return
                 }
-                if (p4 == null || !players.contains(p4) || !p4.isOnline) {
+                if (!players.contains(p4) || !p4.isOnline) {
                     sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
                     players.remove(p4)
                     preparePvP()
@@ -186,31 +186,6 @@ class FightArena(var m: DreamFight) {
 
             startFight()
         }
-        /* object : BukkitRunnable() {
-            fun run() {
-                if (count == 0) {
-                    startFight()
-                    this.cancel()
-                    return
-                }
-                var modCount = count.toDouble()
-                val asriel = modCount / 15
-                if (asriel as Int.toDouble () == asriel){
-                    var text = ""
-                    if (!modifiers.isEmpty()) {
-                        val names = ArrayList<String?>()
-                        for (fa in modifiers) {
-                            names.add(fa.title)
-                        }
-                        text = "(" + names.joinToString(", ").toString() + ") "
-                    }
-                    m.getServer()
-                        .broadcastMessage(FancyAsriel.fancy(SparklyFight.Companion.prefix + "§eEvento Fight " + text + "irá iniciar em §l" + count + " segundos§e! §e/fight"))
-                }
-                modCount = modCount - 1
-                countdown(modCount.toInt())
-            }
-        }.runTaskLater(m, 20L) */
     }
 
     fun startFight() {
@@ -383,10 +358,7 @@ class FightArena(var m: DreamFight) {
             while (time1 == time2) {
                 time1 = RandomTeamName.rtn.random()
             }
-            p1
-            p2
-            p3!!
-            p4!!
+
             sendToFightArena("§c§k§l*...* §b§lTime " + time1 + ": §e§l" + p1.displayName + "§e e §e§l" + p2.displayName + " §c§k§L*...*")
             sendToFightArena("§c§k§l*...* §4§lTime " + time2 + ": §e§l" + p3.displayName + "§e e §e§l" + p4.displayName + " §c§k§L*...*")
             this.time1 = time1
@@ -500,7 +472,7 @@ class FightArena(var m: DreamFight) {
         }
         if (modifiers.contains(FightModifier.HEAL_POTION)) {
             p.inventory.addItem(
-                ItemStack(Material.POTION).meta<PotionMeta> {
+                ItemStack(Material.SPLASH_POTION).meta<PotionMeta> {
                     this.addCustomEffect(PotionEffect(PotionEffectType.HEAL, 20 * 15, 0), true)
                 }
             )
@@ -607,7 +579,7 @@ class FightArena(var m: DreamFight) {
             winner.balance += finalPrize
             // VaultUtils.econ.depositPlayer(winner, finalPrize);
         }
-        multiplier = multiplier + 1
+        multiplier += 1
         clearInventoryWithArmorOf(loser)
         clearInventoryWithArmorOf(winner)
         loser.removeAllPotionEffects()
