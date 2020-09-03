@@ -5,11 +5,8 @@ import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.*
 import net.perfectdreams.dreamfight.DreamFight
-import net.perfectdreams.dreamcore.utils.extensions.girl
-import net.perfectdreams.dreamcore.utils.extensions.healAndFeed
-import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
@@ -517,7 +514,7 @@ class FightArena(var m: DreamFight) {
                 winner.teleport(exit)
                 m.server.broadcastMessage(
                     FancyAsriel.fancy(
-                        DreamFight.prefix + "§eNós encontramos o nosso §4§lLutador" + (if (winner.girl) "a" else "") + "§e! §l" + winner.displayName + "§e §lvenceu o Evento Fight§e! §a+§l" + winnerPrize + "$§a e §cum pesadelo§a!"
+                        DreamFight.prefix + "§eNós encontramos o noss${winner.artigo} §4§lLutador" + (if (winner.girl) "a" else "") + "§e! §l" + winner.displayName + "§e §lvenceu o Evento Fight§e! §a+§l" + winnerPrize + "$§a e §cum pesadelo§a!"
                     )
                 )
                 winner.balance += winnerPrize

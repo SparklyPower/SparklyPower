@@ -141,7 +141,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 
 		if (whenLoggedOutDueToAfkKick != null) {
 			for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission(isStaffPermission) }) {
-				staff.sendMessage("§b${staff.name} §3foi kickado por AFK, mas ele voltou em menos de um minuto! Talvez ele esteja tentando burlar o sistema de AFK!!")
+				staff.sendMessage("§b${e.player.name} §3foi kickado por AFK, mas ele voltou em menos de um minuto! Talvez ele esteja tentando burlar o sistema de AFK!!")
 			}
 		}
 	}

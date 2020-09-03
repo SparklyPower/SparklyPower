@@ -27,6 +27,7 @@ class QueroTagCommand(val m: DreamChat) : SparklyCommand(arrayOf("querotag"), "d
 			scheduler().schedule(m, SynchronizationContext.ASYNC) {
 				transaction {
 					ChatUsers.upsert(ChatUsers.id) {
+						it[ChatUsers._id] = sender.uniqueId
 						it[tag] = null
 					}
 				}

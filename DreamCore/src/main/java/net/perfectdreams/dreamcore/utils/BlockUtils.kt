@@ -1,15 +1,16 @@
 package net.perfectdreams.dreamcore.utils
 
-import net.minecraft.server.v1_16_R1.BlockPosition
-import net.minecraft.server.v1_16_R1.World
+import net.minecraft.server.v1_16_R2.BlockPosition
+import net.minecraft.server.v1_16_R2.World
+import net.minecraft.server.v1_16_R2.WorldServer
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
-import org.bukkit.craftbukkit.v1_16_R1.CraftWorld
-import org.bukkit.craftbukkit.v1_16_R1.entity.CraftEntity
-import org.bukkit.craftbukkit.v1_16_R1.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_16_R1.util.CraftMagicNumbers
+import org.bukkit.craftbukkit.v1_16_R2.CraftWorld
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftEntity
+import org.bukkit.craftbukkit.v1_16_R2.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_16_R2.util.CraftMagicNumbers
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Entity
 import org.bukkit.inventory.ItemStack
@@ -34,7 +35,7 @@ object BlockUtils {
 		val nmsWorld = (block.world as CraftWorld).handle
 		val nmsBlock = CraftMagicNumbers.getBlock(block.type)
 
-		return net.minecraft.server.v1_16_R1.Block.getDrops(nmsBlock.blockData, nmsWorld, BlockPosition(block.x, block.y, block.z), null, (entity as? CraftEntity)?.handle, CraftItemStack.asNMSCopy(itemStack))
+		return net.minecraft.server.v1_16_R2.Block.getDrops(nmsBlock.blockData, nmsWorld, BlockPosition(block.x, block.y, block.z), null, (entity as? CraftEntity)?.handle, CraftItemStack.asNMSCopy(itemStack))
 			.map {
 				it.bukkitStack
 			}
@@ -48,7 +49,7 @@ object BlockUtils {
 	fun getExpCount(block: Block, itemStack: ItemStack): Int {
 		val nmsBlock = CraftMagicNumbers.getBlock(block.type)
 		val nmsWorld = (block.world as CraftWorld).handle
-		return nmsBlock.getExpDrop(nmsBlock.blockData, nmsWorld as World, BlockPosition(block.x, block.y, block.z), CraftItemStack.asNMSCopy(itemStack))
+		return nmsBlock.getExpDrop(nmsBlock.blockData, nmsWorld as WorldServer, BlockPosition(block.x, block.y, block.z), CraftItemStack.asNMSCopy(itemStack))
 	}
 
 	fun getDropType(block: Block): Material {
