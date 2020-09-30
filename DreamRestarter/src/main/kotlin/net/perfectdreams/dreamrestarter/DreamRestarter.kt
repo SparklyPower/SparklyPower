@@ -42,7 +42,7 @@ class DreamRestarter : KotlinPlugin() {
 						jsonObject(
 							"type" to "transferPlayersByUUID",
 							"bungeeServer" to DreamCore.dreamConfig.bungeeName,
-							"players" to listOf(uniqueId).toJsonArray()
+							"players" to listOf(uniqueId.toString()).toJsonArray()
 						)
 					)
 				}

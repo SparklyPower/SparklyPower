@@ -6,18 +6,17 @@ import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.tables.Users
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.MeninaAPI
-import net.perfectdreams.dreamcore.utils.blacklistedTeleport
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.isUnsafe
-import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamloja.DreamLoja
 import net.perfectdreams.dreamloja.dao.Shop
 import net.perfectdreams.dreamloja.tables.Shops
 import net.perfectdreams.dreamloja.tables.UserShopVotes
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -30,6 +29,15 @@ class LojaCommand(val m: DreamLoja) : SparklyCommand(arrayOf("loja")) {
 
 	@Subcommand
 	fun getShop(player: Player, ownerName: String) {
+		goToShop(player, ownerName, null)
+	}
+
+	@Subcommand
+	fun getShop(player: Player, ownerName: String, shopName: String) {
+		goToShop(player, ownerName, shopName)
+	}
+
+	fun goToShop(player: Player, ownerName: String, shopName: String?) {
 		scheduler().schedule(m, SynchronizationContext.ASYNC) {
 			val user = transaction(Databases.databaseNetwork) {
 				User.find { Users.username eq ownerName }.firstOrNull()
@@ -40,12 +48,43 @@ class LojaCommand(val m: DreamLoja) : SparklyCommand(arrayOf("loja")) {
 				return@schedule
 			}
 
+			val playerShops = transaction(Databases.databaseNetwork) {
+				Shop.find { (Shops.owner eq user.id.value) }
+					.toList()
+			}
+
+			if (playerShops.size > 1 && shopName == null) {
+				switchContext(SynchronizationContext.SYNC)
+
+				val menu = createMenu(9, "§a§lLojas de ${ownerName}") {
+					for ((index, shop) in playerShops.withIndex()) {
+						slot(index, 0) {
+							item = ItemStack(Material.DIAMOND_BLOCK)
+								.rename("§a${shop.shopName}")
+
+							onClick {
+								player.closeInventory()
+								Bukkit.dispatchCommand(player, "loja $ownerName ${shop.shopName}")
+							}
+						}
+					}
+				}
+
+				menu.sendTo(player)
+				return@schedule
+			}
+
+			val trueShopName = shopName ?: "loja"
+
 			val shop = transaction(Databases.databaseNetwork) {
-				Shop.find { (Shops.owner eq user.id.value) and (Shops.shopName eq "loja") }.firstOrNull()
+				if (playerShops.size != 1)
+					Shop.find { (Shops.owner eq user.id.value) and (Shops.shopName eq trueShopName) }.firstOrNull()
+				else
+					Shop.find { (Shops.owner eq user.id.value) }.firstOrNull()
 			}
 
 			if (shop == null) {
-				player.sendMessage("${DreamLoja.PREFIX} §cUsuário não possui loja!")
+				player.sendMessage("${DreamLoja.PREFIX} §cUsuário não possui loja ou você colocou o nome da loja errada!")
 				return@schedule
 			}
 

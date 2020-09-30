@@ -6,6 +6,7 @@ import org.bukkit.ChatColor
 import org.bukkit.OfflinePlayer
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Scoreboard
+import java.lang.IllegalArgumentException
 
 /**
  * PhoenixScoreboard - Uma scoreboard sem flickers, usando teams
@@ -14,6 +15,11 @@ import org.bukkit.scoreboard.Scoreboard
  */
 class PhoenixScoreboard {
 	var scoreboard: Scoreboard
+
+	/**
+	 * Used to avoid getting and setting the score in the scoreboard multiple times for no reason
+	 */
+	private val lineVisibility = mutableMapOf<Int, Boolean>()
 
 	init {
 		scoreboard = Bukkit.getScoreboardManager().newScoreboard
@@ -52,19 +58,49 @@ class PhoenixScoreboard {
 	}
 
 	fun setText(text: String, line: Int) {
+		if (line !in 1..15)
+			throw IllegalArgumentException("Line $line with text \"$text\" is outside of range 1..15!")
+
 		val divided = Splitter.fixedLength(16).split(text).iterator()
-		scoreboard.getTeam("line$line")!!.prefix = divided.next()
+
+		// This code tries to optimize "Scoreboard score search" by avoiding unnecessary updates
+		// How we do this? By checking if the team prefix/suffix is exactly the same as before
+		// This avoids a lot of unnecessary packet updates to the client!
+		val firstHalf = divided.next()
+
+		val firstHalfTeam = scoreboard.getTeam("line$line")!!
+
+		if (firstHalfTeam.prefix != firstHalf)
+			firstHalfTeam.prefix = firstHalf
+
+		val secondHalfTeam = scoreboard.getTeam("line$line")!!
+
 		if (divided.hasNext()) {
-			val color = ChatColor.getLastColors(scoreboard.getTeam("line$line")!!.prefix)
-			scoreboard.getTeam("line$line")!!.suffix = color + divided.next()
-		} else {
-			scoreboard.getTeam("line$line")!!.suffix = ""
+			val color = ChatColor.getLastColors(firstHalfTeam.prefix)
+
+			val newSuffix = color + divided.next()
+
+			if (secondHalfTeam.suffix != newSuffix)
+				secondHalfTeam.suffix = newSuffix
+		} else if (secondHalfTeam.suffix != "") {
+			secondHalfTeam.suffix = ""
 		}
-		scoreboard.getObjective("alphys")!!.getScore(getOfflinePlayerForLine(line)!!).score = line // easy
+
+		// We don't need to get and set the score EVERY SINGLE TIME, most of the time it is a constant value that never changes
+		// So, to avoid unnecessary calls, we are going to cache the values and only changing them if needed
+		val isVisible = lineVisibility[line] ?: false
+
+		if (!isVisible) {
+			val currentScore = scoreboard.getObjective("alphys")!!.getScore(getOfflinePlayerForLine(line)!!)
+			currentScore.score = line
+
+			lineVisibility[line] = true
+		}
 	}
 
 	fun removeLine(line: Int) {
 		scoreboard.resetScores(getOfflinePlayerForLine(line)!!)
+		lineVisibility[line] = false
 	}
 
 	fun setTitle(title: String) {

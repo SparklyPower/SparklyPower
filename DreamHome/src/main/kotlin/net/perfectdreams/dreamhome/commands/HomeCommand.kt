@@ -19,7 +19,7 @@ class HomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("home", "casa")) {
 	 */
 	fun listHomes(player: Player, houses: List<Home>) {
 		if (houses.isNotEmpty()) {
-			val textComponent = "§3Casas: ".toTextComponent()
+			val textComponent = "§3Casas (${houses.size}/${DreamHome.getMaxAllowedHomes(player)}): ".toTextComponent()
 			var first = true
 			for (house in houses) {
 				if (!first) {
@@ -97,7 +97,7 @@ class HomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("home", "casa")) {
 
 			m.loadHouses(UUID.nameUUIDFromBytes("OfflinePlayer:$playerName".toByteArray())) { houses ->
 				if (houses.isNotEmpty()) {
-					val textComponent = "§3Casas: ".toTextComponent()
+					val textComponent = "§3Casas de $playerName (${houses.size}): ".toTextComponent()
 					var first = true
 					for (house in houses) {
 						if (!first) {
