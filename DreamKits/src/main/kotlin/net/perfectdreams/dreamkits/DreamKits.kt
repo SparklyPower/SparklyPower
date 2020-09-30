@@ -52,7 +52,8 @@ class DreamKits : KotlinPlugin(), Listener {
 	}
 
 	fun giveKit(player: Player, kit: Kit) {
-		DreamCorreios.addItems(player.name, true, false, *kit.items.toTypedArray())
+		// We need to clone because DreamCorreios is dumb sometimes
+		DreamCorreios.addItems(player.name, true, false, *kit.items.map { it.clone() }.toTypedArray())
 	}
 
 	fun loadKits() {

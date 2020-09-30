@@ -21,7 +21,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
     var wonPlayers = mutableListOf<UUID>()
 
     init {
-        this.delayBetween = 30 * 60 * 1000 // 30m
+        this.delayBetween = 3_600_000  // one hour
         this.requiredPlayers = 40 // 40 players
     }
 

@@ -22,7 +22,7 @@ open class AbstractCommand(
 		val label: String,
 		val aliases: List<String> = listOf(),
 		val permission: String? = null,
-		val withoutPermission: String? = null,
+		val withoutPermission: String? = DreamCore.dreamConfig.strings.withoutPermission,
 		val withoutPermissionCallback: ((CommandSender, String, Array<String>) -> (Unit))? = null
 ) {
 	lateinit var reflectCommand: ReflectCommand

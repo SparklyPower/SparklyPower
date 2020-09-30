@@ -70,8 +70,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.AXES].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lM",
-                    "§e§lMachados",
+                    "§e§lV",
+                    "§e§lViking",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 de machados do McMMO!"
                     ),

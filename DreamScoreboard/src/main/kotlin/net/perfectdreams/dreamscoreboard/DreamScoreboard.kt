@@ -106,9 +106,16 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
 			while (true) {
 				CURRENT_TICK++
-				if (CURRENT_TICK > 19) {
+
+				// We have four different states:
+				// 0 = players online, clock, money and active events
+				// 1 = players online and upcoming events
+				// 2 = players online and staff
+				// 3 = players online, last voter, facebook, twitter and discord
+				if (CURRENT_TICK > 3) {
 					CURRENT_TICK = 0
 				}
+
 				scoreboards.values.forEach {
 					try {
 						it.updateScoreboard()
@@ -116,7 +123,7 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 						e.printStackTrace()
 					}
 				}
-				waitFor(20)
+				waitFor(20 * 4) // 4 seconds each update
 			}
 		}
 

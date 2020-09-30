@@ -39,6 +39,18 @@ class DreamHome : KotlinPlugin() {
 			}
 			return RANDOM_ICONS[name.hashCode() % (RANDOM_ICONS.size - 1)]
 		}
+
+		/**
+		 * Gets the max allowed homes for the [player]
+		 */
+		fun getMaxAllowedHomes(player: Player): Int {
+			return when {
+				player.hasPermission("dreamhome.houseplusplusplus") -> 20
+				player.hasPermission("dreamhome.houseplusplus") -> 15
+				player.hasPermission("dreamhome.houseplus") -> 10
+				else -> 5
+			}
+		}
 	}
 
 	override fun softEnable() {

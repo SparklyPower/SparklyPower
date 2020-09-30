@@ -38,20 +38,28 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 		if (!noCollisionTeam.hasEntry(player.name))
 			noCollisionTeam.addEntry(player.name)
 
+		// Shows the player's health bellow the player's name
 		if (phoenix.scoreboard.getObjective("healthBelowName") == null) {
 			val healthObj = phoenix.scoreboard.registerNewObjective("healthBelowName", "health", "§c♥")
 			healthObj.displaySlot = DisplaySlot.BELOW_NAME
 			healthObj.renderType = RenderType.HEARTS
 		}
 
-		// Removed because it was kinda bad tbh
+		// Displays the player's ping on the TAB screen
+		// Before we used the player's health, but it looked kinda bad tbh
 		if (phoenix.scoreboard.getObjective("pingPlayerList") == null) {
 			val healthObj = phoenix.scoreboard.registerNewObjective("pingPlayerList", "dummy", "ms")
 			healthObj.displaySlot = DisplaySlot.PLAYER_LIST
 			healthObj.renderType = RenderType.INTEGER
 		}
 
-		setupTeams()
+		val tps = Bukkit.getTPS()
+		val tpsNow = "%.2f".format(tps[0])
+
+		val fancyWorldName = when (player.world.name) {
+			"world" -> "Survival"
+			else -> player.world.name
+		}
 
 		player.setPlayerListHeaderFooter(
 			"""§4§k||§c§k|§f§k|§b§k|§3§k|| §6»»§e»»§f»» §8§l[ §4§lSparkly§b§lPower §8§l] §f««§e««§6«« §4§k||§c§k|§f§k|§b§k|§3§k||
@@ -59,6 +67,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
     |§3§m✦-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-✦
     |§e§lSeja bem-vind${player.artigo} ${player.displayName}§e§l!
     |§6Modéstia à parte... esse servidor é incrível!
+	|§aMundo: §x§3§0§e§3§3§0$fancyWorldName §7• §aTPS: §x§3§0§e§3§3§0${tpsNow}
     |§8§m-§3§m-§b§m-§f§m-§b§m-§3§m-§8§m-
     |§6§lPrecisa de ajuda? §e/ajuda
     |§6§lAlguma dúvida? §6§oPergunte no chat!
@@ -84,7 +93,15 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 		idx = setupPlayersOnline(idx)
 		phoenix.setText("§c", idx--)
 
-		if (DreamScoreboard.CURRENT_TICK in 0..4) {
+		if (DreamScoreboard.CURRENT_TICK == 0) {
+			// Teams are only updated once every 16 seconds because:
+			// * It has a lot of team requests, which can cause lag
+			// * It doesn't really need to be updated every single task, since most of the times the teams
+			// doesn't really change that fast
+			//
+			// In the future we could set up a way for plugins to register for clubes changes, then we would be able t
+			// request an update without causing performance issues
+			setupTeams()
 			idx = setupClock(idx)
 			phoenix.setText("§c", idx--)
 
@@ -94,15 +111,15 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 			idx = setupActiveEvents(idx)
 		}
 
-		if (DreamScoreboard.CURRENT_TICK in 5..9) {
+		if (DreamScoreboard.CURRENT_TICK == 1) {
 			idx = setupUpcomingEvents(idx)
 		}
 
-		if (DreamScoreboard.CURRENT_TICK in 10..14) {
+		if (DreamScoreboard.CURRENT_TICK == 2) {
 			idx = setupStaff(idx)
 		}
 
-		if (DreamScoreboard.CURRENT_TICK in 15..19) {
+		if (DreamScoreboard.CURRENT_TICK == 3) {
 			idx = setupLastVoter(idx)
 			phoenix.setText("§c", idx--)
 			idx = setupFacebook(idx)

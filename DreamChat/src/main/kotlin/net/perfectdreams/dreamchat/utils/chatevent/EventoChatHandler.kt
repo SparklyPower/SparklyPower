@@ -32,9 +32,10 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 		unshuffleWordEvent,
 		calculateEvent
 	)
+	var willGiveOutPesadelos = false
 
 	init {
-		this.delayBetween = 420_000
+		this.delayBetween = 900_000 // 15 minutes
 		this.requiredPlayers = 7
 
 		prizes.add(ItemStack(Material.DIAMOND, 2))
@@ -66,10 +67,19 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 		event.preStart()
 
 		start = System.currentTimeMillis()
+
+		willGiveOutPesadelos = DreamUtils.random.nextInt(0, 3) == 0 // 25% chance
+
 		Bukkit.broadcastMessage(DreamUtils.HEADER_LINE)
 		Bukkit.broadcastMessage(("§6Quem " + event.getToDoWhat() + " primeiro").centralize())
 		Bukkit.broadcastMessage(("§e" + event.getAnnouncementMessage()).centralize())
-		Bukkit.broadcastMessage(("§6Irá ganhar §9" + currentPrize.getAmount() + " " + ChatColor.stripColor(currentPrize.getTranslatedDisplayName("pt_BR")) + "§6 e §cum pesadelo§6!").centralize());
+
+		var message = "§6Irá ganhar §9" + currentPrize.amount + " " + ChatColor.stripColor(currentPrize.getTranslatedDisplayName("pt_BR"))
+		if (willGiveOutPesadelos)
+			message += "§6 e §cum pesadelo"
+		message += "§6!"
+
+		Bukkit.broadcastMessage(message.centralize())
 		Bukkit.broadcastMessage(DreamUtils.HEADER_LINE)
 
 		scheduler().schedule(DreamChat.INSTANCE) {
@@ -101,7 +111,8 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 				player,
 				"Chat"
 			)
-			Cash.giveCash(player, 1L)
+			if (willGiveOutPesadelos)
+				Cash.giveCash(player, 1L)
 			DreamChat.INSTANCE.userData.save(DreamChat.INSTANCE.dataYaml)
 			event.postEndAsync(player, diff)
 		}
