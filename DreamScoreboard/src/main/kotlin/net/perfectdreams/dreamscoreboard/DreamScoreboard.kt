@@ -3,7 +3,6 @@ package net.perfectdreams.dreamscoreboard
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
-import net.perfectdreams.dreamchat.utils.PlayerTag
 import net.perfectdreams.dreamclubes.dao.Clube
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
@@ -18,20 +17,23 @@ import net.perfectdreams.dreamscoreboard.utils.PlayerScoreboard
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Statistic
+import org.bukkit.craftbukkit.v1_16_R2.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_16_R2.scoreboard.CraftScoreboard
+import org.bukkit.craftbukkit.v1_16_R2.scoreboard.CraftScoreboardManager
+import org.bukkit.craftbukkit.v1_16_R2.util.WeakCollection
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.scoreboard.Team
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 import java.time.ZoneId
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.and
 
 class DreamScoreboard : KotlinPlugin(), Listener {
 	companion object {
@@ -58,6 +60,19 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 	val scoreboards = ConcurrentHashMap<Player, PlayerScoreboard>()
 	val coloredGlow = ConcurrentHashMap<UUID, ChatColor>()
 	var cachedClubesPrefixes = WeakHashMap<Player, String?>()
+
+	val scoreboardsField = (Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("scoreboards").apply {
+		this.isAccessible = true
+	}
+	val playerBoardsField = (Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("playerBoards").apply {
+		this.isAccessible = true
+	}
+
+	fun cleanUp(scoreboard: Scoreboard) {
+		// Needs to be fixed: https://github.com/PaperMC/Paper/issues/4260
+		val scoreboards = scoreboardsField.get(Bukkit.getScoreboardManager()) as WeakCollection<Scoreboard>
+		scoreboards.remove(scoreboard)
+	}
 
 	override fun softEnable() {
 		super.softEnable()
@@ -103,12 +118,32 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 			}
 		}
 
+		// Needs to be fixed: https://github.com/PaperMC/Paper/issues/4260
+		scheduler().schedule(this, SynchronizationContext.SYNC) {
+			while (true) {
+				val weakCollection = scoreboardsField.get(Bukkit.getScoreboardManager()) as WeakCollection<CraftScoreboard>
+
+				logger.info("Weak Collection before clean up size is ${weakCollection.size}")
+
+				val playerBoards = playerBoardsField.get(Bukkit.getScoreboardManager()) as Map<CraftPlayer, CraftScoreboard>
+
+				weakCollection.removeAll(weakCollection - playerBoards.values)
+
+				logger.info("Weak Collection after clean up size is ${weakCollection.size}")
+
+				waitFor(20 * 60) // 1 minute
+			}
+		}
+
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
 			while (true) {
 				CURRENT_TICK++
 				if (CURRENT_TICK > 19) {
 					CURRENT_TICK = 0
 				}
+
+				logger.info("Updating scoreboard... Current tick: $CURRENT_TICK; Active scoreboards: ${scoreboards.size}")
+
 				scoreboards.values.forEach {
 					try {
 						it.updateScoreboard()
@@ -263,6 +298,11 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onQuit(e: PlayerQuitEvent) {
+		val playerScoreboard = scoreboards[e.player]
+		playerScoreboard?.let {
+			cleanUp(it.phoenix.scoreboard)
+		}
+
 		scoreboards.remove(e.player)
 	}
 
