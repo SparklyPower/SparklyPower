@@ -28,9 +28,8 @@ class DreamBroadcast : KotlinPlugin(), Listener {
 
 				var messageIdx = lastMessageId
 
-				while (lastMessageId == messageIdx) {
-					messageIdx = DreamUtils.random.nextInt(0, 18)
-				}
+				while (lastMessageId == messageIdx)
+					messageIdx = DreamUtils.random.nextInt(0, 20)
 
 				lastMessageId = messageIdx
 				for (player in onlinePlayers()) {
@@ -38,18 +37,18 @@ class DreamBroadcast : KotlinPlugin(), Listener {
 
 					when (messageIdx) {
 						0 -> {
-							message.addExtra(
-								"§eEspero que você esteja se divertindo no §4§lSparkly§b§lPower§e!".toTextComponent()
+							message.addExtrpa(
+								"§eEspero que você esteja se divertindo no §4§lSparkly§b§lPower§e! §f開".toTextComponent()
 							)
 						}
 						1 -> {
 							message.addExtra(
-								"§eNão mendigue cargos no servidor, se você merecesse a vaga você já teria ela!".toTextComponent()
+								"§eNão mendigue cargos no servidor, se você merecesse a vaga você já teria ela! Cada mendigação de cargo que você faz, mais o gatinho fica triste. §f闹".toTextComponent()
 							)
 						}
 						2 -> {
 							message.addExtra(
-								"§eTem uma sugestão supimpa que irá melhorar o servidor §b${player.displayName}§e? Então escreva ela na §6/warp sugestões§e!".toTextComponent()
+								"§eTem uma sugestão supimpa que irá melhorar o servidor §b${player.displayName}§e? Então mande para nós no nosso Discord! §6/discord§e!".toTextComponent()
 							)
 						}
 						3 -> {
@@ -80,7 +79,7 @@ class DreamBroadcast : KotlinPlugin(), Listener {
 								)
 							} else {
 								message.addExtra(
-									"§eQuer ajudar o §4§lSparkly§b§lPower§e §b${player.displayName}§e? Então compre §3§lVIP§be! §6/lojacash".toTextComponent()
+									"§eQuer ajudar o §4§lSparkly§b§lPower§e §b${player.displayName}§e? Então compre §3§lVIP§b§e! §6/lojacash".toTextComponent()
 								)
 							}
 						}
@@ -141,12 +140,22 @@ class DreamBroadcast : KotlinPlugin(), Listener {
 						}
 						16 -> {
 							message.addExtra(
-								"§eAdicione a Loritta no seu servidor do Discord, o maior bot brasileiro para o Discord! E, é claro, amiguinha da Pantufa :3§3§n https://loritta.website/".toTextComponent()
+								"§eAdicione a Loritta, o maior bot brasileiro para o Discord! E, é claro, amiguinha da Pantufa :3 §3§nhttps://loritta.website/".toTextComponent()
 							)
 						}
 						17 -> {
 							message.addExtra(
 								"§eVocê já bebeu água hoje §b${player.displayName}§e? Sempre é bom se manter hidratado! §c^-^".toTextComponent()
+							)
+						}
+						18 -> {
+							message.addExtra(
+								"§eVenha batalhar com os seus amigos na nossa Arena PvP! Mas tome cuidado, você perde itens caso morra! §6/warp pvp".toTextComponent()
+							)
+						}
+						19 -> {
+							message.addExtra(
+								"§eProcurando decorativos diversos para a sua humilde casa? Então visite a §6/warp decorações§e e encontre hoje mesmo a decoração que irá deixar a sua casa chique!".toTextComponent()
 							)
 						}
 						else -> {

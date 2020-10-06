@@ -36,7 +36,7 @@ class SignListener(val m: DreamLoja) : Listener {
         }
 
         val voteCount = transaction(Databases.databaseNetwork) {
-            net.perfectdreams.dreamloja.tables.UserShopVotes.select {
+            UserShopVotes.select {
                 UserShopVotes.receivedBy eq owner
             }.count()
         }
@@ -57,6 +57,49 @@ class SignListener(val m: DreamLoja) : Listener {
                 }
                 switchContext(SynchronizationContext.SYNC)
             }
+        }
+    }
+
+    @EventHandler
+    fun onSignEditGoToShop(e: SignChangeEvent) {
+        if (!e.lines[0].equals("[Ir para Loja]", true))
+            return
+
+        if (e.lines[1].isBlank()) {
+            e.player.sendMessage("§cVocê precisa especificar o nome do player na segunda linha!")
+            return
+        }
+
+        e.setLine(0, "§8[§a§lIr para Loja§8]")
+        e.player.sendMessage("§aPlaca de teletransporte para a loja marcada com sucesso! Você pode colocar qual loja do player você quer que o teletransporte leve na segunda linha.")
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onClickGoToShop(e: PlayerInteractEvent) {
+        if (!e.rightClick)
+            return
+
+        if (e.clickedBlock?.type?.name?.endsWith("_SIGN") == false)
+            return
+
+        val block = e.clickedBlock ?: return
+
+        val sign = block.state as Sign
+
+        if (sign.lines[0] != "§8[§a§lIr para Loja§8]")
+            return
+
+        val line1 = sign.lines[1]
+        val line2 = sign.lines[2]
+
+        var cmd = "loja "
+        if (line1.isNotBlank()) {
+            cmd += "$line1 "
+
+            if (line2.isNotBlank())
+                cmd += line2
+
+            Bukkit.dispatchCommand(e.player, cmd.trim())
         }
     }
 

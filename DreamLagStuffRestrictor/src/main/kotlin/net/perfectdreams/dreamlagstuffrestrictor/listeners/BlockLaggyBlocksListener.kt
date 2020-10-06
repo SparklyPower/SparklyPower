@@ -27,9 +27,10 @@ class BlockLaggyBlocksListener : Listener {
                     for (y in 0..255) {
                         val block = e.block.chunk.getBlock(x, y, z)
                         if (block.type == e.block.type) {
+                            println("Block at ${block.location} matches ${e.block.type}, current count is $count")
                             count++
 
-                            if (count >= restrictCount) {
+                            if (count > (restrictCount + 1)) {
                                 e.isCancelled = true
                                 e.player.sendMessage("§cJá existem muitos tipos deste bloco neste chunk! Sim, eu sei que é chato limitar essas coisas, mas tipo... muitos blocos disso em um chunk é a receita para o desastre!")
                                 return

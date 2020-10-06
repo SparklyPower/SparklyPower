@@ -36,7 +36,7 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
     init {
         this.requiredPlayers = 15
         this.discordAnnouncementRole = "555184377504464898"
-        this.delayBetween = 1_800_000 // 30 minutos
+        this.delayBetween = 3_600_000  // one hour
         this.command = "/quiz"
     }
 
