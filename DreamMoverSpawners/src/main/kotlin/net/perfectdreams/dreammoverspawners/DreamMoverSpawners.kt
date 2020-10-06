@@ -2,6 +2,7 @@ package net.perfectdreams.dreammoverspawners
 
 import com.gmail.nossr50.events.skills.repair.McMMOPlayerRepairCheckEvent
 import com.gmail.nossr50.events.skills.salvage.McMMOPlayerSalvageCheckEvent
+import com.okkero.skedule.schedule
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
@@ -165,6 +166,13 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
 
             val center = e.block.location.add(0.5, 0.5, 0.5)
 
+            schedule {
+                repeat(10) {
+                    center.world.spawnParticle(Particle.VILLAGER_HAPPY, center, 1)
+                    waitFor(20L)
+                }
+            }
+
             val spawner = validSpawners.firstOrNull { it.type == type }
             if (spawner == null) {
                 e.player.sendMessage("§cDesculpe, mas o meu poder não permite quebrar esses tipos de spawners...")
@@ -200,7 +208,9 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
             }
 
             e.block.type = Material.AIR // rip
-            e.block.world.dropItemNaturally(
+
+            // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
+            e.block.world.dropItem(
                 center,
                 ItemStack(
                     Material.SPAWNER

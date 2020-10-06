@@ -173,8 +173,9 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 						val drops = location.block.getDrops(inHand)
 						val exp = BlockUtils.getExpCount(location.block, enchantmentLevel)
 
+						// Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
 						val dropsAsItems =  drops.map {
-							location.world.dropItemNaturally(
+							location.world.dropItem(
 								location,
 								it
 							)
