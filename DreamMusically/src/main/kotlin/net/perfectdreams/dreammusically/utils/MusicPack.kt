@@ -71,6 +71,16 @@ data class MusicPack(
                 "Major Lazer - Lean On",
                 37,
                 "perfectdreams.record.leanon"
+            ),
+            MusicPack(
+                "Hampton and the Hampsters - Sing a Simple Song",
+                38,
+                "perfectdreams.record.sing_a_simple_song"
+            ),
+            MusicPack(
+                "DJ Azeitona - Para de falar que tu é minha namorada",
+                39,
+                "perfectdreams.record.dj_azeitona"
             )
         )
     }

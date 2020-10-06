@@ -61,11 +61,17 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 	val coloredGlow = ConcurrentHashMap<UUID, ChatColor>()
 	var cachedClubesPrefixes = WeakHashMap<Player, String?>()
 
-	val scoreboardsField = (Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("scoreboards").apply {
-		this.isAccessible = true
+	val scoreboardsField by lazy {
+		(Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("scoreboards").apply {
+			this.isAccessible = true
+		}
 	}
-	val playerBoardsField = (Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("playerBoards").apply {
-		this.isAccessible = true
+
+	val playerBoardsField by lazy {
+		(Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("playerBoards")
+			.apply {
+				this.isAccessible = true
+			}
 	}
 
 	fun cleanUp(scoreboard: Scoreboard) {
@@ -76,6 +82,7 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 	override fun softEnable() {
 		super.softEnable()
+
 		registerEvents(this)
 		registerEvents(TagListener(this))
 
@@ -229,14 +236,14 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 							switchContext(SynchronizationContext.SYNC)
 						}
 						/* switchContext(SynchronizationContext.ASYNC)
-						if (bestClube != null && bestClube.first.id.value == ClubeAPI.getPlayerClube(it)?.id?.value) {
-							switchContext(SynchronizationContext.ASYNC)
-							Cash.giveCash(it, 1)
-							logger.info("Giving 1 pesadelos to ${it.name} because they are top 3 in event victories!")
-							it.sendMessage("§aVocê ganhou um pesadelo pois o seu clube está em top 1 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
-							switchContext(SynchronizationContext.SYNC)
-						}
-						switchContext(SynchronizationContext.SYNC) */
+                        if (bestClube != null && bestClube.first.id.value == ClubeAPI.getPlayerClube(it)?.id?.value) {
+                            switchContext(SynchronizationContext.ASYNC)
+                            Cash.giveCash(it, 1)
+                            logger.info("Giving 1 pesadelos to ${it.name} because they are top 3 in event victories!")
+                            it.sendMessage("§aVocê ganhou um pesadelo pois o seu clube está em top 1 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
+                            switchContext(SynchronizationContext.SYNC)
+                        }
+                        switchContext(SynchronizationContext.SYNC) */
 					}
 
 				Bukkit.getOnlinePlayers().forEach {

@@ -4,6 +4,7 @@ import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamlagstuffrestrictor.listeners.BlockLaggyBlocksListener
 import net.perfectdreams.dreamlagstuffrestrictor.listeners.BlockMinecartHopperListener
+import net.perfectdreams.dreamlagstuffrestrictor.utils.ThanosSnap
 import org.bukkit.event.Listener
 
 class DreamLagStuffRestrictor : KotlinPlugin(), Listener {
@@ -12,6 +13,8 @@ class DreamLagStuffRestrictor : KotlinPlugin(), Listener {
 
 		registerEvents(BlockMinecartHopperListener())
 		registerEvents(BlockLaggyBlocksListener())
+
+		ThanosSnap(this).start()
 	}
 
 	override fun softDisable() {

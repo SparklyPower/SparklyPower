@@ -42,7 +42,7 @@ class DreamMusically : KotlinPlugin(), Listener {
 								lore = listOf(
 									"§7${musicPack.name}"
 								)
-								setUnbreakable(true)
+								isUnbreakable = true
 							}.meta<org.bukkit.inventory.meta.Damageable> {
 								damage = damageValue
 							}
