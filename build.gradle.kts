@@ -30,7 +30,7 @@ allprojects {
         maven("https://maven.sk89q.com/repo/")
         maven("https://repo.aikar.co/content/groups/aikar/")
         maven("https://dl.bintray.com/ichbinjoe/public/")
-        // maven("https://repo.bstats.org/content/repositories/releases/")
+        maven("https://repo.bstats.org/content/repositories/releases/")
         // maven("http://repo.ess3.net/content/repositories/bukkitsnapshot/")
         maven("https://jitpack.io")
     }
