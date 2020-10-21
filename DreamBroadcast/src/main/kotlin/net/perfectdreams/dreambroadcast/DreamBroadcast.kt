@@ -37,7 +37,7 @@ class DreamBroadcast : KotlinPlugin(), Listener {
 
 					when (messageIdx) {
 						0 -> {
-							message.addExtrpa(
+							message.addExtra(
 								"§eEspero que você esteja se divertindo no §4§lSparkly§b§lPower§e! §f開".toTextComponent()
 							)
 						}
