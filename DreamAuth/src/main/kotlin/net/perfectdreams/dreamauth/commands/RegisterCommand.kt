@@ -60,6 +60,7 @@ object RegisterCommand : DSLCommandBase<DreamAuth> {
                 val matchedUsers = transaction(Databases.databaseNetwork) {
                     val users = User.find {
                         Users.username ilike player.name
+                            .replace("_", "\\_") // We need to escape _ pattern matching
                     }
 
                     AuthInfo.find {

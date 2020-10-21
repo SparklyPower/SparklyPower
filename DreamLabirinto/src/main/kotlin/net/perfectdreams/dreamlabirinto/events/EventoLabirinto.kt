@@ -52,7 +52,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         // Player venceu a corrida!
         wonPlayers.add(winner.uniqueId)
         val howMuchMoneyWillBeGiven = 15_000 / wonPlayers.size
-        val howMuchNightmaresWillBeGiven = 1
+        val howMuchNightmaresWillBeGiven = if (wonPlayers.size == 1) 1 else 0
 
         winner.balance += howMuchMoneyWillBeGiven
         scheduler().schedule(plugin, SynchronizationContext.ASYNC) {
@@ -62,7 +62,8 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                     "Labirinto"
                 )
 
-            Cash.giveCash(winner, howMuchNightmaresWillBeGiven.toLong())
+            if (howMuchNightmaresWillBeGiven == 1)
+                Cash.giveCash(winner, howMuchNightmaresWillBeGiven.toLong())
         }
 
         winner.fallDistance = 0.0f
@@ -71,9 +72,12 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
         winner.teleportToServerSpawn()
 
-        Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} §b${winner.displayName}§a venceu o labirinto em ${wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
+        if (howMuchNightmaresWillBeGiven == 1)
+            Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} §b${winner.displayName}§a venceu o labirinto em ${wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
+        else
+            Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} §b${winner.displayName}§a venceu o labirinto em ${wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a!")
 
-        if (wonPlayers.size == 5) { // Finalizar labirinto
+        if (wonPlayers.size == 3) { // Finalizar labirinto
             Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} §eEvento Labirinto acabou, obrigado a todos que participaram! ^-^")
 
             world.players.forEach {

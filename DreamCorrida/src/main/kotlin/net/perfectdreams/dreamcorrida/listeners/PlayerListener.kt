@@ -130,12 +130,13 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                         // Player venceu a corrida!
                         eventoCorrida.wonPlayers.add(e.player.uniqueId)
                         val howMuchMoneyWillBeGiven = 15_000 / eventoCorrida.wonPlayers.size
-                        val howMuchNightmaresWillBeGiven = 1
+                        val howMuchNightmaresWillBeGiven = if (eventoCorrida.wonPlayers.size == 1) 1 else 0
 
                         e.player.balance += howMuchMoneyWillBeGiven
-                        scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                            Cash.giveCash(e.player, howMuchNightmaresWillBeGiven.toLong())
-                        }
+                        if (howMuchNightmaresWillBeGiven == 1)
+                            scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                                Cash.giveCash(e.player, howMuchNightmaresWillBeGiven.toLong())
+                            }
 
                         e.player.fallDistance = 0.0f
                         e.player.fireTicks = 0
@@ -143,9 +144,12 @@ class PlayerListener(val m: DreamCorrida) : Listener {
 
                         e.player.teleport(DreamCore.dreamConfig.getSpawn())
 
-                        Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
+                        if (howMuchNightmaresWillBeGiven == 1)
+                            Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
+                        else
+                            Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a!")
 
-                        if (eventoCorrida.wonPlayers.size == 5) { // Finalizar corrida
+                        if (eventoCorrida.wonPlayers.size == 3) { // Finalizar corrida
                             Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §eEvento Corrida acabou, obrigado a todos que participaram! ^-^")
 
                             spawnLocation.world.players.forEach {
