@@ -9,7 +9,6 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
-    maven("https://repo.codemc.org/repository/maven-public")
 }
 
 dependencies {
@@ -21,7 +20,6 @@ dependencies {
     compileOnly(files("../libs/WorldEdit.jar"))
     compileOnly(files("../libs/WorldGuard.jar"))
     compileOnly("com.github.TechFortress:GriefPrevention:16.11.5")
-    compileOnly("org.bstats:bstats-bukkit:1.2")
     implementation("net.perfectdreams.commands:command-framework-core:0.0.8")
     implementation("com.github.dmulloy2:PacketWrapper:84d4c3d9f1")
     compileOnly("net.milkbowl.vault:VaultAPI:1.6")
