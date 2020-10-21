@@ -190,6 +190,14 @@ class SocketListener : Listener {
 			receivedMessages.addAll(p0)
 		}
 
+		override fun sendMessage(p0: UUID?, p1: String) {
+			TODO("Not yet implemented")
+		}
+
+		override fun sendMessage(p0: UUID?, p1: Array<out String>) {
+			TODO("Not yet implemented")
+		}
+
 		override fun sendMessage(component: BaseComponent) {
 			receivedMessages.add(component.toLegacyText())
 		}
