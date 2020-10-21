@@ -9,6 +9,7 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
+    maven("https://repo.codemc.org/repository/maven-public")
 }
 
 dependencies {
