@@ -98,8 +98,14 @@ class LojaCommand(val m: DreamLoja) : SparklyCommand(arrayOf("loja")) {
 
 			val location = shop.getLocation()
 			if (location.isUnsafe || location.blacklistedTeleport) {
-				player.sendMessage("${DreamLoja.PREFIX} §cLoja do usuário não é segura!")
-				return@schedule
+				val isOwner = shop.owner == player.uniqueId && player.hasPermission("dreamloja.bypass")
+
+				if (!isOwner) {
+					player.sendMessage("${DreamLoja.PREFIX} §cLoja do usuário não é segura!")
+					return@schedule
+				} else {
+					player.sendMessage("${DreamLoja.PREFIX} §cSua loja não é segura! Verifique se existe água, lava ou buracos em volta do spawn dela!")
+				}
 			}
 
 			player.teleport(location)
