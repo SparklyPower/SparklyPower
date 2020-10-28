@@ -26,8 +26,10 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
+import org.bukkit.event.entity.ItemDespawnEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.PrepareAnvilEvent
+import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.inventory.AnvilInventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
@@ -106,6 +108,41 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	fun onPlayerDropItemEvent(e: PlayerDropItemEvent) {
+		// Because some people are DUMB AS FUCC
+		val droppedItem = e.itemDrop.itemStack
+		if (droppedItem.getStoredMetadata("isMonsterPickaxe") != "true")
+			return
+
+		e.player.playSound(
+			e.player.location,
+			Sound.ENTITY_BLAZE_DEATH,
+			1f,
+			0.1f
+		)
+
+		e.player.sendTitle(
+			"§cSUA MONSTRA TÁ NO CHÃO!",
+			"§cPegue ela antes que ela suma!",
+			10,
+			140,
+			10
+		)
+
+		logger.info("Player ${e.player.name} dropped a Picareta Monstra at ${e.player.world.name} ${e.player.location.x}, ${e.player.location.y}, ${e.player.location.z}")
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	fun onPlayerDropItemEvent(e: ItemDespawnEvent) {
+		// Because some people are DUMB AS FUCC
+		val droppedItem = e.entity.itemStack
+		if (droppedItem.getStoredMetadata("isMonsterPickaxe") != "true")
+			return
+
+		logger.info("Picareta Monstra despawned at ${e.location.world.name} ${e.location.x}, ${e.location.y}, ${e.location.z}")
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onBreak(e: BlockBreakEvent) {
 		val inHand = e.player.inventory.itemInMainHand
 
@@ -114,6 +151,9 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 
 		if (inHand.getStoredMetadata("isMonsterPickaxe") != "true")
 			return
+
+		val damageable = inHand.itemMeta as Damageable
+		logger.info("Player ${e.player.name} used a Picareta Monstra at ${e.player.world.name} ${e.block.location.x}, ${e.block.location.y}, ${e.block.location.z}. Damage value: ${damageable.damage}")
 
 		if (e.block.world.name == "MinaRecheada")
 			return
