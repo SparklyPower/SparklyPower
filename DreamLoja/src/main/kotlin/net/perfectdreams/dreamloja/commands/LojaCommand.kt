@@ -74,7 +74,8 @@ class LojaCommand(val m: DreamLoja) : SparklyCommand(arrayOf("loja")) {
 				return@schedule
 			}
 
-			val trueShopName = shopName ?: "loja"
+			// All shop names are in lowercase
+			val trueShopName = shopName?.toLowerCase() ?: "loja"
 
 			val shop = transaction(Databases.databaseNetwork) {
 				if (playerShops.size != 1)

@@ -23,6 +23,9 @@ class SetLojaCommand(val m: DreamLoja) : SparklyCommand(arrayOf("setloja")) {
 	}
 
 	fun createShop(player: Player, shopName: String) {
+		// All shop names are in lowercase
+		val shopName = shopName.toLowerCase()
+
 		val location = player.location
 		if (location.isUnsafe) {
 			player.sendMessage("${DreamLoja.PREFIX} §cA sua localização atual é insegura! Vá para um lugar mais seguro antes de marcar a sua loja!")
