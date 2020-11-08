@@ -9,7 +9,7 @@ import org.bukkit.Sound
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.Directional
 import org.bukkit.block.data.MultipleFacing
-import org.bukkit.craftbukkit.v1_16_R2.block.impl.CraftGlazedTerracotta
+import org.bukkit.craftbukkit.v1_16_R3.block.impl.CraftGlazedTerracotta
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener

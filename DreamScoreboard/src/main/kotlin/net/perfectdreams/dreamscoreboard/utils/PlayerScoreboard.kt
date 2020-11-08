@@ -8,7 +8,7 @@ import net.perfectdreams.dreamvanish.DreamVanishAPI
 import net.perfectdreams.dreamvote.DreamVote
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
-import org.bukkit.craftbukkit.v1_16_R2.scoreboard.CraftScoreboardManager
+import org.bukkit.craftbukkit.v1_16_R3.scoreboard.CraftScoreboardManager
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.RenderType

@@ -30,7 +30,7 @@ jobs:
         java-version: 13
 
     - name: Download Paper
-      run: wget -O paperclip.jar https://papermc.io/api/v1/paper/1.16.3/244/download
+      run: wget -O paperclip.jar https://papermc.io/api/v1/paper/1.16.4/262/download
       
     - name: Run Paper
       run: java -Dpaperclip.patchonly=true -jar paperclip.jar
