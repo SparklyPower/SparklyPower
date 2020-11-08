@@ -6,6 +6,9 @@ import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 class ShopListener : Listener {
     companion object {
@@ -28,21 +31,46 @@ class ShopListener : Listener {
         if (e.price == 0.0 || e.transactionOutcome != PreTransactionEvent.TransactionOutcome.TRANSACTION_SUCCESFUL) // Apenas se não é de graça
             return
 
+        val zoneId = ZoneId.of("America/Sao_Paulo")
+        val isAfterChange = LocalDateTime.of(
+            2020,
+            10,
+            30,
+            0,
+            0,
+            0,
+            0
+        ).atZone(zoneId)
+            .isBefore(
+                Instant.now()
+                    .atZone(zoneId)
+            )
+
         if (e.transactionType == TransactionEvent.TransactionType.BUY) {
-            e.price *= when {
-                e.client.hasPermission("group.vip++") -> 1 - VIP_PLUS_PLUS_DISCOUNT
-                e.client.hasPermission("group.vip+") -> 1 - VIP_PLUS_DISCOUNT
-                e.client.hasPermission("group.vip") -> 1 - VIP_DISCOUNT
-                else -> 1.0
+            if (isAfterChange) {
+                if (e.client.hasPermission("group.vip"))
+                    e.price *= 1 - VIP_PLUS_DISCOUNT
+            } else {
+                e.price *= when {
+                    e.client.hasPermission("group.vip++") -> 1 - VIP_PLUS_PLUS_DISCOUNT
+                    e.client.hasPermission("group.vip+") -> 1 - VIP_PLUS_DISCOUNT
+                    e.client.hasPermission("group.vip") -> 1 - VIP_DISCOUNT
+                    else -> 1.0
+                }
             }
         }
 
         if (e.transactionType == TransactionEvent.TransactionType.SELL) {
-            e.price *= when {
-                e.client.hasPermission("group.vip++") -> 1 + VIP_PLUS_PLUS_DISCOUNT
-                e.client.hasPermission("group.vip+") -> 1 + VIP_PLUS_DISCOUNT
-                e.client.hasPermission("group.vip") -> 1 + VIP_DISCOUNT
-                else -> 1.0
+            if (isAfterChange) {
+                if (e.client.hasPermission("group.vip"))
+                    e.price *= 1 + VIP_PLUS_DISCOUNT
+            } else {
+                e.price *= when {
+                    e.client.hasPermission("group.vip++") -> 1 + VIP_PLUS_PLUS_DISCOUNT
+                    e.client.hasPermission("group.vip+") -> 1 + VIP_PLUS_DISCOUNT
+                    e.client.hasPermission("group.vip") -> 1 + VIP_DISCOUNT
+                    else -> 1.0
+                }
             }
         }
     }

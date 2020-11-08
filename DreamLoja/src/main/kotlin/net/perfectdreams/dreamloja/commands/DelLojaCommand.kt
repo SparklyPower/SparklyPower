@@ -30,7 +30,7 @@ class DelLojaCommand(val m: DreamLoja) : SparklyCommand(arrayOf("delloja")) {
 	fun deleteShop(player: Player, shopName: String) {
 		// All shop names are in lowercase
 		val shopName = shopName.toLowerCase()
-		
+
 		scheduler().schedule(m, SynchronizationContext.ASYNC) {
 			transaction(Databases.databaseNetwork) {
 				Shops.deleteWhere {

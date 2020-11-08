@@ -27,13 +27,14 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.entity.ItemDespawnEvent
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.PrepareAnvilEvent
 import org.bukkit.event.player.PlayerDropItemEvent
-import org.bukkit.inventory.AnvilInventory
+import org.bukkit.event.player.PlayerItemBreakEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.metadata.FixedMetadataValue
+import java.util.*
 
 class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 	companion object {
@@ -111,8 +112,17 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 	fun onPlayerDropItemEvent(e: PlayerDropItemEvent) {
 		// Because some people are DUMB AS FUCC
 		val droppedItem = e.itemDrop.itemStack
+
 		if (droppedItem.getStoredMetadata("isMonsterPickaxe") != "true")
 			return
+
+		e.itemDrop.setMetadata(
+			"owner",
+			FixedMetadataValue(
+				this,
+				e.player.uniqueId
+			)
+		)
 
 		e.player.playSound(
 			e.player.location,
@@ -139,7 +149,60 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 		if (droppedItem.getStoredMetadata("isMonsterPickaxe") != "true")
 			return
 
-		logger.info("Picareta Monstra despawned at ${e.location.world.name} ${e.location.x}, ${e.location.y}, ${e.location.z}")
+		val metadata = e.entity.getMetadata("owner")
+			.firstOrNull()
+
+		val playerMetadata = metadata?.value() as UUID?
+
+		if (playerMetadata != null) {
+			val player = Bukkit.getPlayer(playerMetadata)
+
+			logger.info("Picareta Monstra despawned at ${e.location.world.name} ${e.location.x}, ${e.location.y}, ${e.location.z} by owner ${player?.name} ${metadata}")
+
+			if (player != null) {
+				player.playSound(
+					player.location,
+					Sound.ENTITY_BLAZE_DEATH,
+					1f,
+					0.01f
+				)
+
+				player.sendTitle(
+					"§cSUA MONSTRA DESPAWNOU!",
+					"§cQuem mandou deixar ela no chão!",
+					10,
+					140,
+					10
+				)
+			}
+		} else {
+			logger.info("Picareta Monstra despawned at ${e.location.world.name} ${e.location.x}, ${e.location.y}, ${e.location.z} without any metadata attached")
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	fun onPlayerDropItemEvent(e: PlayerItemBreakEvent) {
+		// Because some people are DUMB AS FUCC
+		val brokenItem = e.brokenItem
+		if (brokenItem.getStoredMetadata("isMonsterPickaxe") != "true")
+			return
+
+		logger.info("Picareta Monstra broke at ${e.player.location.world.name} ${e.player.location.x}, ${e.player.location.y}, ${e.player.location.z}")
+
+		e.player.playSound(
+			e.player.location,
+			Sound.ENTITY_BLAZE_DEATH,
+			1f,
+			0.05f
+		)
+
+		e.player.sendTitle(
+			"§cSUA MONSTRA QUEBROU!",
+			"§cQuem mandou ficar sambando com ela na mão!",
+			10,
+			140,
+			10
+		)
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

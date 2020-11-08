@@ -18,7 +18,7 @@ object DreamCoreUnloadCommand : DSLCommandBase<DreamCore> {
             } else {
                 val script = plugin.dreamScriptManager.scripts.firstOrNull { it.fileName == fileName }
                 if (script == null) {
-                    sender.sendMessage("§cO script ${fileName} existe! Use reload seu tosco!")
+                    sender.sendMessage("§cO script ${fileName} não existe! Use reload seu tosco!")
                     return@executes
                 }
 
