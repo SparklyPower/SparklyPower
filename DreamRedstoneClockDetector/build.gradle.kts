@@ -12,7 +12,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation(files("../libs/patched_1.15.1.jar"))
+    implementation(files("../libs/paper_server.jar"))
     implementation(files("../libs/DreamCore-shadow.jar"))
     implementation(files("../libs/WorldGuard.jar"))
 }
