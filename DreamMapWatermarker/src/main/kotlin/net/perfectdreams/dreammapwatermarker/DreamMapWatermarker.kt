@@ -9,6 +9,7 @@ import net.perfectdreams.dreamcore.utils.registerEvents
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.inventory.CraftItemEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.ItemFlag
@@ -56,7 +57,17 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 	}
 
 	@EventHandler
-	fun craft(event: InventoryClickEvent) {
+	fun onCraft(event: CraftItemEvent) {
+		val hasCustomMap = event.inventory.matrix.filterNotNull().any {
+			it.getStoredMetadata("customMapOwner") != null || it.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^"
+		}
+
+		if (hasCustomMap)
+			event.isCancelled = true
+	}
+
+	@EventHandler
+	fun onCartography(event: InventoryClickEvent) {
 		// We could use "clickedInventory" but that does disallow dragging from the bottom to the top
 		val clickedInventory = event.whoClicked.openInventory
 		val currentItem = event.currentItem ?: return
