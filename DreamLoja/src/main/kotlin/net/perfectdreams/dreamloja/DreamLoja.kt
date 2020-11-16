@@ -6,6 +6,7 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamloja.commands.DelLojaCommand
 import net.perfectdreams.dreamloja.commands.LojaCommand
 import net.perfectdreams.dreamloja.commands.SetLojaCommand
+import net.perfectdreams.dreamloja.commands.SetLojaIconCommand
 import net.perfectdreams.dreamloja.dao.UserShopVote
 import net.perfectdreams.dreamloja.listeners.SignListener
 import net.perfectdreams.dreamloja.listeners.TagListener
@@ -48,6 +49,7 @@ class DreamLoja : KotlinPlugin() {
 		registerCommand(LojaCommand(this))
 		registerCommand(SetLojaCommand(this))
 		registerCommand(DelLojaCommand(this))
+		registerCommand(SetLojaIconCommand(this))
 
 		registerEvents(SignListener(this))
 		registerEvents(TagListener())

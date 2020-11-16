@@ -59,7 +59,7 @@ class LojaCommand(val m: DreamLoja) : SparklyCommand(arrayOf("loja")) {
 				val menu = createMenu(9, "§a§lLojas de ${ownerName}") {
 					for ((index, shop) in playerShops.withIndex()) {
 						slot(index, 0) {
-							item = ItemStack(Material.DIAMOND_BLOCK)
+							item = shop.iconItemStack?.fromBase64Item() ?: ItemStack(Material.DIAMOND_BLOCK)
 								.rename("§a${shop.shopName}")
 
 							onClick {

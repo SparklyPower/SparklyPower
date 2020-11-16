@@ -35,6 +35,8 @@ class SetLojaCommand(val m: DreamLoja) : SparklyCommand(arrayOf("setloja")) {
 		var createdNew = false
 		var valid = true
 
+		val shopCountForPlayer = getMaxAllowedShops(player)
+
 		transaction(Databases.databaseNetwork) {
 			val shop = Shop.find {
 				(Shops.owner eq player.uniqueId) and (Shops.shopName eq shopName)
@@ -45,8 +47,6 @@ class SetLojaCommand(val m: DreamLoja) : SparklyCommand(arrayOf("setloja")) {
 			val shopCount = transaction(Databases.databaseNetwork) {
 				Shop.find { (Shops.owner eq player.uniqueId) }.count()
 			}
-
-			val shopCountForPlayer = getMaxAllowedShops(player)
 
 			if (isNew) {
 				if (shopCount + 1 > shopCountForPlayer) {
@@ -80,6 +80,10 @@ class SetLojaCommand(val m: DreamLoja) : SparklyCommand(arrayOf("setloja")) {
 			} else {
 				player.sendMessage("${DreamLoja.PREFIX} §aSua loja foi atualizada com sucesso! Outros jogadores podem ir até ela utilizando §6/loja ${player.name} $shopName§a!")
 			}
+		}
+
+		if (shopCountForPlayer != 1) {
+			player.sendMessage("${DreamLoja.PREFIX} §eSabia que é possível alterar o ícone da sua loja na §6/loja§e? Use §6/setlojaicon $shopName§e com o item na mão!")
 		}
 	}
 
