@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     compile(kotlin("stdlib-jdk8"))
-    compile(files("../libs/patched_1.15.1.jar"))
+    compile(files("../libs/paper_server.jar"))
     compile("io.github.waterfallmc:waterfall-api:1.13-SNAPSHOT")
     compile("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.5")
     compile("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.3.5")
