@@ -20,6 +20,7 @@ import net.perfectdreams.dreamchat.dao.EventMessage
 import net.perfectdreams.dreamchat.listeners.ChatListener
 import net.perfectdreams.dreamchat.listeners.SignListener
 import net.perfectdreams.dreamchat.tables.ChatUsers
+import net.perfectdreams.dreamchat.tables.PremiumUsers
 import net.perfectdreams.dreamchat.tables.DiscordAccounts
 import net.perfectdreams.dreamchat.tables.EventMessages
 import net.perfectdreams.dreamchat.utils.DiscordAccountInfo
@@ -101,7 +102,9 @@ class DreamChat : KotlinPlugin() {
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
 				ChatUsers,
-				EventMessages
+				EventMessages,
+				PremiumUsers,
+				DiscordAccounts
 			)
 		}
 
