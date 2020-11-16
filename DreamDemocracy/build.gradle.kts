@@ -7,14 +7,14 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
+    maven("https://repo.citizensnpcs.co/")
 }
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(files("../libs/paper_server.jar"))
     implementation(files("../libs/DreamCore-shadow.jar"))
-    implementation(files("../libs/WorldGuard.jar"))
-    implementation(files("../libs/ChestShop.jar"))
+    implementation("net.citizensnpcs:citizens:2.0.26-SNAPSHOT")
 }
 
 tasks.withType<KotlinCompile> {
