@@ -56,9 +56,9 @@ object ColorsCommand : DSLCommandBase<DreamColorEmote> {
             tg.addRow("${ChatColor.BOLD}&a = ${ChatColor.GREEN}Verde","${ChatColor.RESET}${ChatColor.BOLD}&b = ${ChatColor.AQUA}Ciano")
             tg.addRow("${ChatColor.BOLD}&c = ${ChatColor.RED}Vermelho","${ChatColor.RESET}${ChatColor.BOLD}&d = ${ChatColor.LIGHT_PURPLE}Rosa Claro")
             tg.addRow("${ChatColor.BOLD}&e = ${ChatColor.YELLOW}Amarelo","${ChatColor.RESET}${ChatColor.BOLD}&f = ${ChatColor.WHITE}Branco")
-            tg.addRow("${ChatColor.BOLD}&k = ${ChatColor.MAGIC}Mágica${ChatColor.RESET}","${ChatColor.BOLD}&n = ${ChatColor.BOLD}Negrito")
-            tg.addRow("${ChatColor.BOLD}&m = ${ChatColor.STRIKETHROUGH}Traçado${ChatColor.RESET}","${ChatColor.BOLD}&r = ${ChatColor.UNDERLINE}Sublinhado")
-            tg.addRow("${ChatColor.BOLD}&o = ${ChatColor.ITALIC}Italico${ChatColor.RESET}","${ChatColor.BOLD}&5 = ${ChatColor.RESET}Resetar")
+            tg.addRow("${ChatColor.BOLD}&k = ${ChatColor.MAGIC}Mágica${ChatColor.RESET}","${ChatColor.BOLD}&l = ${ChatColor.BOLD}Negrito")
+            tg.addRow("${ChatColor.BOLD}&m = ${ChatColor.STRIKETHROUGH}Traçado${ChatColor.RESET}","${ChatColor.BOLD}&n = ${ChatColor.UNDERLINE}Sublinhado")
+            tg.addRow("${ChatColor.BOLD}&o = ${ChatColor.ITALIC}Italico${ChatColor.RESET}","${ChatColor.BOLD}&r = ${ChatColor.RESET}Resetar")
 
             sender.sendMessage("${ChatColor.BOLD}${ChatColor.GOLD}========== ${ChatColor.RED}Chat Cores & Estilos ${ChatColor.GOLD}==========")
             for (line in tg.generate(TableGenerator.Receiver.CLIENT, false, true)) {
