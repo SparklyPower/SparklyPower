@@ -8,13 +8,18 @@ import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
-import net.perfectdreams.dreamterrainadditions.commands.*
+import net.perfectdreams.dreamterrainadditions.commands.BanirCommand
+import net.perfectdreams.dreamterrainadditions.commands.ConfigureClaimCommand
+import net.perfectdreams.dreamterrainadditions.commands.DesbanirCommand
+import net.perfectdreams.dreamterrainadditions.commands.RetirarCommand
+import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockFormEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.player.PlayerMoveEvent
@@ -163,10 +168,24 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		}
 	}
 
+	@EventHandler
+	fun onBlockForm(e: BlockFormEvent) {
+		val entityClaim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null) ?: return
+
+		val claimAdditions = getClaimAdditionsById(entityClaim.id) ?: return
+		val disableSnowFormation = claimAdditions.disableSnowFormation
+
+		val type = e.newState.type
+
+		if (disableSnowFormation && type == Material.SNOW)
+			e.isCancelled = true
+	}
+
 	class ClaimAdditions(val claimId: Long) {
 		val bannedPlayers = mutableListOf<String>()
 		var pvpEnabled = false
 		var disablePassiveMobs = false
 		var disableHostileMobs = false
+		var disableSnowFormation = false
 	}
 }

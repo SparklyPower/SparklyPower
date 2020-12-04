@@ -38,6 +38,10 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
 
                 val claimAdditions = _claimAdditions
 
+                val humanizeBoolean: Boolean.() -> String = {
+                    if (this) "§2habilitado§r§a" else "§cdesabilitado§r§a"
+                }
+
                 val menu = createMenu(9, "§aConfiguração do seu Terreno") {
                     slot(0, 0) {
                         item = ItemStack(Material.IRON_SWORD)
@@ -64,7 +68,35 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                         onClick {
                             it.closeInventory()
                             claimAdditions.pvpEnabled = !claimAdditions.pvpEnabled
-                            it.sendMessage("§aPvP agora está ${claimAdditions.pvpEnabled} no seu terreno!")
+                            it.sendMessage("§aPvP agora está ${humanizeBoolean(claimAdditions.pvpEnabled)} no seu terreno!")
+                        }
+                    }
+
+                    slot(6, 0) {
+                        item = ItemStack(Material.SNOWBALL)
+                                .apply {
+                                    if (claimAdditions.disableSnowFormation)
+                                        this.addUnsafeEnchantment(Enchantment.LUCK, 1)
+                                }
+                                .meta<ItemMeta> {
+                                    this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+
+                                    if (claimAdditions.disableSnowFormation) {
+                                        setDisplayName("§c§lPermitir formação de neve no terreno")
+                                    } else {
+                                        setDisplayName("§a§lNão permitir formação de neve no terreno")
+                                    }
+
+                                    lore = listOf(
+                                            "§7Bloqueie formação de neve no seu claim caso ele esteja em um bioma de neve"
+                                    )
+                                }
+
+                        onClick {
+                            it.closeInventory()
+                            claimAdditions.disableSnowFormation = !claimAdditions.disableSnowFormation
+
+                            it.sendMessage("§aBloqueio de formação de neve agora está ${humanizeBoolean(claimAdditions.disableSnowFormation)} no seu terreno!")
                         }
                     }
 
@@ -91,7 +123,7 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                         onClick {
                             it.closeInventory()
                             claimAdditions.disableHostileMobs = !claimAdditions.disableHostileMobs
-                            it.sendMessage("§aBloqueio de mobs agressivos agora está ${claimAdditions.disableHostileMobs} no seu terreno!")
+                            it.sendMessage("§aBloqueio de mobs agressivos agora está ${humanizeBoolean(claimAdditions.disableHostileMobs)} no seu terreno!")
                         }
                     }
 
@@ -118,7 +150,7 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                         onClick {
                             it.closeInventory()
                             claimAdditions.disablePassiveMobs = !claimAdditions.disablePassiveMobs
-                            it.sendMessage("§aBloqueio de mobs passivos agora está ${claimAdditions.disablePassiveMobs} no seu terreno!")
+                            it.sendMessage("§aBloqueio de mobs passivos agora está ${humanizeBoolean(claimAdditions.disablePassiveMobs)} no seu terreno!")
                         }
                     }
                 }
