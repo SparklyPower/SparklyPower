@@ -157,8 +157,8 @@ class DreamBusca : KotlinPlugin(), Listener {
 			// Iremos reutilizar depois, caso não tenhamos encontrado uma localização válida, mas existia no cache, mesmo que já tenha expirado.
 		}
 
-		val blacklistedX = 403 - 250..403 + 250
-		val blacklistedZ = 257 - 250..257 + 250
+		val blacklistedX = 403.0 - 250.0..403.0 + 250.0
+		val blacklistedZ = 257.0 - 250.0..257.0 + 250.0
 		// Para procurar um bioma, iremos pegar primeiro os chunks carregados, para evitar IO desnecessário
 		val world = player.world
 		val chunk = world.loadedChunks.filter {
