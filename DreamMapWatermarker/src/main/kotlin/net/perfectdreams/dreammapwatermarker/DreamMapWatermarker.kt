@@ -1,5 +1,8 @@
 package net.perfectdreams.dreammapwatermarker
 
+import com.okkero.skedule.SynchronizationContext
+import com.okkero.skedule.schedule
+import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.commands.command
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
@@ -13,6 +16,7 @@ import org.bukkit.event.inventory.CraftItemEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.ItemFlag
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 class DreamMapWatermarker : KotlinPlugin(), Listener {
@@ -31,22 +35,26 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 						return@executes
 					}
 
-					val uniqueId = UUID.nameUUIDFromBytes("OfflinePlayer:$playerName".toByteArray())
+					schedule(SynchronizationContext.ASYNC) {
+						val uniqueId = DreamUtils.retrieveUserUniqueId(playerName)
 
-					val item = player.inventory.itemInMainHand
+						switchContext(SynchronizationContext.SYNC)
+						
+						val item = player.inventory.itemInMainHand
 
-					player.inventory.setItemInMainHand(
-						item.lore(
-							"§7Diretamente de §dXerox da Pantufa§7...",
-							"§7(temos os melhores preços da região!)",
-							"§7§oUm incrível mapa para você!",
-							"§7",
-							"§7Mapa feito para §a${playerName} §e(◠‿◠✿)"
-						).apply {
-							this.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
-							this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
-						}.storeMetadata("customMapOwner", uniqueId.toString())
-					)
+						player.inventory.setItemInMainHand(
+							item.lore(
+								"§7Diretamente de §dXerox da Pantufa§7...",
+								"§7(temos os melhores preços da região!)",
+								"§7§oUm incrível mapa para você!",
+								"§7",
+								"§7Mapa feito para §a${playerName} §e(◠‿◠✿)"
+							).apply {
+								this.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
+								this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+							}.storeMetadata("customMapOwner", uniqueId.toString())
+						)
+					}
 				}
 			}
 		)

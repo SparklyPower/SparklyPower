@@ -95,7 +95,7 @@ class HomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("home", "casa")) {
 		fun goToPlayerHome(player: Player, playerName: String) {
 			player.sendMessage("§dListando casas de $playerName...")
 
-			m.loadHouses(UUID.nameUUIDFromBytes("OfflinePlayer:$playerName".toByteArray())) { houses ->
+			m.loadHouses(playerName) { houses ->
 				if (houses.isNotEmpty()) {
 					val textComponent = "§3Casas de $playerName (${houses.size}): ".toTextComponent()
 					var first = true
@@ -127,7 +127,7 @@ class HomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("home", "casa")) {
 		fun goToPlayerHome(player: Player, playerName: String, name: String) {
 			player.sendMessage("§dAcessando casas de $playerName...")
 
-			m.loadHouses(UUID.nameUUIDFromBytes("OfflinePlayer:$playerName".toByteArray())) { houses ->
+			m.loadHouses(playerName) { houses ->
 				teleportToHome(player, houses, name)
 			}
 		}

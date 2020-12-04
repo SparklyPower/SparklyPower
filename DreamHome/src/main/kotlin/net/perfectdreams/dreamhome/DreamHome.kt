@@ -82,6 +82,19 @@ class DreamHome : KotlinPlugin() {
 		}
 	}
 
+	fun loadHouses(playerName: String, callback: (MutableList<Home>) -> Unit) {
+		scheduler().schedule(this, SynchronizationContext.ASYNC) {
+			val uniqueId = DreamUtils.retrieveUserUniqueId(playerName)
+
+			val houses = transaction(Databases.databaseNetwork) {
+				Home.find { Homes.owner eq uniqueId }.toMutableList()
+			}
+
+			switchContext(SynchronizationContext.SYNC)
+			callback.invoke(houses)
+		}
+	}
+
 	fun createHouse(player: Player, _house: Home?, homeName: String, new: Boolean, oldLocation: Location?, newLocation: Location, callback: () -> Unit) {
 		var house = _house
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {

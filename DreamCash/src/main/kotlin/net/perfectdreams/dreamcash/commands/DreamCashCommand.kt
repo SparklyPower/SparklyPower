@@ -10,6 +10,7 @@ import net.perfectdreams.dreamcash.dao.CashInfo
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.scheduler
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
@@ -38,7 +39,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
     fun checkPlayerCash(sender: CommandSender, name: String) {
         scheduler().schedule(m, SynchronizationContext.ASYNC) {
             val cashInfo = transaction(Databases.databaseNetwork) {
-                CashInfo.findById(UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray()))
+                CashInfo.findById(DreamUtils.retrieveUserUniqueId(name))
             }
 
             val cash = cashInfo?.cash ?: 0
@@ -74,7 +75,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
             }
 
             var receiverCashInfo = transaction(Databases.databaseNetwork) {
-                CashInfo.findById(UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray()))
+                CashInfo.findById(DreamUtils.retrieveUserUniqueId(name))
             }
 
             val howMuch = howMuchString.toIntOrNull()
@@ -98,7 +99,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
             }
 
             receiverCashInfo = receiverCashInfo ?: transaction(Databases.databaseNetwork) {
-                CashInfo.new(UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray())) {
+                CashInfo.new(DreamUtils.retrieveUserUniqueId(name)) {
                     this.cash = 0
                 }
             }
@@ -121,7 +122,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
     fun givePlayerCash(sender: CommandSender, name: String, howMuchString: String) {
         scheduler().schedule(m, SynchronizationContext.ASYNC) {
             var receiverCashInfo = transaction(Databases.databaseNetwork) {
-                CashInfo.findById(UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray()))
+                CashInfo.findById(DreamUtils.retrieveUserUniqueId(name))
             }
 
             val howMuch = howMuchString.toIntOrNull()
@@ -133,7 +134,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
             }
 
             receiverCashInfo = receiverCashInfo ?: transaction(Databases.databaseNetwork) {
-                CashInfo.new(UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray())) {
+                CashInfo.new(DreamUtils.retrieveUserUniqueId(name)) {
                     this.cash = 0
                 }
             }
@@ -155,7 +156,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
     fun takePlayerCash(sender: CommandSender, name: String, howMuchString: String) {
         scheduler().schedule(m, SynchronizationContext.ASYNC) {
             var receiverCashInfo = transaction(Databases.databaseNetwork) {
-                CashInfo.findById(UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray()))
+                CashInfo.findById(DreamUtils.retrieveUserUniqueId(name))
             }
 
             val howMuch = howMuchString.toIntOrNull()
@@ -167,7 +168,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
             }
 
             receiverCashInfo = receiverCashInfo ?: transaction(Databases.databaseNetwork) {
-                CashInfo.new(UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray())) {
+                CashInfo.new(DreamUtils.retrieveUserUniqueId(name)) {
                     this.cash = 0
                 }
             }
@@ -189,7 +190,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
     fun setPlayerCash(sender: CommandSender, name: String, howMuchString: String) {
         scheduler().schedule(m, SynchronizationContext.ASYNC) {
             var receiverCashInfo = transaction(Databases.databaseNetwork) {
-                CashInfo.findById(UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray()))
+                CashInfo.findById(DreamUtils.retrieveUserUniqueId(name))
             }
 
             val howMuch = howMuchString.toIntOrNull()
@@ -201,7 +202,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
             }
 
             receiverCashInfo = receiverCashInfo ?: transaction(Databases.databaseNetwork) {
-                CashInfo.new(UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray())) {
+                CashInfo.new(DreamUtils.retrieveUserUniqueId(name)) {
                     this.cash = 0
                 }
             }

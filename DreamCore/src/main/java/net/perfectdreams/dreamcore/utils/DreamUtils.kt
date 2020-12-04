@@ -19,7 +19,9 @@ import com.mongodb.event.ServerMonitorListener
 import com.sk89q.worldguard.WorldGuard
 import net.md_5.bungee.api.chat.BaseComponent
 import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.pojo.PlayerInfo
+import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.codecs.LocationCodec
 import net.perfectdreams.dreamcore.utils.extensions.getCompoundTag
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
@@ -46,6 +48,7 @@ import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.PluginManager
 import org.bukkit.scheduler.BukkitScheduler
+import org.jetbrains.exposed.sql.transactions.transaction
 // import protocolsupport.api.ProtocolSupportAPI
 // import protocolsupport.api.ProtocolVersion
 import java.util.*
@@ -259,6 +262,46 @@ object DreamUtils {
 
 		override fun serverHearbeatStarted(p0: ServerHeartbeatStartedEvent) {
 		}
+	}
+
+	/**
+	 * Retrieves the user info for the specified [uuid]
+	 *
+	 * @param uuid the user's unique ID
+	 * @return the user's data, if present
+	 */
+	fun retrieveUserInfo(uuid: UUID): User? {
+		assertAsyncThread(true)
+		return transaction(Databases.databaseNetwork) {
+			User.findById(uuid)
+		}
+	}
+
+	/**
+	 * Retrieves the user info for the specified [playerName]
+	 *
+	 * @param playerName user's name
+	 * @return the user's data, if present
+	 */
+	fun retrieveUserInfo(playerName: String): User? {
+		assertAsyncThread(true)
+		return transaction(Databases.databaseNetwork) {
+			User.find { Users.username eq playerName }
+				.firstOrNull()
+		}
+	}
+
+	/**
+	 * Retrieves the player's UUID for the specified [playerName]
+	 * If the player does not exist on the database, it will default
+	 * to "OfflinePlayer:$playerName"
+	 *
+	 * @param playerName user's name
+	 * @return the user's data, if present
+	 */
+	fun retrieveUserUniqueId(playerName: String): UUID {
+		assertAsyncThread(true)
+		return retrieveUserInfo(playerName)?.id?.value ?: UUID.nameUUIDFromBytes("OfflinePlayer:$playerName".toByteArray(Charsets.UTF_8))
 	}
 
 	/**

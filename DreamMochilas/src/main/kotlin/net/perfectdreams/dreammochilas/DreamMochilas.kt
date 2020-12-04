@@ -1,12 +1,11 @@
 package net.perfectdreams.dreammochilas
 
+import com.okkero.skedule.SynchronizationContext
+import com.okkero.skedule.schedule
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.listeners.InventoryListener
 import net.perfectdreams.dreammochilas.tables.Mochilas
@@ -75,26 +74,30 @@ class DreamMochilas : KotlinPlugin(), Listener {
 
 					@Subcommand(["player"])
 					fun getPlayerMochilas(sender: Player, playerName: String, skip: String? = null) {
-						val uniqueId = UUID.nameUUIDFromBytes("OfflinePlayer:${playerName}".toByteArray())
+						scheduler().schedule(INSTANCE) {
+							switchContext(SynchronizationContext.ASYNC)
+							val uniqueId = DreamUtils.retrieveUserUniqueId(playerName)
+							switchContext(SynchronizationContext.SYNC)
 
-						sender.sendMessage("§aCriando inventário com mochilas de $uniqueId")
+							sender.sendMessage("§aCriando inventário com mochilas de $uniqueId")
 
-						val mochilas = transaction(Databases.databaseNetwork) {
-							Mochila.find {
-								Mochilas.owner eq uniqueId
-							}.toMutableList()
-						}
+							val mochilas = transaction(Databases.databaseNetwork) {
+								Mochila.find {
+									Mochilas.owner eq uniqueId
+								}.toMutableList()
+							}
 
-						val inventory = Bukkit.createInventory(null, 54)
-						mochilas.forEach {
-							inventory.addItem(
+							val inventory = Bukkit.createInventory(null, 54)
+							mochilas.forEach {
+								inventory.addItem(
 									it.createItem()
-							)
+								)
+							}
+
+							sender.openInventory(inventory)
+
+							sender.sendMessage("§7É possível pular entradas usando §6/mochila player $playerName QuantidadeDeMochilasParaPular")
 						}
-
-						sender.openInventory(inventory)
-
-						sender.sendMessage("§7É possível pular entradas usando §6/mochila player $playerName QuantidadeDeMochilasParaPular")
 					}
 				}
 		)
