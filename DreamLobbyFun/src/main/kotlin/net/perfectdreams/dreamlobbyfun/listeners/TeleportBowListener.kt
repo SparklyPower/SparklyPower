@@ -15,11 +15,21 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.entity.ProjectileHitEvent
+import org.bukkit.event.player.PlayerQuitEvent
 
 class TeleportBowListener(val m: DreamLobbyFun) : Listener {
 	@EventHandler
+	fun onQuit(e: PlayerQuitEvent) {
+		// Automatically delete all arrows that were shot by the player
+		e.player.world.entities
+			.filterIsInstance<Arrow>()
+			.filter { it.shooter == e.player }
+			.onEach { it.remove() }
+	}
+
+	@EventHandler
 	fun onShoot(e: EntityShootBowEvent) {
-		val projectile = e.projectile ?: return
+		val projectile = e.projectile
 		if (projectile !is Arrow)
 			return
 
@@ -27,7 +37,7 @@ class TeleportBowListener(val m: DreamLobbyFun) : Listener {
 		projectile.setBounce(false)
 
 		scheduler().schedule(m) {
-			while (!projectile.isDead) {
+			while (!projectile.isValid) {
 				projectile.world.spawnParticle(Particle.LAVA, projectile.location, 1, 0.0, 0.0, 0.0, 0.1)
 				projectile.world.spawnParticle(Particle.FLAME, projectile.location, 1, 0.0, 0.0, 0.0, 0.1)
 				waitFor(1)

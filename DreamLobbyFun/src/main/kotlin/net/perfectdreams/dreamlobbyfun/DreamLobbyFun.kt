@@ -19,6 +19,7 @@ import net.perfectdreams.dreamlobbyfun.tables.UserSettings
 import net.perfectdreams.dreamlobbyfun.utils.ServerCitizen
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
+import org.bukkit.entity.Arrow
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
@@ -38,6 +39,7 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 	// Players que podem burlar coisas no servidor
 	val unlockedPlayers = mutableListOf<Player>()
 	var serverCitizens = mutableListOf<ServerCitizen>()
+
 	val serverCitizensFile by lazy {
 		dataFolder.mkdirs()
 		File(dataFolder, "server_citizens_file.json")

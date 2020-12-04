@@ -78,7 +78,7 @@ class ServerCitizen(val citizenId: Int, val serverName: String, val fancyServerN
 		}
 
 		if (easeTask == null) {
-			easeTask = scheduler().schedule(Bukkit.getPluginManager().getPlugin("DreamLobbyFun")) {
+			easeTask = scheduler().schedule(Bukkit.getPluginManager().getPlugin("DreamLobbyFun")!!) {
 				while (true) {
 					val newLocation = middle.clone()
 					clickHereHologram.teleport(newLocation.add(0.0, (ease(currentEase) / 4) - 0.125, 0.0))

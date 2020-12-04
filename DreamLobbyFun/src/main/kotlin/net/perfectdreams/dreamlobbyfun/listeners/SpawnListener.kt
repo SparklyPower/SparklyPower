@@ -35,14 +35,14 @@ class SpawnListener(val m: DreamLobbyFun) : Listener {
 
 	@EventHandler
 	fun onLogin(e: PlayerLoggedInEvent) {
-		e.player.teleport(dreamConfig.spawn)
+		e.player.teleport(dreamConfig.getSpawn())
 
 		handleJoin(e.player)
 	}
 
 	@EventHandler
 	fun onRespawn(e: PlayerRespawnEvent) {
-		e.respawnLocation = dreamConfig.spawn
+		e.respawnLocation = dreamConfig.getSpawn()
 		handleJoin(e.player)
 	}
 
