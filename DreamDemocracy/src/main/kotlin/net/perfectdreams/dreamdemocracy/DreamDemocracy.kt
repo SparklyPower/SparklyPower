@@ -15,14 +15,18 @@ class DreamDemocracy : KotlinPlugin(), Listener {
 		super.softEnable()
 
 		schedule {
+			// Wait a few ticks before checking for
 			while (true) {
 				val loritta = CitizensAPI.getNPCRegistry().getById(879)
 				val gabriela = CitizensAPI.getNPCRegistry().getById(880)
 				val pantufa = CitizensAPI.getNPCRegistry().getById(882)
 
-				checkSantinho(loritta, 11126, "O planfleto tem cheiro de Blueberry")
-				checkSantinho(gabriela, 11127, "O planfleto tem cheiro de pincel")
-				checkSantinho(pantufa, 11128, "O planfleto tem cheiro de caixa de celular novo")
+				if (loritta != null)
+					checkSantinho(loritta, 11126, "O planfleto tem cheiro de Blueberry")
+				if (gabriela != null)
+					checkSantinho(gabriela, 11127, "O planfleto tem cheiro de pincel")
+				if (pantufa != null)
+					checkSantinho(pantufa, 11128, "O planfleto tem cheiro de caixa de celular novo")
 
 				waitFor(20 * 5)
 			}
