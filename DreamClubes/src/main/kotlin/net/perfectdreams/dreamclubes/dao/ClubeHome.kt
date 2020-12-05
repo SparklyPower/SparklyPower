@@ -1,11 +1,9 @@
 package net.perfectdreams.dreamclubes.dao
 
-import net.perfectdreams.dreamclubes.tables.Clubes
-import net.perfectdreams.dreamclubes.tables.Clubes.index
-import net.perfectdreams.dreamclubes.tables.Clubes.nullable
 import net.perfectdreams.dreamclubes.tables.ClubesHomes
-import org.bukkit.Bukkit
-import org.bukkit.Location
+import org.jetbrains.exposed.dao.id.EntityID
+import org.jetbrains.exposed.dao.LongEntity
+import org.jetbrains.exposed.dao.LongEntityClass
 import org.jetbrains.exposed.dao.*
 
 class ClubeHome(id: EntityID<Long>) : LongEntity(id) {

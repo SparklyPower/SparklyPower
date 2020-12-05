@@ -3,6 +3,7 @@ package net.perfectdreams.dreamassinaturas.dao
 import net.perfectdreams.dreamassinaturas.tables.Assinaturas
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.*
 
 class Assinatura(id: EntityID<Long>) : LongEntity(id) {

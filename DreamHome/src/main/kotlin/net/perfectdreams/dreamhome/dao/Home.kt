@@ -3,7 +3,7 @@ package net.perfectdreams.dreamhome.dao
 import net.perfectdreams.dreamhome.tables.Homes
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 

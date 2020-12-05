@@ -99,7 +99,7 @@ class DreamVote : KotlinPlugin() {
 
 	fun getVoteCount(player: Player) = getVoteCount(player.uniqueId)
 
-	fun getVoteCount(uuid: UUID): Int {
+	fun getVoteCount(uuid: UUID): Long {
 		DreamUtils.assertAsyncThread(true)
 
 		return transaction(Databases.databaseNetwork) {
@@ -123,7 +123,7 @@ class DreamVote : KotlinPlugin() {
 		return transaction(Databases.databaseNetwork) {
 			Votes.select {
 				Votes.votedAt greaterEq today.timeInMillis and (Votes.player eq uuid)
-			}.count() != 0
+			}.count() != 0L
 		}
 	}
 
@@ -155,7 +155,7 @@ class DreamVote : KotlinPlugin() {
 
 			giveAwards.addAll(alwaysAwards.filter {
 				if (it.hasEqualsVoteCountCondition) {
-					return@filter (it.requiredEqualsVoteCount == voteCount)
+					return@filter (it.requiredEqualsVoteCount.toLong() == voteCount)
 				}
 				true
 			})

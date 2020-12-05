@@ -1,7 +1,7 @@
 package net.perfectdreams.dreamassinaturas.tables
 
 import net.perfectdreams.dreamcore.DreamCore
-import org.jetbrains.exposed.dao.IdTable
+import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.dao.LongIdTable
 import java.util.*
 

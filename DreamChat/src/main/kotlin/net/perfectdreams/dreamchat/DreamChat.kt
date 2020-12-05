@@ -150,7 +150,7 @@ class DreamChat : KotlinPlugin() {
 				// GET TOP PLAYERS
 				oldestPlayers = transaction(Databases.databaseNetwork) {
 					ChatUsers.select { ChatUsers.playOneMinute.isNotNull() }
-						.orderBy(ChatUsers.playOneMinute, false)
+						.orderBy(ChatUsers.playOneMinute, SortOrder.DESC)
 						.limit(10)
 						.map { it[ChatUsers.id].value to (it[ChatUsers.playOneMinute] ?: 0) }
 				}

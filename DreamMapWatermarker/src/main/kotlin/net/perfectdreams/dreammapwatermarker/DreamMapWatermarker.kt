@@ -39,7 +39,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 						val uniqueId = DreamUtils.retrieveUserUniqueId(playerName)
 
 						switchContext(SynchronizationContext.SYNC)
-						
+
 						val item = player.inventory.itemInMainHand
 
 						player.inventory.setItemInMainHand(

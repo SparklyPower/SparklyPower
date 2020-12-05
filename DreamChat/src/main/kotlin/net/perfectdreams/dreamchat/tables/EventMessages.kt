@@ -1,7 +1,7 @@
 package net.perfectdreams.dreamchat.tables
 
 import net.perfectdreams.dreamcore.DreamCore
-import org.jetbrains.exposed.dao.IntIdTable
+import org.jetbrains.exposed.dao.id.IntIdTable
 
 object EventMessages : IntIdTable() {
 	override val tableName: String

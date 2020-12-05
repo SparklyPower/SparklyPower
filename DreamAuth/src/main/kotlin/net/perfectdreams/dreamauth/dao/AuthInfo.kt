@@ -1,7 +1,7 @@
 package net.perfectdreams.dreamauth.dao
 
 import net.perfectdreams.dreamauth.tables.AuthStorage
-import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import java.util.*

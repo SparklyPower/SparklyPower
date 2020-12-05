@@ -6,10 +6,11 @@ import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
 import net.perfectdreams.dreamclubes.utils.async
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
-import net.perfectdreams.dreamcore.utils.translateColorCodes
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import org.jetbrains.exposed.dao.*
+import org.jetbrains.exposed.dao.LongEntity
+import org.jetbrains.exposed.dao.LongEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*

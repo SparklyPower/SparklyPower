@@ -1,7 +1,7 @@
 package net.perfectdreams.dreamchat.tables
 
 import net.perfectdreams.dreamcore.DreamCore
-import org.jetbrains.exposed.dao.IdTable
+import org.jetbrains.exposed.dao.id.IdTable
 import java.util.*
 
 object ChatUsers : IdTable<UUID>() {

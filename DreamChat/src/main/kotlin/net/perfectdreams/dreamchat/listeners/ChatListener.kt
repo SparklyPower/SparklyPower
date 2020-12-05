@@ -501,7 +501,7 @@ class ChatListener(val m: DreamChat) : Listener {
 
 			val isMinecraftPremium = transaction(Databases.databaseNetwork) {
 				PremiumUsers.select { PremiumUsers.crackedUniqueId eq player.uniqueId }
-					.count() != 0
+					.count() != 0L
 			}
 
 			val mcPremiumStatus = if (isMinecraftPremium) {

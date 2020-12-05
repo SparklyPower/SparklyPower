@@ -4,7 +4,7 @@ import net.perfectdreams.dreamcasamentos.tables.Marriages
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 import java.util.*

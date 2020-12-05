@@ -1,6 +1,6 @@
 package net.perfectdreams.dreamhome.tables
 
-import org.jetbrains.exposed.dao.IntIdTable
+import org.jetbrains.exposed.dao.id.IntIdTable
 
 object Homes : IntIdTable() {
 	val owner = uuid("owner").index()

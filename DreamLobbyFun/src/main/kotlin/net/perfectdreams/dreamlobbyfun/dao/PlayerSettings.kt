@@ -1,7 +1,7 @@
 package net.perfectdreams.dreamlobbyfun.dao
 
 import net.perfectdreams.dreamlobbyfun.tables.UserSettings
-import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.UUIDEntity
 import org.jetbrains.exposed.dao.UUIDEntityClass
 import java.util.*

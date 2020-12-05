@@ -2,6 +2,7 @@ package net.perfectdreams.dreamclubes.dao
 
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.*
 import java.util.*
 

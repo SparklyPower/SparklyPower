@@ -3,7 +3,7 @@ package net.perfectdreams.dreamloja.dao
 import net.perfectdreams.dreamloja.tables.VoteSigns
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
 
