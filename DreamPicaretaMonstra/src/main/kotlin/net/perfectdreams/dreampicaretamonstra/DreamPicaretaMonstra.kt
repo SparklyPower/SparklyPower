@@ -13,6 +13,7 @@ import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.block.BlockState
@@ -274,7 +275,12 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 						}
 
 						val drops = location.block.getDrops(inHand)
+							.toMutableList()
 						val exp = BlockUtils.getExpCount(location.block, enchantmentLevel)
+
+						if (!isSilky && location.block.type == Material.REDSTONE_ORE && CustomItems.checkIfRubyShouldDrop()) {
+							drops.add(CustomItems.RUBY.clone())
+						}
 
 						// Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
 						val dropsAsItems =  drops.map {
