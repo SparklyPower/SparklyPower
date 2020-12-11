@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
+import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
@@ -67,6 +68,13 @@ class MicrowaveListener(val m: DreamCustomItems) : Listener {
             e.isCancelled = true
 
             val microwave = m.microwaves[clickedBlock.location] ?: return
+
+            val claim = GriefPrevention.instance.dataStore.getClaimAt(clickedBlock.location, false, null)
+
+            if (claim != null && (claim.ownerName != e.player.name && !claim.managers.contains(e.player.name))) {
+                e.player.sendMessage("§cVocê não tem permissão para mexer neste micro-ondas!")
+                return
+            }
 
             microwave.open(e.player)
         }

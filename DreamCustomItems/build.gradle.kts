@@ -14,6 +14,7 @@ dependencies {
     compile(files("../libs/paper_server.jar"))
     compile(files("../libs/DreamCore-shadow.jar"))
     compile(files("../libs/WorldGuard.jar"))
+    compileOnly("com.github.TechFortress:GriefPrevention:16.11.5")
 }
 
 tasks.withType<KotlinCompile> {
