@@ -34,11 +34,13 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 
 		phoenix.setTitle("§6✪ §r$randomEmote §4§lSparkly§b§lPower §r$randomEmote §6✪")
 
-		val noCollisionTeam = phoenix.scoreboard.getTeam("nocoll") ?: phoenix.scoreboard.registerNewTeam("nocoll")
+		// This doesn't need to be here? Please test!
+		// Adding the player to a new team breaks glow
+		/* val noCollisionTeam = phoenix.scoreboard.getTeam("nocoll") ?: phoenix.scoreboard.registerNewTeam("nocoll")
 		noCollisionTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER)
 
 		if (!noCollisionTeam.hasEntry(player.name))
-			noCollisionTeam.addEntry(player.name)
+			noCollisionTeam.addEntry(player.name) */
 
 		// Shows the player's health bellow the player's name
 		if (phoenix.scoreboard.getObjective("healthBelowName") == null) {
