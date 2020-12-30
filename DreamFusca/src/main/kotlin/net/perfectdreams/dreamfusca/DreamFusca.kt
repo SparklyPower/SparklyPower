@@ -41,7 +41,8 @@ class DreamFusca : KotlinPlugin(), Listener {
 		Material.BLACK_WOOL,
 		Material.BLACK_TERRACOTTA,
 		Material.COAL_BLOCK,
-		Material.BLACK_CONCRETE_POWDER
+		Material.BLACK_CONCRETE_POWDER,
+		Material.GRAY_CONCRETE
 	)
 
 	var cars = mutableMapOf<UUID, CarInfo>()
