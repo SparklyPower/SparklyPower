@@ -60,28 +60,5 @@ class TagListener(val plugin: DreamScoreboard) : Listener {
                 )
             )
         }
-
-        /* val averageWins = plugin.getTopClubeVictoriesOnAverageOnThisMonth()
-
-        val bestClube = averageWins.firstOrNull()
-
-        if (bestClube != null && bestClube.first.id == ClubeAPI.getPlayerClube(e.player)?.id) {
-            val clube = bestClube.first
-
-            e.tags.add(
-                PlayerTag(
-                    "§x§f§f§2§1§4§6§lF",
-                    "§x§f§f§2§1§4§6§lFrenéticos",
-                    listOf(
-                        "§r§b${e.player.displayName}§r§7 está no ${clube.shortName}§7, o clube com mais",
-                        "§7vitórias de eventos nos últimos 30 dias!",
-                        "",
-                        "§7Será que você consegue passar? :3 §6/eventos top clubes"
-                    ),
-                    "/eventos top clubes",
-                    true
-                )
-            )
-        } */
     }
 }
