@@ -143,7 +143,7 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 					WebhookMessageBuilder()
 						.setUsername("Pantufa")
 						.setAvatarUrl("https://cdn.discordapp.com/avatars/390927821997998081/c6917c2ad778119eb041002c6e18f581.png?size=2048")
-						.setContent("@everyone <:lori_yay_ping:640141673531441153>\n\nCatapimbas! O que é isso?!?!?!?!\n\nExatamente, <a:dokyo_bongo:539839128674631690> **Boost de 2x na experiência do McMMO!** <a:dokyo_bongo:539839128674631690>\n\nAté as $endsAt:00, então aproveitem. <:lori_ok:731873534036541500>")
+						.setContent("<@&798696876052185119> <:lori_yay_ping:640141673531441153>\n\nCatapimbas! O que é isso?!?!?!?!\n\nExatamente, <a:dokyo_bongo:539839128674631690> **Boost de 2x na experiência do McMMO!** <a:dokyo_bongo:539839128674631690>\n\nAté as $endsAt:00, então aproveitem. <:lori_ok:731873534036541500>")
 						.build()
 				)
 			}
@@ -157,7 +157,7 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 	@EventHandler
 	fun onChat(e: McMMOPartyChatEvent) {
 		for (staff in Bukkit.getOnlinePlayers().asSequence().filter { it.hasPermission("dreammcmmofun.snoop") }) {
-			staff.sendMessage("§7[${e.sender} » Party ${e.party}] ${e.message}")
+			staff.sendMessage("§7[${e.author.examinableName()} » Party ${e.authorParty.name}] ${e.componentMessage.content()}")
 		}
 	}
 
