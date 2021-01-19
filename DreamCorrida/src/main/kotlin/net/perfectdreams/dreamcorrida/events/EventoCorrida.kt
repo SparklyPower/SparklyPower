@@ -46,6 +46,7 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
         }
 
         running = true
+        broadcastEventAnnouncement()
         start()
     }
 

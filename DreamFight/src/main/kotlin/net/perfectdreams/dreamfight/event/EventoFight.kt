@@ -8,9 +8,11 @@ class EventoFight(val m: DreamFight) : ServerEvent("Fight", "/fight") {
         this.requiredPlayers = 50
         this.delayBetween = 60 * 60 * 1_000 // 60 minutos entre cada evento
         this.command = "/fight"
+        this.discordAnnouncementRole = "798697267312853002"
     }
 
     override fun preStart() {
+        broadcastEventAnnouncement()
         m.fight.preStartFight()
     }
 }

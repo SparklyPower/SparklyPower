@@ -54,17 +54,14 @@ class InventoryListener(val m: DreamEquipCoolStuff) : Listener {
             // NOTE: There is no need to cancel the event since that is just a proxy method for the line below.
             event.result = Event.Result.DENY
 
-            // Schedule swap
-            Bukkit.getScheduler().scheduleSyncDelayedTask(m) { // Get
-                val current: ItemStack? = event.currentItem
+            val current: ItemStack? = event.currentItem
 
-                // Set
-                event.currentItem = cursor
-                view.cursor = current
+            // Set
+            event.currentItem = cursor
+            view.cursor = current
 
-                // Update
-                clicker.updateInventory()
-            }
+            // Update
+            clicker.updateInventory()
         }
     }
 }

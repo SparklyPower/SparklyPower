@@ -22,20 +22,29 @@ open class ServerEvent(val eventName: String, val prefix: String) {
 		countdown()
 	}
 
+	/**
+	 * Broadcasts the event in the [discordChannelId] (or [DreamCore.dreamConfig.discord.eventAnnouncementChannelId] if [discordChannelId] is not set)
+	 *
+	 * Also only broadcasts if [discordAnnouncementRole] is not null.
+	 */
+	open fun broadcastEventAnnouncement() {
+		val broadcastEventInChannelId = discordChannelId ?: DreamCore.dreamConfig.discord?.eventAnnouncementChannelId
+
+		if (discordAnnouncementRole != null && broadcastEventInChannelId != null) {
+			DreamNetwork.PANTUFA.sendAsync(
+				jsonObject(
+					"type" to "sendEventStart",
+					"eventName" to eventName,
+					"roleId" to discordAnnouncementRole,
+					"channelId" to broadcastEventInChannelId
+				)
+			)
+		}
+	}
+
 	open fun countdown() {
 		scheduler().schedule(DreamCore.INSTANCE) {
-			val broadcastEventInChannelId = discordChannelId ?: DreamCore.dreamConfig.discord?.eventAnnouncementChannelId
-
-			if (discordAnnouncementRole != null && broadcastEventInChannelId != null) {
-				DreamNetwork.PANTUFA.sendAsync(
-						jsonObject(
-								"type" to "sendEventStart",
-								"eventName" to eventName,
-								"roleId" to discordAnnouncementRole,
-								"channelId" to broadcastEventInChannelId
-						)
-				)
-			}
+			broadcastEventAnnouncement()
 
 			for (i in 60 downTo 1) {
 				val announce = (i in 15..60 && i % 15 == 0) || (i in 0..14 && i % 5 == 0)

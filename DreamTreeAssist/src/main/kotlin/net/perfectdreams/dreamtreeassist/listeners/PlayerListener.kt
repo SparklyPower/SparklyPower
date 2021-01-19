@@ -219,9 +219,9 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
     private fun doMcMMOStuff(player: Player, blockState: BlockState) {
         val mcMMOPlayer: McMMOPlayer = UserManager.getPlayer(player) ?: return
 
-        if (BlockUtils.isLog(blockState) && PrimarySkillType.WOODCUTTING.getPermissions(player) && !mcMMO.getPlaceStore().isTrue(blockState)) {
+        if (BlockUtils.hasWoodcuttingXP(blockState) && PrimarySkillType.WOODCUTTING.getPermissions(player) && !mcMMO.getPlaceStore().isTrue(blockState)) {
             val miningManager: WoodcuttingManager = mcMMOPlayer.woodcuttingManager
-            miningManager.woodcuttingBlockCheck(blockState)
+            miningManager.processWoodcuttingBlockXP(blockState)
         }
     }
 }

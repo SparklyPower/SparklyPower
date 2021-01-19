@@ -23,6 +23,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
     init {
         this.delayBetween = 3_600_000  // one hour
         this.requiredPlayers = 40 // 40 players
+        this.discordAnnouncementRole = "539471142772146176"
     }
 
     var startLocation: Location? = null
@@ -98,6 +99,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
     override fun preStart() {
         running = true
+        broadcastEventAnnouncement()
         start()
     }
 

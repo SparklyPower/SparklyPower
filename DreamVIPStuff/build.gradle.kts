@@ -24,7 +24,7 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-/* tasks {
+tasks {
     val fatJar = task("fatJar", type = Jar::class) {
         println("Building fat jar for ${project.name}...")
 
@@ -43,4 +43,4 @@ tasks.withType<KotlinCompile> {
     "build" {
         dependsOn(fatJar)
     }
-} */
+}

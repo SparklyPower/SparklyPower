@@ -258,6 +258,7 @@ class DreamChat : KotlinPlugin() {
 
 		// Shutdown all current active webhooks
 		chatWebhooks.forEach { it.close() }
+		chatWebhooks.clear()
 		config.getStringList("chat-webhooks").forEach {
 			chatWebhooks += WebhookClient.withUrl(it)
 		}

@@ -16,7 +16,7 @@ class RubyDropListener(val m: DreamCustomItems) : Listener {
 
         val isSilky = inHand.getEnchantmentLevel(Enchantment.SILK_TOUCH) > 0
 
-        if (isSilky && e.block.type == Material.REDSTONE_ORE && CustomItems.checkIfRubyShouldDrop())
+        if (!isSilky && e.block.type == Material.REDSTONE_ORE && CustomItems.checkIfRubyShouldDrop())
             e.block.world.dropItemNaturally(e.block.location, CustomItems.RUBY.clone())
     }
 }
