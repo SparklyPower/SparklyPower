@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.AbstractCommand
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.*
@@ -59,7 +60,22 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 							override = true
 							val randomX = DreamUtils.random.nextInt(-3, 4)
 							val randomZ = DreamUtils.random.nextInt(-3, 4)
-							val spawned = spawner.spawn.world.spawnEntity(spawner.spawn.clone().add(0.0 + randomX.toDouble(), 1.0, 0.0 + randomZ.toDouble()), spawner.type)
+
+							var spawnLocation = spawner.spawn.clone()
+								.add(0.0 + randomX.toDouble(),
+									1.0,
+									0.0 + randomZ.toDouble()
+								)
+
+							if (spawnLocation.block.type != Material.AIR) {
+								// Not air, so let's move the location up a bit :)
+								spawnLocation = spawnLocation.add(0.0, 1.0, 0.0)
+							}
+
+							val spawned = spawner.spawn.world.spawnEntity(
+								spawnLocation,
+								spawner.type
+							)
 							override = false
 							spawner.spawnedMobs.add(spawned)
 						}
