@@ -42,7 +42,7 @@ object CabecasPersonalizadasCommand : DSLCommandBase<DreamVIPStuff> {
             }
 
             if (url != null) {
-                if (!url.contains("://minecraft-heads.com/custom-heads/")) {
+                if (!url.startsWith("https://minecraft-heads.com/custom-heads/")) {
                     player.sendMessage("§6/vipcabeças url")
                     player.sendMessage("§cCada cabeça custa 10k sonhos")
                     player.sendMessage("§cEnvie URLs do https://minecraft-heads.com/ da seção de \"Custom Heads\"!")
