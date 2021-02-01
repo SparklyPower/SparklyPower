@@ -146,7 +146,7 @@ class ChatListener(val m: DreamChat) : Listener {
 		if (3500 >= diff) {
 			val lastMessageContent = lastMessageCache[player]
 			if (lastMessageContent != null) {
-				if (5 > StringUtils.getLevenshteinDistance(lastMessageContent, message)) {
+				if (5 > StringUtils.getLevenshteinDistance(lastMessageContent, message) && !m.eventoChat.running) {
 					player.sendMessage("§cNão mande mensagens iguais ou similares a última que você mandou!")
 					return
 				}
