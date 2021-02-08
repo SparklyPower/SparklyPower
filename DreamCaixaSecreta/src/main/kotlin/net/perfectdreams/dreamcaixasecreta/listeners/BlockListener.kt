@@ -16,8 +16,14 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
+import java.time.Instant
+import java.time.ZoneId
 
 class BlockListener(val m: DreamCaixaSecreta) : Listener {
+	companion object {
+		private const val DISCORD_COLOR = "§x§7§2§8§9§d§a"
+	}
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onPlace(e: PlayerInteractEvent) {
 		if (e.action != Action.RIGHT_CLICK_BLOCK)
@@ -43,11 +49,19 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 			val nitroClassicChance = chanceMultiplied(0.01, level)
 
 			if (chance(nitroClassicChance)) {
-				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §x§3§8§2§b§0§0Um Nitro Classic§a pela caixa secreta! Parabéns!!")
+				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu ${DISCORD_COLOR}Um Nitro Classic§a pela caixa secreta! Parabéns!!")
+
+				val now = Instant.now()
+					.atZone(ZoneId.of("America/Sao_Paulo"))
+
+				val year = now.year
+				val month = now.monthValue.toString().padStart(2, '0')
+				val day = now.dayOfMonth.toString().padStart(2, '0')
+
 				items.add(
 					ItemStack(Material.TRIPWIRE_HOOK)
-						.rename("§x§3§8§2§b§0§0Nitro Classic")
-						.lore("§aPara receber o seu prêmio, contate", "§aa equipe do SparklyPower no", "§anosso Discord!", "§a", "§7Prêmio de §b${e.player.name}")
+						.rename("${DISCORD_COLOR}Nitro Classic")
+						.lore("§aPara receber o seu prêmio, contate", "§aa equipe do SparklyPower no", "§anosso Discord!", "§a", "§7Prêmio de §b${e.player.name}", "§a", "§aData: §2$day/$month/$year")
 				)
 			}
 

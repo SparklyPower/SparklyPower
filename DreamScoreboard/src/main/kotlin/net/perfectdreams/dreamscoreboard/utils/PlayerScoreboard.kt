@@ -28,7 +28,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 	}
 
 	fun updateScoreboard() {
-		m.logger.info { "Updating scoreboards for ${player}..." }
+		// m.logger.info { "Updating scoreboards for ${player}..." }
 		if (DreamScoreboard.CURRENT_TICK == 0)
 			randomEmote = DreamScoreboard.EMOTES.random()
 
@@ -301,7 +301,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 		if (phoenix.scoreboard != player.scoreboard)
 			player.scoreboard = scoreboard
 
-		m.logger.info { "Setting up scoreboard teams for ${player}..." }
+		// m.logger.info { "Setting up scoreboard teams for ${player}..." }
 
 		for (player in Bukkit.getOnlinePlayers()) {
 			val tabPrefixColor = when {

@@ -4,8 +4,16 @@ import com.Acrobot.ChestShop.Events.PreTransactionEvent
 import com.Acrobot.ChestShop.Events.TransactionEvent
 import com.Acrobot.ChestShop.Listeners.Player.PlayerInteract
 import com.Acrobot.ChestShop.Listeners.PreTransaction.SpamClickProtector
+import com.okkero.skedule.BukkitDispatcher
+import com.okkero.skedule.BukkitSchedulerController
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
@@ -65,6 +73,13 @@ class InventoryListener(val m: DreamMochilas) : Listener {
         }
     }
 
+    val testX = BukkitSchedulerController(
+        m,
+        Bukkit.getScheduler()
+    )
+    val mutex = Mutex()
+
+    @InternalCoroutinesApi
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     fun onMochilaPreTransaction(e: PreTransactionEvent) {
         if (trackingMochilasPreTransactionsEvents.contains(e)) {
@@ -88,74 +103,76 @@ class InventoryListener(val m: DreamMochilas) : Listener {
             if (savingMochilas.contains(mochilaId))
                 return
 
-            scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                val mochila = transaction(Databases.databaseNetwork) {
-                    Mochila.find { Mochilas.id eq mochilaId }
-                        .firstOrNull()
-                }
+            GlobalScope.launch(BukkitDispatcher(m, true)) {
+                m.logger.info { "User is doing transaction, is mutex locked? ${mutex.isLocked}; Is thread async? ${!isPrimaryThread}" }
 
-                if (mochila == null) {
-                    e.client.sendMessage("§cEssa mochila não existe!")
-                    return@schedule
-                }
-
-                switchContext(SynchronizationContext.SYNC)
-
-                try {
-                    val sign = e.sign
-                    val player = e.client
-
-                    val action = if (e.transactionType == TransactionEvent.TransactionType.BUY) {
-                        Action.RIGHT_CLICK_BLOCK
-                    } else {
-                        Action.LEFT_CLICK_BLOCK
+                mutex.withLock {
+                    val mochila = transaction(Databases.databaseNetwork) {
+                        Mochila.find { Mochilas.id eq mochilaId }
+                            .firstOrNull()
                     }
 
-                    val r = preparePreTransactionEventMethod.invoke(null as Any?, sign, player, action) as PreTransactionEvent?
-                        ?: return@schedule
+                    if (mochila == null) {
+                        e.client.sendMessage("§cEssa mochila não existe!")
+                        return@withLock
+                    }
 
-                    val mochilaInventory = mochila.createMochilaInventory()
-                    r.clientInventory = mochilaInventory
+                    withContext(BukkitDispatcher(m, false)) {
+                        try {
+                            val sign = e.sign
+                            val player = e.client
 
-                    trackingMochilasPreTransactionsEvents.add(r)
-                    chestShopSpamClickProtectorMap.remove(player)
-                    Bukkit.getPluginManager().callEvent(r)
+                            val action = if (e.transactionType == TransactionEvent.TransactionType.BUY) {
+                                Action.RIGHT_CLICK_BLOCK
+                            } else {
+                                Action.LEFT_CLICK_BLOCK
+                            }
 
-                    if (r.isCancelled)
-                        return@schedule
+                            val r = preparePreTransactionEventMethod.invoke(null as Any?, sign, player, action) as PreTransactionEvent?
+                                ?: return@withContext
 
-                    val tEvent = TransactionEvent(r, sign)
-                    Bukkit.getPluginManager().callEvent(tEvent)
+                            val mochilaInventory = mochila.createMochilaInventory()
+                            r.clientInventory = mochilaInventory
 
-                    if (tEvent.isCancelled)
-                        return@schedule
+                            trackingMochilasPreTransactionsEvents.add(r)
+                            chestShopSpamClickProtectorMap.remove(player)
+                            Bukkit.getPluginManager().callEvent(r)
 
-                    // Não foi cancelado, então vamos salvar o conteúdo dela!
-                    val base64Mochila = mochilaInventory.toBase64(1)
+                            if (r.isCancelled)
+                                return@withContext
 
-                    // Para evitar que alguém possa abrir ANTES de ter salvado, vamos adicionar em um set
-                    savingMochilas.add(mochila.id.value)
-                    loadedMochilaInventories.remove(mochila.id.value)
+                            val tEvent = TransactionEvent(r, sign)
+                            Bukkit.getPluginManager().callEvent(tEvent)
 
-                    switchContext(SynchronizationContext.ASYNC)
+                            if (tEvent.isCancelled)
+                                return@withContext
 
-                    scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                        transaction(Databases.databaseNetwork) {
-                            mochila.content = base64Mochila
+                            // Não foi cancelado, então vamos salvar o conteúdo dela!
+                            val base64Mochila = mochilaInventory.toBase64(1)
+
+                            // Para evitar que alguém possa abrir ANTES de ter salvado, vamos adicionar em um set
+                            savingMochilas.add(mochila.id.value)
+                            loadedMochilaInventories.remove(mochila.id.value)
+
+                            withContext(BukkitDispatcher(m, true)) {
+                                transaction(Databases.databaseNetwork) {
+                                    mochila.content = base64Mochila
+                                }
+
+                                savingMochilas.remove(mochila.id.value)
+                            }
+                        } catch (var8: SecurityException) {
+                            var8.printStackTrace()
+                        } catch (var8: IllegalAccessException) {
+                            var8.printStackTrace()
+                        } catch (var8: IllegalArgumentException) {
+                            var8.printStackTrace()
+                        } catch (var8: InvocationTargetException) {
+                            var8.printStackTrace()
+                        } catch (var8: NoSuchMethodException) {
+                            var8.printStackTrace()
                         }
-
-                        savingMochilas.remove(mochila.id.value)
                     }
-                } catch (var8: SecurityException) {
-                    var8.printStackTrace()
-                } catch (var8: IllegalAccessException) {
-                    var8.printStackTrace()
-                } catch (var8: IllegalArgumentException) {
-                    var8.printStackTrace()
-                } catch (var8: InvocationTargetException) {
-                    var8.printStackTrace()
-                } catch (var8: NoSuchMethodException) {
-                    var8.printStackTrace()
                 }
             }
         }

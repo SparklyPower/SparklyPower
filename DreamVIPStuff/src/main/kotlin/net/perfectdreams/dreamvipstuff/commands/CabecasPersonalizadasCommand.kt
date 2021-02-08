@@ -1,6 +1,5 @@
 package net.perfectdreams.dreamvipstuff.commands
 
-import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
@@ -14,6 +13,7 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.jsoup.Jsoup
+import java.net.URL
 import java.util.*
 
 object CabecasPersonalizadasCommand : DSLCommandBase<DreamVIPStuff> {
@@ -42,7 +42,13 @@ object CabecasPersonalizadasCommand : DSLCommandBase<DreamVIPStuff> {
             }
 
             if (url != null) {
-                if (!url.contains("://minecraft-heads.com/custom-heads/")) {
+                val urlObj = try {
+                    URL(url)
+                } catch (e: Exception) { null }
+
+                val isValidCustomHeadUrl = urlObj != null && urlObj.host == "minecraft-heads.com" && urlObj.path.startsWith("/custom-heads/")
+
+                if (!isValidCustomHeadUrl) {
                     player.sendMessage("§6/vipcabeças url")
                     player.sendMessage("§cCada cabeça custa 10k sonhos")
                     player.sendMessage("§cEnvie URLs do https://minecraft-heads.com/ da seção de \"Custom Heads\"!")
