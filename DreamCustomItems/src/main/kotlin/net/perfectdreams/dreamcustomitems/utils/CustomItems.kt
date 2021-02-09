@@ -14,6 +14,7 @@ import java.util.*
 
 object CustomItems {
     val IS_MICROWAVE_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_microwave")
+    val IS_SUPERFURNACE_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_superfurnace")
 
     val RUBY = ItemStack(Material.PRISMARINE_SHARD)
         .meta<ItemMeta> {
@@ -53,6 +54,27 @@ object CustomItems {
                 }
             persistentDataContainer.set(IS_MICROWAVE_KEY, PersistentDataType.BYTE, 1)
         }
+
+    val SUPERFURNACE = ItemStack(Material.PLAYER_HEAD).meta<SkullMeta> {
+        setDisplayName("§fSuper fornalha")
+
+        lore = listOf(
+                "§7A fornalha mais rápida existente! Ela é",
+                "§7perfeita para esquentar minérios.",
+                "§7",
+                "§cOBSERVAÇÃO: §7Apenas §b§lVIPs+ §7ou §b§lVIPs§e§l++ §7conseguem usar o equipamento!"
+        )
+
+        playerProfile = Bukkit.createProfile(UUID.fromString("c70bc8a2-61cb-46f8-955f-fd27026834f0")).apply {
+            this.setProperty(
+                    ProfileProperty(
+                            "textures",
+                            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODI5NmYwOTI1MjRhZTljMmEyZTg3ODgxY2I0MTVhZGIzNThkNmNiNzczYzg1ZGM5NzIwMmZlZmI3NTRjMSJ9fX0="
+                    )
+            )
+        }
+        persistentDataContainer.set(IS_SUPERFURNACE_KEY, PersistentDataType.BYTE, 1)
+    }
 
     fun checkIfRubyShouldDrop() = chance(0.1)
 }

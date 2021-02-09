@@ -1,38 +1,28 @@
 package net.perfectdreams.dreamcustomitems
 
-import com.destroystokyo.paper.profile.PlayerProfile
-import com.destroystokyo.paper.profile.ProfileProperty
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcustomitems.commands.CustomItemsCommand
-import net.perfectdreams.dreamcustomitems.listeners.BlockCraftListener
-import net.perfectdreams.dreamcustomitems.listeners.BlockListener
-import net.perfectdreams.dreamcustomitems.listeners.MicrowaveListener
-import net.perfectdreams.dreamcustomitems.listeners.RubyDropListener
+import net.perfectdreams.dreamcustomitems.listeners.*
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import net.perfectdreams.dreamcustomitems.utils.Microwave
+import net.perfectdreams.dreamcustomitems.utils.SuperFurnace
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.inventory.CraftItemEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.Recipe
-import org.bukkit.inventory.RecipeChoice
 import org.bukkit.inventory.ShapedRecipe
-import org.bukkit.inventory.meta.ItemMeta
-import org.bukkit.inventory.meta.SkullMeta
 import java.io.File
-import java.util.*
 
 class DreamCustomItems : KotlinPlugin(), Listener {
 	private val recipes = mutableListOf<NamespacedKey>()
 	val microwaves = mutableMapOf<Location, Microwave>()
+	val superfurnaces = mutableMapOf<Location, SuperFurnace>()
 
 	val microwavesDataFile by lazy {
 		File(dataFolder, "microwaves.yml")
@@ -45,22 +35,35 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		YamlConfiguration.loadConfiguration(microwavesDataFile)
 	}
 
+	val superfurnacesDataFile by lazy {
+		File(dataFolder, "superfurnaces.yml")
+	}
+
+	val superfurnacesData by lazy {
+		if (!superfurnacesDataFile.exists())
+			superfurnacesDataFile.writeText("")
+
+		YamlConfiguration.loadConfiguration(superfurnacesDataFile)
+	}
+
 	override fun softEnable() {
 		super.softEnable()
 
 		dataFolder.mkdirs()
 
 		loadAllMicrowaves()
+		loadAllSuperFurnaces()
 
 		schedule {
 			while (true) {
 				waitFor(20 * (15 * 60)) // every 15m
 				saveAllMicrowaves()
+				saveAllSuperFurnaces()
 			}
 		}
 
 		registerEvents(BlockListener(this))
-		registerEvents(MicrowaveListener(this))
+		registerEvents(CustomHeadsListener(this))
 		registerEvents(BlockCraftListener(this))
 		registerEvents(RubyDropListener(this))
 
@@ -109,12 +112,29 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			// TODO: Filter
 			it.setIngredient('U', Material.PRISMARINE_SHARD)
 		}
+
+		addRecipe(
+				"superfurnace",
+				CustomItems.SUPERFURNACE,
+				listOf(
+						"UNU",
+						"EBE",
+						"UNU"
+				)
+		) {
+			it.setIngredient('U', Material.PRISMARINE_SHARD)
+			it.setIngredient('B', Material.BLAST_FURNACE)
+			it.setIngredient('N', Material.NETHER_STAR)
+			it.setIngredient('E', Material.EMERALD_BLOCK)
+		}
+
 	}
 
 	override fun softDisable() {
 		super.softDisable()
 
 		saveAllMicrowaves()
+		saveAllSuperFurnaces()
 
 		recipes.forEach {
 			Bukkit.removeRecipe(it)
@@ -163,6 +183,53 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 
 		microwavesData.set("microwaves", list)
 		microwavesData.save(microwavesDataFile)
+	}
+
+	fun loadAllSuperFurnaces() {
+		if (superfurnacesData.contains("superfurnaces")) {
+			val list = superfurnacesData.get("superfurnaces", null) as List<Map<String, Any?>>
+
+			for (entry in list) {
+				val location = entry["location"] as Location
+				val items = entry["items"] as List<ItemStack>
+
+				superfurnaces[location] = SuperFurnace(this, location).apply {
+					for ((index, item) in items.withIndex()) {
+						inventory.setItem(
+								0 + index,
+								item
+						)
+					}
+				}
+			}
+		}
+	}
+
+	fun saveAllSuperFurnaces() {
+		superfurnacesData.set("superfurnaces", null)
+
+		val list = mutableListOf<Map<Any, Any>>()
+
+		superfurnaces.map {
+			val items = arrayOf(
+					it.value.inventory.getItem(0),
+					it.value.inventory.getItem(1),
+					it.value.inventory.getItem(2),
+					it.value.inventory.getItem(3),
+					it.value.inventory.getItem(4),
+					it.value.inventory.getItem(5)
+			)
+
+			list.add(
+					mapOf(
+							"location" to it.key,
+							"items" to items
+					)
+			)
+		}
+
+		superfurnacesData.set("superfurnaces", list)
+		superfurnacesData.save(superfurnacesDataFile)
 	}
 
 	fun addRecipe(name: String, item: ItemStack, shape: List<String>, ingredients: (ShapedRecipe) -> (Unit)) {

@@ -28,15 +28,22 @@ import net.perfectdreams.dreamcore.utils.DreamUtils.jsonParser
 import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.girl
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.apache.commons.lang3.StringUtils
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
+import org.bukkit.Material
 import org.bukkit.Statistic
+import org.bukkit.entity.EnderDragon
 import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.*
+import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
@@ -92,7 +99,25 @@ class ChatListener(val m: DreamChat) : Listener {
 				)
 			)
 		}
-	}
+
+		if (e.player.uniqueId.toString() == m.config.get("last-enderdragon-killer")) {
+			val gender = e.player.artigo == "a"
+
+			e.tags.add(
+					PlayerTag(
+							"§a§lC",
+							"§a§l${if(gender) "Caçadora" else "Caçador"}",
+							listOf(
+									"§r§9${e.player.displayName}§r§7 conseguiu matar o Ender Dragon! ${if(gender) "Ela" else "Ele"}",
+									"§7mostrou a todos suas habilidades como ${if(gender) "caçadora" else "caçador"},",
+									"§7trazendo para casa a cabeça do temido dragão e também uma linda tag!"
+							),
+							null,
+							false
+					)
+			)
+		}
+ 	}
 
 	@EventHandler
 	fun onJoin(e: PlayerCommandPreprocessEvent) {
@@ -106,6 +131,42 @@ class ChatListener(val m: DreamChat) : Listener {
 
 		if (cmd == "calc" || cmd == "calculadora")
 			e.isCancelled = true
+	}
+
+	@EventHandler
+	fun onEnderDragonDeathEvent(e: EntityDeathEvent) {
+		if (e.entity is EnderDragon) {
+			var whoKilled = e.entity.killer
+
+			if (whoKilled == null) {
+				val killerEntity = e.entity.lastDamageCause as EntityDamageByEntityEvent
+
+				if (killerEntity is Player)
+					whoKilled = killerEntity.damager as Player
+
+				if (killerEntity is Projectile) {
+					val projectile = killerEntity.damager as Projectile
+
+					if (projectile.shooter is Player)
+						whoKilled = projectile.shooter as Player
+				}
+			}
+
+			var enderDragonKilledMessage = "§8[§5§lThe End§8] §c§lO dragão do do The End morreu por causa de alguma §6§lexplosão§c§l, parabéns a todos!"
+
+			if (whoKilled !== null) {
+				m.config.set("last-enderdragon-killer", whoKilled.uniqueId.toString())
+				m.saveConfig()
+
+                val enderDragonEgg = ItemStack(Material.DRAGON_EGG, 1)
+
+				whoKilled.inventory.addItem(enderDragonEgg)
+
+				enderDragonKilledMessage = "§8[§5§lThe End§8] §c§lO Dragão do The End foi morto por §6§l${whoKilled.name}§c§l, parabéns!"
+			}
+			
+			Bukkit.broadcastMessage(enderDragonKilledMessage)
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

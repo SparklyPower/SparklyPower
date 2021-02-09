@@ -14,7 +14,13 @@ class BlockCraftListener(val m: DreamCustomItems) : Listener {
     fun onBreak(e: CraftItemEvent) {
         val recipe = e.recipe
         if (recipe is Keyed) {
-            if (recipe.key.key == "microwave" && e.inventory.any { it.type == Material.PRISMARINE_SHARD && (!it.itemMeta.hasCustomModelData() || it.itemMeta.customModelData != 1) })
+			val recipeKey = when(recipe.key.key) {
+				"microwave" -> true
+				"superfurnace" -> true
+				else -> false				
+			}
+
+            if (recipeKey && e.inventory.any { it.type == Material.PRISMARINE_SHARD && (!it.itemMeta.hasCustomModelData() || it.itemMeta.customModelData != 1) })
                 e.isCancelled = true
         }
     }
