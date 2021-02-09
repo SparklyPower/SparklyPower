@@ -88,7 +88,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			e.tags.add(
 				PlayerTag(
 					"§b§lD",
-					"§b§lDatilógraf${player.artigo}",
+					"§b§lDatilógraf${e.player.artigo}",
 					listOf(
 						"§r§b${e.player.displayName}§r§7 ficou atento no chat e",
 						"§7e preparad${e.player.artigo} no teclado para conseguir",

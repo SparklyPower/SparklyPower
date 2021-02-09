@@ -154,12 +154,12 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 		lastOnlineTimeCheck.remove(e.player)
 	}
 
-	@EventHandler
-	fun onChat(e: McMMOPartyChatEvent) {
-		for (staff in Bukkit.getOnlinePlayers().asSequence().filter { it.hasPermission("dreammcmmofun.snoop") }) {
-			staff.sendMessage("§7[${e.author.examinableName()} » Party ${e.authorParty.name}] ${e.componentMessage.content()}")
-		}
-	}
+//	@EventHandler
+//	fun onChat(e: McMMOPartyChatEvent) {
+//		for (staff in Bukkit.getOnlinePlayers().asSequence().filter { it.hasPermission("dreammcmmofun.snoop") }) {
+//			staff.sendMessage("§7[${e.author.examinableName()} » Party ${e.authorParty.name}] ${e.componentMessage.content()}")
+//		}
+//	}
 
 	private fun getTopPlayerInMcMMOSkill(skill: PrimarySkillType?) = mcMMO.getDatabaseManager().readLeaderboard(skill, 1, 1).firstOrNull()?.name
 	private data class McMMOXPBoostTime(val startsAt: Int, val endsAt: Int)

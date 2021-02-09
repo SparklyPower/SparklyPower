@@ -17,12 +17,12 @@ allprojects {
     repositories {
         mavenLocal()
 
-        maven("https://repo.dmulloy2.net/nexus/repository/public/")
+        maven("https://ci.dmulloy2.net/nexus/repository/public/")
         maven("https://dl.bintray.com/kotlin/kotlin-dev/")
         maven("https://dl.bintray.com/kotlin/kotlin-eap/")
         maven("https://jcenter.bintray.com")
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
-        // maven("https://repo.perfectdreams.net/")
+        maven("https://repo.perfectdreams.net/")
         maven("https://dl.bintray.com/kotlin/exposed/")
         maven("https://nexus.wesjd.net/repository/thirdparty/")
         // maven("http://nexus.okkero.com/repository/maven-releases/")
