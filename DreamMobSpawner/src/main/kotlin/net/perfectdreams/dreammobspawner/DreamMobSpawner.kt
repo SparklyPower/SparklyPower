@@ -85,6 +85,18 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 		}
 	}
 
+	// Disable shulker bullets in the Warp VIP
+	@EventHandler
+	fun onSpawnShulkerBullet(event: EntitySpawnEvent) {
+		if (event.entity.world.name != "WarpVIP")
+			return
+
+		if (event.entityType != EntityType.SHULKER_BULLET)
+			return
+
+		event.isCancelled = true
+	}
+
 	@EventHandler(ignoreCancelled = false, priority = EventPriority.MONITOR)
 	fun onSpawn(event: EntitySpawnEvent) {
 		if (override)

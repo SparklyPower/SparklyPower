@@ -88,7 +88,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			e.tags.add(
 				PlayerTag(
 					"§b§lD",
-					"§b§lDatilógrafo",
+					"§b§lDatilógraf${player.artigo}",
 					listOf(
 						"§r§b${e.player.displayName}§r§7 ficou atento no chat e",
 						"§7e preparad${e.player.artigo} no teclado para conseguir",
@@ -207,7 +207,7 @@ class ChatListener(val m: DreamChat) : Listener {
 		if (3500 >= diff) {
 			val lastMessageContent = lastMessageCache[player]
 			if (lastMessageContent != null) {
-				if (5 > StringUtils.getLevenshteinDistance(lastMessageContent, message)) {
+				if (5 > StringUtils.getLevenshteinDistance(lastMessageContent, message) && !m.eventoChat.running) {
 					player.sendMessage("§cNão mande mensagens iguais ou similares a última que você mandou!")
 					return
 				}
@@ -342,7 +342,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			event.tags.add(
 				PlayerTag(
 					"§2§lL",
-					"§2§lLuxuoso",
+					"§2§lLuxuos${player.artigo}",
 					listOf(
 						"§r§b${player.displayName}§r§7 é a segunda pessoa mais rica do §4§lSparkly§b§lPower§r§7!",
 						"",
@@ -358,7 +358,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			event.tags.add(
 				PlayerTag(
 					"§2§lB",
-					"§2§lBurguês",
+					"§2§l${if (!player.girl) { "Burguês" } else { "Burguesa" }}",
 					listOf(
 						"§r§b${player.displayName}§r§7 é a terceira pessoa mais rica do §4§lSparkly§b§lPower§r§7!",
 						"",

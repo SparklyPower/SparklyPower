@@ -15,6 +15,7 @@ dependencies {
     compile(files("../libs/DreamCore-shadow.jar"))
     compile(files("../libs/NoteBlockAPI.jar"))
     compile(files("../libs/ChestShop.jar"))
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
 }
 
 tasks.withType<KotlinCompile> {

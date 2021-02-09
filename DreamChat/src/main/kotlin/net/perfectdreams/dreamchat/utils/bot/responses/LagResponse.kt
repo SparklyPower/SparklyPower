@@ -29,6 +29,10 @@ class LagResponse : RegExResponse() {
 		val player = event.player
 		val ping = player.spigot().ping
 
+		// kk sou muito engraçado
+		if (message.contains("pingulin", true) || message.contains("pingolin", true) || message.contains("pingola", true))
+			return "§b" + event.player.displayName + "§a, consiga uma régua microscópia que aí a gente descobre o tamanho do seu!"
+
 		if (tpsNow >= 18) { // Não está lagado
 			return when {
 				ping >= 400 -> "§b" + event.player.displayName + "§a, o servidor não está travado... mas sabe o que está travado? A sua internet. (§9${ping}ms§a)"
