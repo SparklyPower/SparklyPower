@@ -21,7 +21,7 @@ dependencies {
     compileOnly(files("../libs/WorldGuard.jar"))
     compileOnly("com.github.TechFortress:GriefPrevention:16.11.5")
     implementation("net.perfectdreams.commands:command-framework-core:0.0.8")
-    implementation("com.github.dmulloy2:PacketWrapper:84d4c3d9f1")
+    implementation("com.github.dmulloy2:PacketWrapper:5262e36c72")
     compileOnly("net.milkbowl.vault:VaultAPI:1.6")
     compileOnly("com.meowj:LangUtils:1.9")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
