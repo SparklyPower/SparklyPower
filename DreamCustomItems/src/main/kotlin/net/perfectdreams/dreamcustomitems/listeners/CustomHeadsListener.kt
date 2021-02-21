@@ -3,7 +3,13 @@ package net.perfectdreams.dreamcustomitems.listeners
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
-import net.perfectdreams.dreamcustomitems.utils.*
+import net.perfectdreams.dreamcustomitems.holders.CustomItemRecipeHolder
+import net.perfectdreams.dreamcustomitems.holders.MicrowaveHolder
+import net.perfectdreams.dreamcustomitems.holders.SuperFurnaceHolder
+import net.perfectdreams.dreamcustomitems.items.Microwave
+import net.perfectdreams.dreamcustomitems.items.SuperFurnace
+import net.perfectdreams.dreamcustomitems.items.TrashCan
+import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.event.EventHandler
@@ -27,6 +33,10 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
 
         if (itemInHand.type == Material.PLAYER_HEAD && itemInHand.hasItemMeta() && itemInHand.itemMeta.persistentDataContainer.has(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.BYTE)) {
             m.superfurnaces[e.block.location] = SuperFurnace(m, e.block.location)
+        }
+
+        if (itemInHand.type == Material.PLAYER_HEAD && itemInHand.hasItemMeta() && itemInHand.itemMeta.persistentDataContainer.has(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.BYTE)) {
+            m.trashcans[e.block.location] = TrashCan(m, e.block.location)
         }
     }
 
@@ -86,6 +96,20 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                     }
                 }
 
+                m.trashcans[clickedBlock.location] != null -> {
+                    val watercontainer = m.trashcans[clickedBlock.location] ?: return
+
+                    m.trashcans.remove(clickedBlock.location)
+
+                    e.isCancelled = true
+                    e.block.world.dropItemNaturally(
+                            e.block.location,
+                            CustomItems.TRASHCAN.clone()
+                    )
+
+                    e.block.type = Material.AIR
+                }
+
                 else -> return
             }
         }
@@ -124,6 +148,12 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                     }
 
                     superfurnace.open(e.player)
+                }
+
+                m.trashcans[clickedBlock.location] != null -> {
+                    val trashCan = m.trashcans[clickedBlock.location] ?: return
+
+                    trashCan.open(e.player)
                 }
 
                 else -> return
@@ -184,6 +214,10 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                     holder.m.stop()
                     return
                 }
+            }
+
+            is CustomItemRecipeHolder -> {
+                e.isCancelled = true
             }
 
             else -> return

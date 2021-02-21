@@ -1,4 +1,4 @@
-package net.perfectdreams.dreamcustomitems.utils
+package net.perfectdreams.dreamcustomitems.items
 
 import com.gmail.nossr50.util.player.UserManager
 import com.okkero.skedule.CoroutineTask
@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
+import net.perfectdreams.dreamcustomitems.holders.SuperFurnaceHolder
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -114,7 +115,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
         scheduler = scheduler().schedule(m) {
             while (running) {
                 playersNearSuperFurnace().forEach {
-                    it.playSound(location, "perfectdreams.sfx.microwave.spin", SoundCategory.BLOCKS, 1f, 1f)
+                    it.playSound(location, "perfectdreams.sfx.furnace.crackling", SoundCategory.BLOCKS, 1f, 1f)
                 }
 
 
@@ -125,7 +126,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
 
                 if (0 >= ticksRunning) {
                     playersNearSuperFurnace().forEach {
-                        it.stopSound("perfectdreams.sfx.microwave.spin", SoundCategory.BLOCKS)
+                        it.stopSound("perfectdreams.sfx.furnace.crackling", SoundCategory.BLOCKS)
                     }
 
                     running = false
@@ -168,7 +169,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
         updateInventory()
 
         playersNearSuperFurnace().forEach {
-            it.stopSound("perfectdreams.sfx.microwave.spin", SoundCategory.BLOCKS)
+            it.stopSound("perfectdreams.sfx.furnace.crackling", SoundCategory.BLOCKS)
         }
     }
 

@@ -3,14 +3,10 @@ package net.perfectdreams.dreamcustomitems.listeners
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
-import net.perfectdreams.dreamcustomitems.utils.Microwave
-import net.perfectdreams.dreamcustomitems.utils.MicrowaveHolder
 import org.bukkit.Material
-import org.bukkit.Particle
 import org.bukkit.block.data.Levelled
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta

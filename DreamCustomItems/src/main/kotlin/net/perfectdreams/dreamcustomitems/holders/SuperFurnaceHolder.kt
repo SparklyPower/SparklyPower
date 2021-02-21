@@ -1,5 +1,6 @@
-package net.perfectdreams.dreamcustomitems.utils
+package net.perfectdreams.dreamcustomitems.holders
 
+import net.perfectdreams.dreamcustomitems.items.SuperFurnace
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 

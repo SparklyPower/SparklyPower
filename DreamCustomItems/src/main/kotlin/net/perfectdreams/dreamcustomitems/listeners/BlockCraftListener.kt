@@ -7,7 +7,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.CraftItemEvent
-import org.bukkit.inventory.ShapedRecipe
 
 class BlockCraftListener(val m: DreamCustomItems) : Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
