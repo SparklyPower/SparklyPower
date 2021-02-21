@@ -85,7 +85,8 @@ class DreamVIPStuff : KotlinPlugin(), Listener {
 		val centerPosition = Location(Bukkit.getWorld("world"), 305.5, 66.0, 257.5)
 		val npcs = npcIds.map {
 			CitizensAPI.getNPCRegistry().getById(it)
-		}.sortedBy { it.storedLocation.distanceSquared(centerPosition) }
+		}.filterNotNull()
+			.sortedBy { it.storedLocation.distanceSquared(centerPosition) }
 			.toMutableList()
 
 		for (heldNode in players) {
