@@ -1,24 +1,16 @@
 package net.perfectdreams.dreamcorrida.events
 
-import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
-import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
-import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.PlayerUtils
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcorrida.DreamCorrida
-import net.perfectdreams.dreamcorrida.utils.toChatColor
 import org.bukkit.Bukkit
-import org.bukkit.boss.BarColor
-import org.bukkit.boss.BarStyle
-import net.perfectdreams.dreamcore.utils.chance
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcorrida.utils.Checkpoint
 import net.perfectdreams.dreamcorrida.utils.Corrida
 import org.bukkit.Sound
 import org.bukkit.SoundCategory
-import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -45,7 +37,16 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
             return
         }
 
+        val corrida = m.availableCorridas.filter { it.ready }.random()
+
+        preStart(corrida)
+    }
+
+    fun preStart(corrida: Corrida) {
         running = true
+
+        this.corrida = corrida
+
         broadcastEventAnnouncement()
         start()
     }
@@ -53,9 +54,9 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
     override fun start() {
         startCooldown = 15
         damageCooldown.clear()
-        val corrida = m.availableCorridas.filter { it.ready }.random()
-        this.corrida = corrida
 
+        // If it is null then F, but this should never be null at this point!
+        val corrida = corrida!!
         val spawnPoint = corrida.spawn.toLocation()
 
         val world = spawnPoint.world

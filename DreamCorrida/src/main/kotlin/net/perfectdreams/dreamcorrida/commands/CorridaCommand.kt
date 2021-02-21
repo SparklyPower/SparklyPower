@@ -53,6 +53,17 @@ class CorridaCommand(val m: DreamCorrida) : SparklyCommand(arrayOf("corrida")) {
         m.eventoCorrida.preStart()
     }
 
+    @Subcommand(["start"])
+    @SubcommandPermission("dreamcorrida.manage")
+    fun start(sender: Player, corridaName: String) {
+        if (m.eventoCorrida.running) {
+            sender.sendMessage("${DreamCorrida.PREFIX} Já existe um evento Corrida acontecendo!")
+            return
+        }
+
+        m.eventoCorrida.preStart(m.availableCorridas.first { it.name == corridaName })
+    }
+
     @Subcommand(["create"])
     @SubcommandPermission("dreamcorrida.manage")
     fun setSpawn(sender: Player, corridaName: String) {
