@@ -28,7 +28,7 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                 return@executes
             }
 
-            if (claim.ownerName == player.name || claim.managers.contains(player.name)) {
+            if (claim.ownerName == player.name || claim.allowGrantPermission(player) == null) {
                 var _claimAdditions = plugin.getClaimAdditionsById(claim.id)
 
                 if (_claimAdditions == null) {

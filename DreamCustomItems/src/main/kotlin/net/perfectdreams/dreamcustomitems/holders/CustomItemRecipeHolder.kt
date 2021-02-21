@@ -1,9 +1,9 @@
-package net.perfectdreams.dreamcustomitems.utils
+package net.perfectdreams.dreamcustomitems.holders
 
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 
-class MicrowaveHolder(val m: Microwave) : InventoryHolder {
+class CustomItemRecipeHolder() : InventoryHolder {
     override fun getInventory(): Inventory {
         TODO("Not yet implemented")
     }

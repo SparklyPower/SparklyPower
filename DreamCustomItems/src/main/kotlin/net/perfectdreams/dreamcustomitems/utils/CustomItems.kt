@@ -15,6 +15,7 @@ import java.util.*
 object CustomItems {
     val IS_MICROWAVE_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_microwave")
     val IS_SUPERFURNACE_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_superfurnace")
+    val IS_TRASHCAN_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_trashcan")
 
     val RUBY = ItemStack(Material.PRISMARINE_SHARD)
         .meta<ItemMeta> {
@@ -74,6 +75,28 @@ object CustomItems {
             )
         }
         persistentDataContainer.set(IS_SUPERFURNACE_KEY, PersistentDataType.BYTE, 1)
+    }
+
+    val TRASHCAN = ItemStack(Material.PLAYER_HEAD).meta<SkullMeta> {
+        setDisplayName("§fLixeira")
+
+        lore = listOf(
+                "§7Lixeira para você que não quer fazer",
+                "§7um buraco com lava para jogarem lixo!",
+                "§7O mais legal dessa lixeira é que",
+                "§7você não precisará esvaziar ela nunca!"
+        )
+
+        playerProfile = Bukkit.createProfile(UUID.fromString("28b9c4bd-ac62-43ee-a19c-eab295a73758")).apply {
+            this.setProperty(
+                    ProfileProperty(
+                            "textures",
+                            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWUwM2JmNTEzM2JkZTBlNmI4YzYyOTk3NTIxNWMyOGIwMDQ4MTIwYzQwZTNkNzM5MTIyYmEwOWNkMTc3OGNlYSJ9fX0="
+                    )
+            )
+        }
+
+        persistentDataContainer.set(IS_TRASHCAN_KEY, PersistentDataType.BYTE, 1)
     }
 
     fun checkIfRubyShouldDrop() = chance(0.1)
