@@ -1,0 +1,5 @@
+name: DreamPvPTweaks
+main: net.perfectdreams.dreampvptweaks.DreamPvPTweaks
+version: 1.0.0
+api-version: 1.13
+softdepend: ["DreamCore"]
