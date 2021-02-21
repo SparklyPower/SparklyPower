@@ -42,6 +42,10 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 		)
 	}
 
+	override fun softEnable() {
+		registerEvents(this)
+	}
+
 	val lastDamage = WeakHashMap<Player, Long>()
 	val battleModeTasks = WeakHashMap<Player, BukkitSchedulerController>()
 
