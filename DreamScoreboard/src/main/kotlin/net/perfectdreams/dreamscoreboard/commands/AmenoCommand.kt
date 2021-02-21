@@ -1,15 +1,21 @@
 package net.perfectdreams.dreamscoreboard.commands
 
+import com.comphenix.packetwrapper.WrapperPlayServerSetSlot
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamscoreboard.DreamScoreboard
 import org.bukkit.Bukkit
+import org.bukkit.EntityEffect
+import org.bukkit.Material
 import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_16_R3.scoreboard.CraftScoreboard
 import org.bukkit.craftbukkit.v1_16_R3.scoreboard.CraftScoreboardManager
 import org.bukkit.craftbukkit.v1_16_R3.util.WeakCollection
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import java.awt.Color
 import java.io.File
 import javax.imageio.ImageIO
@@ -20,6 +26,19 @@ object AmenoCommand : DSLCommandBase<DreamScoreboard> {
 
         executes {
             if (true) {
+                if (true) {
+                    val wpsss = WrapperPlayServerSetSlot()
+                    wpsss.slot = 45
+                    wpsss.windowId = 0
+                    wpsss.slotData = ItemStack(Material.TOTEM_OF_UNDYING).meta<ItemMeta> {
+                        setCustomModelData(1)
+                    }
+                    wpsss.sendPacket(player)
+                    player.playEffect(EntityEffect.TOTEM_RESURRECT)
+                    player.updateInventory()
+                    return@executes
+                }
+
                 val playerScoresMethod = (Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("scoreboards")
                 playerScoresMethod.isAccessible = true
                 val map = playerScoresMethod.get(Bukkit.getScoreboardManager())

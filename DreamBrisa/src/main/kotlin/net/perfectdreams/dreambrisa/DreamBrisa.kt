@@ -2,6 +2,7 @@ package net.perfectdreams.dreambrisa
 
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.effects.CustomTotemRessurectEffect
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -222,6 +223,7 @@ class DreamBrisa : KotlinPlugin(), Listener {
 
 		e.isCancelled = true
 		player.sendMessage("$PREFIX§aVocê comeu a folha de maconha...")
+		CustomTotemRessurectEffect.sendCustomTotemAnimation(player, 1)
 		player.setMetadata("isBrisado", FixedMetadataValue(this, true))
 		player.playSound(player.location, Sound.BLOCK_FURNACE_FIRE_CRACKLE, 1F, 1F)
 

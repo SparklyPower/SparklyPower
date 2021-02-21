@@ -67,7 +67,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 	@EventHandler
 	fun onCraft(event: CraftItemEvent) {
 		val hasCustomMap = event.inventory.matrix.filterNotNull().any {
-			it.getStoredMetadata("customMapOwner") != null || it.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^"
+			it.getStoredMetadata("customMapOwner") != null || it.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^" || it.lore?.firstOrNull() == "§7§o\"Sim, eu estava lá!\""
 		}
 
 		if (hasCustomMap)

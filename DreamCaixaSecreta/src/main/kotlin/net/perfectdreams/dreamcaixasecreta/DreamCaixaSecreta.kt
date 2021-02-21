@@ -7,11 +7,13 @@ import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcaixasecreta.listeners.BlockListener
 import net.perfectdreams.dreamcaixasecreta.utils.RandomItem
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import java.io.File
 
 class DreamCaixaSecreta : KotlinPlugin() {
@@ -607,7 +609,11 @@ class DreamCaixaSecreta : KotlinPlugin() {
 	fun generateCaixaSecreta(_level: Int? = null, worldName: String? = null): ItemStack {
 		val level = _level ?: DreamUtils.random.nextInt(0, 5)
 
-		var caixa = ItemStack(Material.CHEST).rename("§6✪ §a§lCaixa Secreta §6✪")
+		var caixa = ItemStack(Material.CHEST)
+			.rename("§6✪ §a§lCaixa Secreta §6✪")
+			.meta<ItemMeta> {
+				setCustomModelData(level + 1)
+			}
 
 		val rarityLevel = when (level) {
 			4 -> "§8[§a|||||§8]"

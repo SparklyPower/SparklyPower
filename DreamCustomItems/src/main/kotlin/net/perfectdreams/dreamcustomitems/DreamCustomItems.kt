@@ -66,6 +66,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		registerEvents(CustomHeadsListener(this))
 		registerEvents(BlockCraftListener(this))
 		registerEvents(RubyDropListener(this))
+		registerEvents(RainbowWoolListener())
 
 		registerCommand(CustomItemsCommand)
 
@@ -128,6 +129,20 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			it.setIngredient('E', Material.EMERALD_BLOCK)
 		}
 
+		addRecipe(
+			"rainbow_wool",
+			CustomItems.RAINBOW_WOOL,
+			listOf(
+				"RWR",
+				"WUW",
+				"RWR"
+			)
+		) {
+			it.setIngredient('W', Material.WHITE_WOOL)
+			it.setIngredient('R', Material.REDSTONE_BLOCK)
+			// TODO: Filter
+			it.setIngredient('U', Material.PRISMARINE_SHARD)
+		}
 	}
 
 	override fun softDisable() {

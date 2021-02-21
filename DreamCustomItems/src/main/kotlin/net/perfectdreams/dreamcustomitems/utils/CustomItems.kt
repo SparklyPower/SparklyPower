@@ -76,5 +76,13 @@ object CustomItems {
         persistentDataContainer.set(IS_SUPERFURNACE_KEY, PersistentDataType.BYTE, 1)
     }
 
+    val RAINBOW_WOOL = ItemStack(Material.WHITE_WOOL)
+        .meta<ItemMeta> {
+            setCustomModelData(1)
+            // Lã Arco-Íris
+            setDisplayName("§x§f§f§0§0§0§0L§x§f§f§8§0§0§0ã§x§f§f§f§f§0§0 §x§8§0§f§f§0§0A§x§0§0§f§f§0§0r§x§0§0§f§f§8§0c§x§0§0§f§f§f§fo§x§0§0§8§0§f§f-§x§0§0§0§0§f§fÍ§x§7§f§0§0§f§fr§x§f§f§0§0§f§fi§x§f§f§0§0§8§0s")
+            lore = listOf("§7Também conhecido como \"Lã Gamer\"")
+        }
+
     fun checkIfRubyShouldDrop() = chance(0.1)
 }

@@ -27,7 +27,6 @@ allprojects {
         maven("https://dl.bintray.com/kotlin/exposed/")
         maven("https://nexus.wesjd.net/repository/thirdparty/")
         // maven("http://nexus.okkero.com/repository/maven-releases/")
-        maven("https://raw.github.com/MascusJeoraly/LanguageUtils/mvn-repo/")
         maven("https://maven.sk89q.com/repo/")
         maven("https://repo.aikar.co/content/groups/aikar/")
         maven("https://dl.bintray.com/ichbinjoe/public/")
