@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamassinaturas.listeners
 
+import com.Acrobot.ChestShop.Signs.ChestShopSign
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamassinaturas.DreamAssinaturas
@@ -44,6 +45,13 @@ class SignListener(val m: DreamAssinaturas) : Listener {
 
             // Don't allow users to create signatures that contain "SparklyShop" in the sign template
             if (split.any { it.contains("SparklyShop", true) })
+                return
+
+            if (split.firstOrNull() == "§1[Reparar]")
+                return
+
+            val isChestShopSign = ChestShopSign.isValid(lines)
+            if (isChestShopSign)
                 return
 
             for ((index, str) in split.withIndex())
