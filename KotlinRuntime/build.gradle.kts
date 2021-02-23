@@ -35,7 +35,7 @@ tasks {
         archiveBaseName.set("KotlinRuntime-shadow")
 
         exclude {
-            it.file?.name?.startsWith("patched_") == true || it.file?.name?.startsWith("waterfall") == true
+            it.file?.name?.startsWith("paper_server") == true || it.file?.name?.startsWith("waterfall") == true
         }
     }
 
