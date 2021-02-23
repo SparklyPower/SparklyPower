@@ -1,17 +1,25 @@
 package net.perfectdreams.dreamcorrida.events
 
+import com.comphenix.packetwrapper.WrapperPlayServerEntityEquipment
+import com.comphenix.protocol.PacketType
+import com.comphenix.protocol.ProtocolLibrary
+import com.comphenix.protocol.events.PacketContainer
+import com.comphenix.protocol.wrappers.EnumWrappers
+import com.comphenix.protocol.wrappers.Pair
 import com.okkero.skedule.schedule
+import net.minecraft.server.v1_16_R3.PacketPlayOutEntityEquipment
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.PlayerUtils
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcorrida.DreamCorrida
-import org.bukkit.Bukkit
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcorrida.utils.Checkpoint
 import net.perfectdreams.dreamcorrida.utils.Corrida
-import org.bukkit.Sound
-import org.bukkit.SoundCategory
+import org.bukkit.*
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.util.*
@@ -68,6 +76,9 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
                     it.playSound(it.location, Sound.UI_BUTTON_CLICK, SoundCategory.PLAYERS, 1f, 1f)
 
                     it.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
+                    it.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0, false, false))
+                    it.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 200, 0, false, false))
+                    broadcastFakeArmor(it, world)
                 }
 
                 waitFor(20) // 1 segundo
@@ -78,15 +89,7 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
                 it.sendTitle("§aCorra e se divirta!", "§bBoa sorte!", 0, 60, 20)
                 it.playSound(it.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
 
-                it.removeAllPotionEffects()
-                it.fallDistance = 0.0f
-                it.fireTicks = 0
-                PlayerUtils.healAndFeed(it)
-                it.activePotionEffects.filter { it.type != PotionEffectType.SPEED && it.type != PotionEffectType.JUMP && it.type != PotionEffectType.NIGHT_VISION } .forEach { effect ->
-                    it.removePotionEffect(effect.type)
-                }
-
-                it.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 1, false, false))
+                addCorridaEffect(it, world)
             }
         }
 
@@ -99,21 +102,71 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
 
                 if (0 >= startCooldown)
                     world.players.forEach {
-                        it.fallDistance = 0.0f
-                        it.fireTicks = 0
-                        PlayerUtils.healAndFeed(it)
-                        it.activePotionEffects.filter { (it.type != PotionEffectType.SPEED && it.amplifier != 0) && (it.type != PotionEffectType.JUMP && it.amplifier != 0) && (it.type != PotionEffectType.NIGHT_VISION) } .forEach { effect ->
-                            it.removePotionEffect(effect.type)
-                        }
-
-                        it.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 0, false, false))
-                        it.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 200, 0, false, false))
-                        it.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0, false, false))
+                        addCorridaEffect(it, world)
                     }
 
                 waitFor(100) // 5 segundos
                 idx++
             }
+        }
+    }
+
+    fun addCorridaEffect(player: Player, world: World) {
+        player.fallDistance = 0.0f
+        player.fireTicks = 0
+        PlayerUtils.healAndFeed(player)
+        player.activePotionEffects.filter { (it.type != PotionEffectType.SPEED && it.amplifier != 0) && (it.type != PotionEffectType.JUMP && it.amplifier != 0) && (it.type != PotionEffectType.NIGHT_VISION) } .forEach { effect ->
+            player.removePotionEffect(effect.type)
+        }
+
+        player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 0, false, false))
+        player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 200, 0, false, false))
+        player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0, false, false))
+        player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 200, 0, false, false))
+
+        broadcastFakeArmor(player, world)
+    }
+
+    fun broadcastFakeArmor(player: Player, world: World) {
+        // Now we are going to fake send packets to everyone to remove all armor
+        val packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_EQUIPMENT)
+
+        // Uses the player's name as seed
+        val random = SplittableRandom(player.name.hashCode().toLong())
+
+        // Write the entity ID of the player...
+        packet.integers.write(0, player.entityId)
+        packet.slotStackPairLists.write(
+            0,
+            listOf(
+                Pair(
+                    EnumWrappers.ItemSlot.HEAD,
+                    ItemStack(Material.AIR)
+                ),
+                Pair(
+                    EnumWrappers.ItemSlot.CHEST,
+                    ItemStack(Material.AIR)
+                ),
+                Pair(
+                    EnumWrappers.ItemSlot.LEGS,
+                    ItemStack(Material.AIR)
+                ),
+                Pair(
+                    EnumWrappers.ItemSlot.FEET,
+                    ItemStack(Material.LEATHER_BOOTS)
+                        // Generate random color for the armor
+                        .meta<LeatherArmorMeta> {
+                            this.setColor(Color.fromRGB(
+                                random.nextInt(0, 256), random.nextInt(0, 256), random.nextInt(0, 256)
+                            ))
+                        }
+                ),
+            )
+        )
+
+        // Now send the packet to everyone *except* the player!
+        world.players.filter { it != player }.forEach {
+            ProtocolLibrary.getProtocolManager().sendServerPacket(it, packet)
         }
     }
 }
