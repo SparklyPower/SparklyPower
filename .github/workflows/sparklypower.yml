@@ -30,7 +30,7 @@ jobs:
         java-version: 13
 
     - name: Download Paper
-      run: wget -O paperclip.jar https://papermc.io/api/v1/paper/1.16.4/262/download
+      run: wget -O paperclip.jar https://cdn.discordapp.com/attachments/691041345275691021/813788102152683570/launcher-sparklypaper.jar
       
     - name: Run Paper
       run: java -Dpaperclip.patchonly=true -jar paperclip.jar
