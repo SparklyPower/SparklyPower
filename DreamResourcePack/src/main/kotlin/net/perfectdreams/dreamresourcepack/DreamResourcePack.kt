@@ -3,6 +3,7 @@ package net.perfectdreams.dreamresourcepack
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamresourcepack.commands.DreamRPCommand
+import net.perfectdreams.dreamresourcepack.commands.ResourcePackCommand
 import net.perfectdreams.dreamresourcepack.listeners.MoveListener
 import org.bukkit.entity.Player
 import java.util.*
@@ -15,6 +16,7 @@ class DreamResourcePack : KotlinPlugin() {
 
 		registerEvents(MoveListener(this))
 		registerCommand(DreamRPCommand(this))
+		registerCommand(ResourcePackCommand(this))
 	}
 
 	override fun softDisable() {
