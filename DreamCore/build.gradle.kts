@@ -16,7 +16,7 @@ dependencies {
     compileOnly(kotlin("reflect"))
     compileOnly(files("../libs/paper_server.jar"))
     // compileOnly(files("../libs/ProtocolSupport.jar"))
-    compileOnly("com.comphenix.protocol:ProtocolLib:4.4.0-SNAPSHOT")
+    compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
     compileOnly(files("../libs/WorldEdit.jar"))
     compileOnly(files("../libs/WorldGuard.jar"))
     compileOnly("com.github.TechFortress:GriefPrevention:16.17.1")
