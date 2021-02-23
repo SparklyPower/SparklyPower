@@ -1,5 +1,9 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
+import com.comphenix.packetwrapper.WrapperPlayClientBlockPlace
+import com.comphenix.packetwrapper.WrapperPlayClientEntityAction
+import com.comphenix.protocol.wrappers.EnumWrappers
+import com.okkero.skedule.schedule
 import ml.beancraft.haricot.event.block.NoteBlockUpdateEvent
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.BlockPosition
@@ -12,7 +16,10 @@ import org.bukkit.block.data.type.NoteBlock
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.block.*
+import org.bukkit.event.block.Action
+import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.block.NotePlayEvent
 import org.bukkit.event.player.PlayerInteractEvent
 
 class CustomBlocksListener(val m: DreamCustomItems) : Listener {
@@ -39,6 +46,18 @@ class CustomBlocksListener(val m: DreamCustomItems) : Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onBlockBreak(e: BlockBreakEvent) {
+        // If this is a custom block, we need to drop it!
+        if (m.getCustomBlocksInWorld(e.block.world.name).contains(BlockPosition.fromBlock(e.block))) {
+            val blockData = e.block.state.blockData as NoteBlock
+            val block = CustomBlocks.allCustomBlocks.firstOrNull {
+                blockData.instrument == it.instrument && blockData.note.id.toInt() == it.note
+            } ?: return
+
+            // Drop the item!
+            e.isDropItems = false
+            e.block.world.dropItem(e.block.location.toCenterLocation(), block.sourceItem)
+        }
+
         m.getCustomBlocksInWorld(e.block.world.name).remove(BlockPosition.fromBlock(e.block))
     }
 
@@ -57,33 +76,15 @@ class CustomBlocksListener(val m: DreamCustomItems) : Listener {
         if (clickedBlock.type != Material.NOTE_BLOCK)
             return
 
-        val whereBlockShouldBePlaced = clickedBlock.getRelative(e.blockFace)
+        // Toggle sneak
+        val sneakingStateBefore = e.player.isSneaking
+        e.player.isSneaking = true
 
-        val oldState = whereBlockShouldBePlaced.state.blockData.clone()
-        whereBlockShouldBePlaced.type = clickedItem.type
-        val blockPlaceEvent = BlockPlaceEvent(
-            whereBlockShouldBePlaced,
-            whereBlockShouldBePlaced.state,
-            whereBlockShouldBePlaced,
-            clickedItem,
-            e.player,
-            true,
-            e.hand!!
-        )
+        m.schedule {
+            // Reset sneak after 1 tick
+            waitFor(1L)
 
-        Bukkit.getPluginManager().callEvent(blockPlaceEvent)
-
-        if (blockPlaceEvent.isCancelled) {
-            // oh no... revert the changes!!
-            blockPlaceEvent.block.state.blockData = oldState
-            blockPlaceEvent.block.state.update(true, false)
-            return
-        } else {
-            // Cancel the interact event because we will take the matters in our own hands!1!!
-            e.isCancelled = true
-
-            if (e.player.gameMode != GameMode.CREATIVE)
-                clickedItem.amount -= 1
+            e.player.isSneaking = sneakingStateBefore
         }
     }
 
