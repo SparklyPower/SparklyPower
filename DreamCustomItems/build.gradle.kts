@@ -16,6 +16,7 @@ dependencies {
     compile(files("../libs/WorldGuard.jar"))
     compile(files("../libs/mcMMO.jar"))
     compileOnly("com.github.TechFortress:GriefPrevention:16.17.1")
+    compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
 }
 
 tasks.withType<KotlinCompile> {

@@ -1,25 +1,27 @@
 package net.perfectdreams.dreamcustomitems
 
+import com.comphenix.protocol.ProtocolLibrary
+import com.google.common.collect.Sets
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
+import net.perfectdreams.dreamcustomitems.blocks.BlockPacketAdapter
 import net.perfectdreams.dreamcustomitems.commands.CustomItemRecipeCommand
 import net.perfectdreams.dreamcustomitems.commands.CustomItemsCommand
 import net.perfectdreams.dreamcustomitems.items.Microwave
 import net.perfectdreams.dreamcustomitems.items.SuperFurnace
 import net.perfectdreams.dreamcustomitems.items.TrashCan
 import net.perfectdreams.dreamcustomitems.listeners.*
+import net.perfectdreams.dreamcustomitems.utils.BlockPosition
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
+import org.bukkit.*
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.Recipe
 import org.bukkit.inventory.ShapedRecipe
 import java.io.File
+import java.util.concurrent.ConcurrentHashMap
 
 class DreamCustomItems : KotlinPlugin(), Listener {
 	private val recipes = mutableListOf<NamespacedKey>()
@@ -57,20 +59,30 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		YamlConfiguration.loadConfiguration(trashcansDataFile)
 	}
 
+	// Custom Blocks in Worlds
+	val customBlocksInWorlds = ConcurrentHashMap<String, MutableSet<BlockPosition>>()
+
+	val customBlocksFolder = File(dataFolder, "custom_blocks")
+	fun getCustomBlocksInWorld(worldName: String) = customBlocksInWorlds.getOrPut(worldName) { Sets.newConcurrentHashSet() }
+
 	override fun softEnable() {
 		super.softEnable()
 
 		dataFolder.mkdirs()
+		customBlocksFolder.mkdirs()
 
 		loadAllMicrowaves()
 		loadAllSuperFurnaces()
 		loadAllTrashCans()
+		loadAllCustomBlocks()
 
 		schedule {
 			while (true) {
 				waitFor(20 * (15 * 60)) // every 15m
 				saveAllMicrowaves()
 				saveAllSuperFurnaces()
+				saveAllTrashCans()
+				saveAllCustomBlocks()
 			}
 		}
 
@@ -78,7 +90,10 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		registerEvents(CustomHeadsListener(this))
 		registerEvents(BlockCraftListener(this))
 		registerEvents(RubyDropListener(this))
-		registerEvents(RainbowWoolListener())
+		registerEvents(CustomBlocksListener(this))
+
+		val protocolManager = ProtocolLibrary.getProtocolManager()
+		protocolManager.addPacketListener(BlockPacketAdapter(this))
 
 		registerCommand(CustomItemsCommand)
 		registerCommand(CustomItemRecipeCommand)
@@ -128,13 +143,13 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		}
 
 		addRecipe(
-				"superfurnace",
-				CustomItems.SUPERFURNACE,
-				listOf(
-						"UNU",
-						"EBE",
-						"UNU"
-				)
+			"superfurnace",
+			CustomItems.SUPERFURNACE,
+			listOf(
+				"UNU",
+				"EBE",
+				"UNU"
+			)
 		) {
 			it.setIngredient('U', Material.PRISMARINE_SHARD)
 			it.setIngredient('B', Material.BLAST_FURNACE)
@@ -176,6 +191,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		saveAllMicrowaves()
 		saveAllSuperFurnaces()
 		saveAllTrashCans()
+		saveAllCustomBlocks()
 
 		recipes.forEach {
 			Bukkit.removeRecipe(it)
@@ -213,8 +229,8 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 				superfurnaces[location] = SuperFurnace(this, location).apply {
 					for ((index, item) in items.withIndex()) {
 						inventory.setItem(
-								0 + index,
-								item
+							0 + index,
+							item
 						)
 					}
 				}
@@ -234,73 +250,114 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		}
 	}
 
-	fun saveAllMicrowaves() {
-		microwavesData.set("microwaves", null)
+	fun saveAllMicrowaves() = saveAllLocations(
+		microwavesData,
+		"microwaves",
+		microwaves,
+		{ entry, map ->
+			val items = arrayOf(
+				entry.inventory.getItem(3),
+				entry.inventory.getItem(4),
+				entry.inventory.getItem(5)
+			)
+
+			map["items"] = items
+		},
+		microwavesDataFile
+	)
+
+	fun saveAllSuperFurnaces() = saveAllLocations(
+		superfurnacesData,
+		"superfurnaces",
+		superfurnaces,
+		{ entry, map ->
+			val items = arrayOf(
+				entry.inventory.getItem(0),
+				entry.inventory.getItem(1),
+				entry.inventory.getItem(2),
+				entry.inventory.getItem(3),
+				entry.inventory.getItem(4),
+				entry.inventory.getItem(5)
+			)
+
+			map["items"] = items
+		},
+		superfurnacesDataFile
+	)
+
+	fun saveAllTrashCans() = saveAllLocations(
+		trashcansData,
+		"trashcans",
+		trashcans,
+		{ k, v -> },
+		trashcansDataFile
+	)
+
+	private fun <T> saveAllLocations(
+		configuration: YamlConfiguration,
+		key: String,
+		locations: Map<Location, T>,
+		transformer: (T, MutableMap<Any, Any>) -> (Unit),
+		file: File
+	) {
+		configuration.set(key, null)
 
 		val list = mutableListOf<Map<Any, Any>>()
 
-		microwaves.map {
-			val items = arrayOf(
-				it.value.inventory.getItem(3),
-				it.value.inventory.getItem(4),
-				it.value.inventory.getItem(5)
+		locations.map {
+			val map = mutableMapOf<Any, Any>(
+				"location" to it.key
 			)
 
-			list.add(
-				mapOf(
-					"location" to it.key,
-					"items" to items
+			transformer.invoke(it.value, map)
+
+			list.add(map)
+		}
+
+		configuration.set(key, list)
+		configuration.save(file)
+	}
+
+	private fun loadAllCustomBlocks() {
+		customBlocksFolder.listFiles().filter { it.extension == "yml" }.forEach {
+			val yamlConfiguration = YamlConfiguration.loadConfiguration(it)
+			val list = yamlConfiguration.getStringList("blocks")
+			val world = Bukkit.getWorld(it.nameWithoutExtension)
+			if (world == null) {
+				logger.warning { "Can't find world ${it.nameWithoutExtension}!" }
+				return@forEach
+			}
+
+			val set = getCustomBlocksInWorld(it.nameWithoutExtension)
+
+			list.forEach {
+				val split = it.split(";")
+				set.add(
+					BlockPosition(
+						split[0].toInt(),
+						split[1].toInt(),
+						split[2].toInt()
+					)
 				)
-			)
-		}
+			}
 
-		microwavesData.set("microwaves", list)
-		microwavesData.save(microwavesDataFile)
+			logger.info { "Loaded ${set.size} custom blocks in ${world.name}!" }
+		}
 	}
 
-	fun saveAllSuperFurnaces() {
-		superfurnacesData.set("superfurnaces", null)
+	private fun saveAllCustomBlocks() {
+		customBlocksInWorlds.forEach {
+			val yamlConfiguration = YamlConfiguration()
 
-		val list = mutableListOf<Map<Any, Any>>()
+			val list = mutableListOf<String>()
 
-		superfurnaces.map {
-			val items = arrayOf(
-					it.value.inventory.getItem(0),
-					it.value.inventory.getItem(1),
-					it.value.inventory.getItem(2),
-					it.value.inventory.getItem(3),
-					it.value.inventory.getItem(4),
-					it.value.inventory.getItem(5)
-			)
+			for (position in it.value) {
+				list += "${position.x};${position.y};${position.z}"
+			}
 
-			list.add(
-					mapOf(
-							"location" to it.key,
-							"items" to items
-					)
-			)
+			yamlConfiguration.set("blocks", list)
+			yamlConfiguration.save(File(customBlocksFolder, it.key + ".yml"))
 		}
-
-		superfurnacesData.set("superfurnaces", list)
-		superfurnacesData.save(superfurnacesDataFile)
-	}
-
-	fun saveAllTrashCans() {
-		trashcansData.set("trashcans", null)
-
-		val list = mutableListOf<Map<Any, Any>>()
-
-		trashcans.map {
-
-			list.add(
-					mapOf(
-							"location" to it.key
-					)
-			)
-		}
-
-		trashcansData.set("trashcans", list)
-		trashcansData.save(trashcansDataFile)
 	}
 
 	fun addRecipe(name: String, item: ItemStack, shape: List<String>, ingredients: (ShapedRecipe) -> (Unit)) {
