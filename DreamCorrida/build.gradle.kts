@@ -14,6 +14,7 @@ dependencies {
     compileOnly(files("../libs/paper_server.jar"))
     compile(files("../libs/DreamCore-shadow.jar"))
     compile(project(":DreamChat"))
+    compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
 }
 
 tasks.withType<KotlinCompile> {
