@@ -36,7 +36,7 @@ jobs:
       run: java -Dpaperclip.patchonly=true -jar paperclip.jar
       
     - name: Copy Patched JAR
-      run: cp cache/patched_1.16.4.jar libs/paper_server.jar
+      run: cp cache/patched_1.16.5.jar libs/paper_server.jar
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
