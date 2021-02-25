@@ -1,10 +1,12 @@
 package net.perfectdreams.dreamquickharvest
 
 import com.gmail.nossr50.api.ExperienceAPI
+import com.gmail.nossr50.datatypes.experience.XPGainReason
+import com.gmail.nossr50.datatypes.experience.XPGainSource
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.mcMMO
+import com.gmail.nossr50.util.player.UserManager
 import com.okkero.skedule.BukkitDispatcher
-import com.okkero.skedule.SynchronizationContext
-import com.okkero.skedule.schedule
 import kotlinx.coroutines.*
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
@@ -27,7 +29,6 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.util.concurrent.TimeUnit
 import kotlin.experimental.and
 
 @OptIn(InternalCoroutinesApi::class)
@@ -239,7 +240,19 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			else -> xpBlockPlant
 		}
 
-		ExperienceAPI.addXP(player, "herbalism", xpValue)
+		// Yes, there is a "ExperienceAPI.addXP" method, but it *sucks* because you can't pass a PrimarySkillType enum
+		// But you may ask: "What is the issue in that?": McMMO creates a PATTERN AND A LOCALE just to check what skill type is,
+		// bringing our sweet TPS down the drain
+		//
+		// So we add the XP directly via the "beginXpGain" method, which is what the "addXP" uses behind the scenes
+		//
+		// TODO: Optimize this further, we can add all the XP first and then give out the XP, instead of giving XP for each crop broken
+		UserManager.getPlayer(player).beginXpGain(
+			PrimarySkillType.HERBALISM,
+			xpValue.toFloat(),
+			XPGainReason.UNKNOWN,
+			XPGainSource.CUSTOM
+		)
 	}
 
 	suspend fun doQuickHarvestOnCrop(player: Player, block: Block, type: Material, fortuneLevel: Int, inventory: Inventory) {
