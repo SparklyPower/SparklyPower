@@ -107,7 +107,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 				val ttl = System.nanoTime()
 				doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget)
-				println("Took ${System.nanoTime() - ttl}ns to harvest cocoa")
+				logger.info { "Took ${System.nanoTime() - ttl}ns to harvest cocoa" }
 
 				if (mochila != null) {
 					val base64Mochila = inventoryTarget.toBase64(1)
@@ -162,7 +162,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 			if (isMochilaItem) {
 				mochila = withContext(BukkitDispatcher(this, true)) {
-					println(Bukkit.isPrimaryThread().toString())
 					val mochila = transaction(Databases.databaseNetwork) {
 						Mochila.find { Mochilas.id eq mochilaId }
 							.firstOrNull()
@@ -175,8 +174,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 					mochila
 				}
-
-				println(Bukkit.isPrimaryThread().toString())
 
 				if (mochila != null)
 					inventoryTarget = mochila.createMochilaInventory()
