@@ -1,19 +1,15 @@
 package net.perfectdreams.dreamcorrida.events
 
-import com.comphenix.packetwrapper.WrapperPlayServerEntityEquipment
 import com.comphenix.protocol.PacketType
 import com.comphenix.protocol.ProtocolLibrary
-import com.comphenix.protocol.events.PacketContainer
 import com.comphenix.protocol.wrappers.EnumWrappers
 import com.comphenix.protocol.wrappers.Pair
 import com.okkero.skedule.schedule
-import net.minecraft.server.v1_16_R3.PacketPlayOutEntityEquipment
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.PlayerUtils
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcorrida.DreamCorrida
-import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcorrida.utils.Checkpoint
 import net.perfectdreams.dreamcorrida.utils.Corrida
 import org.bukkit.*
@@ -115,7 +111,7 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
         player.fallDistance = 0.0f
         player.fireTicks = 0
         PlayerUtils.healAndFeed(player)
-        player.activePotionEffects.filter { (it.type != PotionEffectType.SPEED && it.amplifier != 0) && (it.type != PotionEffectType.JUMP && it.amplifier != 0) && (it.type != PotionEffectType.NIGHT_VISION) } .forEach { effect ->
+        player.activePotionEffects.filter { (it.type != PotionEffectType.SPEED && it.amplifier != 0) && (it.type != PotionEffectType.JUMP && it.amplifier != 0) && (it.type != PotionEffectType.NIGHT_VISION) && (it.type != PotionEffectType.INVISIBILITY) } .forEach { effect ->
             player.removePotionEffect(effect.type)
         }
 
