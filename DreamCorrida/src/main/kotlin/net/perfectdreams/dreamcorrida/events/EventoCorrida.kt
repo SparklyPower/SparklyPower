@@ -31,6 +31,8 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
     var playerCheckpoints = mutableMapOf<Player, Checkpoint>()
     var wonPlayers = mutableListOf<UUID>()
     var startCooldown = 15
+    val isPreStart: Boolean
+        get() = startCooldown != 0
     val damageCooldown = mutableMapOf<Player, Long>()
 
     override fun preStart() {
@@ -71,10 +73,7 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
                     it.sendTitle("§aCorrida irá começar em...", "§c${startCooldown}s", 0, 100, 0)
                     it.playSound(it.location, Sound.UI_BUTTON_CLICK, SoundCategory.PLAYERS, 1f, 1f)
 
-                    it.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
-                    it.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0, false, false))
-                    it.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 200, 0, false, false))
-                    broadcastFakeArmor(it, world)
+                    addCorridaEffect(it, it.world, true)
                 }
 
                 waitFor(20) // 1 segundo
@@ -85,7 +84,7 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
                 it.sendTitle("§aCorra e se divirta!", "§bBoa sorte!", 0, 60, 20)
                 it.playSound(it.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
 
-                addCorridaEffect(it, world)
+                addCorridaEffect(it, world, false)
             }
         }
 
@@ -98,7 +97,7 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
 
                 if (0 >= startCooldown)
                     world.players.forEach {
-                        addCorridaEffect(it, world)
+                        addCorridaEffect(it, world, false)
                     }
 
                 waitFor(100) // 5 segundos
@@ -107,15 +106,29 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
         }
     }
 
-    fun addCorridaEffect(player: Player, world: World) {
+    fun addCorridaEffect(player: Player, world: World, isPreStart: Boolean) {
         player.fallDistance = 0.0f
         player.fireTicks = 0
         PlayerUtils.healAndFeed(player)
-        player.activePotionEffects.filter { (it.type != PotionEffectType.SPEED && it.amplifier != 0) && (it.type != PotionEffectType.JUMP && it.amplifier != 0) && (it.type != PotionEffectType.NIGHT_VISION) && (it.type != PotionEffectType.INVISIBILITY) } .forEach { effect ->
+        player.activePotionEffects.filter {
+            (
+                    if (isPreStart)
+                    { it.type != PotionEffectType.SLOW }
+                    else
+                    { it.type != PotionEffectType.SPEED && it.amplifier != 0 }
+                    )
+                    && (it.type != PotionEffectType.JUMP && it.amplifier != 0)
+                    && (it.type != PotionEffectType.NIGHT_VISION)
+                    && (it.type != PotionEffectType.INVISIBILITY)
+        }.forEach { effect ->
             player.removePotionEffect(effect.type)
         }
 
-        player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 0, false, false))
+        if (isPreStart) {
+            player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
+        } else {
+            player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 0, false, false))
+        }
         player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 200, 0, false, false))
         player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0, false, false))
         player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 200, 0, false, false))

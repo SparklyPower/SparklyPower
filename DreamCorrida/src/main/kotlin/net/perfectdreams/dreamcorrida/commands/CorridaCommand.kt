@@ -37,8 +37,7 @@ class CorridaCommand(val m: DreamCorrida) : SparklyCommand(arrayOf("corrida")) {
         val spawnLocation = m.eventoCorrida.corrida?.spawn?.toLocation()!!
 
         sender.teleport(spawnLocation)
-        sender.removeAllPotionEffects()
-        m.eventoCorrida.broadcastFakeArmor(sender, spawnLocation.world)
+        m.eventoCorrida.addCorridaEffect(sender, spawnLocation.world, m.eventoCorrida.isPreStart)
 
         sender.playSound(spawnLocation, "perfectdreams.sfx.special_stage", SoundCategory.RECORDS, 1000f, 1f)
     }

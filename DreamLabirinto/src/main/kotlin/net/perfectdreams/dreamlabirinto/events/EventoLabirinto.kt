@@ -42,12 +42,14 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         Material.YELLOW_CONCRETE,
         Material.LIME_CONCRETE
     )
+    val isPreStart: Boolean
+        get() = startCooldown != 0
 
     fun join(player: Player) {
         val spawn = startLocation!!
         player.teleport(spawn)
 
-        player.removeAllPotionEffects()
+        addLabirintoEffect(player, player.world, isPreStart)
         player.playSound(spawn, "perfectdreams.sfx.special_stage", SoundCategory.RECORDS, 1000f, 1f)
     }
 
@@ -124,10 +126,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                     it.sendTitle("§aLabirinto irá começar em...", "§c${startCooldown}s", 0, 100, 0)
                     it.playSound(it.location, Sound.UI_BUTTON_CLICK, SoundCategory.PLAYERS, 1f, 1f)
 
-                    it.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
-                    it.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0, false, false))
-                    it.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 200, 0, false, false))
-                    broadcastFakeArmor(it, world)
+                    addLabirintoEffect(it, it.world, true)
                 }
 
                 waitFor(20) // 1 segundo
@@ -138,7 +137,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                 it.sendTitle("§aCorra e se aventure!", "§bBoa sorte!", 0, 60, 20)
                 it.playSound(it.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
 
-                addLabirintoEffect(it, it.world)
+                addLabirintoEffect(it, it.world, false)
             }
         }
 
@@ -150,14 +149,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
                 if (0 >= startCooldown)
                     world.players.forEach {
-                        it.fallDistance = 0.0f
-                        it.fireTicks = 0
-                        PlayerUtils.healAndFeed(it)
-                        it.activePotionEffects.filter { it.type != PotionEffectType.SPEED && it.type != PotionEffectType.JUMP } .forEach { effect ->
-                            it.removePotionEffect(effect.type)
-                        }
-
-                        it.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 1, false, false))
+                        addLabirintoEffect(it, it.world, false)
                     }
 
                 waitFor(100) // 5 segundos
@@ -166,16 +158,30 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         }
     }
 
-    fun addLabirintoEffect(player: Player, world: World) {
+    fun addLabirintoEffect(player: Player, world: World, isPreStart: Boolean) {
         player.fallDistance = 0.0f
         player.fireTicks = 0
         PlayerUtils.healAndFeed(player)
-        player.activePotionEffects.filter { (it.type != PotionEffectType.SPEED && it.amplifier != 0) && (it.type != PotionEffectType.NIGHT_VISION) && (it.type != PotionEffectType.INVISIBILITY) } .forEach { effect ->
-            player.removePotionEffect(effect.type)
+
+        player.activePotionEffects.filter {
+            (
+                    if (isPreStart)
+                    { it.type != PotionEffectType.SLOW }
+                    else
+                    { it.type != PotionEffectType.SPEED && it.amplifier != 0 }
+                    )
+                    && (it.type != PotionEffectType.NIGHT_VISION)
+                    && (it.type != PotionEffectType.INVISIBILITY) }
+            .forEach { effect ->
+                player.removePotionEffect(effect.type)
+            }
+
+        if (isPreStart) {
+            player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
+        } else {
+            player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 0, false, false))
         }
 
-        player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 0, false, false))
-        player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 200, 0, false, false))
         player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0, false, false))
         player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 200, 0, false, false))
 
