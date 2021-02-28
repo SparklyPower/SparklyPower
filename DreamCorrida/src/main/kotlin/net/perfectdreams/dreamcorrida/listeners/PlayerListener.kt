@@ -15,7 +15,9 @@ import org.bukkit.GameMode
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.entity.EntityToggleGlideEvent
@@ -46,14 +48,9 @@ class PlayerListener(val m: DreamCorrida) : Listener {
 
     @EventHandler
     fun onElytra(e: EntityToggleGlideEvent) {
-        if (!m.eventoCorrida.running)
-            return
+        val player = (e.entity as? Player) ?: return
 
-        val eventoCorrida = m.eventoCorrida
-        val corrida = eventoCorrida.corrida ?: return
-        val spawnLocation = corrida.spawn.toLocation()
-
-        if (spawnLocation.world.name != e.entity.world.name)
+        if (!isPlayerInCorrida(player))
             return
 
         e.isCancelled = true
@@ -61,14 +58,9 @@ class PlayerListener(val m: DreamCorrida) : Listener {
 
     @EventHandler
     fun onShoot(e: EntityShootBowEvent) {
-        if (!m.eventoCorrida.running)
-            return
+        val player = (e.entity as? Player) ?: return
 
-        val eventoCorrida = m.eventoCorrida
-        val corrida = eventoCorrida.corrida ?: return
-        val spawnLocation = corrida.spawn.toLocation()
-
-        if (spawnLocation.world.name != e.entity.world.name)
+        if (!isPlayerInCorrida(player))
             return
 
         e.isCancelled = true
@@ -76,17 +68,10 @@ class PlayerListener(val m: DreamCorrida) : Listener {
 
     @EventHandler
     fun onMovePreStart(e: PlayerMoveEvent) {
-        if (!m.eventoCorrida.running)
-            return
-
         if (!e.displaced)
             return
 
-        val eventoCorrida = m.eventoCorrida
-        val corrida = eventoCorrida.corrida ?: return
-        val spawnLocation = corrida.spawn.toLocation()
-
-        if (spawnLocation.world.name != e.player.world.name)
+        if (!isPlayerInCorrida(e.player))
             return
 
         if (m.eventoCorrida.startCooldown > 0)
@@ -232,14 +217,72 @@ class PlayerListener(val m: DreamCorrida) : Listener {
 
     @EventHandler
     fun onInteract(e: PlayerInteractEvent) {
-        val eventoCorrida = m.eventoCorrida
-        val corrida = eventoCorrida.corrida ?: return
-        val spawnLocation = corrida.spawn.toLocation()
-
-        if (spawnLocation.world.name != e.player.world.name || e.player.hasPermission("dreamcorrida.bypass"))
+        if (!isPlayerInCorridaInteractionCheck(e.player))
             return
 
         // Block all item interaction in the event
         e.isCancelled = true
     }
+
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+    fun onBlockPlace(e: BlockPlaceEvent) {
+        if (!isPlayerInCorridaInteractionCheck(e.player))
+            return
+
+        // If the player is in the corrida and places a block, we will bring them back to the last checkpoint.
+        //
+        // We will need to do that because some players abuse lag and uses the "fake" blocks (blocks that were
+        // placed on the client side that the server still needs to switch them back to air) to their advantage.
+        e.isCancelled = true
+
+        val player = e.player
+        val eventoCorrida = m.eventoCorrida
+        val corrida = eventoCorrida.corrida ?: return
+
+        val currentPlayerCheckpoint = eventoCorrida.playerCheckpoints[e.player]
+        val teleportTo = currentPlayerCheckpoint?.spawn?.toLocation() ?: corrida.spawn.toLocation()
+
+        player.fallDistance = 0.0f
+        player.fireTicks = 0
+        PlayerUtils.healAndFeed(player)
+
+        player.teleport(teleportTo)
+        player.sendMessage("§cPara que colocar blocos na corrida? É uma corrida e não evento de construção! Mas não desista, continue correndo!")
+
+        for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }) {
+            staff.sendMessage("§cPlayer ${player.name} tentou colocar blocos na corrida, então eu movi ele para o último checkpoint! :3")
+        }
+    }
+
+    /**
+     * Checks if a player is in a corrida, by checking:
+     *
+     * * If the event is running [EventoCorrida.running]
+     * * If the [EventoCorrida.corrida] object is set
+     * * If the player shares the same world as [EventoCorrida.corrida]
+     *
+     * @param player the player that will be checked
+     * @return if the player is in the corrida
+     */
+    private fun isPlayerInCorrida(player: Player): Boolean {
+        val eventoCorrida = m.eventoCorrida
+        if (!m.eventoCorrida.running)
+            return false
+
+        val corrida = eventoCorrida.corrida ?: return false
+        val spawnLocation = corrida.spawn.toLocation()
+
+        if (spawnLocation.world.name != player.world.name)
+            return false
+
+        return true
+    }
+
+    /**
+     * Checks if a player is in a corrida by using [isPlayerInCorrida], but bypasses if the player has the "dreamcorrida.bypass" permission
+     *
+     * @param player the player that will be checked
+     * @return if the player is in the corrida
+     */
+    private fun isPlayerInCorridaInteractionCheck(player: Player) = !player.hasPermission("dreamcorrida.bypass") && isPlayerInCorrida(player)
 }
