@@ -2,6 +2,7 @@ package net.perfectdreams.dreambusca
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
 import net.perfectdreams.dreamcore.utils.extensions.getSafeDestination
@@ -165,11 +166,19 @@ class DreamBusca : KotlinPlugin(), Listener {
 			// Se o bioma é do bioma desejado...
 			val block = it.getBlock(0, 80, 0)
 			val location = block.location
+
+			// So, before we were checking if the player could break at the specified location (with "player.canBreakAt(...)")
+			// But that was kinda bad because GriefPrevention causes a player lookup
+			//
+			// So, to avoid that, we will just check if there's *any* claims in the location and, if there is, we will just ignore
+			//
+			// Also, it makes sense: Why would the player want to teleport to a already claimed claim? (even if it is their own claim
+			// https://cdn.discordapp.com/attachments/513405772911345664/815548215365206056/unknown.png
 			biomeMix.isBiomeOfKind(block.biome) &&
 					location.x !in blacklistedX &&
 					location.z !in blacklistedZ &&
-					!location.worldGuardRegions.any { it.id.contains("survival")} &&
-					player.canBreakAt(location, Material.DIRT)
+					!location.worldGuardRegions.any { it.id.contains("survival") } &&
+					GriefPrevention.instance.dataStore.getClaimAt(location, false, null) == null
 		}.run {
 			if (this.isNotEmpty())
 				this.random()
