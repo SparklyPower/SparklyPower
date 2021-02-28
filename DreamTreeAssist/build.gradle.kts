@@ -14,7 +14,7 @@ dependencies {
     implementation(files("../libs/paper_server.jar"))
     implementation(files("../libs/DreamCore-shadow.jar"))
     compile(files("../libs/mcMMO.jar"))
-    compileOnly("com.github.TechFortress:GriefPrevention:16.11.5")
+    compileOnly("com.github.TechFortress:GriefPrevention:16.17.1")
 }
 
 tasks.withType<KotlinCompile> {

@@ -15,6 +15,7 @@ dependencies {
     compile(files("../libs/DreamCore-shadow.jar"))
     compile(project(":DreamCash"))
     compile(project(":DreamChat"))
+    compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
 }
 
 tasks.withType<KotlinCompile> {

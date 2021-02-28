@@ -73,16 +73,9 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 
 		player.setPlayerListHeaderFooter(
 			"""§4§k||§c§k|§f§k|§b§k|§3§k|| §6»»§e»»§f»» §8§l[ §4§lSparkly§b§lPower §8§l] §f««§e««§6«« §4§k||§c§k|§f§k|§b§k|§3§k||
-    |§f
-    |§f
-	|§f
-	|§f$PANTUFA_ICON
-	|§f
-	|§f
+	|§6Modéstia à parte... esse servidor é incrível!
 	|§x§f§6§1§7§0§0§om§x§e§8§1§f§0§b§oc§x§d§b§2§7§1§6§o.§x§c§d§2§f§2§1§os§x§b§f§3§7§2§c§op§x§b§2§4§0§3§8§oa§x§a§4§4§8§4§3§or§x§9§6§5§0§4§e§ok§x§8§9§5§8§5§9§ol§x§7§b§6§0§6§4§oy§x§6§d§6§8§6§f§op§x§6§0§7§0§7§a§oo§x§5§2§7§8§8§5§ow§x§4§4§8§0§9§0§oe§x§3§7§8§9§9§c§or§x§2§9§9§1§a§7§o.§x§1§b§9§9§b§2§on§x§0§e§a§1§b§d§oe§x§0§0§a§9§c§8§ot
     |§3§m✦-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-✦
-    |§e§lSeja bem-vind${player.artigo} ${player.displayName}§e§l!
-    |§6Modéstia à parte... esse servidor é incrível!
 	|§aMundo: §x§3§0§e§3§3§0$fancyWorldName §7• §aTPS: §x§3§0§e§3§3§0${tpsNow}
     |§8§m-§3§m-§b§m-§f§m-§b§m-§3§m-§8§m-
     |§6§lPrecisa de ajuda? §e/ajuda
@@ -90,6 +83,12 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
     |§8§m-§3§m-§b§m-§f§m-§b§m-§3§m-§8§m-
 """.trimMargin().toBaseComponent(),
 			"""§8§m-§3§m-§b§m-§f§m-§b§m-§3§m-§8§m
+    |§f
+    |§f
+	|§f
+	|§f$PANTUFA_ICON
+	|§f
+	|§f
     |§f锈 §bQuer ajudar o servidor? Então compre VIP! §f锈
     |§3https://sparklypower.net/loja
     |
@@ -101,6 +100,8 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 """.trimMargin().toBaseComponent()
 		)
 
+		//    |§e§lSeja bem-vind${player.artigo} ${player.displayName}§e§l!
+		//    |§6Modéstia à parte... esse servidor é incrível!
 		//    |§7Lembre-se... você é incrível, continue sendo uma pessoa maravilhosa e ajude a
 		//    |§7transformar o mundo em um lugar melhor!
 		var idx = 15

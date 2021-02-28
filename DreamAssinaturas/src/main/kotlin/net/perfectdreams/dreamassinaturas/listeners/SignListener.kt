@@ -11,6 +11,7 @@ import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.colorize
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
+import net.perfectdreams.dreamcore.utils.stripColors
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -43,25 +44,30 @@ class SignListener(val m: DreamAssinaturas) : Listener {
 
             val split = template.split("\n")
 
+            val replacedLines = split.map {
+                it.replace("{0}", lines[1])
+                    .replace("{1}", lines[2])
+                    .replace("{2}", lines[3])
+                    .colorize()
+            }
+
             // Don't allow users to create signatures that contain "SparklyShop" in the sign template
-            if (split.any { it.contains("SparklyShop", true) })
+            if (replacedLines.any { it.stripColors().contains("SparklyShop", true) })
                 return
 
-            if (split.firstOrNull() == "§1[Reparar]")
+            if (replacedLines.firstOrNull() == "§1[Reparar]")
                 return
 
-            val isChestShopSign = ChestShopSign.isValid(lines)
+            val isChestShopSign = ChestShopSign.isValid(replacedLines.toTypedArray())
             if (isChestShopSign)
                 return
 
-            for ((index, str) in split.withIndex())
+            for ((index, str) in replacedLines.withIndex()) {
                 e.setLine(
                     index,
-                    str.replace("{0}", lines[1])
-                        .replace("{1}", lines[2])
-                        .replace("{2}", lines[3])
-                        .colorize()
+                    str
                 )
+            }
 
             m.schedule(SynchronizationContext.ASYNC) {
                 transaction(Databases.databaseNetwork) {
@@ -78,7 +84,7 @@ class SignListener(val m: DreamAssinaturas) : Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     fun onRightClick(e: PlayerInteractEvent) {
         if (!e.rightClick)
             return
@@ -93,6 +99,9 @@ class SignListener(val m: DreamAssinaturas) : Listener {
         // Wow, é uma assinatura! :3
         val indexOf = m.storedSignatures.filter { it.signedBy == signature.signedBy }
             .indexOf(signature)
+
+        // We will cancel the event to avoid propagating to ChestShop & stuff
+        e.isCancelled = true
 
         m.schedule(SynchronizationContext.ASYNC) {
             val username = transaction(Databases.databaseNetwork) {

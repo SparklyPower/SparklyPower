@@ -16,7 +16,7 @@ dependencies {
     compile(files("../libs/WorldGuard.jar"))
     compile(files("../libs/mcMMO.jar"))
     compile(project(":DreamCustomItems"))
-    compileOnly("com.github.TechFortress:GriefPrevention:16.11.5")
+    compileOnly("com.github.TechFortress:GriefPrevention:16.17.1")
 }
 
 tasks.withType<KotlinCompile> {

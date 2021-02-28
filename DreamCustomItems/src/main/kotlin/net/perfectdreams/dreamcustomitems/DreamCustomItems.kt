@@ -162,11 +162,12 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomItems.TRASHCAN,
 			listOf(
 				"I I",
-				"I I",
+				"IXI",
 				"III"
 			)
 		) {
 			it.setIngredient('I', Material.IRON_INGOT)
+			it.setIngredient('X', Material.PAPER)
 		}
 
 		addRecipe(

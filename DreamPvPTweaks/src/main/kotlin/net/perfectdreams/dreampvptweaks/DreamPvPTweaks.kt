@@ -52,14 +52,16 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	fun onCommand(e: PlayerCommandPreprocessEvent) {
 		// Do not allow commands while you are in PvP
-		if (battleModeTasks.containsKey(e.player))
+		if (!battleModeTasks.containsKey(e.player))
 			return
 
 		val command = e.message.removePrefix("/").split(" ")
 			.firstOrNull()
 
-		if (command !in ENABLED_COMMANDS)
+		if (command !in ENABLED_COMMANDS) {
 			e.isCancelled = true
+			e.player.sendMessage("§cVocê não pode usar comandos durante o PvP!")
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
