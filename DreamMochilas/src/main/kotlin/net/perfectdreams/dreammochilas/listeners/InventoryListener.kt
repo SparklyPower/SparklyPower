@@ -4,6 +4,8 @@ import com.Acrobot.ChestShop.Events.PreTransactionEvent
 import com.Acrobot.ChestShop.Events.TransactionEvent
 import com.Acrobot.ChestShop.Listeners.Player.PlayerInteract
 import com.Acrobot.ChestShop.Listeners.PreTransaction.SpamClickProtector
+import com.github.salomonbrys.kotson.set
+import com.google.gson.JsonObject
 import com.okkero.skedule.BukkitDispatcher
 import com.okkero.skedule.BukkitSchedulerController
 import com.okkero.skedule.SynchronizationContext
@@ -14,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import net.perfectdreams.dreamcore.network.socket.SocketUtils
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
@@ -73,10 +76,6 @@ class InventoryListener(val m: DreamMochilas) : Listener {
         }
     }
 
-    val testX = BukkitSchedulerController(
-        m,
-        Bukkit.getScheduler()
-    )
     val mutex = Mutex()
 
     @InternalCoroutinesApi
@@ -104,17 +103,38 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 return
 
             GlobalScope.launch(BukkitDispatcher(m, true)) {
-                m.logger.info { "User is doing transaction, is mutex locked? ${mutex.isLocked}; Is thread async? ${!isPrimaryThread}" }
+                m.logger.info { "Player ${e.client.name} is doing transaction, is mutex locked? ${mutex.isLocked}; Is thread async? ${!isPrimaryThread}" }
 
                 mutex.withLock {
-                    val mochila = transaction(Databases.databaseNetwork) {
-                        Mochila.find { Mochilas.id eq mochilaId }
-                            .firstOrNull()
-                    }
+                    val mochilaInventory = if (loadedMochilaInventories[mochilaId] != null) {
+                        for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }) {
+                            player.sendMessage("§cPlayer ${e.client.name} tentou vender itens com a mochila enquanto a mochila estava aberta (bug/dupe?)")
+                        }
 
-                    if (mochila == null) {
-                        e.client.sendMessage("§cEssa mochila não existe!")
-                        return@withLock
+                        m.logger.warning { "Player ${e.client.name} tried to sell items while the backpack was open (bug/dupe?)" }
+
+                        scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                            val json = JsonObject()
+                            json["type"] = "sendMessage"
+                            json["message"] = "@everyone Player ${e.client.name} tentou vender itens com a mochila enquanto a mochila estava aberta (bug/dupe?)"
+                            json["textChannelId"] = "417059128519819265"
+
+                            SocketUtils.send(json, port = 60799)
+                        }
+
+                        loadedMochilaInventories[mochilaId]!!
+                    } else {
+                        val mochila = transaction(Databases.databaseNetwork) {
+                            Mochila.find { Mochilas.id eq mochilaId }
+                                .firstOrNull()
+                        }
+
+                        if (mochila == null) {
+                            e.client.sendMessage("§cEssa mochila não existe!")
+                            return@withLock
+                        }
+
+                        mochila.createMochilaInventory()
                     }
 
                     withContext(BukkitDispatcher(m, false)) {
@@ -131,7 +151,6 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                             val r = preparePreTransactionEventMethod.invoke(null as Any?, sign, player, action) as PreTransactionEvent?
                                 ?: return@withContext
 
-                            val mochilaInventory = mochila.createMochilaInventory()
                             r.clientInventory = mochilaInventory
 
                             trackingMochilasPreTransactionsEvents.add(r)
@@ -151,15 +170,20 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                             val base64Mochila = mochilaInventory.toBase64(1)
 
                             // Para evitar que alguém possa abrir ANTES de ter salvado, vamos adicionar em um set
-                            savingMochilas.add(mochila.id.value)
-                            loadedMochilaInventories.remove(mochila.id.value)
+                            savingMochilas.add(mochilaId)
+                            loadedMochilaInventories.remove(mochilaId)
 
                             withContext(BukkitDispatcher(m, true)) {
                                 transaction(Databases.databaseNetwork) {
+                                    val mochila = transaction(Databases.databaseNetwork) {
+                                        Mochila.find { Mochilas.id eq mochilaId }
+                                            .first()
+                                    }
+
                                     mochila.content = base64Mochila
                                 }
 
-                                savingMochilas.remove(mochila.id.value)
+                                savingMochilas.remove(mochilaId)
                             }
                         } catch (var8: SecurityException) {
                             var8.printStackTrace()
