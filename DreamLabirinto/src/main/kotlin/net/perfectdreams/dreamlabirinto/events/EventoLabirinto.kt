@@ -1,11 +1,16 @@
 package net.perfectdreams.dreamlabirinto.events
 
+import com.comphenix.protocol.PacketType
+import com.comphenix.protocol.ProtocolLibrary
+import com.comphenix.protocol.wrappers.EnumWrappers
+import com.comphenix.protocol.wrappers.Pair
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamlabirinto.DreamLabirinto
@@ -13,6 +18,8 @@ import net.perfectdreams.dreamlabirinto.utils.MazeGenerator
 import org.bukkit.*
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.util.*
@@ -118,6 +125,9 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                     it.playSound(it.location, Sound.UI_BUTTON_CLICK, SoundCategory.PLAYERS, 1f, 1f)
 
                     it.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
+                    it.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0, false, false))
+                    it.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 200, 0, false, false))
+                    broadcastFakeArmor(it, world)
                 }
 
                 waitFor(20) // 1 segundo
@@ -128,15 +138,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                 it.sendTitle("§aCorra e se aventure!", "§bBoa sorte!", 0, 60, 20)
                 it.playSound(it.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
 
-                it.removeAllPotionEffects()
-                it.fallDistance = 0.0f
-                it.fireTicks = 0
-                PlayerUtils.healAndFeed(it)
-                it.activePotionEffects.filter { it.type != PotionEffectType.SPEED && it.type != PotionEffectType.JUMP } .forEach { effect ->
-                    it.removePotionEffect(effect.type)
-                }
-
-                it.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 1, false, false))
+                addLabirintoEffect(it, it.world)
             }
         }
 
@@ -161,6 +163,66 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                 waitFor(100) // 5 segundos
                 idx++
             }
+        }
+    }
+
+    fun addLabirintoEffect(player: Player, world: World) {
+        player.fallDistance = 0.0f
+        player.fireTicks = 0
+        PlayerUtils.healAndFeed(player)
+        player.activePotionEffects.filter { (it.type != PotionEffectType.SPEED && it.amplifier != 0) && (it.type != PotionEffectType.NIGHT_VISION) && (it.type != PotionEffectType.INVISIBILITY) } .forEach { effect ->
+            player.removePotionEffect(effect.type)
+        }
+
+        player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 0, false, false))
+        player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 200, 0, false, false))
+        player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0, false, false))
+        player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 200, 0, false, false))
+
+        broadcastFakeArmor(player, world)
+    }
+
+
+    fun broadcastFakeArmor(player: Player, world: World) {
+        // Now we are going to fake send packets to everyone to remove all armor
+        val packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.ENTITY_EQUIPMENT)
+
+        // Uses the player's name as seed
+        val random = SplittableRandom(player.name.hashCode().toLong())
+
+        // Write the entity ID of the player...
+        packet.integers.write(0, player.entityId)
+        packet.slotStackPairLists.write(
+            0,
+            listOf(
+                Pair(
+                    EnumWrappers.ItemSlot.HEAD,
+                    ItemStack(Material.AIR)
+                ),
+                Pair(
+                    EnumWrappers.ItemSlot.CHEST,
+                    ItemStack(Material.AIR)
+                ),
+                Pair(
+                    EnumWrappers.ItemSlot.LEGS,
+                    ItemStack(Material.AIR)
+                ),
+                Pair(
+                    EnumWrappers.ItemSlot.FEET,
+                    ItemStack(Material.LEATHER_BOOTS)
+                        // Generate random color for the armor
+                        .meta<LeatherArmorMeta> {
+                            this.setColor(Color.fromRGB(
+                                random.nextInt(0, 256), random.nextInt(0, 256), random.nextInt(0, 256)
+                            ))
+                        }
+                ),
+            )
+        )
+
+        // Now send the packet to everyone *except* the player!
+        world.players.filter { it != player }.forEach {
+            ProtocolLibrary.getProtocolManager().sendServerPacket(it, packet)
         }
     }
 
