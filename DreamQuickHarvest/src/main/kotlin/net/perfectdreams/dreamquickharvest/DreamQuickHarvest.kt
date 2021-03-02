@@ -8,6 +8,7 @@ import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.player.UserManager
 import com.okkero.skedule.BukkitDispatcher
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.withLock
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
@@ -67,9 +68,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			GlobalScope.launch(BukkitDispatcher(plugin)) {
 				val (inventoryTarget, mochila) = getInventoryTarget(e)
 
-				if (mochila != null)
-					InventoryListener.savingMochilas.add(mochila.id.value)
-
 				doQuickHarvestOnCrop(
 					e.player,
 					e.block,
@@ -82,8 +80,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					val base64Mochila = inventoryTarget.toBase64(1)
 
 					withContext(BukkitDispatcher(plugin, true)) {
-						transaction(Databases.databaseNetwork) {
-							mochila.content = base64Mochila
+						InventoryListener.mochilaLoadSaveMutex.withLock {
+							transaction(Databases.databaseNetwork) {
+								mochila.content = base64Mochila
+							}
 						}
 					}
 
@@ -113,8 +113,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					val base64Mochila = inventoryTarget.toBase64(1)
 
 					withContext(BukkitDispatcher(plugin, true)) {
-						transaction(Databases.databaseNetwork) {
-							mochila.content = base64Mochila
+						InventoryListener.mochilaLoadSaveMutex.withLock {
+							transaction(Databases.databaseNetwork) {
+								mochila.content = base64Mochila
+							}
 						}
 					}
 
@@ -139,8 +141,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					val base64Mochila = inventoryTarget.toBase64(1)
 
 					withContext(BukkitDispatcher(plugin, true)) {
-						transaction(Databases.databaseNetwork) {
-							mochila.content = base64Mochila
+						InventoryListener.mochilaLoadSaveMutex.withLock {
+							transaction(Databases.databaseNetwork) {
+								mochila.content = base64Mochila
+							}
 						}
 					}
 
@@ -162,17 +166,22 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 			if (isMochilaItem) {
 				mochila = withContext(BukkitDispatcher(this, true)) {
-					val mochila = transaction(Databases.databaseNetwork) {
-						Mochila.find { Mochilas.id eq mochilaId }
-							.firstOrNull()
-					}
+					InventoryListener.mochilaLoadSaveMutex.withLock {
+						val mochila = transaction(Databases.databaseNetwork) {
+							Mochila.find { Mochilas.id eq mochilaId }
+								.firstOrNull()
+						}
 
-					if (mochila == null) {
-						e.player.sendMessage("§cEssa mochila não existe!")
-						return@withContext null
-					}
+						if (mochila == null) {
+							e.player.sendMessage("§cEssa mochila não existe!")
+							return@withContext null
+						}
 
-					mochila
+						// Hold the mochila in saving state
+						InventoryListener.savingMochilas.add(mochila.id.value)
+
+						mochila
+					}
 				}
 
 				if (mochila != null)
