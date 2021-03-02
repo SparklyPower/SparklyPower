@@ -1,5 +1,7 @@
 package net.perfectdreams.dreammochilas.dao
 
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamcore.utils.fromBase64Inventory
 import net.perfectdreams.dreamcore.utils.lore
@@ -25,7 +27,12 @@ class Mochila(id: EntityID<Long>) : LongEntity(id) {
     var funnyId by Mochilas.funnyId
     var type by Mochilas.type
 
-    fun createMochilaInventory(): Inventory {
+    internal var cachedInventory: Inventory? = null
+    // Public to allow other plugins locking
+    val mochilaInventoryCreationLock = Mutex()
+    val mochilaInventoryManipulationLock = Mutex()
+
+    /* fun createMochilaInventory(): Inventory {
         val blahInventory = content.fromBase64Inventory() // Vamos pegar o inventário original
 
         // E criar ele com o nosso holder personalizado
@@ -34,12 +41,30 @@ class Mochila(id: EntityID<Long>) : LongEntity(id) {
         inventory.contents = blahInventory.contents
 
         return inventory
+    } */
+
+    suspend fun <T> lockForInventoryManipulation(callback: suspend (Inventory) -> (T)): T {
+        return mochilaInventoryManipulationLock.withLock {
+            callback.invoke(getOrCreateMochilaInventory())
+        }
     }
 
-    fun openMochilaTo(player: Player) {
-        val inventory = createMochilaInventory()
+    suspend fun getOrCreateMochilaInventory(): Inventory {
+        // We need to lock to avoid two threads loading the inventory at the same time, causing issues
+        mochilaInventoryCreationLock.withLock {
+            return cachedInventory ?: run {
+                val blahInventory = content.fromBase64Inventory() // Vamos pegar o inventário original
 
-        player.openInventory(inventory)
+                // E criar ele com o nosso holder personalizado
+                val inventory = Bukkit.createInventory(MochilaHolder(this), Math.min(54, size), "§d§lMochila")
+
+                inventory.contents = blahInventory.contents
+
+                cachedInventory = inventory
+
+                return inventory
+            }
+        }
     }
 
     class MochilaHolder(val mochila: Mochila) : InventoryHolder {

@@ -15,6 +15,7 @@ import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.listeners.InventoryListener
 import net.perfectdreams.dreammochilas.tables.Mochilas
+import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -77,17 +78,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				)
 
 				if (mochila != null) {
-					val base64Mochila = inventoryTarget.toBase64(1)
-
 					withContext(BukkitDispatcher(plugin, true)) {
-						InventoryListener.mochilaLoadSaveMutex.withLock {
-							transaction(Databases.databaseNetwork) {
-								mochila.content = base64Mochila
-							}
-						}
+						// Let's unlock the inventory lock!
+						mochila.mochilaInventoryManipulationLock.unlock()
+						MochilaUtils.saveMochila(mochila, "${e.player.name} harvesting")
 					}
-
-					InventoryListener.savingMochilas.remove(mochila.id.value)
 				}
 			}
 			return
@@ -102,25 +97,16 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			GlobalScope.launch(BukkitDispatcher(this)) {
 				val (inventoryTarget, mochila) = getInventoryTarget(e)
 
-				if (mochila != null)
-					InventoryListener.savingMochilas.add(mochila.id.value)
-
 				val ttl = System.nanoTime()
 				doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget)
 				logger.info { "Took ${System.nanoTime() - ttl}ns to harvest cocoa" }
 
 				if (mochila != null) {
-					val base64Mochila = inventoryTarget.toBase64(1)
-
 					withContext(BukkitDispatcher(plugin, true)) {
-						InventoryListener.mochilaLoadSaveMutex.withLock {
-							transaction(Databases.databaseNetwork) {
-								mochila.content = base64Mochila
-							}
-						}
+						// Let's unlock the inventory lock!
+						mochila.mochilaInventoryManipulationLock.unlock()
+						MochilaUtils.saveMochila(mochila, "${e.player.name} harvesting")
 					}
-
-					InventoryListener.savingMochilas.remove(mochila.id.value)
 				}
 			}
 			return
@@ -132,23 +118,14 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			GlobalScope.launch(BukkitDispatcher(this)) {
 				val (inventoryTarget, mochila) = getInventoryTarget(e)
 
-				if (mochila != null)
-					InventoryListener.savingMochilas.add(mochila.id.value)
-
 				doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget)
 
 				if (mochila != null) {
-					val base64Mochila = inventoryTarget.toBase64(1)
-
 					withContext(BukkitDispatcher(plugin, true)) {
-						InventoryListener.mochilaLoadSaveMutex.withLock {
-							transaction(Databases.databaseNetwork) {
-								mochila.content = base64Mochila
-							}
-						}
+						// Let's unlock the inventory lock!
+						mochila.mochilaInventoryManipulationLock.unlock()
+						MochilaUtils.saveMochila(mochila, "${e.player.name} harvesting")
 					}
-
-					InventoryListener.savingMochilas.remove(mochila.id.value)
 				}
 			}
 			return
@@ -162,30 +139,21 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		if (item.type == Material.CARROT_ON_A_STICK) {
 			val isMochilaItem = item.getStoredMetadata("isMochila")?.toBoolean() ?: false
-			val mochilaId = item.getStoredMetadata("mochilaId")?.toLong()
+			val mochilaId = item.getStoredMetadata("mochilaId")?.toLong() ?: -1L // Impossible anyways
 
 			if (isMochilaItem) {
 				mochila = withContext(BukkitDispatcher(this, true)) {
-					InventoryListener.mochilaLoadSaveMutex.withLock {
-						val mochila = transaction(Databases.databaseNetwork) {
-							Mochila.find { Mochilas.id eq mochilaId }
-								.firstOrNull()
-						}
-
-						if (mochila == null) {
-							e.player.sendMessage("§cEssa mochila não existe!")
-							return@withContext null
-						}
-
-						// Hold the mochila in saving state
-						InventoryListener.savingMochilas.add(mochila.id.value)
-
-						mochila
-					}
+					MochilaUtils.retrieveMochila(mochilaId, "${e.player.name} harvesting")
 				}
 
-				if (mochila != null)
-					inventoryTarget = mochila.createMochilaInventory()
+				if (mochila != null) {
+					// HODL THE LOCK!!
+					val lockSuccess = mochila.mochilaInventoryManipulationLock.tryLock()
+
+					// Only allow using the mochila if the lock was a success
+					if (lockSuccess)
+						inventoryTarget = mochila.getOrCreateMochilaInventory()
+				}
 			}
 		}
 
