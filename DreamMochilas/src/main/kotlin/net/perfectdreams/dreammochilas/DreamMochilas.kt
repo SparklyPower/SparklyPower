@@ -9,6 +9,7 @@ import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.listeners.InventoryListener
 import net.perfectdreams.dreammochilas.tables.Mochilas
+import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
@@ -142,5 +143,18 @@ class DreamMochilas : KotlinPlugin(), Listener {
 				}
 			}
 		)
+	}
+
+	override fun softDisable() {
+		// Save all backpacks
+		transaction(Databases.databaseNetwork) {
+			for (loadedMochila in MochilaUtils.loadedMochilas.values) {
+				val inventory = loadedMochila.cachedInventory
+
+				if (inventory != null) {
+					loadedMochila.content = inventory.toBase64(1)
+				}
+			}
+		}
 	}
 }
