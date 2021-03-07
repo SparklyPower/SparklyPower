@@ -14,16 +14,16 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(files("../libs/paper_server.jar"))
-    compile("io.github.waterfallmc:waterfall-api:1.13-SNAPSHOT")
-    compile("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
-    compile("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.4.2")
-    compile(kotlin("reflect"))
-    compile(kotlin("script-util"))
-	compile(kotlin("compiler"))
-	compile(kotlin("scripting-compiler"))
-    compile("io.github.microutils:kotlin-logging:1.7.9")
+    api(kotlin("stdlib-jdk8"))
+    compileOnly(files("../libs/paper_server.jar"))
+    compileOnly("io.github.waterfallmc:waterfall-api:1.13-SNAPSHOT")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.4.2")
+    api(kotlin("reflect"))
+    api(kotlin("script-util"))
+    api(kotlin("compiler"))
+    api(kotlin("scripting-compiler"))
+    api("io.github.microutils:kotlin-logging:1.7.9")
 }
 
 tasks.withType<KotlinCompile> {
