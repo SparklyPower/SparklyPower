@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
+    compileOnly(project(":DreamCore", configuration = "shadowWithRuntimeDependencies"))
     implementation(project(":DreamCash"))
     implementation(files("../libs/mcMMO.jar"))
 }

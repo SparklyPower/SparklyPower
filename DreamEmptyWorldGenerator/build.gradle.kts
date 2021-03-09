@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(files("../libs/paper_server.jar"))
+    compileOnly(project(":KotlinRuntime"))
+    compileOnly(files("../libs/paper_server.jar"))
 }
 
 tasks.withType<KotlinCompile> {

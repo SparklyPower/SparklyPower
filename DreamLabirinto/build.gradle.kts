@@ -10,11 +10,9 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(files("../libs/paper_server.jar"))
-    compile(files("../libs/DreamCore-shadow.jar"))
-    compile(project(":DreamCash"))
-    compile(project(":DreamChat"))
+    compileOnly(project(":DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":DreamCash"))
+    compileOnly(project(":DreamChat"))
     compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
 }
 

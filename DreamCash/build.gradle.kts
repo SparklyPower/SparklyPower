@@ -9,11 +9,9 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(files("../libs/paper_server.jar"))
-    compile(files("../libs/DreamCore-shadow.jar"))
-    compile("net.luckperms:api:5.0")
-    compile(project(":DreamClubes"))
+    compileOnly(project(":DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly("net.luckperms:api:5.0")
+    compileOnly(project(":DreamClubes"))
 }
 
 tasks.withType<KotlinCompile> {

@@ -9,12 +9,7 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(project(":DreamCash"))
-    compileOnly(files("../libs/paper_server.jar"))
-    compile(files("../libs/DreamCore-shadow.jar"))
-    compile(project(":DreamChat"))
-    compile(project(":DreamCash"))
+    compileOnly(project(":DreamCore", configuration = "shadowWithRuntimeDependencies"))
 }
 
 tasks.withType<KotlinCompile> {

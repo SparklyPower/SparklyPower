@@ -3,6 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     kotlin("jvm")
+    `java-library`
     id("com.github.johnrengelman.shadow") version "4.0.4"
 }
 
@@ -11,41 +12,51 @@ repositories {
     maven("https://jitpack.io")
 }
 
+// This is our DreamCore configuration that has all the dependencies (so plugins can just need to include the project as a project dependency)
+//
+// The reason we needed to do this is because we want ALL the declared "api" dependencies here BUT we also want the relocated dependencies
+// done by the shadow JAR!
+//
+// So, to do that, we create a configuration that extends the default "shadow" configuration and the "compileClasspath" configuration, this allows us
+// to satisfy both of our needs!
+val shadowWithRuntimeDependencies by configurations.creating {
+    // If you want this configuration to share the same dependencies, otherwise omit this line
+    extendsFrom(configurations["shadow"], configurations["compileClasspath"])
+}
+
 dependencies {
-    compileOnly(kotlin("stdlib-jdk8"))
-    compileOnly(kotlin("reflect"))
-    compileOnly(files("../libs/paper_server.jar"))
+    compileOnlyApi(project(":KotlinRuntime"))
+    compileOnlyApi(files("../libs/paper_server.jar"))
     // compileOnly(files("../libs/ProtocolSupport.jar"))
-    compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
-    compileOnly(files("../libs/WorldEdit.jar"))
-    compileOnly(files("../libs/WorldGuard.jar"))
-    compileOnly("com.github.TechFortress:GriefPrevention:16.17.1")
-    implementation("net.perfectdreams.commands:command-framework-core:0.0.8")
-    implementation("com.github.dmulloy2:PacketWrapper:5262e36c72")
-    compileOnly("net.milkbowl.vault:VaultAPI:1.6")
-    compileOnly("com.github.MascusJeoraly:LanguageUtils:1.9")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
-    implementation("org.mongodb:mongo-java-driver:3.7.0-rc0")
-    implementation("com.zaxxer:HikariCP:2.7.8")
-    implementation("org.postgresql:postgresql:42.2.5")
-    implementation("org.xerial:sqlite-jdbc:3.30.1")
-    implementation("org.jetbrains.exposed:exposed-core:0.28.1")
-    implementation("org.jetbrains.exposed:exposed-dao:0.28.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.28.1")
-    implementation("com.okkero.skedule:skedule:1.2.4.1-SNAPSHOT")
-    implementation("com.github.kevinsawicki:http-request:6.0")
-    implementation("org.ow2.asm:asm:7.0")
-    implementation("org.ow2.asm:asm-util:7.0")
-    implementation("commons-codec:commons-codec:1.12")
-    implementation("org.apache.commons:commons-lang3:3.9")
-    implementation("org.mindrot:jbcrypt:0.4")
-    implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
-    implementation("club.minnced:discord-webhooks:0.1.5")
-    implementation("com.github.ben-manes.caffeine:caffeine:2.6.2")
-    implementation("org.apache.commons:commons-text:1.8")
-    implementation("club.minnced:discord-webhooks:0.3.2")
-    compileOnly("com.greatmancode:craftconomy3:3.3.1")
-    compileOnly("me.lucko.luckperms:luckperms-api:4.3")
+    compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
+    compileOnlyApi(files("../libs/WorldEdit.jar"))
+    compileOnlyApi(files("../libs/WorldGuard.jar"))
+    compileOnlyApi("com.github.TechFortress:GriefPrevention:16.17.1")
+    api("net.perfectdreams.commands:command-framework-core:0.0.8")
+    api("com.github.dmulloy2:PacketWrapper:5262e36c72")
+    compileOnlyApi("net.milkbowl.vault:VaultAPI:1.6")
+    compileOnlyApi("com.github.MascusJeoraly:LanguageUtils:1.9")
+    api("org.mongodb:mongo-java-driver:3.7.0-rc0")
+    api("com.zaxxer:HikariCP:2.7.8")
+    api("org.postgresql:postgresql:42.2.5")
+    api("org.xerial:sqlite-jdbc:3.30.1")
+    api("org.jetbrains.exposed:exposed-core:0.28.1")
+    api("org.jetbrains.exposed:exposed-dao:0.28.1")
+    api("org.jetbrains.exposed:exposed-jdbc:0.28.1")
+    api("com.okkero.skedule:skedule:1.2.4.1-SNAPSHOT")
+    api("com.github.kevinsawicki:http-request:6.0")
+    api("org.ow2.asm:asm:7.0")
+    api("org.ow2.asm:asm-util:7.0")
+    api("commons-codec:commons-codec:1.12")
+    api("org.apache.commons:commons-lang3:3.9")
+    api("org.mindrot:jbcrypt:0.4")
+    api("com.github.salomonbrys.kotson:kotson:2.5.0")
+    api("club.minnced:discord-webhooks:0.1.5")
+    api("com.github.ben-manes.caffeine:caffeine:2.6.2")
+    api("org.apache.commons:commons-text:1.8")
+    api("club.minnced:discord-webhooks:0.3.2")
+    compileOnlyApi("com.greatmancode:craftconomy3:3.3.1")
+    compileOnlyApi("me.lucko.luckperms:luckperms-api:4.3")
     testCompile(files("../libs/paper_server.jar"))
     testCompile("org.junit.jupiter:junit-jupiter-api:5.3.0-M1")
     testCompile("org.junit.jupiter:junit-jupiter-engine:5.3.0-M1")

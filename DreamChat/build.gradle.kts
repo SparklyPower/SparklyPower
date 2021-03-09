@@ -9,20 +9,14 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(project(":DreamCash"))
-    compileOnly(files("../libs/paper_server.jar"))
-    compile(files("../libs/DreamCore-shadow.jar"))
-    compile(files("../libs/DreamCorreios.jar"))
-    compile(project(":DreamCasamentos"))
-    compile(project(":DreamClubes"))
-    // compileOnly(files("../libs/ProtocolSupport.jar"))
+    compileOnly(project(":DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":DreamCash"))
+    compileOnly(project(":DreamCorreios"))
+    compileOnly(project(":DreamCasamentos"))
+    compileOnly(project(":DreamClubes"))
+    compileOnly(project(":DreamVanish"))
     compileOnly(files("../libs/mcMMO.jar"))
-    compile("net.milkbowl.vault:VaultAPI:1.6")
-    compile("com.greatmancode:craftconomy3:3.3.1")
-    // compile(project(":DreamVote"))
-    compile(project(":DreamVanish"))
-    compile("net.luckperms:api:5.0")
+    compileOnly("net.luckperms:api:5.0")
 }
 
 tasks.withType<KotlinCompile> {

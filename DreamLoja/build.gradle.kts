@@ -9,11 +9,8 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.1")
+    compileOnly(project(":DreamCore", configuration = "shadowWithRuntimeDependencies"))
     compile(project(":DreamCash"))
-    compile(files("../libs/paper_server.jar"))
-    compile(files("../libs/DreamCore-shadow.jar"))
     compile(project(":DreamChat"))
 }
 

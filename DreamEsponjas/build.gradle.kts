@@ -10,12 +10,7 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    api(project(":DreamHome"))
-    compile(files("../libs/paper_server.jar"))
-    compile(files("../libs/DreamCore-shadow.jar"))
-    compile(files("../libs/WorldGuard.jar"))
-    implementation("com.github.ChestShop-authors:ChestShop-3:3.11")
+    compileOnly(project(":DreamCore", configuration = "shadowWithRuntimeDependencies"))
 }
 
 tasks.withType<KotlinCompile> {

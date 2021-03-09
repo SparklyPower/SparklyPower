@@ -11,9 +11,7 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(files("../libs/paper_server.jar"))
-    compile(files("../libs/DreamCore-shadow.jar"))
+    compileOnly(project(":DreamCore", configuration = "shadowWithRuntimeDependencies"))
     implementation("net.citizensnpcs:citizens:2.0.26-SNAPSHOT")
 }
 

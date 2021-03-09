@@ -10,11 +10,8 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(files("../libs/paper_server.jar"))
-    compile(files("../libs/DreamCore-shadow.jar"))
-    compile(files("../libs/WorldGuard.jar"))
-    compile(files("../libs/mcMMO.jar"))
+    compileOnly(project(":DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(files("../libs/mcMMO.jar"))
     compileOnly("com.github.TechFortress:GriefPrevention:16.17.1")
     compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
 }

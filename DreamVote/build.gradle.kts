@@ -9,14 +9,11 @@ repositories {
 }
 
 dependencies {
-    compile(kotlin("stdlib-jdk8"))
-    compile(project(":DreamCash"))
-    compileOnly(files("../libs/paper_server.jar"))
-    compile(files("../libs/DreamCore-shadow.jar"))
-    compile(files("../libs/DreamCorreios.jar"))
-    compile(project(":DreamChat"))
-    compile("net.milkbowl.vault:VaultAPI:1.6")
-    compile("com.vexsoftware:nuvotifier-bukkit:2.6.0")
+    compileOnly(project(":DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":DreamChat"))
+    compileOnly(project(":DreamCash"))
+    compileOnly(project(":DreamCorreios"))
+    compileOnly("com.vexsoftware:nuvotifier-bukkit:2.6.0")
 }
 
 tasks.withType<KotlinCompile> {
