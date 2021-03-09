@@ -1,7 +1,5 @@
 package net.perfectdreams.dreamcore.utils
 
-import co.aikar.commands.BaseCommand
-import co.aikar.commands.PaperCommandManager
 import net.perfectdreams.commands.bukkit.BukkitCommandManager
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.DreamCore
@@ -18,8 +16,6 @@ import org.bukkit.plugin.java.JavaPlugin
 open class KotlinPlugin : JavaPlugin() {
 	// Lista de comandos registrados por este plugin
 	val commandList = mutableListOf<AbstractCommand>()
-	@Deprecated("Please use dreamCommandManager")
-	val commandManager by lazy { PaperCommandManager(this) }
 	@Deprecated("Please use dreamCommandManager")
 	val bukkitCommandManager by lazy { BukkitCommandManager(this) }
 	val dreamCommandManager by lazy { DreamCommandManager(this) }
@@ -66,16 +62,6 @@ open class KotlinPlugin : JavaPlugin() {
 	fun registerCommand(command: AbstractCommand) {
 		command.register()
 		commandList.add(command)
-	}
-
-	/**
-	 * Registra um comando
-	 *
-	 * @param command comando
-	 */
-	@Deprecated(message = "Usar command DSL")
-	fun registerCommand(command: BaseCommand) {
-		commandManager.registerCommand(command)
 	}
 
 	/**
