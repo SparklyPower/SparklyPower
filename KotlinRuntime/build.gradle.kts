@@ -19,6 +19,7 @@ dependencies {
     compileOnly("io.github.waterfallmc:waterfall-api:1.13-SNAPSHOT")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.4.2")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
     api(kotlin("reflect"))
     api(kotlin("script-util"))
     api(kotlin("compiler"))
