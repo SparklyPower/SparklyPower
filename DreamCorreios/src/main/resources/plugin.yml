@@ -1,0 +1,5 @@
+name: DreamCorreios
+main: net.perfectdreams.dreamcorreios.DreamCorreios
+version: 1.0.0
+softdepend: ["DreamCore"]
+api-version: 1.13
