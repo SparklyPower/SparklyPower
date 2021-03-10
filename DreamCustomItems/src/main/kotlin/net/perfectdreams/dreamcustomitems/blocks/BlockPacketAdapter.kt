@@ -2,6 +2,7 @@ package net.perfectdreams.dreamcustomitems.blocks
 
 import com.comphenix.packetwrapper.WrapperPlayServerBlockChange
 import com.comphenix.protocol.PacketType
+import com.comphenix.protocol.events.ListenerOptions
 import com.comphenix.protocol.events.ListenerPriority
 import com.comphenix.protocol.events.PacketAdapter
 import com.comphenix.protocol.events.PacketEvent
@@ -19,9 +20,14 @@ import us.myles.ViaVersion.api.type.types.version.ChunkSectionType1_16
 class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
     m,
     ListenerPriority.NORMAL, // Listener priority
-    PacketType.Play.Server.MAP_CHUNK,
-    PacketType.Play.Server.BLOCK_CHANGE,
-    PacketType.Play.Server.MULTI_BLOCK_CHANGE
+    listOf(
+        PacketType.Play.Server.MAP_CHUNK,
+        PacketType.Play.Server.BLOCK_CHANGE,
+        PacketType.Play.Server.MULTI_BLOCK_CHANGE,
+    ),
+    // Reading chunk packets uses a lot of CPU, so let's parse everything in a async thread!
+    // It *should* be fine since we don't call the Bukkit API (except to get the player's world)
+    ListenerOptions.ASYNC
 ) {
     override fun onPacketSending(event: PacketEvent) {
         // println(event.packetType)
