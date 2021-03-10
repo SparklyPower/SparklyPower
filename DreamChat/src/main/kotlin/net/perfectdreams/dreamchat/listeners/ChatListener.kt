@@ -283,18 +283,6 @@ class ChatListener(val m: DreamChat) : Listener {
 			}
 		}
 
-		if ((luckyUser?.primaryGroup ?: "default") == "default" && m.partners.contains(e.player.uniqueId)) {
-			prefix = if (e.player.girl) {
-				"§5§lParceira"
-			} else {
-				"§5§lParceiro"
-			}
-		}
-
-		if ((luckyUser?.primaryGroup ?: "default") == "default" && m.artists.contains(e.player.uniqueId)) {
-			prefix = "§5§lDesenhista"
-		}
-
 		if (chatUser != null) {
 			if (chatUser.nickname != null && !e.player.hasPermission("dreamchat.nick")) {
 				transaction(Databases.databaseNetwork) {
