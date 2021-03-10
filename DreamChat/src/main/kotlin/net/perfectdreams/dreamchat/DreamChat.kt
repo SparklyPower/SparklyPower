@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamchat
 
 import club.minnced.discord.webhook.WebhookClient
+import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.kevinsawicki.http.HttpRequest
 import com.github.salomonbrys.kotson.array
@@ -13,6 +14,7 @@ import com.greatmancode.craftconomy3.Common
 import com.greatmancode.craftconomy3.groups.WorldGroupsManager
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.delay
 import net.perfectdreams.dreamchat.commands.*
 import net.perfectdreams.dreamchat.dao.ChatUser
 import net.perfectdreams.dreamchat.dao.DiscordAccount
@@ -38,6 +40,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.util.*
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
 
@@ -76,6 +79,8 @@ class DreamChat : KotlinPlugin() {
 		.expireAfterWrite(3, TimeUnit.DAYS)
 		.build<Long, Optional<DiscordAccountInfo>>()
 		.asMap()
+	var tellMessagesWebhook: WebhookClient? = null
+	val tellMessagesQueue = ConcurrentLinkedQueue<String>()
 
 	val dataYaml by lazy {
 		File(dataFolder, "data.yml")
@@ -239,6 +244,45 @@ class DreamChat : KotlinPlugin() {
 				waitFor(20 * 60)
 			}
 		}
+
+		launchAsyncThread {
+			while (true) {
+				val builder = StringBuilder()
+
+				while (tellMessagesQueue.isNotEmpty()) {
+					val firstElement = tellMessagesQueue.peek()
+
+					// Current length + First Element + "\n"
+					// If it will overflow, we break the loop and send the message as is
+					if (builder.length + firstElement.length + 1 > 2000)
+						break
+
+					// Append the message content
+					builder.append(firstElement)
+					builder.append("\n")
+
+					// And remove the current message!
+					tellMessagesQueue.remove()
+				}
+
+				if (builder.isNotEmpty()) {
+					try {
+						// Send the message if the content is not empty
+						tellMessagesWebhook?.send(
+							WebhookMessageBuilder()
+								.setUsername("Mensagens Privadas \uD83D\uDC40")
+								.setAvatarUrl("https://cdn.discordapp.com/emojis/726559073545486476.png?v=1")
+								.setContent(builder.toString())
+								.build()
+						)
+					} catch (e: Exception) {
+						e.printStackTrace()
+					}
+				}
+
+				delay(1_000)
+			}
+		}
 	}
 
 	override fun softDisable() {
@@ -262,6 +306,9 @@ class DreamChat : KotlinPlugin() {
 		config.getStringList("chat-webhooks").forEach {
 			chatWebhooks += WebhookClient.withUrl(it)
 		}
+
+		tellMessagesWebhook?.close()
+		tellMessagesWebhook = WebhookClient.withUrl(config.getString("tell-webhook")!!)
 
 		// Evento Chat
 		val eventSource = File(dataFolder, "evento-chat-messages.txt")

@@ -189,12 +189,8 @@ object ChatUtils {
 			val date = "${String.format("%02d", calendar[Calendar.DAY_OF_MONTH])}/${String.format("%02d", calendar[Calendar.MONTH] + 1)}/${String.format("%02d", calendar[Calendar.YEAR])} ${String.format("%02d", calendar[Calendar.HOUR_OF_DAY])}:${String.format("%02d", calendar[Calendar.MINUTE])}"
 			DreamChat.INSTANCE.pmLog.appendText("[$date] ${sender.name} -> ${receiver.name}: $message\n")
 
-			val json = JsonObject()
-			json["type"] = "sendMessage"
-			json["message"] = "`[$date]` \uD83D\uDD75 **`${sender.name}`** » **`${receiver.name}`**: $message\n"
-			json["textChannelId"] = "378319231651151892"
-
-			SocketUtils.send(json, port = 60799)
+			DreamChat.INSTANCE.tellMessagesQueue
+				.add("`[$date]` \uD83D\uDD75 **`${sender.name}`** » **`${receiver.name}`**: $message")
 		}
 
 		for (staff in Bukkit.getOnlinePlayers().asSequence().filter { it.hasPermission("dreamchat.snoop") }.filter { it !in DreamChat.INSTANCE.hideTells }) {
