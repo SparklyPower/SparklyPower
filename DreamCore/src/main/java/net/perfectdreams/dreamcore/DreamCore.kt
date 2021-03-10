@@ -23,7 +23,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import kotlin.concurrent.thread
 
-class DreamCore : JavaPlugin() {
+class DreamCore : KotlinPlugin() {
 	companion object {
 		lateinit var dreamConfig: DreamConfig
 		val INSTANCE
@@ -44,7 +44,6 @@ class DreamCore : JavaPlugin() {
 
 	val dreamEventManager = DreamEventManager()
 	lateinit var dreamScriptManager: DreamScriptManager
-	val dreamCommandManager = DreamCommandManager(this)
 
 	override fun onEnable() {
 		saveDefaultConfig()

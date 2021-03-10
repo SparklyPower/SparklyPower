@@ -18,6 +18,7 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.FunnyIds
 import net.perfectdreams.dreammochilas.dao.Mochila
@@ -92,7 +93,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
         e.isCancelled = true
 
         if (ChestShopSign.isValid(e.clickedBlock)) {
-            GlobalScope.launch(BukkitDispatcher(m, true)) {
+            m.launchAsyncThread {
                 m.logger.info { "Player ${e.player.name} is doing transaction, is mutex locked? Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
 
                 val triggerType = "${e.player.name} buying/selling stuff"
@@ -101,11 +102,11 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 if (mochila == null) {
                     e.player.sendMessage("§cEssa mochila não existe!")
                     // Uuuuuh, what are you doing then?
-                    return@launch
+                    return@launchAsyncThread
                 }
 
                 val triggerMochilaSave = mochila.lockForInventoryManipulation {
-                    withContext(BukkitDispatcher(m, false)) {
+                    onMainThread {
                         val sign = clickedBlock.state as Sign
                         try {
                             m.logger.info { "Preparing Pre Transaction Event for ${e.player.name}... Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
@@ -121,7 +122,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                             if (r.isCancelled) {
                                 m.logger.info { "Pre Transaction Event for ${e.player.name} was cancelled! ${r.transactionType} ${r.transactionOutcome}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
                                 MochilaUtils.removeCachedMochila(mochila)
-                                return@withContext false
+                                return@onMainThread false
                             }
 
                             val tEvent = TransactionEvent(r, sign)
@@ -131,27 +132,27 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                             if (tEvent.isCancelled) {
                                 m.logger.info { "Transaction Event for ${e.player.name} was cancelled! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
                                 MochilaUtils.removeCachedMochila(mochila)
-                                return@withContext false
+                                return@onMainThread false
                             }
 
                             m.logger.info { "Transaction Event for ${e.player.name} was successfully completed! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
 
-                            return@withContext true
+                            return@onMainThread true
                         } catch (var8: SecurityException) {
                             var8.printStackTrace()
-                            return@withContext false
+                            return@onMainThread false
                         } catch (var8: IllegalAccessException) {
                             var8.printStackTrace()
-                            return@withContext false
+                            return@onMainThread false
                         } catch (var8: java.lang.IllegalArgumentException) {
                             var8.printStackTrace()
-                            return@withContext false
+                            return@onMainThread false
                         } catch (var8: InvocationTargetException) {
                             var8.printStackTrace()
-                            return@withContext false
+                            return@onMainThread false
                         } catch (var8: NoSuchMethodException) {
                             var8.printStackTrace()
-                            return@withContext false
+                            return@onMainThread false
                         }
                     }
                 }
@@ -193,7 +194,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 if (position == -1) // wait what?
                     return
 
-                GlobalScope.launch(BukkitDispatcher(m, true)) {
+                m.launchAsyncThread {
                     MochilaUtils.mochilaCreationMutex.withLock {
                         val newInventory = Bukkit.createInventory(null, 27, "Mochila")
                         val funnyId = FunnyIds.generatePseudoId()
@@ -227,7 +228,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                         val loadedFromDatabaseMochila = MochilaUtils.retrieveMochila(mochila.id.value, "${e.player.name} mochila creation")!!
 
                         val inventory = loadedFromDatabaseMochila.getOrCreateMochilaInventory()
-                        withContext(BukkitDispatcher(m, false)) {
+                        onMainThread {
                             var item = item
 
                             item = item.lore(
@@ -245,18 +246,18 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 return
             }
 
-            GlobalScope.launch(BukkitDispatcher(m, true)) {
+            m.launchAsyncThread {
                 val mochila = MochilaUtils.retrieveMochila(mochilaId, "${e.player.name} mochila opening")
 
-                withContext(BukkitDispatcher(m, false)) {
+                onMainThread {
                     if (mochila == null) {
                         e.player.sendMessage("§cEssa mochila não existe!")
-                        return@withContext
+                        return@onMainThread
                     }
 
                     if (e.player.openInventory.topInventory.type != InventoryType.CRAFTING) {
                         m.logger.warning { "Player ${e.player.name} tried opening a backpack when they already had a inventory open! ${e.player.openInventory.topInventory.type} Backpack ID: ${mochila.id.value}" }
-                        return@withContext
+                        return@onMainThread
                     }
 
                     m.logger.info { "Player ${e.player.name} opened a backpack. Backpack ID: ${mochila.id.value}" }
@@ -292,7 +293,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 }
             }
 
-            GlobalScope.launch(BukkitDispatcher(m, true)) {
+            m.launchAsyncThread {
                 MochilaUtils.saveMochila(holder.mochila, "${e.player.name} mochila inventory close")
             }
         }

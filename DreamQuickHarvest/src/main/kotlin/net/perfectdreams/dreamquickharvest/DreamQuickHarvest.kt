@@ -6,12 +6,12 @@ import com.gmail.nossr50.datatypes.experience.XPGainSource
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.player.UserManager
-import com.okkero.skedule.BukkitDispatcher
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.listeners.InventoryListener
 import net.perfectdreams.dreammochilas.tables.Mochilas
@@ -65,8 +65,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				return
 
 			e.isCancelled = true
-
-			GlobalScope.launch(BukkitDispatcher(plugin)) {
+			
+			launchMainThread {
 				val (inventoryTarget, mochila) = getInventoryTarget(e)
 
 				doQuickHarvestOnCrop(
@@ -78,7 +78,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				)
 
 				if (mochila != null) {
-					withContext(BukkitDispatcher(plugin, true)) {
+					onAsyncThread {
 						// Let's unlock the inventory lock!
 						mochila.mochilaInventoryManipulationLock.unlock()
 						MochilaUtils.saveMochila(mochila, "${e.player.name} harvesting")
@@ -94,7 +94,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 			e.isCancelled = true
 
-			GlobalScope.launch(BukkitDispatcher(this)) {
+			launchMainThread {
 				val (inventoryTarget, mochila) = getInventoryTarget(e)
 
 				val ttl = System.nanoTime()
@@ -102,7 +102,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				logger.info { "Took ${System.nanoTime() - ttl}ns to harvest cocoa" }
 
 				if (mochila != null) {
-					withContext(BukkitDispatcher(plugin, true)) {
+					onAsyncThread {
 						// Let's unlock the inventory lock!
 						mochila.mochilaInventoryManipulationLock.unlock()
 						MochilaUtils.saveMochila(mochila, "${e.player.name} harvesting")
@@ -115,13 +115,13 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (e.block.type == Material.SUGAR_CANE && (e.block.getRelative(BlockFace.DOWN).type == Material.SUGAR_CANE || e.block.getRelative(BlockFace.UP).type == Material.SUGAR_CANE)) { // Apenas execute o quick harvest caso seja uma plantação de sugar cane
 			e.isCancelled = true
 
-			GlobalScope.launch(BukkitDispatcher(this)) {
+			launchMainThread {
 				val (inventoryTarget, mochila) = getInventoryTarget(e)
 
 				doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget)
 
 				if (mochila != null) {
-					withContext(BukkitDispatcher(plugin, true)) {
+					onAsyncThread {
 						// Let's unlock the inventory lock!
 						mochila.mochilaInventoryManipulationLock.unlock()
 						MochilaUtils.saveMochila(mochila, "${e.player.name} harvesting")
@@ -142,7 +142,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			val mochilaId = item.getStoredMetadata("mochilaId")?.toLong() ?: -1L // Impossible anyways
 
 			if (isMochilaItem) {
-				mochila = withContext(BukkitDispatcher(this, true)) {
+				mochila = onAsyncThread {
 					MochilaUtils.retrieveMochila(mochilaId, "${e.player.name} harvesting")
 				}
 

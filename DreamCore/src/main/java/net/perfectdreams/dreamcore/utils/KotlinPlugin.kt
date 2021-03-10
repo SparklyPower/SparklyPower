@@ -1,12 +1,15 @@
 package net.perfectdreams.dreamcore.utils
 
+import kotlinx.coroutines.*
 import net.perfectdreams.commands.bukkit.BukkitCommandManager
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.commands.*
+import net.perfectdreams.dreamcore.utils.scheduler.BukkitDispatcher
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.concurrent.ConcurrentLinkedQueue
 
 /**
  * Classe que permite "reload" sem explodir o servidor
@@ -14,12 +17,17 @@ import org.bukkit.plugin.java.JavaPlugin
  * Todos os plugins do PerfectDreams devem extender a classe KotlinPlugin!
  */
 open class KotlinPlugin : JavaPlugin() {
+	companion object {
+		internal val PLUGIN_TASK_THREAD_LOCAL = ThreadLocal<KotlinPlugin>()
+	}
+
 	// Lista de comandos registrados por este plugin
 	val commandList = mutableListOf<AbstractCommand>()
 	@Deprecated("Please use dreamCommandManager")
 	val bukkitCommandManager by lazy { BukkitCommandManager(this) }
 	val dreamCommandManager by lazy { DreamCommandManager(this) }
 	val serverEvents = mutableListOf<ServerEvent>()
+	val activeJobs = ConcurrentLinkedQueue<Job>()
 
 	override fun onEnable() {
 		softEnable()
@@ -53,6 +61,34 @@ open class KotlinPlugin : JavaPlugin() {
 
 	open fun softDisable() {
 
+	}
+
+	fun launchMainThread(block: suspend CoroutineScope.() -> Unit) {
+		val job = GlobalScope.launch(
+			BukkitDispatcher(this, false) + PLUGIN_TASK_THREAD_LOCAL.asContextElement(value = this@KotlinPlugin),
+			block = block
+		)
+		// Yes, the order matters, since sometimes the invokeOnCompletion would be invoked before the job was
+		// added to the list, causing leaks.
+		// invokeOnCompletion is also invoked even if the job was already completed at that point, so no worries!
+		activeJobs.add(job)
+		job.invokeOnCompletion {
+			activeJobs.remove(job)
+		}
+	}
+
+	fun launchAsyncThread(block: suspend CoroutineScope.() -> Unit) {
+		val job = GlobalScope.launch(
+			BukkitDispatcher(this, true) + PLUGIN_TASK_THREAD_LOCAL.asContextElement(value = this@KotlinPlugin),
+			block = block
+		)
+		// Yes, the order matters, since sometimes the invokeOnCompletion would be invoked before the job was
+		// added to the list, causing leaks.
+		// invokeOnCompletion is also invoked even if the job was already completed at that point, so no worries!
+		activeJobs.add(job)
+		job.invokeOnCompletion {
+			activeJobs.remove(job)
+		}
 	}
 
 	/**
