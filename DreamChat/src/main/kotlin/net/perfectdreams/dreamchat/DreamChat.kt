@@ -73,8 +73,6 @@ class DreamChat : KotlinPlugin() {
 
 	val replacers = mutableMapOf<Regex, String>()
 
-	val artists = mutableSetOf<UUID>()
-	val partners = mutableSetOf<UUID>()
 	val cachedDiscordAccounts = Caffeine.newBuilder().maximumSize(1_000)
 		.expireAfterWrite(3, TimeUnit.DAYS)
 		.build<Long, Optional<DiscordAccountInfo>>()
@@ -180,68 +178,6 @@ class DreamChat : KotlinPlugin() {
 				}
 
 				waitFor(20 * 15)
-			}
-		}
-
-		scheduler().schedule(this, SynchronizationContext.ASYNC) {
-			while (true) {
-				val request = HttpRequest.get("https://loritta.website/api/v1/loritta/users/artists")
-
-				if (request.code() == 200) {
-					val body = request.body()
-					val json = DreamUtils.jsonParser.parse(body).array
-
-					val results = transaction(Databases.databaseNetwork) {
-						DiscordAccount.find { DiscordAccounts.discordId inList json.map { it.string.toLong() } and (DiscordAccounts.isConnected eq true) }.toMutableList()
-					}
-
-					val newArtists = mutableSetOf<UUID>()
-
-					for (entry in json) {
-						val long = entry.string.toLong()
-
-						val result = results.firstOrNull { it.discordId == long } ?: continue
-						newArtists.add(result.minecraftId)
-					}
-
-					switchContext(SynchronizationContext.SYNC)
-					artists.clear()
-					artists.addAll(newArtists)
-					switchContext(SynchronizationContext.ASYNC)
-				}
-
-				waitFor(20 * 60)
-			}
-		}
-
-		scheduler().schedule(this, SynchronizationContext.ASYNC) {
-			while (true) {
-				val request = HttpRequest.get("https://loritta.website/api/v1/loritta/users/partners")
-
-				if (request.code() == 200) {
-					val body = request.body()
-					val json = DreamUtils.jsonParser.parse(body).array
-
-					val results = transaction(Databases.databaseNetwork) {
-						DiscordAccount.find { DiscordAccounts.discordId inList json.map { it.string.toLong() } and (DiscordAccounts.isConnected eq true) }.toMutableList()
-					}
-
-					val newArtists = mutableSetOf<UUID>()
-
-					for (entry in json) {
-						val long = entry.string.toLong()
-
-						val result = results.firstOrNull { it.discordId == long } ?: continue
-						newArtists.add(result.minecraftId)
-					}
-
-					switchContext(SynchronizationContext.SYNC)
-					partners.clear()
-					partners.addAll(newArtists)
-					switchContext(SynchronizationContext.ASYNC)
-				}
-
-				waitFor(20 * 60)
 			}
 		}
 
