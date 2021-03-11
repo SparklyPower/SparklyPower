@@ -14,7 +14,8 @@ import java.net.ServerSocket
 
 class SocketServer(val socketPort: Int) {
 	fun start() {
-		val listener = ServerSocket(socketPort, 0, InetAddress.getLoopbackAddress())
+		// We want everyone to be able to listen to the socket server
+		val listener = ServerSocket(socketPort, 0, null)
 		try {
 			while (true) {
 				val socket = listener.accept()
