@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamchat
 
 import club.minnced.discord.webhook.WebhookClient
+import club.minnced.discord.webhook.send.AllowedMentions
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.kevinsawicki.http.HttpRequest
@@ -209,6 +210,7 @@ class DreamChat : KotlinPlugin() {
 								.setUsername("Mensagens Privadas \uD83D\uDC40")
 								.setAvatarUrl("https://cdn.discordapp.com/emojis/726559073545486476.png?v=1")
 								.setContent(builder.toString())
+								.setAllowedMentions(AllowedMentions.none())
 								.build()
 						)
 					} catch (e: Exception) {

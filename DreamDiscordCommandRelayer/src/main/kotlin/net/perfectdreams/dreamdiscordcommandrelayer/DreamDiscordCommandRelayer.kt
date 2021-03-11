@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamdiscordcommandrelayer
 
 import club.minnced.discord.webhook.WebhookClient
+import club.minnced.discord.webhook.send.AllowedMentions
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
@@ -52,6 +53,7 @@ class DreamDiscordCommandRelayer : KotlinPlugin(), Listener {
 								.setUsername("Gabriela, a amiga dos comandos \uD83D\uDCBB")
 								.setAvatarUrl("https://cdn.discordapp.com/attachments/513405772911345664/769319309977583676/gabriela_avatar.png")
 								.setContent(builder.toString())
+								.setAllowedMentions(AllowedMentions.none())
 								.build()
 						)
 					} catch (e: Exception) {
