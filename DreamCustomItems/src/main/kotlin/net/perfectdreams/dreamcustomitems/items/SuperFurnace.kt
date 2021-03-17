@@ -1,5 +1,13 @@
 package net.perfectdreams.dreamcustomitems.items
 
+import com.gmail.nossr50.config.Config
+import com.gmail.nossr50.config.experience.ExperienceConfig
+import com.gmail.nossr50.datatypes.experience.XPGainReason
+import com.gmail.nossr50.datatypes.experience.XPGainSource
+import com.gmail.nossr50.datatypes.player.McMMOPlayer
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType
+import com.gmail.nossr50.mcMMO
+import com.gmail.nossr50.skills.smelting.Smelting
 import com.gmail.nossr50.util.player.UserManager
 import com.okkero.skedule.CoroutineTask
 import com.okkero.skedule.schedule
@@ -8,10 +16,7 @@ import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.holders.SuperFurnaceHolder
-import org.bukkit.Bukkit
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.SoundCategory
+import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.inventory.FurnaceRecipe
 import org.bukkit.inventory.ItemStack
@@ -65,6 +70,26 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
 
     fun playersNearSuperFurnace() = location.world.getNearbyPlayers(location, 10.0)
 
+    // MCMMO SMELTING XP
+    fun getResourceXp(smelting: ItemStack): Int {
+        return if (mcMMO.getModManager().isCustomOre(smelting.type)) mcMMO.getModManager().getBlock(smelting.type).smeltingXpGain else ExperienceConfig.getInstance().getXp(PrimarySkillType.SMELTING, smelting.type)
+    }
+
+    // MCMMO DOUBLE SMELTING
+    fun smeltProcessing(smelting: ItemStack, result: ItemStack, mcmmoPlayer: McMMOPlayer): ItemStack {
+        mcmmoPlayer.smeltingManager.applyXpGain(getResourceXp(smelting).toFloat(), XPGainReason.PVE, XPGainSource.PASSIVE)
+
+        return if (Config.getInstance().getDoubleDropsEnabled(PrimarySkillType.SMELTING, result.type) && mcmmoPlayer.smeltingManager.isSecondSmeltSuccessful) {
+            val newResult: ItemStack = result.clone()
+
+            newResult.amount = result.amount + 1
+
+            newResult;
+        } else {
+            result;
+        }
+    }
+
     fun convertToSmeltedItem(itemStack: ItemStack): ItemStack? {
         var result: ItemStack? = null
         var newMcMMOAmount = 0
@@ -73,12 +98,15 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
 
         while (iter.hasNext()) {
             val recipe: Recipe = iter.next() as? FurnaceRecipe ?: continue
-            if ((recipe as FurnaceRecipe).input.type !== itemStack.type) continue
+            val furnaceRecipe = recipe as FurnaceRecipe
+            if (furnaceRecipe.input.type !== itemStack.type) continue
 
-            result = mcmmoPlayer?.smeltingManager?.smeltProcessing(itemStack, recipe.result)
+            result = smeltProcessing(itemStack, recipe.result, mcmmoPlayer)
 
 			repeat(itemStack.amount) {
-				newMcMMOAmount += mcmmoPlayer?.smeltingManager?.smeltProcessing(itemStack, recipe.result)?.amount ?: 0
+                player?.giveExp(mcmmoPlayer.smeltingManager.vanillaXPBoost(recipe.experience.toInt())) // TEST
+
+				newMcMMOAmount += smeltProcessing(itemStack, recipe.result, mcmmoPlayer).amount ?: 0
 			}
             
             break
@@ -97,7 +125,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
     fun start() {
         listOf(18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32).forEach {
             if (inventory.getItem(it) != null) {
-                player?.sendMessage("§cTire os itens dos slots de saída da super fornalha antes de ligar ela!")
+                player?.sendMessage("§8[§6§lSuper Fornalha§8] §cTire os itens dos slots de saída da super fornalha antes de ligar ela!")
                 return
             }
         }
@@ -115,7 +143,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
         scheduler = scheduler().schedule(m) {
             while (running) {
                 playersNearSuperFurnace().forEach {
-                    it.playSound(location, "perfectdreams.sfx.furnace.crackling", SoundCategory.BLOCKS, 1f, 1f)
+                    it.playSound(location, Sound.BLOCK_FURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS, 1f, 1f)
                 }
 
 
@@ -126,12 +154,25 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
 
                 if (0 >= ticksRunning) {
                     playersNearSuperFurnace().forEach {
-                        it.stopSound("perfectdreams.sfx.furnace.crackling", SoundCategory.BLOCKS)
+                        it.stopSound(Sound.BLOCK_FURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS)
                     }
 
                     running = false
-                    finish()
-                    updateInventory()
+
+                    var canFinishSmelting = true
+
+                    listOf(18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32).forEach {
+                        if (inventory.getItem(it) != null) {
+                            player?.sendMessage("§8[§6§lSuper Fornalha§8] §c§lSeus itens já estão prontos, mas não há espaço para eles! Tire os itens dos slots de saída da super fornalha e ligue ela novamente.")
+                            updateInventory()
+                            canFinishSmelting = false
+                        }
+                    }
+
+                    if (canFinishSmelting) {
+                        finish()
+                        updateInventory()
+                    }
 
                     break
                 }
@@ -162,6 +203,8 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
                 }
             }
         }
+
+        player?.sendMessage("§8[§6§lSuper Fornalha§8] §c§lSeus itens já estão prontos!")
     }
 
     fun stop() {
@@ -169,7 +212,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
         updateInventory()
 
         playersNearSuperFurnace().forEach {
-            it.stopSound("perfectdreams.sfx.furnace.crackling", SoundCategory.BLOCKS)
+            it.stopSound(Sound.BLOCK_FURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS)
         }
     }
 

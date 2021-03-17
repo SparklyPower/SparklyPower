@@ -63,7 +63,7 @@ object CustomItems {
                 "§7A fornalha mais rápida existente! Ela é",
                 "§7perfeita para esquentar minérios.",
                 "§7",
-                "§cOBSERVAÇÃO: §7Apenas §b§lVIPs+ §7ou §b§lVIPs§e§l++ §7conseguem usar o equipamento!"
+                "§cOBSERVAÇÃO: §7Apenas §b§lVIPs+§7, §b§lVIPs+ §7ou §b§lVIPs++ §7conseguem usar o equipamento!"
         )
 
         playerProfile = Bukkit.createProfile(UUID.fromString("c70bc8a2-61cb-46f8-955f-fd27026834f0")).apply {
