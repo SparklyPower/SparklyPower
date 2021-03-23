@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryMoveItemEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
@@ -82,5 +83,30 @@ class DreamMenuListener : Listener {
 		if (slot != null) {
 			slot.onClick?.invoke(e.whoClicked)
 		}
+	}
+
+	@EventHandler
+	fun onItemMove(e: InventoryMoveItemEvent) {
+		// This is used to block the following:
+		// Click on your inventory (the player's inventory) twice on a item
+		// This drags the item from the DreamMenu to your inventory
+		//
+		// We also block drag from the player's inventory to DreamMenu and vice-versa
+		val destinationHolder = e.destination.holder
+		val sourceHolder = e.source.holder
+		val dreamMenuHolder: DreamMenu.DreamMenuHolder
+
+		// If the destination or the source is a DreamMenuHolder...
+		if (destinationHolder is DreamMenu.DreamMenuHolder)
+			dreamMenuHolder = destinationHolder
+		else if (sourceHolder is DreamMenu.DreamMenuHolder)
+			dreamMenuHolder = sourceHolder
+		else return
+
+		// The item click is already handled by InventoryClickEvent so we don't need to care about this
+		val dreamMenu = dreamMenuHolder.menu
+
+		if (dreamMenu.cancelItemMovement)
+			e.isCancelled = true
 	}
 }
