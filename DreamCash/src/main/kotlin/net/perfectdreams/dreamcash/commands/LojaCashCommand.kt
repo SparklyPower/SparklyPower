@@ -83,32 +83,32 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             }
 
             // Money
-            generateItemAt(0, 2, Material.OAK_SIGN, "§a234375 Sonhos", 265) {
-                sender.balance += 234375
+            generateItemAt(0, 2, Material.EMERALD, "§a130000 Sonhos", 250) {
+                sender.balance += 130000
             }
-            generateItemAt(1, 2, Material.OAK_SIGN, "§a468750 Sonhos", 530) {
-                sender.balance += 468750
+
+            generateItemAt(1, 2, Material.EMERALD, "§a260000 Sonhos", 500) {
+                sender.balance += 260000
             }
-            generateItemAt(2, 2, Material.OAK_SIGN, "§a937500 Sonhos", 1045) {
-                sender.balance += 937500
+
+            generateItemAt(2, 2, Material.EMERALD, "§a500000 Sonhos", 950) {
+                sender.balance += 500000
             }
-            generateItemAt(3, 2, Material.OAK_SIGN, "§a1875000 Sonhos", 2090) {
-                sender.balance += 1875000
+
+            generateItemAt(3, 2, Material.EMERALD, "§a1000000 Sonhos", 1_900) {
+                sender.balance += 1000000
             }
-            generateItemAt(4, 2, Material.OAK_SIGN, "§a3750000 Sonhos", 4165) {
-                sender.balance += 3750000
+
+            generateItemAt(4, 2, Material.EMERALD, "§a2000000 Sonhos", 3_800) {
+                sender.balance += 2000000
             }
-            generateItemAt(5, 2, Material.OAK_SIGN, "§a7500000 Sonhos", 8325) {
-                sender.balance += 7500000
+
+            generateItemAt(5, 2, Material.EMERALD, "§a5000000 Sonhos", 9_500) {
+                sender.balance += 5000000
             }
-            generateItemAt(6, 2, Material.OAK_SIGN, "§a15000000 Sonhos", 16650) {
-                sender.balance += 15000000
-            }
-            generateItemAt(7, 2, Material.OAK_SIGN, "§a30000000 Sonhos", 33300) {
-                sender.balance += 30000000
-            }
-            generateItemAt(8, 2, Material.OAK_SIGN, "§a60000000 Sonhos", 66600) {
-                sender.balance += 60000000
+
+            generateItemAt(6, 2, Material.EMERALD, "§a10000000 Sonhos", 19_000) {
+                sender.balance += 10000000
             }
 
             // Coisas Reais
