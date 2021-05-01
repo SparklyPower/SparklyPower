@@ -67,7 +67,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 	@EventHandler
 	fun onCraft(event: CraftItemEvent) {
 		val hasCustomMap = event.inventory.matrix.filterNotNull().any {
-			it.getStoredMetadata("customMapOwner") != null || it.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^" || it.lore?.firstOrNull() == "§7§o\"Sim, eu estava lá!\""
+			it.getStoredMetadata("customMapOwner") != null || it.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^" || it.itemMeta?.displayName?.endsWith("Players Online!") == true
 		}
 
 		if (hasCustomMap)
@@ -83,7 +83,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 		if (clickedInventory.type != InventoryType.CARTOGRAPHY) // el gambiarra
 			return
 
-		if (currentItem.getStoredMetadata("customMapOwner") != null || currentItem.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^") {
+		if (currentItem.getStoredMetadata("customMapOwner") != null || currentItem.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^" || currentItem.itemMeta?.displayName?.endsWith("Players Online!") == true) {
 			event.isCancelled = true
 		}
 
