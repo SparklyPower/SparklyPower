@@ -33,7 +33,7 @@ dependencies {
     compileOnlyApi(files("../libs/WorldGuard.jar"))
     compileOnlyApi("com.github.TechFortress:GriefPrevention:16.17.1")
     api("net.perfectdreams.commands:command-framework-core:0.0.8")
-    api("com.github.dmulloy2:PacketWrapper:5262e36c72")
+    api("com.github.SparklyPower:PacketWrapper:88ddd591d8")
     compileOnlyApi("net.milkbowl.vault:VaultAPI:1.6")
     compileOnlyApi("com.github.MascusJeoraly:LanguageUtils:1.9")
     api("org.mongodb:mongo-java-driver:3.7.0-rc0")
