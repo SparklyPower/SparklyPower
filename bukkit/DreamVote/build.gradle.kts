@@ -5,7 +5,7 @@ plugins {
 }
 
 repositories {
-    mavenCentral()
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -13,7 +13,8 @@ dependencies {
     compileOnly(project(":bukkit:DreamChat"))
     compileOnly(project(":bukkit:DreamCash"))
     compileOnly(project(":bukkit:DreamCorreios"))
-    compileOnly("com.vexsoftware:nuvotifier-bukkit:2.6.0")
+    compileOnly("com.github.NuVotifier.NuVotifier:nuvotifier-api:2.7.2")
+    compileOnly("com.github.NuVotifier.NuVotifier:nuvotifier-bukkit:2.7.2")
 }
 
 tasks.withType<KotlinCompile> {
