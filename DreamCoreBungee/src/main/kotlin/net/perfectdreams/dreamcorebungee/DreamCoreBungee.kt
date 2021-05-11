@@ -5,7 +5,6 @@ import net.md_5.bungee.config.ConfigurationProvider
 import net.md_5.bungee.config.YamlConfiguration
 import net.perfectdreams.dreamcorebungee.commands.BungeeCommandManager
 import net.perfectdreams.dreamcorebungee.commands.DreamCoreBungeeCommand
-import net.perfectdreams.dreamcorebungee.listeners.PlayerListener
 import net.perfectdreams.dreamcorebungee.listeners.SocketListener
 import net.perfectdreams.dreamcorebungee.network.socket.SocketServer
 import net.perfectdreams.dreamcorebungee.tables.Users
@@ -58,8 +57,6 @@ class DreamCoreBungee : Plugin() {
 			thread { SocketServer(dreamConfig.socketPort).start() }
 			this.proxy.pluginManager.registerListener(this, SocketListener())
 		}
-
-		this.proxy.pluginManager.registerListener(this, PlayerListener(this))
 
 		val commandManager = BungeeCommandManager(this)
 

@@ -1,3 +1,7 @@
-dependencies {
-    compileOnly(gradleApi())
+plugins {
+    `kotlin-dsl`
+}
+
+repositories {
+    jcenter()
 }

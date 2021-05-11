@@ -18,7 +18,10 @@ pluginManagement {
 
 rootProject.name = "sparklypower-parent"
 
+// ===[ GENERAL PURPOSE ]===
 include(":KotlinRuntime")
+
+// ===[ PAPER ]===
 include(":DreamAntiAFK")
 include(":DreamCore")
 include(":DreamAuth")
@@ -91,3 +94,6 @@ include(":DreamPvPTweaks")
 include(":DreamRoadProtector")
 include(":DreamEmptyWorldGenerator")
 include(":DreamCorreios")
+
+// ===[ BUNGEE ]===
+include(":DreamCoreBungee")

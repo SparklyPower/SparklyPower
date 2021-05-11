@@ -33,6 +33,7 @@ allprojects {
         maven("https://repo.codemc.org/repository/maven-public")
         // maven("http://repo.ess3.net/content/repositories/bukkitsnapshot/")
         maven("https://jitpack.io")
+        maven("https://papermc.io/repo/repository/maven-public/")
     }
 }
 

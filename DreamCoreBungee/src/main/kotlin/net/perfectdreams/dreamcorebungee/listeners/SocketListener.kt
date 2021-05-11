@@ -31,7 +31,7 @@ class SocketListener : Listener {
 						jsonObject(
 								"name" to it.name,
 								"server" to it.server.info.name,
-								"locale" to it.locale.toString(),
+								"locale" to (it.locale?.toString() ?: "???"),
 								"ping" to it.ping,
 								"isForgeUser" to it.isForgeUser
 						)
