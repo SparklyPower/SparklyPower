@@ -40,23 +40,29 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-
-    # Runs a single command using the runners shell
-    - name: Build DreamCore with Gradle
-      run: "./gradlew :DreamCore:build -Dbuild.number=$GITHUB_RUN_NUMBER -Dgit.branch=$GITHUB_REF -Dcommit.hash=$GITHUB_SHA -Dcompiled.at=${{ steps.current-time.outputs.time }}"
-
-    - name: Copy DreamCore to the libs folder
-      run: cp DreamCore/build/libs/DreamCore-shadow.jar libs/
       
     # Runs a single command using the runners shell
     - name: Build with Gradle
       run: "./gradlew build -Dbuild.number=$GITHUB_RUN_NUMBER -Dgit.branch=$GITHUB_REF -Dcommit.hash=$GITHUB_SHA -Dcompiled.at=${{ steps.current-time.outputs.time }} --continue --parallel"
 
     # Upload Artifacts to GitHub
-    # Loritta
     - uses: actions/upload-artifact@v2
-      name: "Upload Plugins"
+      name: "Upload Common Plugins"
       if: ${{ always() }}
       with:
-        name: SparklyPower Plugins
-        path: "*/build/libs/*.jar"
+        name: SparklyPower Common Plugins
+        path: "/common/*/build/libs/*.jar"
+
+    - uses: actions/upload-artifact@v2
+      name: "Upload Bukkit Plugins"
+      if: ${{ always() }}
+      with:
+        name: SparklyPower Bukkit Plugins
+        path: "/bukkit/*/build/libs/*.jar"
+
+    - uses: actions/upload-artifact@v2
+      name: "Upload BungeeCord Plugins"
+      if: ${{ always() }}
+      with:
+        name: SparklyPower BungeeCord Plugins
+        path: "/bungee/*/build/libs/*.jar"
