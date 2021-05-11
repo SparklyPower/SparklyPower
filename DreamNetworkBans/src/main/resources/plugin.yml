@@ -1,0 +1,5 @@
+name: DreamNetworkBans
+main: net.perfectdreams.dreamnetworkbans.DreamNetworkBans
+version: 1.0.0
+softDepends:
+- DreamCoreBungee

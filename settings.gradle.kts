@@ -97,3 +97,5 @@ include(":DreamCorreios")
 
 // ===[ BUNGEE ]===
 include(":DreamCoreBungee")
+include(":DreamMOTDBungee")
+include(":DreamNetworkBans")

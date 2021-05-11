@@ -26,7 +26,7 @@ val shadowWithRuntimeDependencies by configurations.creating {
 }
 
 dependencies {
-    compileOnlyApi("io.github.waterfallmc:waterfall-api:1.16-R0.4-SNAPSHOT")
+    compileOnlyApi("io.github.waterfallmc:waterfall-proxy:1.16-R0.4-SNAPSHOT")
 
     api("com.zaxxer:HikariCP:4.0.3")
     api("org.postgresql:postgresql:42.2.20")
