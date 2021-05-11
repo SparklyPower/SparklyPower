@@ -51,18 +51,18 @@ jobs:
       if: ${{ always() }}
       with:
         name: SparklyPower Common Plugins
-        path: "/common/*/build/libs/*.jar"
+        path: "common/*/build/libs/*.jar"
 
     - uses: actions/upload-artifact@v2
       name: "Upload Bukkit Plugins"
       if: ${{ always() }}
       with:
         name: SparklyPower Bukkit Plugins
-        path: "/bukkit/*/build/libs/*.jar"
+        path: "bukkit/*/build/libs/*.jar"
 
     - uses: actions/upload-artifact@v2
       name: "Upload BungeeCord Plugins"
       if: ${{ always() }}
       with:
         name: SparklyPower BungeeCord Plugins
-        path: "/bungee/*/build/libs/*.jar"
+        path: "bungee/*/build/libs/*.jar"
