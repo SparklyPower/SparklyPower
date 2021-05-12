@@ -14,6 +14,7 @@ import net.md_5.bungee.config.ConfigurationProvider
 import net.perfectdreams.dreamcorebungee.utils.discord.DiscordWebhook
 import net.perfectdreams.dreamnetworkbans.listeners.SocketListener
 import net.perfectdreams.dreamnetworkbans.utils.ASNManager
+import net.perfectdreams.minecraftmojangapi.MinecraftMojangAPI
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -43,6 +44,7 @@ class DreamNetworkBans : KotlinPlugin() {
 	}
 
 	val loggedInPlayers = Collections.newSetFromMap(ConcurrentHashMap<UUID, Boolean>())
+	val minecraftMojangApi = MinecraftMojangAPI()
 
 	override fun onEnable() {
 		super.onEnable()

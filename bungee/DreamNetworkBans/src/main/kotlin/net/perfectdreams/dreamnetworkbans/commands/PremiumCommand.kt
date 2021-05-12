@@ -1,23 +1,14 @@
 package net.perfectdreams.dreamnetworkbans.commands
 
-import net.md_5.bungee.api.CommandSender
-import net.md_5.bungee.api.Title
-import net.md_5.bungee.api.chat.HoverEvent
+import kotlinx.coroutines.runBlocking
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.dreamcorebungee.commands.SparklyBungeeCommand
 import net.perfectdreams.dreamcorebungee.utils.Databases
-import net.perfectdreams.dreamcorebungee.utils.discord.DiscordMessage
-import net.perfectdreams.dreamcorebungee.utils.extensions.toBaseComponent
 import net.perfectdreams.dreamcorebungee.utils.extensions.toTextComponent
 import net.perfectdreams.dreamnetworkbans.DreamNetworkBans
-import net.perfectdreams.dreamnetworkbans.dao.DiscordAccount
 import net.perfectdreams.dreamnetworkbans.listeners.LoginListener
-import net.perfectdreams.dreamnetworkbans.tables.DiscordAccounts
 import net.perfectdreams.dreamnetworkbans.tables.PremiumUsers
-import net.perfectdreams.dreamnetworkbans.utils.MCUtils
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -49,6 +40,15 @@ class PremiumCommand(val m: DreamNetworkBans) : SparklyBungeeCommand(arrayOf("pr
 	@Subcommand
 	fun root(sender: ProxiedPlayer, arg0: String) {
 		if (arg0 == "ativar" || arg0 == "enable") {
+			val userPremiumUniqueId = runBlocking {
+				m.minecraftMojangApi.getUniqueId(sender.name)
+			}
+
+			if (userPremiumUniqueId == null) {
+				sender.sendMessage("§cVocê não parece estar usando uma conta de Minecraft Original... Para evitar que você perca a sua conta no SparklyPower para sempre, eu irei apenas ignorar o que você pediu! ^-^".toTextComponent())
+				return
+			}
+
 			transaction(Databases.databaseNetwork) {
 				if (PremiumUsers.select { PremiumUsers.crackedUniqueId eq sender.uniqueId }.count() != 0L) {
 					sender.sendMessage("§cVocê já está usando uma conta premium!")
@@ -57,7 +57,7 @@ class PremiumCommand(val m: DreamNetworkBans) : SparklyBungeeCommand(arrayOf("pr
 
 				PremiumUsers.insert {
 					it[crackedUniqueId] = sender.uniqueId
-					it[premiumUniqueId] = LoginListener.getUUID(MCUtils.getUniqueId(sender.name)!!)
+					it[premiumUniqueId] = userPremiumUniqueId
 					it[crackedUsername] = sender.name
 				}
 

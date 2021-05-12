@@ -3,11 +3,14 @@ package net.perfectdreams.dreamnetworkbans.listeners
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.obj
 import com.github.salomonbrys.kotson.string
-import net.luckperms.api.LuckPermsProvider
+import kotlinx.coroutines.runBlocking
 import net.md_5.bungee.api.event.*
 import net.md_5.bungee.api.plugin.Listener
+import net.md_5.bungee.connection.InitialHandler
 import net.md_5.bungee.event.EventHandler
 import net.md_5.bungee.event.EventPriority
+import net.perfectdreams.dreamcorebungee.dao.User
+import net.perfectdreams.dreamcorebungee.network.DreamNetwork
 import net.perfectdreams.dreamcorebungee.utils.Databases
 import net.perfectdreams.dreamcorebungee.utils.DreamUtils
 import net.perfectdreams.dreamcorebungee.utils.extensions.toBaseComponent
@@ -22,17 +25,14 @@ import net.perfectdreams.dreamnetworkbans.tables.*
 import net.perfectdreams.dreamnetworkbans.utils.DateUtils
 import net.perfectdreams.dreamnetworkbans.utils.GeoUtils
 import net.perfectdreams.dreamnetworkbans.utils.LoginConnectionStatus
-import net.perfectdreams.dreamnetworkbans.utils.MCUtils
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.lang.reflect.Field
 import java.util.*
+import java.util.logging.Level
 import java.util.regex.Pattern
-import net.md_5.bungee.connection.InitialHandler
-import net.perfectdreams.dreamcorebungee.dao.User
-import net.perfectdreams.dreamcorebungee.network.DreamNetwork
-import org.jetbrains.exposed.sql.ResultRow
 import kotlin.collections.HashMap
 
 class LoginListener(val m: DreamNetworkBans) : Listener {
@@ -122,7 +122,26 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 				return@runAsync
 			}
 
-			val playerUniqueId = MCUtils.getUniqueId(event.connection.name)
+			val playerUniqueIdResult = runBlocking {
+				runCatching {
+					m.minecraftMojangApi.getUniqueId(event.connection.name)
+				}
+			}
+
+			if (playerUniqueIdResult.isFailure) {
+				val exception = playerUniqueIdResult.exceptionOrNull()
+				// Something went wrong while querying the UUID!
+				m.logger.log(Level.WARNING, exception) { "Something went wrong while querying ${event.connection.name}'s UUID!" }
+
+				event.isCancelled = true
+				event.setCancelReason(*"§cParece que a Mojang está tendo dificuldades no momento, tente mais tarde! :(".toBaseComponent())
+
+				event.completeIntent(m)
+				return@runAsync
+			}
+
+
+			val playerUniqueId = playerUniqueIdResult.getOrThrow()?.toString() // Should never throw
 
 			m.logger.info("Player ${event.connection} premium UUID is $playerUniqueId")
 
@@ -239,10 +258,10 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 
 					// E avisar para o auth server que é um player premium
 					DreamNetwork.PERFECTDREAMS_LOBBY.send(
-							jsonObject(
-									"type" to "addToPremiumPlayerList",
-									"uniqueId" to premiumData[PremiumUsers.crackedUniqueId].toString()
-							)
+						jsonObject(
+							"type" to "addToPremiumPlayerList",
+							"uniqueId" to premiumData[PremiumUsers.crackedUniqueId].toString()
+						)
 					)
 				} else {
 					m.logger.info("Player ${event.connection} logged in as a premium user, but doesn't have premium status...?")
@@ -369,10 +388,10 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 	@EventHandler
 	fun onQuit(event: PlayerDisconnectEvent) {
 		DreamNetwork.PERFECTDREAMS_LOBBY.send(
-				jsonObject(
-						"type" to "removeFromPremiumPlayerList",
-						"uniqueId" to event.player.uniqueId.toString()
-				)
+			jsonObject(
+				"type" to "removeFromPremiumPlayerList",
+				"uniqueId" to event.player.uniqueId.toString()
+			)
 		)
 	}
 
