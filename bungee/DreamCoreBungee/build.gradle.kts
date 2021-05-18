@@ -5,6 +5,7 @@ plugins {
     kotlin("jvm")
     `java-library`
     id("com.github.johnrengelman.shadow") version "4.0.4"
+    kotlin("plugin.serialization") version "1.4.32"
 }
 
 repositories {
@@ -28,11 +29,15 @@ val shadowWithRuntimeDependencies by configurations.creating {
 dependencies {
     compileOnlyApi("io.github.waterfallmc:waterfall-proxy:1.16-R0.4-SNAPSHOT")
 
+    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+
     api("com.zaxxer:HikariCP:4.0.3")
     api("org.postgresql:postgresql:42.2.20")
     api("org.jetbrains.exposed:exposed-core:0.28.1")
     api("org.jetbrains.exposed:exposed-dao:0.28.1")
     api("org.jetbrains.exposed:exposed-jdbc:0.28.1")
+    api("io.ktor:ktor-client-cio:1.5.4")
 
     api(Dependencies.DISCORD_WEBHOOKS)
 
@@ -58,7 +63,8 @@ tasks {
         relocate("org.bson", "net.perfectdreams.libs.org.bson")
 
         exclude {
-            it.file?.name?.startsWith("kotlin") == true || it.file?.name?.startsWith("patched_") == true
+            val file = it.file
+            (file?.name?.startsWith("kotlin") == true && file?.name?.contains("serialization") == false) || file?.name?.startsWith("patched_") == true
         }
     }
 

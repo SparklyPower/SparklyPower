@@ -141,7 +141,7 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 			}
 
 
-			val playerUniqueId = playerUniqueIdResult.getOrThrow()?.toString() // Should never throw
+			val playerUniqueId = playerUniqueIdResult.getOrThrow() // Should never throw
 
 			m.logger.info("Player ${event.connection} premium UUID is $playerUniqueId")
 
@@ -169,7 +169,7 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 			// Vamos verificar se é um premium player...
 			val premiumStatus = transaction(Databases.databaseNetwork) {
 				PremiumUsers.select {
-					PremiumUsers.premiumUniqueId eq getUUID(playerUniqueId)
+					PremiumUsers.premiumUniqueId eq playerUniqueId
 				}.firstOrNull()
 			}
 
@@ -434,10 +434,6 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 	}
 
 	companion object {
-		fun getUUID(id: String): UUID {
-			return UUID.fromString(id.substring(0, 8) + "-" + id.substring(8, 12) + "-" + id.substring(12, 16) + "-" + id.substring(16, 20) + "-" + id.substring(20, 32))
-		}
-
 		val idField: Field = InitialHandler::class.java.getDeclaredField("uniqueId").apply {
 			isAccessible = true
 		}
