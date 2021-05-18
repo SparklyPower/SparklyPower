@@ -58,12 +58,15 @@ class DreamMini : KotlinPlugin(), Listener {
 		if (config.getBoolean("command-relay.enabled")) {
 			registerEvents(DiscordCommandRelayer(this))
 		}
+
 		if (config.getBoolean("fancy-unknown-command")) {
 			registerEvents(UnknownCommandListener(this))
 		}
+
 		if (config.getBoolean("disable-phantoms")) {
 			registerEvents(DisablePhantomsListener(this))
 		}
+
 		if (config.getBoolean("filter-phantoms")) {
 			if (phantomFilterFile.exists()) {
 				phantomWhitelist.addAll(
@@ -74,6 +77,7 @@ class DreamMini : KotlinPlugin(), Listener {
 			registerEvents(FilterPhantomsListener(this))
 			registerCommand(PhantomCommand(this))
 		}
+
 		if (config.getBoolean("filter-weather")) {
 			if (weatherBlacklistFile.exists()) {
 				weatherBlacklist.addAll(
@@ -84,14 +88,20 @@ class DreamMini : KotlinPlugin(), Listener {
 			registerEvents(WeatherListener(this))
 			registerCommand(ChuvaCommand(this))
 		}
+
 		if (config.getBoolean("nether-teleport")) {
 			registerEvents(NetherTeleportListener(this))
 		}
+
 		if (config.getBoolean("atendente-da-loja")) {
 			val listener = AtendenteListener(this)
 			registerEvents(listener)
 			registerCommand(AtendenteListener.AtendenteMenuCommand(listener))
 			listener.loadAtendenteMenu()
+		}
+
+		if (config.getBoolean("back-to-spawn-on-unsafe-join")) {
+			registerEvents(BackToSpawnListener(this))
 		}
 
 		registerEvents(this)

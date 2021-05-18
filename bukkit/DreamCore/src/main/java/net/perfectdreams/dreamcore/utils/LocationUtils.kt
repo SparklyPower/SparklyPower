@@ -110,12 +110,7 @@ object LocationUtils {
 		} else MaterialUtils.HOLLOW_MATERIALS.contains(world.getBlockAt(x, y - 1, z).getType())
 	}
 
-	fun isBlockUnsafe(world: World, x: Int, y: Int, z: Int): Boolean {
-		if (isBlockDamaging(world, x, y, z)) {
-			return true
-		}
-		return isBlockAboveAir(world, x, y, z)
-	}
+	fun isBlockUnsafe(world: World, x: Int, y: Int, z: Int) = isBlockDamaging(world, x, y, z) && isBlockAboveAir(world, x, y, z)
 
 	fun isBlockDamaging(world: World, x: Int, y: Int, z: Int): Boolean {
 		val below = world.getBlockAt(x, y - 1, z)
