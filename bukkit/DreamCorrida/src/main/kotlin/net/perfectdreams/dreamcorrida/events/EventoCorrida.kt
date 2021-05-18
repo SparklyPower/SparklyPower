@@ -134,6 +134,20 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
         player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 200, 0, false, false))
 
         broadcastFakeArmor(player, world)
+        sendEmptyInventory(player)
+    }
+
+    fun sendEmptyInventory(player: Player) {
+        // We are going to empty the player's inventory with packets
+        val packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.WINDOW_ITEMS)
+
+        val air = ItemStack(Material.AIR)
+
+        packet.integers.write(0, 0) // 0 = Player Inventory
+        packet.itemListModifier.write(0, (0..44).map { air }) // No items should be used
+
+        // Send packet to player
+        ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet)
     }
 
     fun broadcastFakeArmor(player: Player, world: World) {
