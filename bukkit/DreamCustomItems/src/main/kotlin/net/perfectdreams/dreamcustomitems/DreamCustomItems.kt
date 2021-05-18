@@ -91,6 +91,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		registerEvents(BlockCraftListener(this))
 		registerEvents(RubyDropListener(this))
 		registerEvents(CustomBlocksListener(this))
+		registerEvents(EstalinhoListener(this))
 
 		val protocolManager = ProtocolLibrary.getProtocolManager()
 		protocolManager.addPacketListener(BlockPacketAdapter(this))
@@ -183,6 +184,34 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			it.setIngredient('R', Material.REDSTONE_BLOCK)
 			// TODO: Filter
 			it.setIngredient('U', Material.PRISMARINE_SHARD)
+		}
+
+		addRecipe(
+			"estalinho_red",
+			CustomItems.ESTALINHO_RED,
+			listOf(
+				"CPC",
+				"PXP",
+				"CPC"
+			)
+		) {
+			it.setIngredient('C', Material.RED_DYE)
+			it.setIngredient('P', Material.PAPER)
+			it.setIngredient('X', Material.GUNPOWDER)
+		}
+
+		addRecipe(
+			"estalinho_green",
+			CustomItems.ESTALINHO_GREEN,
+			listOf(
+				"CPC",
+				"PXP",
+				"CPC"
+			)
+		) {
+			it.setIngredient('C', Material.GREEN_DYE)
+			it.setIngredient('P', Material.PAPER)
+			it.setIngredient('X', Material.GUNPOWDER)
 		}
 	}
 

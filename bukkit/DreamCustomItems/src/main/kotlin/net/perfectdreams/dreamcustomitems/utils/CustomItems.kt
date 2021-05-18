@@ -35,6 +35,26 @@ object CustomItems {
             setDisplayName("§fCupcake")
         }
 
+    val ESTALINHO_RED = ItemStack(Material.PRISMARINE_SHARD)
+        .meta<ItemMeta> {
+            setCustomModelData(2)
+            setDisplayName("§c§lEstalinho")
+
+            lore = listOf(
+                "§7Cuidado para não machucar a mão!"
+            )
+        }
+
+    val ESTALINHO_GREEN = ItemStack(Material.PRISMARINE_SHARD)
+        .meta<ItemMeta> {
+            setCustomModelData(3)
+            setDisplayName("§a§lEstalinho")
+
+            lore = listOf(
+                "§7Cuidado para não machucar a mão!"
+            )
+        }
+
     val MICROWAVE = ItemStack(Material.PLAYER_HEAD)
         .meta<SkullMeta> {
             setDisplayName("§fMicro-ondas")
