@@ -93,6 +93,14 @@ class InventoryListener(val m: DreamMochilas) : Listener {
         e.isCancelled = true
 
         if (ChestShopSign.isValid(e.clickedBlock)) {
+            val state = clickedBlock.state as Sign
+
+            // Do not allow interacting with the sign if it is the owner of the sign
+            // While not having this doesn't seem to cause any issues (the owner buys items from themselves),
+            // it is better to have this as a "better be safe than sorry" measure
+            if (ChestShopSign.isOwner(e.player, state))
+                return
+
             m.launchAsyncThread {
                 m.logger.info { "Player ${e.player.name} is doing transaction, is mutex locked? Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
 
