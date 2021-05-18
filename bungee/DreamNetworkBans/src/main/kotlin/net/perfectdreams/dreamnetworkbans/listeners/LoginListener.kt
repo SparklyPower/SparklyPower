@@ -354,7 +354,8 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 				IpBan.find { IpBans.ip eq event.connection.address.hostString }.firstOrNull()
 			}
 
-			if (ipBan != null) {
+			// Because MCPE connections via Geyser uses "127.0.0.1" (for now), we will just ignore IP bans if they are bound to "127.0.0.1"
+			if (ipBan != null && ipBan.ip != "127.0.0.1") {
 				if (!ipBan.temporary || ipBan.expiresAt!! >= System.currentTimeMillis()) {
 					event.isCancelled = true
 					event.setCancelReason(*"""
