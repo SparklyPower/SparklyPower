@@ -55,10 +55,6 @@ class DreamMini : KotlinPlugin(), Listener {
 
 		INSTANCE = this
 
-		if (config.getBoolean("command-relay.enabled")) {
-			registerEvents(DiscordCommandRelayer(this))
-		}
-
 		if (config.getBoolean("fancy-unknown-command")) {
 			registerEvents(UnknownCommandListener(this))
 		}
