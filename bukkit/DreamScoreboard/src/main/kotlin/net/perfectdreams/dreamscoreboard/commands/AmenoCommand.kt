@@ -1,6 +1,9 @@
 package net.perfectdreams.dreamscoreboard.commands
 
 import com.comphenix.packetwrapper.WrapperPlayServerSetSlot
+import com.comphenix.packetwrapper.WrapperPlayServerWindowItems
+import com.comphenix.protocol.PacketType
+import com.comphenix.protocol.ProtocolLibrary
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.md_5.bungee.api.ChatColor
@@ -27,6 +30,20 @@ object AmenoCommand : DSLCommandBase<DreamScoreboard> {
         executes {
             if (true) {
                 if (true) {
+                    if (true) {
+                        // We are going to empty the player's inventory with packets
+                        val packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.WINDOW_ITEMS)
+
+                        val air = ItemStack(Material.AIR)
+
+                        packet.integers.write(0, 0) // 0 = Player Inventory
+                        packet.itemListModifier.write(0, (0..44).map { air }) // No items should be used
+
+                        // Send packet to player
+                        ProtocolLibrary.getProtocolManager().sendServerPacket(player, packet)
+                        return@executes
+                    }
+
                     val wpsss = WrapperPlayServerSetSlot()
                     wpsss.slot = 45
                     wpsss.windowId = 0

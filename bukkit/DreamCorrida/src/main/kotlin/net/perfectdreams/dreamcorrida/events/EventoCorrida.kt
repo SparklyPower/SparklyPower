@@ -22,7 +22,7 @@ import java.util.*
 
 class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
     init {
-        this.requiredPlayers = 30
+        this.requiredPlayers = 40
         this.delayBetween = 3600000 // 1 hora
         this.discordAnnouncementRole = "477979984275701760"
     }

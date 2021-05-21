@@ -29,7 +29,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
     init {
         this.delayBetween = 3_600_000  // one hour
-        this.requiredPlayers = 40 // 40 players
+        this.requiredPlayers = 30 // 30 players
         this.discordAnnouncementRole = "539471142772146176"
     }
 

@@ -20,7 +20,7 @@ import java.awt.Color
 
 class DropParty(val m: DreamDropParty) : ServerEvent("Festa da Firma", "/dropparty") {
     init {
-        this.requiredPlayers = 45
+        this.requiredPlayers = 60
         this.delayBetween = 3600000 // 1 hour
         this.discordAnnouncementRole = "539979402143072267"
     }
