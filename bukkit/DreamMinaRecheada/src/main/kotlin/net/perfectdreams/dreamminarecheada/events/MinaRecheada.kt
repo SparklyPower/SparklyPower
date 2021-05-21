@@ -49,7 +49,7 @@ class MinaRecheada(val m: DreamMinaRecheada) : ServerEvent("Mina Recheada", "/mi
 
     init {
         this.requiredPlayers = 80
-        this.discordAnnouncementRole = "538805118384996392"
+        this.discordAnnouncementRole = 538805118384996392L
     }
 
     override fun startNow(): Boolean {

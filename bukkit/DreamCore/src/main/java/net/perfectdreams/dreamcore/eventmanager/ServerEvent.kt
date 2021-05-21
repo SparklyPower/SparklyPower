@@ -15,7 +15,7 @@ open class ServerEvent(val eventName: String, val prefix: String) {
 	var command = "/loritta"
 	open var delayBetween: Long = 0L
 	var requiredPlayers: Int = 0
-	var discordAnnouncementRole: String? = null
+	var discordAnnouncementRole: Long? = null
 	var discordChannelId: String? = null
 
 	open fun preStart() {

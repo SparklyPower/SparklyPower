@@ -24,7 +24,7 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
     init {
         this.requiredPlayers = 40
         this.delayBetween = 3600000 // 1 hora
-        this.discordAnnouncementRole = "477979984275701760"
+        this.discordAnnouncementRole = 477979984275701760L
     }
 
     var corrida: Corrida? = null
