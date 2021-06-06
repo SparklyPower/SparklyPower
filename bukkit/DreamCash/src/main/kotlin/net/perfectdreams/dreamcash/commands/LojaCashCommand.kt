@@ -61,14 +61,40 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             }
 
             // VIPs
+            val isVipPlusPlus = sender.hasPermission("group.vip++")
+            val isVipPlus = sender.hasPermission("group.vip+")
+            val isVip = sender.hasPermission("group.vip")
+
+            // Accumulate means "add more time", this is to avoid issues when giving the VIP group ;)
             generateItemAt(0, 0, Material.IRON_INGOT, "§b§lVIP §7(um mês • R$ 14,99)", 500) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip 32d")
+                if (!isVip) {
+                    sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
+                } else {
+                    Bukkit.dispatchCommand(
+                        Bukkit.getConsoleSender(),
+                        "lp user ${sender.name} parent addtemp vip 32d accumulate"
+                    )
+                }
             }
             generateItemAt(1, 0, Material.GOLD_INGOT, "§b§lVIP§e+ §7(um mês • R$ 29,99)", 1000) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip+ 32d")
+                if (!isVipPlus) {
+                    sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
+                } else {
+                    Bukkit.dispatchCommand(
+                        Bukkit.getConsoleSender(),
+                        "lp user ${sender.name} parent addtemp vip+ 32d accumulate"
+                    )
+                }
             }
             generateItemAt(2, 0, Material.DIAMOND, "§b§lVIP§e++ §7(um mês • R$ 44,99)", 1500) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user ${sender.name} parent addtemp vip++ 32d")
+                if (!isVipPlusPlus) {
+                    sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
+                } else {
+                    Bukkit.dispatchCommand(
+                        Bukkit.getConsoleSender(),
+                        "lp user ${sender.name} parent addtemp vip++ 32d accumulate"
+                    )
+                }
             }
 
             // Blocos de Proteção
