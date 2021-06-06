@@ -15,6 +15,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.kotlin.cli.common.Usage
 
 class KitCommand(val m: DreamKits) : AbstractCommand("kits", listOf("kit")) {
 	@Subcommand
@@ -55,7 +56,7 @@ class KitCommand(val m: DreamKits) : AbstractCommand("kits", listOf("kit")) {
 			switchContext(SynchronizationContext.SYNC)
 
 			if (kit.delay * 1000 > diff && !p0.hasPermission("dreamkits.bypasstimer")) {
-				val nextUse = diff + System.currentTimeMillis()
+				val nextUse = lastUsage + (kit.delay * 1000)
 				p0.sendMessage(DreamKits.PREFIX + "§cVocê ainda precisa esperar §d${DateUtils.formatDateDiff(nextUse)}§c antes de poder pegar este kit...")
 				return@schedule
 			}

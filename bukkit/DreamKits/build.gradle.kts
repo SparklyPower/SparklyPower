@@ -10,8 +10,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
-    compileOnly(project(":bukkit:DreamCorreios"))
+    api(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    api(project(":bukkit:DreamCorreios"))
 }
 
 tasks.withType<KotlinCompile> {
