@@ -28,7 +28,7 @@ dependencies {
     compileOnlyApi(project(":common:KotlinRuntime"))
     compileOnlyApi(files("../../libs/paper_server.jar"))
     // compileOnly(files("../../libs/ProtocolSupport.jar"))
-    compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
+    compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.6.0")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
     compileOnlyApi(files("../../libs/WorldGuard.jar"))
     compileOnlyApi("com.github.TechFortress:GriefPrevention:16.17.1")
