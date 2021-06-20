@@ -3,15 +3,13 @@ package net.perfectdreams.dreamterrainadditions
 import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
-import net.perfectdreams.dreamterrainadditions.commands.BanirCommand
-import net.perfectdreams.dreamterrainadditions.commands.ConfigureClaimCommand
-import net.perfectdreams.dreamterrainadditions.commands.DesbanirCommand
-import net.perfectdreams.dreamterrainadditions.commands.RetirarCommand
+import net.perfectdreams.dreamterrainadditions.commands.*
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -22,6 +20,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockFormEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntitySpawnEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import java.io.File
 
@@ -36,6 +35,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		registerCommand(DesbanirCommand)
 		registerCommand(RetirarCommand)
 		registerCommand(ConfigureClaimCommand)
+		registerCommand(ListarBanidosCommand)
 
 		dataFolder.mkdir()
 
@@ -181,11 +181,41 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 			e.isCancelled = true
 	}
 
+	@EventHandler
+	fun onPlayerInteractEvent(e: PlayerInteractEvent) {
+		val clickedBlock = e.clickedBlock ?: return
+
+		val checkItem = clickedBlock.type.name.toUpperCase().contains("(_TRAPDOOR|_DOOR)".toRegex())
+
+		if (checkItem) {
+
+			val claim = GriefPrevention.instance.dataStore.getClaimAt(clickedBlock.location, false, null) ?: return
+
+			if (claim.ownerName == e.player.name)
+				return
+
+			if (claim.hasExplicitPermission(e.player, ClaimPermission.Build))
+				return
+
+			if (claim.allowGrantPermission(e.player) == null)
+				return
+
+			val claimAdditions = getClaimAdditionsById(claim.id) ?: return
+
+			val disableTrapdoorAndDoorAccess = claimAdditions.disableTrapdoorAndDoorAccess
+
+			if (disableTrapdoorAndDoorAccess)
+				e.isCancelled = true
+
+		}
+	}
+
 	class ClaimAdditions(val claimId: Long) {
 		val bannedPlayers = mutableListOf<String>()
 		var pvpEnabled = false
 		var disablePassiveMobs = false
 		var disableHostileMobs = false
 		var disableSnowFormation = false
+		var disableTrapdoorAndDoorAccess = false
 	}
 }

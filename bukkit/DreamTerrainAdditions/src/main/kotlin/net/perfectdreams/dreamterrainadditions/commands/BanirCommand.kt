@@ -28,7 +28,7 @@ object BanirCommand : DSLCommandBase<DreamTerrainAdditions> {
                 return@executes
             }
 
-            if (claim.ownerName == player.name || claim.managers.contains(player.name)) {
+            if (claim.ownerName == player.name || claim.allowGrantPermission(player) == null) {
                 var claimAdditions = plugin.getClaimAdditionsById(claim.id)
 
                 if (claimAdditions == null) {
@@ -44,6 +44,11 @@ object BanirCommand : DSLCommandBase<DreamTerrainAdditions> {
                 val banned = Bukkit.getPlayerExact(playerName)
 
                 if (banned != null) {
+                    if (banned.name == claim.ownerName) {
+                        player.sendMessage("§b$playerName§c é o dono do terreno! Não é possível banir ele!")
+                        return@executes
+                    }
+
                     val lesser = Location(banned.world, claim.lesserBoundaryCorner.x, 0.0, claim.lesserBoundaryCorner.z)
                     val greater = Location(banned.world, claim.greaterBoundaryCorner.x, 255.0, claim.greaterBoundaryCorner.z)
 
