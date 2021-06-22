@@ -34,7 +34,7 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
 
                 val claimAdditions = _claimAdditions
 
-                val menu = createMenu(36, "§cConfiguração do seu Terreno") {
+                val menu = createMenu(36, "§cConfiguração do terreno") {
 
                     slot(1, 1) {
 
@@ -90,7 +90,7 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                             it.sendMessage("§aBloqueio de acesso à portas e alçapões para players sem permissão agora está ${humanizeBoolean(claimAdditions.disableTrapdoorAndDoorAccess)}§a! §a" +
                                     humanizeBoolean(claimAdditions.disableTrapdoorAndDoorAccess,
                                             "Players sem trust não irão conseguir abrir ou fechar portas e alçapões.",
-                                            "PLayer sem trust conseguirão abrir ou fechar portas e alçapões."))
+                                            "Players sem trust conseguirão abrir ou fechar portas e alçapões."))
                         }
                     }
 
@@ -240,7 +240,7 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
         }
     }
 
-    fun humanizeBoolean(bool: Boolean, whenEnabled: String = "habilitado", whenDisabled: String = "habilitado"): String {
+    fun humanizeBoolean(bool: Boolean, whenEnabled: String = "§2habilitado§a", whenDisabled: String = "§cdesabilitado§a"): String {
 
         return if (bool) whenEnabled else whenDisabled
     }

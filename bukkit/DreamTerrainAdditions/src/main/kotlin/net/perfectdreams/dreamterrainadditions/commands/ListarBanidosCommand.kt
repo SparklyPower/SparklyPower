@@ -4,8 +4,6 @@ import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
-import net.perfectdreams.dreamcore.utils.commands.Command
-import net.perfectdreams.dreamcore.utils.commands.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
@@ -43,7 +41,7 @@ object  ListarBanidosCommand : DSLCommandBase<DreamTerrainAdditions> {
                     }
                 }
 
-                player.sendMessage("§cPlayers banidos deste claim".centralizeHeader())
+                player.sendMessage("§8[ §bPlayers banidos deste claim §8]".centralizeHeader())
                 player.sendMessage("")
                 if (claimAdditions.bannedPlayers.size > 0) {
                     player.sendMessage(textComponent)
@@ -52,7 +50,7 @@ object  ListarBanidosCommand : DSLCommandBase<DreamTerrainAdditions> {
                     player.sendMessage("§6Nenhum player está banido do seu terreno!".centralize())
                 }
 
-                player.sendMessage("§c-".centralizeHeader())
+                player.sendMessage("§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-")
 
             } else {
                 player.sendMessage(withoutPermission)
