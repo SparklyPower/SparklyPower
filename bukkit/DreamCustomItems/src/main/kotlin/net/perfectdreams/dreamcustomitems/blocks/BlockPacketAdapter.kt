@@ -8,14 +8,17 @@ import com.comphenix.protocol.events.PacketAdapter
 import com.comphenix.protocol.events.PacketEvent
 import com.comphenix.protocol.wrappers.WrappedBlockData
 import io.netty.buffer.Unpooled
-import net.minecraft.server.v1_16_R3.Blocks
+import net.minecraft.network.protocol.game.PacketPlayOutMapChunk
+import net.minecraft.world.level.block.Blocks
+import net.perfectdreams.dreamcore.utils.DefaultFontInfo
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.BlockPosition
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_16_R3.block.data.CraftBlockData
+import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData
 import us.myles.ViaVersion.api.minecraft.chunks.ChunkSection
 import us.myles.ViaVersion.api.type.types.version.ChunkSectionType1_16
+import java.util.*
 
 class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
     m,
@@ -45,8 +48,10 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
             // println("Current Chunk: $chunkX, $chunkZ")
 
             // https://launcher.mojang.com/v1/objects/41285beda6d251d190f2bf33beadd4fee187df7a/server.txt
-            val availableSections = event.packet.integers.read(2)
-            // println(availableSections)
+            // idk how to read this
+            // I hate this, but ProtocolLib doesn't have a way to read a BitSet
+            val nmsPacket = event.packet.handle as PacketPlayOutMapChunk
+            val sectionsMask = nmsPacket.e() // Reads the BitSet, this is just a getter
 
             val chunkDataByteArray = event.packet.byteArrays.read(0)
 
@@ -56,8 +61,9 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
 
             var requiresEdits = false
 
+            // TODO: 1.17 doesn't always have 16 sections, this needs to be updated!
             for (i in 0..15) {
-                if (availableSections and (1 shl i) == 0) continue  // Section not set
+                if (!sectionsMask.get(i)) continue // Section not set
                 val nonAirBlocksCount: Short = buf.readShort()
                 val section = ChunkSectionType1_16().read(buf)
                 section.nonAirBlocksCount = nonAirBlocksCount.toInt()
@@ -65,7 +71,8 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
 
                 // Quick fail: Only edit if the palette contains note blocks
                 // Empty palette = Global palette (I think?)
-                if (section.palette.isNotEmpty() && !section.palette.any { net.minecraft.server.v1_16_R3.ChunkSection.GLOBAL_PALETTE.getObject(
+                // d = global palette
+                if (section.palette.isNotEmpty() && !section.palette.any { net.minecraft.world.level.chunk.ChunkSection.d.a(
                         it
                     )?.bukkitMaterial == Material.NOTE_BLOCK })
                     continue
@@ -78,7 +85,9 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
                         for (z in 0 until 16) {
                             val blockId = section.getFlatBlock(x, y, z)
 
-                            val blockData = net.minecraft.server.v1_16_R3.ChunkSection.GLOBAL_PALETTE.getObject(blockId)
+                            // d = global palette
+                            // a = getObject
+                            val blockData = net.minecraft.world.level.chunk.ChunkSection.d.a(blockId)
 
                             if (blockData?.bukkitMaterial == Material.GOLD_BLOCK)
                                 continue
@@ -106,8 +115,9 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
                                         x,
                                         y,
                                         z,
-                                        net.minecraft.server.v1_16_R3.ChunkSection.GLOBAL_PALETTE.getOrCreateIdFor(
-                                            Blocks.NOTE_BLOCK.blockData
+                                        net.minecraft.world.level.chunk.ChunkSection.d.a(
+                                            // Check the proper name in the obfuscated code, the name is "note_block"
+                                            Blocks.aC.blockData
                                         )
                                     )
                                     hasNoteBlock = true
@@ -150,7 +160,8 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
                 }
 
                 // Oh no, NMS!!!
-                wrapper.blockData = WrappedBlockData.createData(CraftBlockData.fromData(Blocks.NOTE_BLOCK.blockData))
+                // Check the proper name in the obfuscated code, the name is "note_block"
+                wrapper.blockData = WrappedBlockData.createData(CraftBlockData.fromData(Blocks.aC.blockData))
             }
 
             event.packet = wrapper.handle

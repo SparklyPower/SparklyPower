@@ -1,6 +1,9 @@
 package net.perfectdreams.dreammusically.listeners
 
 import com.okkero.skedule.schedule
+import net.minecraft.world.level.block.BlockJukeBox
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.state.IBlockData
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreammusically.DreamMusically
@@ -81,24 +84,24 @@ class PlayerListener(val m: DreamMusically) : Listener {
                     return
 
                 // Uma gambiarra, já que Spigot não deixa colocar itens que não sejam records dentro de jukeboxes
-                val nmsWorld = (e.player.world as org.bukkit.craftbukkit.v1_16_R3.CraftWorld).getHandle() as net.minecraft.server.v1_16_R3.World
-                val tileEntity = nmsWorld.getTileEntity(net.minecraft.server.v1_16_R3.BlockPosition(clickedBlock.x, clickedBlock.y, clickedBlock.z))
+                val nmsWorld = (e.player.world as org.bukkit.craftbukkit.v1_17_R1.CraftWorld).getHandle() as net.minecraft.world.level.World
+                val tileEntity = nmsWorld.getTileEntity(net.minecraft.core.BlockPosition(clickedBlock.x, clickedBlock.y, clickedBlock.z))
 
                 val copyOfItemInMainHand = e.player.inventory.itemInMainHand.clone()
 
                 m.schedule {
                     waitFor(1)
-                    val nmsJukebox = tileEntity as net.minecraft.server.v1_16_R3.TileEntityJukeBox
+                    val nmsJukebox = tileEntity as net.minecraft.world.level.block.entity.TileEntityJukeBox
                     nmsWorld.setTypeAndData(
                         nmsJukebox.getPosition(),
-                        net.minecraft.server.v1_16_R3.Blocks.JUKEBOX.getBlockData().set(
-                            net.minecraft.server.v1_16_R3.BlockJukeBox.HAS_RECORD,
+                        Blocks.cQ.getBlockData().set( // check the proper name in the obfuscated code, this is "jukebox"
+                            BlockJukeBox.a, // again, check the proper name in the obfuscated code, this is "has_record"
                             true
-                        ) as net.minecraft.server.v1_16_R3.IBlockData,
+                        ) as IBlockData,
                         3
                     )
 
-                    nmsJukebox.setRecord(org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack.asNMSCopy(copyOfItemInMainHand))
+                    nmsJukebox.setRecord(org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack.asNMSCopy(copyOfItemInMainHand))
                     e.player.inventory.setItemInMainHand(copyOfItemInMainHand.clone().apply { this.amount-- })
                     e.player.world.playSound(clickedBlock.location, customPlayingSong.play, SoundCategory.RECORDS, 4f, 1f)
 
