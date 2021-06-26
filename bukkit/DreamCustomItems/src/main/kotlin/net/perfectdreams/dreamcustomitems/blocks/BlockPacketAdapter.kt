@@ -89,9 +89,6 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
                             // a = getObject
                             val blockData = net.minecraft.world.level.chunk.ChunkSection.d.a(blockId)
 
-                            if (blockData?.bukkitMaterial == Material.GOLD_BLOCK)
-                                continue
-
                             if (blockData != null) {
                                 if (blockData.bukkitMaterial == Material.NOTE_BLOCK) {
                                     // Okay, so it is a note block... but what if it is a *custom* block?
