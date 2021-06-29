@@ -2,27 +2,19 @@ package net.perfectdreams.dreampvptweaks
 
 import com.okkero.skedule.BukkitSchedulerController
 import com.okkero.skedule.schedule
-import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.effects.CustomTotemRessurectEffect
-import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
-import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.registerEvents
+import net.perfectdreams.dreamcore.utils.scheduler
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
-import org.bukkit.Sound
 import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
-import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.MapMeta
-import org.bukkit.metadata.FixedMetadataValue
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import java.util.*
 
 class DreamPvPTweaks : KotlinPlugin(), Listener {
@@ -175,6 +167,11 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onQuit(e: PlayerQuitEvent) {
+		if (10_000L >= lastDamage.getOrDefault(e.player, 0L) - System.currentTimeMillis()) { // 10 seconds
+			if (e.player.world.name in ENABLED_WORLDS) // Only kill the player inside of the PvP worlds
+				e.player.damage(99999.9) // no u
+		}
+
 		lastDamage.remove(e.player)
 		battleModeTasks.remove(e.player)
 	}
