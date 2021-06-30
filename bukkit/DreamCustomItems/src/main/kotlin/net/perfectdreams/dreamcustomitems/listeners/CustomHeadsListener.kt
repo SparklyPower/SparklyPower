@@ -45,12 +45,17 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
         val clickedBlock = e.block
 
         if (clickedBlock.type == Material.PLAYER_HEAD || clickedBlock.type == Material.PLAYER_WALL_HEAD) {
-
             when {
                 m.microwaves[clickedBlock.location] != null -> {
                     val microwave = m.microwaves[clickedBlock.location] ?: return
 
                     microwave.stop()
+
+                    // Close inventory to avoid dupes when breaking a custom block while someone has the block's inventory open
+                    microwave.inventory.viewers.forEach {
+                        it.closeInventory()
+                    }
+
                     m.microwaves.remove(clickedBlock.location)
                     e.isCancelled = true
 
@@ -75,6 +80,12 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                 m.superfurnaces[clickedBlock.location] != null -> {
                     val superfurnace = m.superfurnaces[clickedBlock.location] ?: return
                     superfurnace.stop()
+
+                    // Close inventory to avoid dupes when breaking a custom block while someone has the block's inventory open
+                    superfurnace.inventory.viewers.forEach {
+                        it.closeInventory()
+                    }
+
                     m.superfurnaces.remove(clickedBlock.location)
                     e.isCancelled = true
 
