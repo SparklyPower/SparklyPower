@@ -167,7 +167,7 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onQuit(e: PlayerQuitEvent) {
-		if (10_000L >= lastDamage.getOrDefault(e.player, 0L) - System.currentTimeMillis()) { // 10 seconds
+		if (10_000L >= System.currentTimeMillis() - lastDamage.getOrDefault(e.player, 0L)) { // 10 seconds
 			if (e.player.world.name in ENABLED_WORLDS) // Only kill the player inside of the PvP worlds
 				e.player.damage(99999.9) // no u
 		}
