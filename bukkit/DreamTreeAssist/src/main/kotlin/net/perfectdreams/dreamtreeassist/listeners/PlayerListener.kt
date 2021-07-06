@@ -131,7 +131,7 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
         if (!blocksToBeDestroyed.any { it.type in leaves })
             return false
 
-        val lowestLog = blocksToBeDestroyed.asSequence().filter { it.type in logs }.minBy { it.y }
+        val lowestLog = blocksToBeDestroyed.asSequence().filter { it.type in logs }.minByOrNull { it.y }
         val lowestLogType = lowestLog?.type
 
         for ((index, blockToBeDestroyed) in blocksToBeDestroyed.withIndex()) {
