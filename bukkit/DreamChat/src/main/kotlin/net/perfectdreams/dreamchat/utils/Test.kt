@@ -56,7 +56,7 @@ fun main() {
         println(it.tagPositions.map { it?.small })
     }
 
-    val whatTagShouldBeUsed = wordTags.maxBy {
+    val whatTagShouldBeUsed = wordTags.maxByOrNull {
         it.tagPositions.filterNotNull().distinct().size
     }
 

@@ -76,7 +76,7 @@ class BanCommand(val m: DreamNetworkBans) : SparklyBungeeCommand(arrayOf("ban"),
 		val punisherDisplayName = PunishmentManager.getPunisherName(sender)
 
 		val geoLocalization = transaction(Databases.databaseNetwork) {
-			ConnectionLogEntry.find { ConnectionLogEntries.player eq punishedUniqueId!! }.maxBy { it.connectedAt }
+			ConnectionLogEntry.find { ConnectionLogEntries.player eq punishedUniqueId!! }.maxByOrNull { it.connectedAt }
 		}
 
 		val ip = if (player != null)

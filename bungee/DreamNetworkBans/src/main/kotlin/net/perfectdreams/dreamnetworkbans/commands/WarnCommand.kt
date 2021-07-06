@@ -65,7 +65,7 @@ class WarnCommand(val m: DreamNetworkBans) : SparklyBungeeCommand(arrayOf("warn"
 		val count = Math.min(warns.size, 5)
 
 		val geoLocalization = transaction(Databases.databaseNetwork) {
-			ConnectionLogEntry.find { ConnectionLogEntries.player eq punishedUniqueId }.maxBy { it.connectedAt }
+			ConnectionLogEntry.find { ConnectionLogEntries.player eq punishedUniqueId }.maxByOrNull { it.connectedAt }
 		}
 		
 		// IP do usuário, caso seja encontrado

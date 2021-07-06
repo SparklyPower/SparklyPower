@@ -49,7 +49,7 @@ class IpUnbanCommand(val m: DreamNetworkBans) : SparklyBungeeCommand(arrayOf("ip
 			val resultRow = transaction(Databases.databaseNetwork) {
 				ConnectionLogEntries.select {
 					ConnectionLogEntries.player eq playerUniqueId
-				}.maxBy { it[ConnectionLogEntries.connectedAt] }
+				}.maxByOrNull { it[ConnectionLogEntries.connectedAt] }
 			} ?: run {
 				sender.sendMessage("§cO player $ip nunca jogou no servidor!".toTextComponent())
 				return

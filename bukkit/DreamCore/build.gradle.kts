@@ -36,6 +36,7 @@ dependencies {
     api("com.github.SparklyPower:PacketWrapper:88ddd591d8")
     compileOnlyApi("net.milkbowl.vault:VaultAPI:1.6")
     compileOnlyApi("com.github.MascusJeoraly:LanguageUtils:1.9")
+    api("com.google.code.gson:gson:2.8.7")
     api("org.mongodb:mongo-java-driver:3.7.0-rc0")
     api("com.zaxxer:HikariCP:2.7.8")
     api("org.postgresql:postgresql:42.2.5")

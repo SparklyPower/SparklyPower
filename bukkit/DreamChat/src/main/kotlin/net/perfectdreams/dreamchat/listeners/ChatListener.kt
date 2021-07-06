@@ -460,7 +460,7 @@ class ChatListener(val m: DreamChat) : Listener {
 					}
 				}
 
-				val whatTagShouldBeUsed = wordTags.maxBy {
+				val whatTagShouldBeUsed = wordTags.maxByOrNull {
 					it.tagPositions.filterNotNull().distinct().size
 				}
 

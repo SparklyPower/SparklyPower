@@ -21,7 +21,7 @@ class DreamEventManager {
 
 				for (event in upcoming) {
 					if (event.startNow() && getRunningEvents().isEmpty()) {
-						val lastestEvent = events.maxBy { it.lastTime }?.lastTime
+						val lastestEvent = events.maxByOrNull { it.lastTime }?.lastTime
 
 						// Only start a new event if 30s has already elapsed since the last event
 						if (System.currentTimeMillis() - (lastestEvent ?: 0L) >= 30_000L)
