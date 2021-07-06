@@ -25,6 +25,26 @@ import org.bukkit.event.block.BlockDropItemEvent
 class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 	companion object {
 		lateinit var INSTANCE: DreamPicaretaMonstra
+		private val MINING_BLOCKS = listOf(
+			Material.STONE,
+			Material.NETHERRACK,
+			Material.GRANITE,
+			Material.DIORITE,
+			Material.ANDESITE,
+			Material.CALCITE,
+			Material.SMOOTH_BASALT,
+			Material.AMETHYST_BLOCK,
+			Material.TUFF,
+			Material.COBBLED_DEEPSLATE,
+			Material.DEEPSLATE
+		)
+
+		private val SHOVELLING_BLOCKS = listOf(
+			Material.GRASS_BLOCK,
+			Material.DIRT,
+			Material.SAND,
+			Material.GRAVEL
+		)
 	}
 
 	override fun softEnable() {
@@ -41,11 +61,11 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 	}
 
 	fun isValidMiningBlock(block: Block): Boolean {
-		return block.type.name.contains("ORE") || block.type === Material.STONE || block.type === Material.NETHERRACK || block.type == Material.GRANITE || block.type == Material.DIORITE || block.type == Material.ANDESITE
+		return block.type.name.contains("ORE") || block.type in MINING_BLOCKS
 	}
 
 	fun isValidShovellingBlock(block: Block): Boolean {
-		return block.type == Material.GRASS_BLOCK || block.type == Material.DIRT || block.type == Material.SAND || block.type == Material.GRAVEL
+		return block.type in SHOVELLING_BLOCKS
 	}
 
 	fun isValidForHeldItem(material: Material, block: Block): Boolean {
