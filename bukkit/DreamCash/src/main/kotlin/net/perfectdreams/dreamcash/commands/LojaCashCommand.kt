@@ -24,7 +24,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
     fun showShopMenu(sender: Player) {
         val menu = createMenu(45, "§a§lA Loja de seus §c§lPesadelos") {
-            fun generateItemAt(x: Int, y: Int, type: Material, name: String, quantity: Long, callback: () -> (Unit)) {
+            fun generateItemAt(x: Int, y: Int, type: Material, name: String, quantity: Long, callback: () -> (Boolean)) {
                 slot(x, y) {
                     item = ItemStack(type)
                         .rename(name)
@@ -37,22 +37,27 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                             askForConfirmation(sender) {
                                 sender.closeInventory()
 
-                                scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                                    transaction(Databases.databaseNetwork) {
-                                        try {
-                                            Cash.takeCash(sender, quantity)
-                                        } catch (e: IllegalArgumentException) {
-                                            sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
-                                            return@transaction
+                                scheduler().schedule(m, SynchronizationContext.SYNC) {
+                                    val result = callback.invoke()
+
+                                    if (result) {
+                                        switchContext(SynchronizationContext.ASYNC)
+
+                                        transaction(Databases.databaseNetwork) {
+                                            try {
+                                                Cash.takeCash(sender, quantity)
+                                            } catch (e: IllegalArgumentException) {
+                                                sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
+                                                return@transaction
+                                            }
                                         }
+
+                                        switchContext(SynchronizationContext.SYNC)
+
+                                        sender.sendMessage("§aObrigado pela compra! ^-^")
+
+                                        Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou $name§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
                                     }
-
-                                    switchContext(SynchronizationContext.SYNC)
-
-                                    callback.invoke()
-                                    sender.sendMessage("§aObrigado pela compra! ^-^")
-
-                                    Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou $name§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
                                 }
                             }
                         }
@@ -64,77 +69,94 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             val isVipPlusPlus = sender.hasPermission("group.vip++")
             val isVipPlus = sender.hasPermission("group.vip+")
             val isVip = sender.hasPermission("group.vip")
+            val hasAnyVip = isVip || isVipPlus || isVipPlusPlus
 
             // Accumulate means "add more time", this is to avoid issues when giving the VIP group ;)
             generateItemAt(0, 0, Material.IRON_INGOT, "§b§lVIP §7(um mês • R$ 14,99)", 500) {
-                if (!isVip) {
+                if (hasAnyVip && !isVip) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
+                    false
                 } else {
                     Bukkit.dispatchCommand(
                         Bukkit.getConsoleSender(),
                         "lp user ${sender.name} parent addtemp vip 32d accumulate"
                     )
+                    true
                 }
             }
             generateItemAt(1, 0, Material.GOLD_INGOT, "§b§lVIP§e+ §7(um mês • R$ 29,99)", 1000) {
-                if (!isVipPlus) {
+                if (hasAnyVip && !isVipPlus) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
+                        false
                 } else {
                     Bukkit.dispatchCommand(
                         Bukkit.getConsoleSender(),
                         "lp user ${sender.name} parent addtemp vip+ 32d accumulate"
                     )
+                    true
                 }
             }
             generateItemAt(2, 0, Material.DIAMOND, "§b§lVIP§e++ §7(um mês • R$ 44,99)", 1500) {
-                if (!isVipPlusPlus) {
+                if (hasAnyVip && !isVipPlusPlus) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
+                    false
                 } else {
                     Bukkit.dispatchCommand(
                         Bukkit.getConsoleSender(),
                         "lp user ${sender.name} parent addtemp vip++ 32d accumulate"
                     )
+                    true
                 }
             }
 
             // Blocos de Proteção
             generateItemAt(0, 1, Material.DIRT, "§e8000 blocos de proteção", 15) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 8000")
+                true
             }
             generateItemAt(1, 1, Material.MYCELIUM, "§e16000 blocos de proteção", 30) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 16000")
+                true
             }
             generateItemAt(2, 1, Material.GRASS_BLOCK, "§e24000 blocos de proteção", 45) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 24000")
+                true
             }
 
             // Money
             generateItemAt(0, 2, Material.EMERALD, "§a130000 Sonhos", 250) {
                 sender.balance += 130000
+                true
             }
 
             generateItemAt(1, 2, Material.EMERALD, "§a260000 Sonhos", 500) {
                 sender.balance += 260000
+                true
             }
 
             generateItemAt(2, 2, Material.EMERALD, "§a500000 Sonhos", 950) {
                 sender.balance += 500000
+                true
             }
 
             generateItemAt(3, 2, Material.EMERALD, "§a1000000 Sonhos", 1_900) {
                 sender.balance += 1000000
+                true
             }
 
             generateItemAt(4, 2, Material.EMERALD, "§a2000000 Sonhos", 3_800) {
                 sender.balance += 2000000
+                true
             }
 
             generateItemAt(5, 2, Material.EMERALD, "§a5000000 Sonhos", 9_500) {
                 sender.balance += 5000000
+                true
             }
 
             generateItemAt(6, 2, Material.EMERALD, "§a10000000 Sonhos", 19_000) {
                 sender.balance += 10000000
+                true
             }
 
             // Coisas Reais
