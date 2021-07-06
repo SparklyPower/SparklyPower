@@ -17,23 +17,16 @@ allprojects {
     repositories {
         mavenLocal()
 
-        maven("https://nexus.hc.to/content/repositories/pub_releases")
-        maven("https://ci.dmulloy2.net/nexus/repository/public/")
-        maven("https://dl.bintray.com/kotlin/kotlin-dev/")
-        maven("https://dl.bintray.com/kotlin/kotlin-eap/")
-        maven("https://jcenter.bintray.com")
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://repo.perfectdreams.net/")
-        maven("https://dl.bintray.com/kotlin/exposed/")
+        maven("https://ci.dmulloy2.net/nexus/repository/public/")
         maven("https://nexus.wesjd.net/repository/thirdparty/")
-        // maven("http://nexus.okkero.com/repository/maven-releases/")
         maven("https://maven.sk89q.com/repo/")
         maven("https://repo.aikar.co/content/groups/aikar/")
-        maven("https://dl.bintray.com/ichbinjoe/public/")
         maven("https://repo.codemc.org/repository/maven-public")
-        // maven("http://repo.ess3.net/content/repositories/bukkitsnapshot/")
         maven("https://jitpack.io")
         maven("https://papermc.io/repo/repository/maven-public/")
+        maven("https://repo.citizensnpcs.co/")
     }
 }
 
