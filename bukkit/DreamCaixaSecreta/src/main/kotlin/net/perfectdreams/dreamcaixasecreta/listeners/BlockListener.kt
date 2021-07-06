@@ -32,6 +32,10 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 		if (e.item?.type != Material.CHEST)
 			return
 
+		// Do not drop if it is a monster pickaxe
+		if (e.item?.getStoredMetadata("isMonsterPickaxe") == "true")
+			return
+
 		val data = e.item!!.getStoredMetadata("caixaSecretaLevel") ?: return
 		val caixaSecretaWorld = e.item!!.getStoredMetadata("caixaSecretaWorld")
 
@@ -46,9 +50,23 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 		if (caixaSecretaWorld == "Resources") {
 			val sonhosChance = chanceMultiplied(1.0, level)
 			val pesadelosChance = chanceMultiplied(0.1, level)
-			val nitroClassicChance = chanceMultiplied(0.01, level)
+			val nitroClassicChance = chanceMultiplied(0.005, level)
 
-			if (chance(nitroClassicChance)) {
+			if (chance(sonhosChance)) {
+				val sonhos = DreamUtils.random.nextInt(25_000, 50_001)
+
+				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §2§l$sonhos sonhos§a pela caixa secreta! Parabéns!!")
+
+				e.player.balance += sonhos
+			} else if (chance(pesadelosChance)) {
+				val pesadelos = DreamUtils.random.nextInt(25, 51)
+
+				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §c§l$pesadelos Pesadelos§a pela caixa secreta! Parabéns!!")
+
+				scheduler().schedule(m, SynchronizationContext.ASYNC) {
+					Cash.giveCash(e.player, pesadelos.toLong())
+				}
+			} else if (chance(nitroClassicChance)) {
 				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu ${DISCORD_COLOR}Um Nitro Classic§a pela caixa secreta! Parabéns!!")
 
 				val now = Instant.now()
@@ -63,24 +81,6 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 						.rename("${DISCORD_COLOR}Nitro Classic")
 						.lore("§aPara receber o seu prêmio, contate", "§aa equipe do SparklyPower no", "§anosso Discord!", "§a", "§7Prêmio de §b${e.player.name}", "§a", "§aData: §2$day/$month/$year")
 				)
-			}
-
-			if (chance(pesadelosChance)) {
-				val pesadelos = DreamUtils.random.nextInt(25, 51)
-
-				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §c§l$pesadelos Pesadelos§a pela caixa secreta! Parabéns!!")
-
-				scheduler().schedule(m, SynchronizationContext.ASYNC) {
-					Cash.giveCash(e.player, pesadelos.toLong())
-				}
-			}
-
-			if (chance(sonhosChance)) {
-				val sonhos = DreamUtils.random.nextInt(25_000, 50_001)
-
-				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §2§l$sonhos sonhos§a pela caixa secreta! Parabéns!!")
-
-				e.player.balance += sonhos
 			}
 		}
 
