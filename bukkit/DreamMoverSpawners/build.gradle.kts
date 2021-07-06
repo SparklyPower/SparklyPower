@@ -10,7 +10,7 @@ repositories {
 
 dependencies {
     compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
-    compile(files("../../libs/mcMMO.jar"))
+    compileOnly(files("../../libs/mcMMO.jar"))
 }
 
 tasks.withType<KotlinCompile> {

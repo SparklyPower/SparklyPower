@@ -11,7 +11,7 @@ repositories {
 
 dependencies {
     compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
-    compile(files("../../libs/ChestShop.jar"))
+    compileOnly(files("../../libs/ChestShop.jar"))
 }
 
 tasks.withType<KotlinCompile> {

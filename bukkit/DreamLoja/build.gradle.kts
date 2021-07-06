@@ -10,8 +10,8 @@ repositories {
 
 dependencies {
     compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
-    compile(project(":bukkit:DreamCash"))
-    compile(project(":bukkit:DreamChat"))
+    compileOnly(project(":bukkit:DreamCash"))
+    compileOnly(project(":bukkit:DreamChat"))
 }
 
 tasks.withType<KotlinCompile> {

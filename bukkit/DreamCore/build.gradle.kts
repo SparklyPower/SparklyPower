@@ -56,11 +56,11 @@ dependencies {
     api("org.apache.commons:commons-text:1.8")
     compileOnlyApi("com.greatmancode:craftconomy3:3.3.1")
     compileOnlyApi("me.lucko.luckperms:luckperms-api:4.3")
-    testCompile(files("../../libs/paper_server.jar"))
-    testCompile("org.junit.jupiter:junit-jupiter-api:5.3.0-M1")
-    testCompile("org.junit.jupiter:junit-jupiter-engine:5.3.0-M1")
-    testCompile("io.mockk:mockk:1.9")
-    testCompile("org.assertj:assertj-core:3.10.0")
+    testCompileOnly(files("../../libs/paper_server.jar"))
+    testCompileOnly("org.junit.jupiter:junit-jupiter-api:5.3.0-M1")
+    testCompileOnly("org.junit.jupiter:junit-jupiter-engine:5.3.0-M1")
+    testCompileOnly("io.mockk:mockk:1.9")
+    testCompileOnly("org.assertj:assertj-core:3.10.0")
 }
 
 tasks.withType<KotlinCompile> {
