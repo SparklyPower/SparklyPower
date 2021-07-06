@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack
 
 object CustomItemsCommand : DSLCommandBase<DreamCustomItems> {
     override fun command(plugin: DreamCustomItems) = create(
-        listOf("customitems")
+        listOf("customitemsgive")
     ) {
         permission = "dreamcustomitems.setup"
 

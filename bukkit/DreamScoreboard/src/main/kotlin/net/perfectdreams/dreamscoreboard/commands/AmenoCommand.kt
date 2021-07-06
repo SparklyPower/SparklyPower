@@ -13,10 +13,10 @@ import net.perfectdreams.dreamscoreboard.DreamScoreboard
 import org.bukkit.Bukkit
 import org.bukkit.EntityEffect
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_16_R3.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_16_R3.scoreboard.CraftScoreboard
-import org.bukkit.craftbukkit.v1_16_R3.scoreboard.CraftScoreboardManager
-import org.bukkit.craftbukkit.v1_16_R3.util.WeakCollection
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_17_R1.scoreboard.CraftScoreboard
+import org.bukkit.craftbukkit.v1_17_R1.scoreboard.CraftScoreboardManager
+import org.bukkit.craftbukkit.v1_17_R1.util.WeakCollection
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import java.awt.Color

@@ -7,7 +7,6 @@ import com.gmail.nossr50.datatypes.experience.XPGainSource
 import com.gmail.nossr50.datatypes.player.McMMOPlayer
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.mcMMO
-import com.gmail.nossr50.skills.smelting.Smelting
 import com.gmail.nossr50.util.player.UserManager
 import com.okkero.skedule.CoroutineTask
 import com.okkero.skedule.schedule
@@ -90,11 +89,12 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
         }
     }
 
-    fun convertToSmeltedItem(itemStack: ItemStack): ItemStack? {
+    fun convertToSmeltedItem(item: ItemStack): ItemStack? {
         var result: ItemStack? = null
         var newMcMMOAmount = 0
         val iter: Iterator<Recipe> = Bukkit.recipeIterator()
         val mcmmoPlayer = UserManager.getPlayer(player)
+        val itemStack: ItemStack = if (item.type == Material.NETHER_GOLD_ORE) ItemStack(Material.GOLD_ORE).asQuantity(item.amount) else item
 
         while (iter.hasNext()) {
             val recipe: Recipe = iter.next() as? FurnaceRecipe ?: continue

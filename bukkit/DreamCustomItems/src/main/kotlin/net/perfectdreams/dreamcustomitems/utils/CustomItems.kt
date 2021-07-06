@@ -16,6 +16,7 @@ object CustomItems {
     val IS_MICROWAVE_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_microwave")
     val IS_SUPERFURNACE_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_superfurnace")
     val IS_TRASHCAN_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_trashcan")
+    val RUBY_DROP_CHANCE = 0.1
 
     val RUBY = ItemStack(Material.PRISMARINE_SHARD)
         .meta<ItemMeta> {
@@ -127,5 +128,5 @@ object CustomItems {
         persistentDataContainer.set(IS_TRASHCAN_KEY, PersistentDataType.BYTE, 1)
     }
 
-    fun checkIfRubyShouldDrop() = chance(0.1)
+    fun checkIfRubyShouldDrop() = chance(RUBY_DROP_CHANCE)
 }
