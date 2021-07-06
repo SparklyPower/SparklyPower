@@ -15,8 +15,9 @@ repositories {
 
 allprojects {
     repositories {
+        mavenCentral()
         mavenLocal()
-        
+
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://repo.perfectdreams.net/")
         maven("https://ci.dmulloy2.net/nexus/repository/public/")

@@ -4,12 +4,6 @@ plugins {
     kotlin("jvm")
 }
 
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-    maven("https://repo.citizensnpcs.co/")
-}
-
 dependencies {
     compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
     implementation("net.citizensnpcs:citizens:2.0.26-SNAPSHOT")
