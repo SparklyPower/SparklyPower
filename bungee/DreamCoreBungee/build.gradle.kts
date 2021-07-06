@@ -34,9 +34,9 @@ dependencies {
 
     api("com.zaxxer:HikariCP:4.0.3")
     api("org.postgresql:postgresql:42.2.20")
-    api("org.jetbrains.exposed:exposed-core:0.28.1")
-    api("org.jetbrains.exposed:exposed-dao:0.28.1")
-    api("org.jetbrains.exposed:exposed-jdbc:0.28.1")
+    api("org.jetbrains.exposed:exposed-core:0.32.1")
+    api("org.jetbrains.exposed:exposed-dao:0.32.1")
+    api("org.jetbrains.exposed:exposed-jdbc:0.32.1")
     api("io.ktor:ktor-client-cio:1.5.4")
 
     api(Dependencies.DISCORD_WEBHOOKS)
