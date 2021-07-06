@@ -49,24 +49,27 @@ class DreamAssinaturas : KotlinPlugin(), Listener {
 				for (signature in storedSignatures.toList()) {
 					val location = signature.getLocation()
 
-					val isChunkLoaded = location.isChunkLoaded
-					if (isChunkLoaded) {
-						// Não é mais uma placa! Iremos remover...
-						if (location.block.type.name.contains("SIGN")) {
-							location.world.spawnParticle(
-								Particle.VILLAGER_HAPPY,
-								location.add(0.5, 0.5, 0.5),
-								1,
-								0.25,
-								0.25,
-								0.25
-							)
-						} else {
-							switchContext(SynchronizationContext.ASYNC)
-							transaction(Databases.databaseNetwork) {
-								signature.delete()
+					// Maybe someone added a signature in a deleted world!
+					if (location.isWorldLoaded) {
+						val isChunkLoaded = location.isChunkLoaded
+						if (isChunkLoaded) {
+							// Não é mais uma placa! Iremos remover...
+							if (location.block.type.name.contains("SIGN")) {
+								location.world.spawnParticle(
+									Particle.VILLAGER_HAPPY,
+									location.add(0.5, 0.5, 0.5),
+									1,
+									0.25,
+									0.25,
+									0.25
+								)
+							} else {
+								switchContext(SynchronizationContext.ASYNC)
+								transaction(Databases.databaseNetwork) {
+									signature.delete()
+								}
+								switchContext(SynchronizationContext.SYNC)
 							}
-							switchContext(SynchronizationContext.SYNC)
 						}
 					}
 				}

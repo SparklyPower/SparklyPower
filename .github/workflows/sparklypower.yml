@@ -27,10 +27,10 @@ jobs:
     - name: Setup Java JDK
       uses: actions/setup-java@v1.4.3
       with:
-        java-version: 13
+        java-version: 16
 
     - name: Download Paper
-      run: wget -O paperclip.jar https://cdn.discordapp.com/attachments/691041345275691021/813788102152683570/launcher-sparklypaper.jar
+      run: wget -O paperclip.jar https://cdn.discordapp.com/attachments/417059128519819265/861661660187197500/SparklyPaper-1.17-R0.1-SNAPSHOT.jar
       
     - name: Run Paper
       run: java -Dpaperclip.patchonly=true -jar paperclip.jar

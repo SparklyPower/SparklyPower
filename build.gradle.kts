@@ -17,7 +17,7 @@ allprojects {
     repositories {
         mavenLocal()
 
-        maven("http://nexus.hc.to/content/repositories/pub_releases")
+        maven("https://nexus.hc.to/content/repositories/pub_releases")
         maven("https://ci.dmulloy2.net/nexus/repository/public/")
         maven("https://dl.bintray.com/kotlin/kotlin-dev/")
         maven("https://dl.bintray.com/kotlin/kotlin-eap/")
