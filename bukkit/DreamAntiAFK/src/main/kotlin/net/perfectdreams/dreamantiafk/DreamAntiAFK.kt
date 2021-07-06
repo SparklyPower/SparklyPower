@@ -12,10 +12,12 @@ import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.*
 import java.io.File
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.absoluteValue
 
 class DreamAntiAFK : KotlinPlugin(), Listener {
 	val players = WeakHashMap<Player, PlayerAFKInfo>()
@@ -84,20 +86,50 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 
 							pair.location = location
 
-							var value = 5
+							var value = 8 // Only increase score if the user is around 8 blocks
 							val isLiquid = player.location.block.isLiquid
 							val isInsideVehicle = player.isInsideVehicle
 
 							if (isLiquid || isInsideVehicle) {
-								value = 100
+								value = 100 // But if they are inside a vehicle or in a liquid, let's increase it to 100!
 							}
 
-							if (value >= distance) {
-								pair.score += 10
-							} else if (value >= distanceSameYLevel) {
-								pair.score += 5
-							} else {
-								pair.score = Math.max(pair.score - 10, 0)
+							when {
+								distance == 0.0 -> {
+									logger.info("Player ${player.name} haven't moved in a long time, adding 20 to the player's score... Distance: $distance")
+									pair.score += 20 // Haven't moved in a long time, so let's increase +20 to the player's score!
+								}
+
+								value >= distance -> {
+									val scoreToBeAdded = (((value - distance) / value) * 20).toInt()
+										.coerceAtMost(20)
+									logger.info("Player ${player.name} has moved but just a little bit, adding $scoreToBeAdded to the player's score... Distance: $distance")
+
+									// Changes depending on the difference between the distance, if the user haven't moved a lot, it grows more
+									pair.score += scoreToBeAdded
+								}
+
+								value >= distanceSameYLevel -> {
+									val scoreToBeAdded = (((value - distanceSameYLevel) / value) * 10).toInt()
+										.coerceAtMost(10)
+									logger.info("Player ${player.name} has moved but we are only matching the distance at the same Y level, adding $scoreToBeAdded to the player's score... Distance at Y level: $distanceSameYLevel")
+
+									// Same thing as above, but because only the X/Z axis are similar, we add less score
+									pair.score += scoreToBeAdded
+								}
+
+								else -> {
+									// Now, we are going to decrease the score if nothing matches
+									// However we are going to decrease depending on the distance travelled!
+									val scoreToBeRemoved = ((distance / value) * 10)
+										.toInt()
+										.coerceAtMost(10) // Max 10 score per Anti AFK check
+
+									logger.info("Player ${player.name} moved, so we are going to decrease $scoreToBeRemoved from the player's score... Distance: $distance")
+
+									pair.score = (pair.score - scoreToBeRemoved)
+										.coerceAtLeast(0)
+								}
 							}
 
 							if (pair.score >= 100) {
@@ -114,15 +146,19 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 								logoutTime[player.uniqueId] = System.currentTimeMillis()
 
 								for (staff in Bukkit.getOnlinePlayers().filter { it.hasPermission(isStaffPermission) }) {
-									staff.sendMessage("§b${player.name} §3foi kickado por ficar parado por mais de 10 minutos!")
-									if (isLiquid) {
-										staff.sendMessage("§bUso de AntiAFK? §3Provavelmente! §7(Água @ §b${player.location.blockX}§3, §b${player.location.blockY}§3, §b${player.location.blockZ}§7)")
-										staff.sendMessage("§7(Obs: Não é necessário punir o usuário!)")
-									} else if (isInsideVehicle) {
-										staff.sendMessage("§bUso de AntiAFK? §3Provavelmente! §7(Dentro de um veículo @ §b${player.location.blockX}§3, §b${player.location.blockY}§3, §b${player.location.blockZ}§7)")
-										staff.sendMessage("§7(Obs: Não é necessário punir o usuário!)")
-									} else {
-										staff.sendMessage("§bUso de AntiAFK? §3Não!")
+									staff.sendMessage("§b${player.name} §3foi kickado por ficar parado por muito tempo!")
+									when {
+										isLiquid -> {
+											staff.sendMessage("§bUso de AntiAFK? §3Provavelmente! §7(Água @ §b${player.location.blockX}§3, §b${player.location.blockY}§3, §b${player.location.blockZ}§7)")
+											staff.sendMessage("§7(Obs: Não é necessário punir o usuário!)")
+										}
+										isInsideVehicle -> {
+											staff.sendMessage("§bUso de AntiAFK? §3Provavelmente! §7(Dentro de um veículo @ §b${player.location.blockX}§3, §b${player.location.blockY}§3, §b${player.location.blockZ}§7)")
+											staff.sendMessage("§7(Obs: Não é necessário punir o usuário!)")
+										}
+										else -> {
+											staff.sendMessage("§bUso de AntiAFK? §3Não!")
+										}
 									}
 								}
 							}
@@ -155,6 +191,8 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 	fun onChat(e: AsyncPlayerChatEvent) {
 		if (players.containsKey(e.player)) {
 			val info = players[e.player]!!
+			// Decrease the score a bit if they are talking in chat
+			// If they send 2 messages per minute, it is already enough
 			info.score = Math.max(info.score - 5, 0)
 		}
 	}
@@ -163,13 +201,25 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 	fun onCommand(e: PlayerCommandPreprocessEvent) {
 		if (players.containsKey(e.player)) {
 			val info = players[e.player]!!
+			// Decrease the score a bit if they are talking in chat
+			// If they send 4 commands per minute, it is already enough
 			info.score = Math.max(info.score - 3, 0)
+		}
+	}
+
+	@EventHandler
+	fun onBlockPlace(e: BlockPlaceEvent) {
+		if (players.containsKey(e.player)) {
+			// Decrease it a bit if they are placing blocks
+			val info = players[e.player]!!
+			info.score = Math.max(info.score - 1, 0)
 		}
 	}
 
 	@EventHandler
 	fun onInteract(e: PlayerInteractEvent) {
 		if (players.containsKey(e.player) && (e.rightClick || e.leftClick)) {
+			// Decrease it a bit if they are placing blocks
 			val info = players[e.player]!!
 			info.score = Math.max(info.score - 1, 0)
 		}
