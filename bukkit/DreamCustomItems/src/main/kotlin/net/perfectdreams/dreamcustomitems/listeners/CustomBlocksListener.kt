@@ -4,7 +4,7 @@ import com.comphenix.packetwrapper.WrapperPlayClientBlockPlace
 import com.comphenix.packetwrapper.WrapperPlayClientEntityAction
 import com.comphenix.protocol.wrappers.EnumWrappers
 import com.okkero.skedule.schedule
-// import ml.beancraft.haricot.event.block.NoteBlockUpdateEvent
+import ml.beancraft.haricot.event.block.NoteBlockUpdateEvent
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.BlockPosition
 import net.perfectdreams.dreamcustomitems.utils.CustomBlocks
@@ -95,8 +95,7 @@ class CustomBlocksListener(val m: DreamCustomItems) : Listener {
             e.isCancelled = true
     }
 
-    // TODO: Fix
-    /* @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onNoteBlockUpdate(e: NoteBlockUpdateEvent) {
         // Blocks random ticking/block changes updating the note block
         if (m.getCustomBlocksInWorld(e.block.world.name).contains(BlockPosition.fromBlock(e.block))) {
@@ -106,5 +105,5 @@ class CustomBlocksListener(val m: DreamCustomItems) : Listener {
                 it.sendBlockChange(e.block.location, e.block.blockData)
             }
         }
-    } */
+    }
 }
