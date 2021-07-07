@@ -298,6 +298,7 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 			m.logger.info { "ASN check result for $playerIp: $asnBlacklisted; Quantity of triggered ASNs: ${m.asnManager.triggeredAsns.size}/${m.asnManager.asns.size}" }
 
 			if (asnBlacklisted) {
+				event.isCancelled = true
 				event.setCancelReason(*"""
 							§cSeu IP está bloqueado, desative VPNs ou proxies ativos para poder jogar!"
 						""".trimIndent().toBaseComponent())
