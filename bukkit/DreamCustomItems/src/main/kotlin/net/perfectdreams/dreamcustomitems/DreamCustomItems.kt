@@ -330,11 +330,17 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		transformer: (T, MutableMap<Any, Any>) -> (Unit),
 		file: File
 	) {
+		if (locations.isEmpty()) {
+			logger.warning("No $key is present! Bug? We are going to ignore this save request...")
+			return
+		}
+
+		logger.info("Saving ${locations.size} $key to the file...")
 		configuration.set(key, null)
 
 		val list = mutableListOf<Map<Any, Any>>()
 
-		locations.map {
+		locations.forEach {
 			val map = mutableMapOf<Any, Any>(
 				"location" to it.key
 			)
