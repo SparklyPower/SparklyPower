@@ -296,7 +296,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 				if (!inventory.canHoldItem(itemStack)) {
 					player.sendTitle(
-						"",
+						"§f",
 						"§cVocê está com o inventário cheio!",
 						0,
 						60,

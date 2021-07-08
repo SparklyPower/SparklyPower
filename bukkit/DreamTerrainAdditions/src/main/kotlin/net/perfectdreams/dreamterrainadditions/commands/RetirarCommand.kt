@@ -50,7 +50,7 @@ object RetirarCommand : DSLCommandBase<DreamTerrainAdditions> {
                 }
 
                 kick.teleport(DreamCore.dreamConfig.getSpawn())
-                kick.sendTitle("", "§cVocê foi expulso do terreno", 20, 60, 20)
+                kick.sendTitle("§f", "§cVocê foi expulso do terreno", 20, 60, 20)
 
                 player.sendMessage("§b${kick.displayName}§a foi expulso do terreno!")
                 player.sendMessage("§7Você pode banir alguém do seu terreno usando §6/banir")

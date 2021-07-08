@@ -61,7 +61,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		if (claimAdditions.bannedPlayers.contains(e.player.name) && !e.player.hasPermission("sparklypower.soustaff")) {
 			e.isCancelled = true
 
-			e.player.sendTitle("", "§cVocê está banido deste terreno", 0, 60, 0)
+			e.player.sendTitle("§f", "§cVocê está banido deste terreno", 0, 60, 0)
 		}
 	}
 

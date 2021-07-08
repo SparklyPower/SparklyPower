@@ -54,7 +54,7 @@ object BanirCommand : DSLCommandBase<DreamTerrainAdditions> {
 
                     if (banned.location.isBetween(lesser, greater)) {
                         banned.teleport(DreamCore.dreamConfig.getSpawn())
-                        banned.sendTitle("", "§cVocê foi banido do terreno", 20, 60, 20)
+                        banned.sendTitle("§f", "§cVocê foi banido do terreno", 20, 60, 20)
                     }
                 }
 

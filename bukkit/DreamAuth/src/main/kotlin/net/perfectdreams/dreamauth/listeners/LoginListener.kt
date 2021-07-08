@@ -83,7 +83,7 @@ class LoginListener(val m: DreamAuth) : Listener {
 				waitFor(20)
 				player.sendTitle("§a§lBem-Vindo(a) ao...", "§4§lSparkly§b§lPower", 10, 60, 10)
 				waitFor(90)
-				player.sendTitle("", "§bMas, antes de começar...", 10, 60, 10)
+				player.sendTitle("§f", "§bMas, antes de começar...", 10, 60, 10)
 				waitFor(90)
 				player.sendTitle("§b§lRegistre a sua conta!", "§6/registrar SuaSenha SuaSenha", 10, 60, 10)
 				waitFor(20)
@@ -133,7 +133,7 @@ class LoginListener(val m: DreamAuth) : Listener {
 			waitFor(90)
 			if (m.playerStatus[player] != PlayerStatus.LOGIN)
 				return@schedule
-			player.sendTitle("", "§bMas, antes de começar...", 10, 60, 10)
+			player.sendTitle("§f", "§bMas, antes de começar...", 10, 60, 10)
 			waitFor(90)
 			if (m.playerStatus[player] != PlayerStatus.LOGIN)
 				return@schedule

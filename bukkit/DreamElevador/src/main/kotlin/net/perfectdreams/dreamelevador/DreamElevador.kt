@@ -144,7 +144,7 @@ class DreamElevador : KotlinPlugin(), Listener {
             }
             return
         }
-        player.sendTitle("", "§cVocê já está no último andar!", 8, 35, 8)
+        player.sendTitle("§f", "§cVocê já está no último andar!", 8, 35, 8)
         player.world.spawnParticle(Particle.VILLAGER_ANGRY, player.location.add(0.0, 0.5, 0.0), 10, 0.5, 0.5, 0.5)
     }
 
@@ -215,7 +215,7 @@ class DreamElevador : KotlinPlugin(), Listener {
             }
             return
         }
-        player.sendTitle("", "§cVocê já está no primeiro andar!", 8, 35, 8)
+        player.sendTitle("§f", "§cVocê já está no primeiro andar!", 8, 35, 8)
         player.world.spawnParticle(Particle.VILLAGER_ANGRY, player.location.add(0.0, 0.5, 0.0), 10, 0.5, 0.5, 0.5)
     }
 
