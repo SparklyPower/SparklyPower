@@ -32,10 +32,6 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 		if (e.item?.type != Material.CHEST)
 			return
 
-		// Do not drop if it is a monster pickaxe
-		if (e.item?.getStoredMetadata("isMonsterPickaxe") == "true")
-			return
-
 		val data = e.item!!.getStoredMetadata("caixaSecretaLevel") ?: return
 		val caixaSecretaWorld = e.item!!.getStoredMetadata("caixaSecretaWorld")
 
@@ -130,6 +126,10 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 			return
 
 		if (e.player.inventory.itemInMainHand.containsEnchantment(Enchantment.SILK_TOUCH))
+			return
+
+		// Do not drop if it is a monster pickaxe
+		if (e.player.inventory.itemInMainHand.getStoredMetadata("isMonsterPickaxe") == "true")
 			return
 
 		val chance = 0.8
