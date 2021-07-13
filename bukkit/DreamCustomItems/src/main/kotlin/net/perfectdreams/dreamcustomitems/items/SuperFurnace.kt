@@ -17,16 +17,16 @@ import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.holders.SuperFurnaceHolder
 import org.bukkit.*
 import org.bukkit.entity.Player
-import org.bukkit.inventory.FurnaceRecipe
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.Recipe
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.inventory.FurnaceRecipe
 
 class SuperFurnace(val m: DreamCustomItems, val location: Location) {
     var ticksRunning = 0
     var running = false
     var scheduler: CoroutineTask? = null
-    var player: Player? = null
+    var furnacePlayer: Player? = null
 
     val inventory = Bukkit.createInventory(SuperFurnaceHolder(this), 36, "Super Fornalha").apply {
         repeat(36) {
@@ -80,7 +80,6 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
 
         return if (Config.getInstance().getDoubleDropsEnabled(PrimarySkillType.SMELTING, result.type) && mcmmoPlayer.smeltingManager.isSecondSmeltSuccessful) {
             val newResult: ItemStack = result.clone()
-
             newResult.amount = result.amount + 1
 
             newResult;
@@ -90,42 +89,43 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
     }
 
     fun convertToSmeltedItem(item: ItemStack): ItemStack? {
-        var result: ItemStack? = null
-        var newMcMMOAmount = 0
         val iter: Iterator<Recipe> = Bukkit.recipeIterator()
-        val mcmmoPlayer = UserManager.getPlayer(player)
-        val itemStack: ItemStack = if (item.type == Material.NETHER_GOLD_ORE) ItemStack(Material.GOLD_ORE).asQuantity(item.amount) else item
+        var result: ItemStack? = null
+        var newAmount = 0
 
         while (iter.hasNext()) {
             val recipe: Recipe = iter.next() as? FurnaceRecipe ?: continue
-            val furnaceRecipe = recipe as FurnaceRecipe
-            if (furnaceRecipe.input.type !== itemStack.type) continue
 
-            result = smeltProcessing(itemStack, recipe.result, mcmmoPlayer)
+            if ((recipe as FurnaceRecipe).input.type !== item.type) continue
 
-			repeat(itemStack.amount) {
-                player?.giveExp(mcmmoPlayer.smeltingManager.vanillaXPBoost(recipe.experience.toInt())) // TEST
+            result = recipe.result.asQuantity(item.amount)
 
-				newMcMMOAmount += smeltProcessing(itemStack, recipe.result, mcmmoPlayer).amount ?: 0
-			}
-            
+            repeat(item.amount) {
+                newAmount += smeltProcessing(item, recipe.result, UserManager.getPlayer(furnacePlayer)).amount
+            }
+
             break
         }
-        result?.amount = newMcMMOAmount
+
+        if (result == null) return null
+
+        result.amount += newAmount
+
         return result
     }
 
-    fun open(furnacePlayer: Player) {
-        furnacePlayer.openInventory(inventory)
-        furnacePlayer.playSound(location, "perfectdreams.sfx.microwave.open", SoundCategory.BLOCKS, 1f, 1f)
-
-        player = furnacePlayer
+    fun open(player: Player) {
+        player.openInventory(inventory)
+        player.playSound(location, "perfectdreams.sfx.microwave.open", SoundCategory.BLOCKS, 1f, 1f)
     }
 
-    fun start() {
+    fun start(whoStarted: Player) {
+
+        furnacePlayer = whoStarted
+
         listOf(18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32).forEach {
             if (inventory.getItem(it) != null) {
-                player?.sendMessage("§8[§6§lSuper Fornalha§8] §cTire os itens dos slots de saída da super fornalha antes de ligar ela!")
+                furnacePlayer?.sendMessage("§8[§6§lSuper Fornalha§8] §cTire os itens dos slots de saída da super fornalha antes de ligar ela!")
                 return
             }
         }
@@ -163,7 +163,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
 
                     listOf(18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32).forEach {
                         if (inventory.getItem(it) != null) {
-                            player?.sendMessage("§8[§6§lSuper Fornalha§8] §c§lSeus itens já estão prontos, mas não há espaço para eles! Tire os itens dos slots de saída da super fornalha e ligue ela novamente.")
+                            furnacePlayer?.sendMessage("§8[§6§lSuper Fornalha§8] §c§lSeus itens já estão prontos, mas não há espaço para eles! Tire os itens dos slots de saída da super fornalha e ligue ela novamente.")
                             updateInventory()
                             canFinishSmelting = false
                         }
@@ -204,7 +204,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
             }
         }
 
-        player?.sendMessage("§8[§6§lSuper Fornalha§8] §c§lSeus itens já estão prontos!")
+        furnacePlayer?.sendMessage("§8[§6§lSuper Fornalha§8] §c§lSeus itens já estão prontos!")
     }
 
     fun stop() {

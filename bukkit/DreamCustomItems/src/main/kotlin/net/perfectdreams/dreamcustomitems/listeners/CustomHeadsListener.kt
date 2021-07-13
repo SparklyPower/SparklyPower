@@ -10,8 +10,10 @@ import net.perfectdreams.dreamcustomitems.items.Microwave
 import net.perfectdreams.dreamcustomitems.items.SuperFurnace
 import net.perfectdreams.dreamcustomitems.items.TrashCan
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -217,7 +219,7 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                 e.isCancelled = true
 
                 if (e.currentItem?.type == Material.RED_STAINED_GLASS_PANE) {
-                    holder.m.start()
+                    holder.m.start(e.whoClicked as Player)
                     return
                 }
 
