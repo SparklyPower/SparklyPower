@@ -3,7 +3,9 @@ package net.perfectdreams.dreamantiafk
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.schedule
+import net.perfectdreams.dreamantiafk.listeners.FishListener
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.commands.CommandException
 import net.perfectdreams.dreamcore.utils.commands.command
 import net.perfectdreams.dreamcore.utils.extensions.leftClick
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
@@ -38,7 +40,10 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 			blockedWorlds = DreamUtils.gson.fromJson(configFile.readText())
 		}
 
+		val fishListener = FishListener()
 		registerEvents(this)
+		registerEvents(fishListener)
+
 		registerCommand(command("DreamAntiAFKCommand", listOf("dreamantiafk")) {
 			permission = "dreamantiafk.see"
 
@@ -57,6 +62,31 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 				blockedWorlds = DreamUtils.gson.fromJson(configFile.readText())
 
 				sender.sendMessage("§aRecarregado com sucesso!")
+			}
+		})
+
+		registerCommand(command("DreamAntiAFKFishCommand", listOf("dreamantiafk fish")) {
+			permission = "dreamantiafk.see"
+
+			executes {
+				val playerName = args.getOrNull(0) ?: throw CommandException("Coloque o nome do player!")
+
+				val player = Bukkit.getPlayerUniqueId(playerName)
+				val playerFishEvents = fishListener.fishEvents[player] ?: throw CommandException("Não tem nenhum evento de peixe para o player específicado!")
+
+				sender.sendMessage("§6Eventos de Peixe do $playerName:")
+
+				for ((index, event) in playerFishEvents.withIndex()) {
+					val previousEvent = playerFishEvents.getOrNull(index - 1)
+
+					if (previousEvent != null) {
+						val diff = event.time - previousEvent.time
+						val diffInSeconds = diff / 60.0
+						sender.sendMessage("§7+(${diffInSeconds}s)")
+					}
+
+					sender.sendMessage("§eEvento: ${event.state}")
+				}
 			}
 		})
 
