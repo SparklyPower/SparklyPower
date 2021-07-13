@@ -89,7 +89,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 
 					if (previousEvent != null) {
 						val diff = event.time - previousEvent.time
-						val diffInSeconds = diff / 60.0
+						val diffInSeconds = diff / 1000.0
 						sender.sendMessage("§7+${diffInSeconds}s")
 					}
 
