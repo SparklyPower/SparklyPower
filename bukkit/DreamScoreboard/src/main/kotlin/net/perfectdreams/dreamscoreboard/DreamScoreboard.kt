@@ -17,6 +17,10 @@ import net.perfectdreams.dreamscoreboard.utils.PlayerScoreboard
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Statistic
+import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_17_R1.scoreboard.CraftScoreboard
+import org.bukkit.craftbukkit.v1_17_R1.scoreboard.CraftScoreboardManager
+import org.bukkit.craftbukkit.v1_17_R1.util.WeakCollection
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -56,6 +60,28 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 	val scoreboards = ConcurrentHashMap<Player, PlayerScoreboard>()
 	val coloredGlow = ConcurrentHashMap<UUID, ChatColor>()
 	var cachedClubesPrefixes = WeakHashMap<Player, String?>()
+
+	// 13/07/2021 - YES, THIS IS NEEDED, PAPER HASN'T FIXED THIS ISSUE YET
+	// THERE IS A PATCH THAT IMPLEMENTS SCOREBOARD CLEAN UP, BUT THAT DOESN'T FIX OUR USE CASE!!
+	// https://canary.discord.com/channels/@me/646488209274044457/864264697356091393
+	val scoreboardsField by lazy {
+		(Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("scoreboards").apply {
+			this.isAccessible = true
+		}
+	}
+
+	val playerBoardsField by lazy {
+		(Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("playerBoards")
+			.apply {
+				this.isAccessible = true
+			}
+	}
+
+	fun cleanUp(scoreboard: Scoreboard) {
+		// Needs to be fixed: https://github.com/PaperMC/Paper/issues/4260
+		val scoreboards = scoreboardsField.get(Bukkit.getScoreboardManager()) as WeakCollection<Scoreboard>
+		scoreboards.remove(scoreboard)
+	}
 
 	override fun softEnable() {
 		super.softEnable()
@@ -99,6 +125,23 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 				setupTabDisplayNames()
 
 				waitFor(20 * 15)
+			}
+		}
+
+		// Needs to be fixed: https://github.com/PaperMC/Paper/issues/4260
+		scheduler().schedule(this, SynchronizationContext.SYNC) {
+			while (true) {
+				val weakCollection = scoreboardsField.get(Bukkit.getScoreboardManager()) as WeakCollection<CraftScoreboard>
+
+				logger.info("Weak Collection before clean up size is ${weakCollection.size}")
+
+				val playerBoards = playerBoardsField.get(Bukkit.getScoreboardManager()) as Map<CraftPlayer, CraftScoreboard>
+
+				weakCollection.removeAll(weakCollection - playerBoards.values)
+
+				logger.info("Weak Collection after clean up size is ${weakCollection.size}")
+
+				waitFor(20 * 60) // 1 minute
 			}
 		}
 
@@ -262,6 +305,12 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onQuit(e: PlayerQuitEvent) {
+		// Manually clean up scoreboards
+		val playerScoreboard = scoreboards[e.player]
+		playerScoreboard?.let {
+			cleanUp(it.phoenix.scoreboard)
+		}
+
 		scoreboards.remove(e.player)
 	}
 
