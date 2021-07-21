@@ -31,7 +31,7 @@ dependencies {
     compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.6.0")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
     compileOnlyApi(files("../../libs/WorldGuard.jar"))
-    compileOnlyApi("com.github.TechFortress:GriefPrevention:16.17.1")
+    compileOnlyApi("com.github.TechFortress:GriefPrevention:16036bdc19") // Using commits instead of pinning a version because GP hasn't released a new version yet
     api("net.perfectdreams.commands:command-framework-core:0.0.8")
     api("com.github.SparklyPower:PacketWrapper:88ddd591d8")
     compileOnlyApi("net.milkbowl.vault:VaultAPI:1.6")

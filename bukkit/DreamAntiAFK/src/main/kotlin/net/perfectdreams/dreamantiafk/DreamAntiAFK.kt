@@ -17,9 +17,13 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.*
 import java.io.File
+import java.time.Instant
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+
 
 class DreamAntiAFK : KotlinPlugin(), Listener {
 	val players = WeakHashMap<Player, PlayerAFKInfo>()
@@ -65,10 +69,14 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 			}
 		})
 
+		// TODO: Move to a different plugin
 		registerCommand(command("DreamAntiAFKFishCommand", listOf("dreamantiafk fish")) {
 			permission = "dreamantiafk.see"
 
 			executes {
+
+				val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+					.withZone(ZoneId.systemDefault())
 				val playerName = args.getOrNull(0) ?: throw CommandException("Coloque o nome do player!")
 
 				val player = Bukkit.getPlayerUniqueId(playerName)
@@ -81,11 +89,12 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 
 					if (previousEvent != null) {
 						val diff = event.time - previousEvent.time
-						val diffInSeconds = diff / 60.0
-						sender.sendMessage("§7+(${diffInSeconds}s)")
+						val diffInSeconds = diff / 1000.0
+						sender.sendMessage("§7+${diffInSeconds}s")
 					}
 
-					sender.sendMessage("§eEvento: ${event.state}")
+					Instant.ofEpochMilli(event.time)
+					sender.sendMessage("§7[${DATE_TIME_FORMATTER.format(Instant.ofEpochMilli(event.time).atZone(ZoneId.of("America/Sao_Paulo")))}] §eEvento: ${event.state}")
 				}
 			}
 		})
