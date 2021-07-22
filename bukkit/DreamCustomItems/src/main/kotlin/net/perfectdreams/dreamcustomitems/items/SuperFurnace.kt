@@ -1,6 +1,5 @@
 package net.perfectdreams.dreamcustomitems.items
 
-import com.gmail.nossr50.config.Config
 import com.gmail.nossr50.config.experience.ExperienceConfig
 import com.gmail.nossr50.datatypes.experience.XPGainReason
 import com.gmail.nossr50.datatypes.experience.XPGainSource
@@ -78,13 +77,13 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
     fun smeltProcessing(smelting: ItemStack, result: ItemStack, mcmmoPlayer: McMMOPlayer): ItemStack {
         mcmmoPlayer.smeltingManager.applyXpGain(getResourceXp(smelting).toFloat(), XPGainReason.PVE, XPGainSource.PASSIVE)
 
-        return if (Config.getInstance().getDoubleDropsEnabled(PrimarySkillType.SMELTING, result.type) && mcmmoPlayer.smeltingManager.isSecondSmeltSuccessful) {
+        return if (mcMMO.p.generalConfig.getDoubleDropsEnabled(PrimarySkillType.SMELTING, result.type) && mcmmoPlayer.smeltingManager.isSecondSmeltSuccessful) {
             val newResult: ItemStack = result.clone()
             newResult.amount = result.amount + 1
 
-            newResult;
+            newResult
         } else {
-            result;
+            result
         }
     }
 
