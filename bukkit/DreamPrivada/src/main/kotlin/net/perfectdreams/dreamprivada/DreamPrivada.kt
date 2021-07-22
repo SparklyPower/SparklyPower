@@ -8,7 +8,6 @@ import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.block.BlockFace
 import org.bukkit.block.data.Levelled
-import org.bukkit.block.data.Waterlogged
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -65,9 +64,9 @@ class DreamPrivada : KotlinPlugin(), Listener {
 
 				val water = player.location.block.getRelative(BlockFace.DOWN)
 				val necessidades = ItemStack(Material.COCOA_BEANS, 1)
-						.rename("§8§lNecessidades")
-						.lore("§7Se eu fosse você, eu não", "§7cheirava isto...", "§7", "§7Necessidades de §b${player.displayName}")
-						.storeMetadata("poop", "true")
+					.rename("§8§lNecessidades")
+					.lore("§7Se eu fosse você, eu não", "§7cheirava isto...", "§7", "§7Necessidades de §b${player.displayName}")
+					.storeMetadata("poop", "true")
 
 				player.world.dropItem(water.location.add(0.5, -0.1, 0.5), necessidades)
 			}
@@ -93,19 +92,19 @@ class DreamPrivada : KotlinPlugin(), Listener {
 			if (trap.type == Material.OAK_TRAPDOOR) {
 				val water = trap.getRelative(BlockFace.DOWN)
 
-				if (water.type == Material.CAULDRON) {
+				if (water.type == Material.WATER_CAULDRON) {
 					val waterType = water.blockData as Levelled
 
 					e.isCancelled = true
 					e.player.sendMessage("§7*sons de privada*")
 					scheduler().schedule(this) {
 						val levelled = waterType
-						for (idx in 3 downTo 0) {
+						for (idx in 3 downTo 1) {
 							levelled.level = idx
 							water.blockData = levelled
 							waitFor(5)
 						}
-						for (idx in 0..3) {
+						for (idx in 1..3) {
 							levelled.level = idx
 							water.blockData = levelled
 							waitFor(5)
@@ -134,7 +133,7 @@ class DreamPrivada : KotlinPlugin(), Listener {
 	fun isInAPrivada(player: Player): Boolean {
 		val block = player.location.block
 
-		if (block.type == Material.OAK_TRAPDOOR && block.getRelative(BlockFace.DOWN).type == Material.CAULDRON) {
+		if (block.type == Material.OAK_TRAPDOOR && block.getRelative(BlockFace.DOWN).type == Material.WATER_CAULDRON) {
 			val face = LocationUtils.yawToFace((player.location.yaw + 90) % 360, true).oppositeFace
 
 			if (block.getRelative(face).type == Material.POLISHED_ANDESITE && block.getRelative(face).getRelative(BlockFace.DOWN).type == Material.POLISHED_ANDESITE_STAIRS)
