@@ -3,16 +3,19 @@ package net.perfectdreams.dreamantiafk
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.schedule
+import io.papermc.paper.event.player.AsyncChatEvent
 import net.perfectdreams.dreamantiafk.listeners.FishListener
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.CommandException
 import net.perfectdreams.dreamcore.utils.commands.command
+import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
 import net.perfectdreams.dreamcore.utils.extensions.leftClick
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.*
@@ -74,7 +77,6 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 			permission = "dreamantiafk.see"
 
 			executes {
-
 				val DATE_TIME_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 					.withZone(ZoneId.systemDefault())
 				val playerName = args.getOrNull(0) ?: throw CommandException("Coloque o nome do player!")
@@ -119,6 +121,9 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 								continue
 							}
 
+							if (location.isWithinRegion("spawn")) // Do not kick users in the spawn region, allows them to write stuff happily
+								continue
+
 							val distance = location.distance(lastLocation)
 							val distanceSameYLevel = location.clone().apply { this.y = lastLocation.y }
 								.distance(lastLocation)
@@ -136,12 +141,12 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 							when {
 								distance == 0.0 -> {
 									logger.info("Player ${player.name} haven't moved in a long time, adding 20 to the player's score... Distance: $distance")
-									pair.score += 20 // Haven't moved in a long time, so let's increase +20 to the player's score!
+									pair.score += 10 // Haven't moved in a long time, so let's increase +20 to the player's score!
 								}
 
 								value >= distance -> {
-									val scoreToBeAdded = (((value - distance) / value) * 20).toInt()
-										.coerceAtMost(20)
+									val scoreToBeAdded = (((value - distance) / value) * 10).toInt()
+										.coerceAtMost(10)
 									logger.info("Player ${player.name} has moved but just a little bit, adding $scoreToBeAdded to the player's score... Distance: $distance")
 
 									// Changes depending on the difference between the distance, if the user haven't moved a lot, it grows more
@@ -210,7 +215,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	fun onJoin(e: PlayerJoinEvent) {
 		val whenLoggedOutDueToAfkKick = logoutTime[e.player.uniqueId]
 
@@ -221,13 +226,13 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	fun onQuit(e: PlayerQuitEvent) {
 		players.remove(e.player)
 	}
 
-	@EventHandler
-	fun onChat(e: AsyncPlayerChatEvent) {
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	fun onChat(e: AsyncChatEvent) {
 		if (players.containsKey(e.player)) {
 			val info = players[e.player]!!
 			// Decrease the score a bit if they are talking in chat
@@ -236,7 +241,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	fun onCommand(e: PlayerCommandPreprocessEvent) {
 		if (players.containsKey(e.player)) {
 			val info = players[e.player]!!
@@ -246,7 +251,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	fun onBlockPlace(e: BlockPlaceEvent) {
 		if (players.containsKey(e.player)) {
 			// Decrease it a bit if they are placing blocks
@@ -255,7 +260,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	fun onInteract(e: PlayerInteractEvent) {
 		if (players.containsKey(e.player) && (e.rightClick || e.leftClick)) {
 			// Decrease it a bit if they are placing blocks
