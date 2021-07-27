@@ -111,7 +111,9 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
 
                         m.doMcMMOStuff(e.player, e.block.state, dropsAsItems)
 
-                        location.block.type = Material.AIR
+                        // Do not update physics, this tries to avoid a lot of "notify()" calls
+                        // See: https://cdn.discordapp.com/attachments/513405772911345664/869387512924209182/wLnOZAeMZ5.sparkprofile
+                        location.block.setType(Material.AIR, false)
 
                         if (exp > 0 && !isSilky) {
                             val orb = location.block.world.spawnEntity(center, EntityType.EXPERIENCE_ORB) as ExperienceOrb
