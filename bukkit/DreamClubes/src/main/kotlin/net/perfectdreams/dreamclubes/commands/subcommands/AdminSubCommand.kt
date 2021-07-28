@@ -9,6 +9,7 @@ import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
 import net.perfectdreams.dreamclubes.utils.async
 import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.DreamUtils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -17,12 +18,7 @@ class AdminSubCommand(val m: DreamClubes) : WithClubeSubCommand {
     override fun execute(player: Player, clube: Clube, selfMember: ClubeMember, args: Array<String>) {
         val playerName = args.getOrNull(0) ?: return
 
-        val uniqueId = Bukkit.getPlayerUniqueId(playerName)
-
-        if (uniqueId == null) {
-            player.sendMessage("${DreamClubes.PREFIX} §cPlayer inexistente!")
-            return
-        }
+        val uniqueId = DreamUtils.retrieveUserUniqueId(playerName)
 
         async {
             val permissionLevel = selfMember.permissionLevel

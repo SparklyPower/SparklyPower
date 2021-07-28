@@ -54,6 +54,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
     @Subcommand(["pagar", "pay"])
     fun payPlayerCash(sender: Player, name: String, howMuchString: String) {
         scheduler().schedule(m, SynchronizationContext.ASYNC) {
+            // This is the same check as retrieveUserUniqueId, however retrieveUserUniqueId never returns null
             val receiverInfo = transaction(Databases.databaseNetwork) {
                 User.find { Users.username eq name }.firstOrNull()
             }

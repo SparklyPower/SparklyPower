@@ -7,6 +7,7 @@ import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
 import net.perfectdreams.dreamclubes.utils.async
 import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.TableGenerator
 import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
@@ -24,10 +25,7 @@ class KickSubCommand(val m: DreamClubes) : WithClubeSubCommand {
                 return@async
             }
 
-            val uniqueId = Bukkit.getPlayerUniqueId(playerName) ?: run {
-                player.sendMessage("${DreamClubes.PREFIX} §cO player não existe! Você tem certeza que colocou o nome certo?")
-                return@async
-            }
+            val uniqueId = DreamUtils.retrieveUserUniqueId(playerName)
 
             val clubeMember = clube.retrieveMember(uniqueId) ?: run {
                 player.sendMessage("${DreamClubes.PREFIX} §cO player não está no seu clube!")
