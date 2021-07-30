@@ -55,6 +55,7 @@ dependencies {
     api(Dependencies.DISCORD_WEBHOOKS)
     api("com.github.ben-manes.caffeine:caffeine:2.6.2")
     api("org.apache.commons:commons-text:1.8")
+    api("org.jsoup:jsoup:1.14.1")
     compileOnlyApi("com.greatmancode:craftconomy3:3.3.1")
     compileOnlyApi("me.lucko.luckperms:luckperms-api:4.3")
     testCompileOnly(files("../../libs/paper_server.jar"))

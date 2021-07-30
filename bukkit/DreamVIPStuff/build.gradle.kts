@@ -14,24 +14,3 @@ dependencies {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
-
-tasks {
-    val fatJar = task("fatJar", type = Jar::class) {
-        println("Building fat jar for ${project.name}...")
-
-        archiveBaseName.set("${project.name}-fat")
-
-        from(configurations.runtimeClasspath.get().mapNotNull {
-            if (it.name.contains("jsoup"))
-                zipTree(it)
-            else
-                null
-        })
-
-        with(jar.get() as CopySpec)
-    }
-
-    "build" {
-        dependsOn(fatJar)
-    }
-}
