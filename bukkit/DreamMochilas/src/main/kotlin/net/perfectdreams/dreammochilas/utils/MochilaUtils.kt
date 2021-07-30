@@ -2,13 +2,16 @@ package net.perfectdreams.dreammochilas.utils
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.toBase64
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.tables.Mochilas
 import org.bukkit.Bukkit
+import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.awt.Color
 import java.util.concurrent.ConcurrentHashMap
 
 object MochilaUtils {
@@ -56,9 +59,10 @@ object MochilaUtils {
     /**
      * Saves the mochila to the database, but ONLY if the mochila inventory doesn't have any viewers AND mochilaInventoryManipulationLock is not locked
      *
-     * @param mochila the mochila object
+     * @param mochilaItem the mochila item, used for the slot size in the lore, if null, the lore won't be updated
+     * @param mochila     the mochila object
      */
-    suspend fun saveMochila(mochila: Mochila, triggerType: String? = null) {
+    suspend fun saveMochila(mochilaItem: ItemStack?, mochila: Mochila, triggerType: String? = null) {
         DreamUtils.assertAsyncThread(true)
 
         val viewerCount = mochila.getOrCreateMochilaInventory().viewers.size
@@ -89,6 +93,43 @@ object MochilaUtils {
 
                     transaction(Databases.databaseNetwork) {
                         mochila.content = inventory.toBase64(1)
+                    }
+
+                    if (mochilaItem != null) {
+                        val currentLore = mochilaItem.lore
+
+                        // Only update if the lore exists... it should always exist
+                        if (currentLore?.isNotEmpty() == true) {
+                            val lastLineOfTheLore = currentLore.last()
+                            val newLore = currentLore.toMutableList()
+
+                            if (!lastLineOfTheLore.contains("slots"))
+                                newLore.add("\n")
+                            else
+                                newLore.removeLast()
+
+                            var usedSize = inventory.count { it != null } // Count non empty slots
+                            if (usedSize == -1)
+                                usedSize = inventory.size
+
+                            // Do a nice transition from green to red, depending on how many slots are used
+                            val totalSizeInPercentage = usedSize / inventory.size.toDouble()
+                            val r = 0 + (200 * totalSizeInPercentage).toInt()
+                            val g = 255 - (255 * totalSizeInPercentage).toInt()
+                            val b = 125 - (125 * totalSizeInPercentage).toInt()
+                            val colorToBeUsed = ChatColor.of(Color(r, g, b))
+
+                            newLore.add(
+                                buildString {
+                                    append("$colorToBeUsed$usedSize/${inventory.size} §7slots usados")
+                                    if (usedSize == inventory.size) {
+                                        append(" §c§lCHEIA!")
+                                    }
+                                }
+                            )
+
+                            mochilaItem.lore = newLore
+                        }
                     }
 
                     plugin.logger.info { "Saved backpack ${mochila.id.value} on database! Triggered by $triggerType" }

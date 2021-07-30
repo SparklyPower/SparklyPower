@@ -1,22 +1,21 @@
 package net.perfectdreams.dreamquickharvest
 
-import com.gmail.nossr50.api.ExperienceAPI
 import com.gmail.nossr50.datatypes.experience.XPGainReason
 import com.gmail.nossr50.datatypes.experience.XPGainSource
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.player.UserManager
-import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.withLock
-import net.perfectdreams.dreamcore.utils.*
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.delay
+import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.canHoldItem
 import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
+import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreammochilas.dao.Mochila
-import net.perfectdreams.dreammochilas.listeners.InventoryListener
-import net.perfectdreams.dreammochilas.tables.Mochilas
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.block.Block
@@ -30,7 +29,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.experimental.and
 
 @OptIn(InternalCoroutinesApi::class)
@@ -67,7 +65,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 			
 			launchMainThread {
-				val (inventoryTarget, mochila) = getInventoryTarget(e)
+				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e)
 
 				doQuickHarvestOnCrop(
 					e.player,
@@ -81,7 +79,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					onAsyncThread {
 						// Let's unlock the inventory lock!
 						mochila.mochilaInventoryManipulationLock.unlock()
-						MochilaUtils.saveMochila(mochila, "${e.player.name} harvesting")
+						MochilaUtils.saveMochila(mochilaItem, mochila, "${e.player.name} harvesting")
 					}
 				}
 			}
@@ -95,7 +93,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			launchMainThread {
-				val (inventoryTarget, mochila) = getInventoryTarget(e)
+				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e)
 
 				val ttl = System.nanoTime()
 				doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget)
@@ -105,7 +103,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					onAsyncThread {
 						// Let's unlock the inventory lock!
 						mochila.mochilaInventoryManipulationLock.unlock()
-						MochilaUtils.saveMochila(mochila, "${e.player.name} harvesting")
+						MochilaUtils.saveMochila(mochilaItem, mochila, "${e.player.name} harvesting")
 					}
 				}
 			}
@@ -116,7 +114,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			launchMainThread {
-				val (inventoryTarget, mochila) = getInventoryTarget(e)
+				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e)
 
 				doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget)
 
@@ -124,7 +122,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					onAsyncThread {
 						// Let's unlock the inventory lock!
 						mochila.mochilaInventoryManipulationLock.unlock()
-						MochilaUtils.saveMochila(mochila, "${e.player.name} harvesting")
+						MochilaUtils.saveMochila(mochilaItem, mochila, "${e.player.name} harvesting")
 					}
 				}
 			}
@@ -132,7 +130,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		}
 	}
 
-	suspend fun getInventoryTarget(e: BlockBreakEvent): Pair<Inventory, Mochila?> {
+	suspend fun getInventoryTarget(e: BlockBreakEvent): InventoryTargetResult {
 		var inventoryTarget: Inventory = e.player.inventory
 		var mochila: Mochila? = null
 		val item = e.player.inventory.itemInMainHand
@@ -157,8 +155,14 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			}
 		}
 
-		return Pair(inventoryTarget, mochila)
+		return InventoryTargetResult(inventoryTarget, item, mochila)
 	}
+
+	data class InventoryTargetResult(
+		val inventoryTarget: Inventory,
+		val mochilaItem: ItemStack?,
+		val mochila: Mochila?
+	)
 
 	fun shouldCancelCropEvent(e: BlockBreakEvent, block: Block): Boolean {
 		if (!block.chunk.isLoaded) // Se o chunk não está carregado, ignore, não vamos carregar ele apenas para fazer quick harvest

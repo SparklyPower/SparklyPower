@@ -168,7 +168,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 m.logger.info { "Player ${e.player.name} transaction finished! Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId; Result: $triggerMochilaSave" }
 
                 if (triggerMochilaSave) {
-                    MochilaUtils.saveMochila(mochila, triggerType)
+                    MochilaUtils.saveMochila(item, mochila, triggerType)
                 } else {
                     MochilaUtils.removeCachedMochila(mochila, triggerType)
                 }
@@ -302,7 +302,13 @@ class InventoryListener(val m: DreamMochilas) : Listener {
             }
 
             m.launchAsyncThread {
-                MochilaUtils.saveMochila(holder.mochila, "${e.player.name} mochila inventory close")
+                val item = e.player.inventory.itemInMainHand
+
+                val isMochila = item.getStoredMetadata("isMochila")?.toBoolean()
+
+                MochilaUtils.saveMochila(
+                    if (isMochila == true) item else null // Maybe the user changed the held item?
+                , holder.mochila, "${e.player.name} mochila inventory close")
             }
         }
     }
