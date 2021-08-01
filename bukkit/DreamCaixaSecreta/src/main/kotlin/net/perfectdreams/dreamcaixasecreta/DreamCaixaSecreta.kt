@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcaixasecreta
 
+import club.minnced.discord.webhook.WebhookClient
 import com.xxmicloxx.NoteBlockAPI.model.Song
 import com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder
 import net.perfectdreams.commands.annotation.Subcommand
@@ -9,7 +10,6 @@ import net.perfectdreams.dreamcaixasecreta.utils.RandomItem
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -19,6 +19,8 @@ import java.io.File
 class DreamCaixaSecreta : KotlinPlugin() {
 	lateinit var itemReceived: Song
 	var prizes = mutableListOf<RandomItem>()
+
+	val nitroNotifyWebhook = WebhookClient.withUrl(config.getString("nitro-notify")!!)
 
 	override fun softEnable() {
 		super.softEnable()
