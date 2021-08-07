@@ -46,7 +46,6 @@ class DreamAuth : KotlinPlugin() {
 				"/twofactorauth",
 				"/twofactorauthentication"
 		)
-		val BASE_32 = Base32()
 	}
 
 	val uniqueId2PlayerInfo = ConcurrentHashMap<UUID, AuthInfo?>()
