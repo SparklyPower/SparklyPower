@@ -33,15 +33,21 @@ class TeleportBowListener(val m: DreamLobbyFun) : Listener {
 		if (projectile !is Arrow)
 			return
 
+		val shooter = projectile.shooter
+		if (shooter !is Player) // We only care if it is a player shooting the bow
+			return
+
 		projectile.isGlowing = true
 		projectile.setBounce(false)
 
 		scheduler().schedule(m) {
-			while (!projectile.isValid) {
+			while (projectile.isValid && shooter.isOnline) { // Spawn the particles while the projectile is valid AND the player that shot it is still online
 				projectile.world.spawnParticle(Particle.LAVA, projectile.location, 1, 0.0, 0.0, 0.0, 0.1)
 				projectile.world.spawnParticle(Particle.FLAME, projectile.location, 1, 0.0, 0.0, 0.0, 0.1)
-				waitFor(1)
+				waitFor(5)
 			}
+
+			projectile.remove() // Clean up, this may also be triggered if the player shot it is offline, so that's why we remove the arrows here too
 		}
 	}
 
