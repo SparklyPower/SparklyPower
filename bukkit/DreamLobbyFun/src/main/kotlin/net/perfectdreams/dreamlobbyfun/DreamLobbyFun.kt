@@ -8,6 +8,8 @@ import com.xxmicloxx.NoteBlockAPI.NBSDecoder
 import com.xxmicloxx.NoteBlockAPI.RadioSongPlayer
 import com.xxmicloxx.NoteBlockAPI.Song
 import com.xxmicloxx.NoteBlockAPI.SoundCategory
+import net.perfectdreams.dreamauth.DreamAuth
+import net.perfectdreams.dreamauth.utils.PlayerStatus
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
@@ -17,6 +19,7 @@ import net.perfectdreams.dreamlobbyfun.dao.PlayerSettings
 import net.perfectdreams.dreamlobbyfun.listeners.*
 import net.perfectdreams.dreamlobbyfun.tables.UserSettings
 import net.perfectdreams.dreamlobbyfun.utils.ServerCitizen
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Arrow
@@ -185,5 +188,24 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 
 			this.heldItemSlot = 4
 		}
+	}
+
+	fun getDreamAuthInstance() = Bukkit.getPluginManager().getPlugin("DreamAuth") as DreamAuth
+
+	/**
+	 * Teleports the player to the login location if they aren't logged in, this is used as a fail safe if the user, for some reason, was able to escape the login location without logging in!
+	 *
+	 * @param player the player that is going to be checked
+	 * @return if the player wasn't logged in and they were teleported
+	 */
+	fun teleportToLoginLocationIfNotLoggedIn(player: Player): Boolean {
+		val dreamAuth = getDreamAuthInstance()
+		val playerStatus = dreamAuth.playerStatus[player]
+		if (playerStatus != PlayerStatus.LOGGED_IN) {
+			logger.warning { "Player $player is doing an action that they shouldn't be able to do because they aren't logged in! This means that there is a bug someone that must be fixed! We are going to teleport them to the login location..." }
+			player.teleport(dreamAuth.authConfig.loginLocation ?: error("DreamAuth Login Location is not present!"))
+			return true
+		}
+		return false
 	}
 }

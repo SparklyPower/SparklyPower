@@ -3,6 +3,7 @@ package net.perfectdreams.dreamlobbyfun.listeners
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamauth.events.PlayerLoggedInEvent
+import net.perfectdreams.dreamauth.utils.PlayerStatus
 import net.perfectdreams.dreamcore.DreamCore.Companion.dreamConfig
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
@@ -42,7 +43,16 @@ class SpawnListener(val m: DreamLobbyFun) : Listener {
 
 	@EventHandler
 	fun onRespawn(e: PlayerRespawnEvent) {
-		e.respawnLocation = dreamConfig.getSpawn()
+		val dreamAuth = m.getDreamAuthInstance()
+		val playerStatus = dreamAuth.playerStatus[e.player]
+
+		// Only teleport to the server spawn if the player is logged in!
+		if (playerStatus == PlayerStatus.LOGGED_IN) {
+			e.respawnLocation = dreamConfig.getSpawn()
+		} else {
+			e.respawnLocation = dreamAuth.authConfig.loginLocation ?: error("DreamAuth Login Location is not present!")
+		}
+
 		handleJoin(e.player)
 	}
 

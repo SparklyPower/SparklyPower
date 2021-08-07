@@ -7,6 +7,7 @@ import net.citizensnpcs.api.event.NPCLeftClickEvent
 import net.citizensnpcs.api.event.NPCRightClickEvent
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
@@ -23,6 +24,9 @@ class ServerCitizenListener(val m: DreamLobbyFun) : Listener {
 
 	fun onClick(e: NPCClickEvent) {
 		// NPCClickEvent nunca é chamado (bug no Citizens?), então nós precisamos escutar por left e right clicks
+		if (m.teleportToLoginLocationIfNotLoggedIn(e.clicker))
+			return
+
 		val citizenId = e.npc.id
 
 		val serverCitizen = m.serverCitizens.firstOrNull { it.citizenId == citizenId } ?: return

@@ -15,6 +15,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.EntityType
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -37,9 +38,8 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 
 	@EventHandler
 	fun onInventory(e: InventoryClickEvent) {
-		if (!m.unlockedPlayers.contains(e.whoClicked) || e.clickedInventory?.holder is ServerSelectorHolder) {
+		if (!m.unlockedPlayers.contains(e.whoClicked) || e.clickedInventory?.holder is ServerSelectorHolder)
 			e.isCancelled = true
-		}
 
 		if (e.clickedInventory?.holder is ServerSelectorHolder) { // Clicou dentro do server selector
 			val info = e.currentItem?.getStoredMetadata(DreamLobbyFun.ITEM_INFO_KEY) ?: return
@@ -49,6 +49,9 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 			val arg1 = split.getOrNull(1)
 
 			if (arg0 == "transferTo") {
+				if (m.teleportToLoginLocationIfNotLoggedIn(e.whoClicked as Player))
+					return
+
 				e.whoClicked.closeInventory()
 				// player.sendTitle("§eTransferindo...", "", 10, 60, 10)
 				DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(
@@ -95,6 +98,9 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 		val arg1 = split.getOrNull(1)
 
 		if (arg0 == "serverSelector") {
+			if (m.teleportToLoginLocationIfNotLoggedIn(e.player as Player))
+				return
+
 			val inventory = Bukkit.createInventory(ServerSelectorHolder(), 45, "§a§lEscolha um Servidor!")
 
 			val outline = listOf(
