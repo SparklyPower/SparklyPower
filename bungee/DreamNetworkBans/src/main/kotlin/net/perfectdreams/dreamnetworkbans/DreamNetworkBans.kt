@@ -12,6 +12,7 @@ import java.io.File
 import net.md_5.bungee.config.YamlConfiguration
 import net.md_5.bungee.config.ConfigurationProvider
 import net.perfectdreams.dreamcorebungee.utils.discord.DiscordWebhook
+import net.perfectdreams.dreamnetworkbans.listeners.ServerConnectListener
 import net.perfectdreams.dreamnetworkbans.listeners.SocketListener
 import net.perfectdreams.dreamnetworkbans.utils.ASNManager
 import net.perfectdreams.minecraftmojangapi.MinecraftMojangAPI
@@ -76,6 +77,7 @@ class DreamNetworkBans : KotlinPlugin() {
 		registerCommand(PremiumCommand(this))
 
 		this.proxy.pluginManager.registerListener(this, LoginListener(this))
+		this.proxy.pluginManager.registerListener(this, ServerConnectListener(this))
 		this.proxy.pluginManager.registerListener(this, SocketListener(this))
 
 		if (!youtubersFile.exists()) {
