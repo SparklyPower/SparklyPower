@@ -13,6 +13,7 @@ import net.perfectdreams.dreamcore.utils.extensions.leftClick
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -121,7 +122,7 @@ class DreamAntiAFK : KotlinPlugin(), Listener {
 								continue
 							}
 
-							if (location.isWithinRegion("spawn")) // Do not kick users in the spawn region, allows them to write stuff happily
+							if (player.inventory.itemInMainHand.type == Material.WRITABLE_BOOK) // Do not kick users that have a writable book in their hands
 								continue
 
 							val distance = location.distance(lastLocation)
