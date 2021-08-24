@@ -48,7 +48,7 @@ class MinaRecheada(val m: DreamMinaRecheada) : ServerEvent("Mina Recheada", "/mi
         set(value) {}
 
     init {
-        this.requiredPlayers = 80
+        this.requiredPlayers = 65
         this.discordAnnouncementRole = 538805118384996392L
     }
 
