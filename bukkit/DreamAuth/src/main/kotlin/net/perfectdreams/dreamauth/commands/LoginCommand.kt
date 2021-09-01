@@ -40,7 +40,7 @@ object LoginCommand : DSLCommandBase<DreamAuth> {
                     val count = plugin.wrongPasswordCount.getOrDefault(player.address.address, 0) + 1
                     plugin.wrongPasswordCount[player.address.address] = count
 
-                    if (count == 25 && !player.address.address.hostAddress.startsWith("127.0.0.1")) { // Geyser
+                    if (count == 25) { // Geyser
                         plugin.logger.info { "$player errou a senha vezes demais! Irei banir ele..." }
 
                         DreamNetwork.PANTUFA.sendMessageAsync(

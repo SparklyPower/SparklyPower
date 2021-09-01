@@ -4,7 +4,8 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     kotlin("jvm")
     `java-library`
-    id("com.github.johnrengelman.shadow") version "4.0.4"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
+    kotlin("plugin.serialization")
 }
 
 repositories {
@@ -20,8 +21,10 @@ repositories {
 // So, to do that, we create a configuration that extends the default "shadow" configuration and the "compileClasspath" configuration, this allows us
 // to satisfy both of our needs!
 val shadowWithRuntimeDependencies by configurations.creating {
-    // If you want this configuration to share the same dependencies, otherwise omit this line
-    extendsFrom(configurations["shadow"], configurations["compileClasspath"])
+    extendsFrom(
+        configurations["shadow"], // This has issues with kotlinx.serialization for some reason, investigate later
+        configurations["compileClasspath"]
+    )
 }
 
 dependencies {
@@ -36,6 +39,7 @@ dependencies {
     api("com.github.SparklyPower:PacketWrapper:88ddd591d8")
     compileOnlyApi("net.milkbowl.vault:VaultAPI:1.6")
     compileOnlyApi("com.github.MascusJeoraly:LanguageUtils:1.9")
+    api(project(":common:tables"))
     api("com.google.code.gson:gson:2.8.7")
     api("org.mongodb:mongo-java-driver:3.7.0-rc0")
     api("com.zaxxer:HikariCP:2.7.8")
@@ -56,6 +60,7 @@ dependencies {
     api("com.github.ben-manes.caffeine:caffeine:2.6.2")
     api("org.apache.commons:commons-text:1.8")
     api("org.jsoup:jsoup:1.14.1")
+    api("dev.kord:kord-rest:0.7.4")
     compileOnlyApi("com.greatmancode:craftconomy3:3.3.1")
     compileOnlyApi("me.lucko.luckperms:luckperms-api:4.3")
     testCompileOnly(files("../../libs/paper_server.jar"))
@@ -78,7 +83,7 @@ tasks {
         relocate("org.bson", "net.perfectdreams.libs.org.bson")
 
         exclude {
-            it.file?.name?.startsWith("kotlin") == true || it.file?.name?.startsWith("patched_") == true
+            (it.file?.name?.startsWith("kotlin") == true && it.file?.name?.startsWith("kotlinx") == false) || it.file?.name?.startsWith("patched_") == true
         }
     }
 

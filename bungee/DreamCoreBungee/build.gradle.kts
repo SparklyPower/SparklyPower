@@ -4,8 +4,8 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     kotlin("jvm")
     `java-library`
-    id("com.github.johnrengelman.shadow") version "4.0.4"
-    kotlin("plugin.serialization") version "1.4.32"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
+    kotlin("plugin.serialization")
 }
 
 repositories {
@@ -29,8 +29,10 @@ val shadowWithRuntimeDependencies by configurations.creating {
 dependencies {
     compileOnlyApi("io.github.waterfallmc:waterfall-proxy:1.16-R0.4-SNAPSHOT")
 
-    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+    api(project(":common:tables"))
+
+    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.2")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
 
     api("com.zaxxer:HikariCP:4.0.3")
     api("org.postgresql:postgresql:42.2.20")

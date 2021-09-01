@@ -16,6 +16,7 @@ import net.perfectdreams.dreamnetworkbans.listeners.ServerConnectListener
 import net.perfectdreams.dreamnetworkbans.listeners.SocketListener
 import net.perfectdreams.dreamnetworkbans.utils.ASNManager
 import net.perfectdreams.minecraftmojangapi.MinecraftMojangAPI
+import net.perfectdreams.sparklypower.tables.LoggedInPlayers
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -24,6 +25,7 @@ class DreamNetworkBans : KotlinPlugin() {
 	companion object {
 		lateinit var INSTANCE: DreamNetworkBans
 		var bypassPremiumCheck = false
+		const val GEYSER_LISTENER_MOTD = "&1Geyser Listener"
 	}
 
 	val youtubersFile by lazy { File(this.dataFolder, "youtubers.json") }
@@ -45,6 +47,7 @@ class DreamNetworkBans : KotlinPlugin() {
 	}
 
 	val loggedInPlayers = Collections.newSetFromMap(ConcurrentHashMap<UUID, Boolean>())
+	val geyserPlayers = Collections.newSetFromMap(ConcurrentHashMap<UUID, Boolean>())
 	val minecraftMojangApi = MinecraftMojangAPI()
 
 	override fun onEnable() {
@@ -53,6 +56,7 @@ class DreamNetworkBans : KotlinPlugin() {
 
 		// Caso seja reload
 		loggedInPlayers.addAll(this.proxy.players.map { it.uniqueId })
+		geyserPlayers.addAll(this.proxy.players.filter { it.pendingConnection.listener.motd == GEYSER_LISTENER_MOTD }.map { it.uniqueId })
 
 		this.dataFolder.mkdirs()
 		// Load ASN Manager data
@@ -92,13 +96,13 @@ class DreamNetworkBans : KotlinPlugin() {
 
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
-					Bans,
-					IpBans,
-					Warns,
-					Fingerprints,
-					GeoLocalizations,
-					ConnectionLogEntries,
-					PremiumUsers
+				Bans,
+				IpBans,
+				Warns,
+				Fingerprints,
+				GeoLocalizations,
+				ConnectionLogEntries,
+				PremiumUsers
 			)
 		}
 	}

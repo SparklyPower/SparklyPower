@@ -1,9 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-println(JavaVersion.current())
-
 plugins {
     kotlin("jvm") version "1.5.20"
+    kotlin("plugin.serialization") version "1.5.20" apply false
 }
 
 group = "net.perfectdreams.sparklypower"

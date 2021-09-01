@@ -4,6 +4,7 @@ import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.obj
 import com.github.salomonbrys.kotson.string
 import kotlinx.coroutines.runBlocking
+import net.md_5.bungee.api.connection.PendingConnection
 import net.md_5.bungee.api.event.*
 import net.md_5.bungee.api.plugin.Listener
 import net.md_5.bungee.connection.InitialHandler
@@ -40,6 +41,12 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 	val nameToPremiumData = HashMap<String, ResultRow>()
 	val pingedByAddresses = Collections.synchronizedSet(mutableSetOf<String>())
 
+	private fun isGeyser(connection: PendingConnection): Boolean {
+		// To detect and keep player IPs correctly, we use a separate Bungee listener that uses the PROXY protocol
+		// To check if the user is connecting thru Geyser, we will check if the MOTD matches what we would expect
+		return connection.listener.motd == DreamNetworkBans.GEYSER_LISTENER_MOTD
+	}
+
 	@EventHandler
 	fun onPing(event: ProxyPingEvent) {
 		pingedByAddresses.add(event.connection.address.hostString)
@@ -47,19 +54,15 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 
 	@EventHandler
 	fun onPreLogin(event: PreLoginEvent) {
-		// Geyser
-		val isLocalHost = event.connection.address.hostString == "127.0.0.1"
+		val isGeyser = isGeyser(event.connection)
 
-		m.logger.info { "User ${event.connection.name} is pre logging in... Is local host? $isLocalHost" }
+		m.logger.info { "User ${event.connection.name} is pre logging in... Is Geyser? $isGeyser" }
 		val playerNames = m.proxy.players.map { it.name.toLowerCase() }
 		if (event.connection.name.toLowerCase() in playerNames) {
 			event.isCancelled = true
 			event.setCancelReason("§cJá há um player com o nome §e${event.connection.name}§c conectado no servidor!".toTextComponent())
 			return
 		}
-
-		if (isLocalHost)
-			return
 
 		val onlinePlayersWithSpecificIp = m.proxy.players.count {
 			event.connection.address.address.hostAddress == it.address.address.hostAddress
@@ -81,7 +84,8 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 			return
 		}
 
-		if (!pingedByAddresses.contains(event.connection.address.hostString)) {
+		// We won't check for Geyser here due to MOTD pings being unreliable
+		if (!isGeyser && !pingedByAddresses.contains(event.connection.address.hostString)) {
 			event.isCancelled = true
 			event.setCancelReason(*"§cAdicione §emc.sparklypower.net§c na sua lista de servidores antes de começar a jogar! ^-^\n\nSim, é muito tosco fazer isso, mas serve como uma verificação ;w;".toBaseComponent())
 			return
@@ -191,12 +195,12 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	fun onLogin(event: LoginEvent) {
-		// Geyser
-		val isLocalHost = event.connection.address.hostString == "127.0.0.1"
+		val isGeyser = isGeyser(event.connection)
 		idField.set(event.connection, UUID.nameUUIDFromBytes("OfflinePlayer:${event.connection.name}".toByteArray(Charsets.UTF_8)))
 
 		// If the player has spaces in the username, remove them
-		if (isLocalHost && event.connection.name.contains(" ")) { // Geyser
+		// This would only happen on a Geyser connection or a pirated MC connection, but we will only replace if it is Geyser
+		if (isGeyser && event.connection.name.contains(" ")) { // Geyser
 			val newName = event.connection.name.replace(" ", "_")
 			idField.set(event.connection, UUID.nameUUIDFromBytes("OfflinePlayer:$newName".toByteArray(Charsets.UTF_8)))
 			val nameField: Field = InitialHandler::class.java.getDeclaredField("name")
@@ -276,10 +280,19 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 
 			isOnlineModeSet.remove(event.connection.name)
 
-			// We need to update it on the DreamNetworkBans plugin because BungeeCord does *not* respect event priority.
-			// This sucks, but sadly that's what we need to do :(
 			val uniqueId = event.connection.uniqueId
 			val playerName = event.connection.name
+
+			if (isGeyser)
+				DreamNetwork.PERFECTDREAMS_SURVIVAL.send(
+					jsonObject(
+						"type" to "addToGeyserPlayerList",
+						"uniqueId" to uniqueId.toString()
+					)
+				)
+
+			// We need to update it on the DreamNetworkBans plugin because BungeeCord does *not* respect event priority.
+			// This sucks, but sadly that's what we need to do :(
 			transaction(Databases.databaseNetwork) {
 				val user = User.findById(uniqueId) ?: User.new(uniqueId) {
 					m.logger.info { "Creating new user data for ($playerName / $uniqueId)" }
@@ -392,6 +405,13 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 		DreamNetwork.PERFECTDREAMS_LOBBY.send(
 			jsonObject(
 				"type" to "removeFromPremiumPlayerList",
+				"uniqueId" to event.player.uniqueId.toString()
+			)
+		)
+
+		DreamNetwork.PERFECTDREAMS_SURVIVAL.send(
+			jsonObject(
+				"type" to "removeFromGeyserPlayerList",
 				"uniqueId" to event.player.uniqueId.toString()
 			)
 		)

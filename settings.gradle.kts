@@ -1,25 +1,8 @@
-pluginManagement {
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.id == "kotlin2js") {
-                useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
-            }
-        }
-        eachPlugin {
-            if (requested.id.id == "kotlin-multiplatform") {
-                useModule("org.jetbrains.kotlin:kotlin-gradle-plugin:${requested.version}")
-            }
-            if (requested.id.id == "kotlinx-serialization") {
-                useModule("org.jetbrains.kotlin:kotlin-serialization:${requested.version}")
-            }
-        }
-    }
-}
-
 rootProject.name = "sparklypower-parent"
 
 // ===[ GENERAL PURPOSE ]===
 include(":common:KotlinRuntime")
+include(":common:tables")
 
 // ===[ PAPER ]===
 include(":bukkit:DreamAntiAFK")
@@ -94,6 +77,7 @@ include(":bukkit:DreamPvPTweaks")
 include(":bukkit:DreamRoadProtector")
 include(":bukkit:DreamEmptyWorldGenerator")
 include(":bukkit:DreamCorreios")
+// include(":bukkit:DreamNews")
 
 // ===[ BUNGEE ]===
 include(":bungee:DreamCoreBungee")

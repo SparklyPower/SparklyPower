@@ -61,7 +61,7 @@ class LoginListener(val m: DreamAuth) : Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	fun onJoin(e: PlayerJoinEvent) {
-		e.player.teleport(m.authConfig.loginLocation ?: DreamCore.dreamConfig.getSpawn())
+		e.player.teleport(m.authConfig.loginLocation ?: error("DreamAuth Login Location is not present!"))
 
 		val authInfo = m.uniqueId2PlayerInfo[e.player.uniqueId]
 		val player = e.player
@@ -72,6 +72,7 @@ class LoginListener(val m: DreamAuth) : Listener {
 		} */
 
 		val playerStatus = m.playerStatus[player]
+
 		// Caso já tenha um destes status selecionados, vamos apenas ignorar, porque provavelmente o FastLogin
 		// já processou o player
 		if (playerStatus == PlayerStatus.LOGGED_IN || playerStatus == PlayerStatus.TWO_FACTOR_AUTH)

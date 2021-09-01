@@ -13,17 +13,22 @@ import net.perfectdreams.dreamscoreboard.DreamScoreboard
 import org.bukkit.Bukkit
 import org.bukkit.EntityEffect
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
+import org.bukkit.block.Skull
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_17_R1.scoreboard.CraftScoreboard
 import org.bukkit.craftbukkit.v1_17_R1.scoreboard.CraftScoreboardManager
 import org.bukkit.craftbukkit.v1_17_R1.util.WeakCollection
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 import java.awt.Color
 import java.io.File
 import javax.imageio.ImageIO
 
 object AmenoCommand : DSLCommandBase<DreamScoreboard> {
+    val KEY = NamespacedKey("test123", "hello")
+
     override fun command(plugin: DreamScoreboard) = create(listOf("ameno")) {
         permission = "dreamscoreboard.ameno"
 
@@ -31,6 +36,25 @@ object AmenoCommand : DSLCommandBase<DreamScoreboard> {
             if (true) {
                 if (true) {
                     if (true) {
+                        if (true) {
+                            // woo more stuff
+                            val block = player.getTargetBlock(10)!!
+
+                            if (this.args[0] == "check") {
+                                val skullState = block.state as Skull
+                                val storedString = skullState.persistentDataContainer.get(KEY, PersistentDataType.STRING)
+
+                                player.sendMessage("Stored String: $storedString")
+                            } else if (this.args[0] == "place") {
+                                block.type = Material.PLAYER_HEAD
+                                val skullState = block.state as Skull
+                                skullState.persistentDataContainer
+                                    .set(KEY, PersistentDataType.STRING, "Hello World!!")
+                                skullState.update()
+                            }
+                            return@executes
+                        }
+
                         // We are going to empty the player's inventory with packets
                         val packet = ProtocolLibrary.getProtocolManager().createPacket(PacketType.Play.Server.WINDOW_ITEMS)
 

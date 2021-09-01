@@ -14,6 +14,7 @@ import net.perfectdreams.dreamcore.tables.EventVictories
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.DreamCommandManager
+import net.perfectdreams.sparklypower.tables.LoggedInPlayers
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.configuration.file.YamlConfiguration

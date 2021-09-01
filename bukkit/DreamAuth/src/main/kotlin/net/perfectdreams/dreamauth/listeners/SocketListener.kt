@@ -32,10 +32,7 @@ class SocketListener(val m: DreamAuth) : Listener {
 
 		val removeFromList = type == "removeFromPremiumPlayerList"
 		val addToList = type == "addToPremiumPlayerList"
-		val uniqueId = obj["uniqueId"].nullString
-
-		if (uniqueId == null)
-			return
+		val uniqueId = obj["uniqueId"].nullString ?: return
 
 		val uuid = UUID.fromString(uniqueId)
 		if (addToList) {
