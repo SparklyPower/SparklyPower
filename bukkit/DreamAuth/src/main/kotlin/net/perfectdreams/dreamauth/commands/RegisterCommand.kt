@@ -52,7 +52,7 @@ object RegisterCommand : DSLCommandBase<DreamAuth> {
                     }.count()
                 }
 
-                if (ipCount > 3) { // PSPE
+                if (ipCount > 3) {
                     player.sendMessage("§cVocê já tem várias contas registradas no mesmo IP!")
                     return@schedule
                 }
