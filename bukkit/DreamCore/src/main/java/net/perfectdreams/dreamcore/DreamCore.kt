@@ -2,7 +2,6 @@ package net.perfectdreams.dreamcore
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
-import net.perfectdreams.commands.bukkit.BukkitCommandManager
 import net.perfectdreams.dreamcore.commands.*
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.eventmanager.DreamEventManager
@@ -13,12 +12,9 @@ import net.perfectdreams.dreamcore.scriptmanager.DreamScriptManager
 import net.perfectdreams.dreamcore.tables.EventVictories
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.commands.DreamCommandManager
-import net.perfectdreams.sparklypower.tables.LoggedInPlayers
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.plugin.java.JavaPlugin
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
