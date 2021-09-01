@@ -60,7 +60,6 @@ dependencies {
     api("com.github.ben-manes.caffeine:caffeine:2.6.2")
     api("org.apache.commons:commons-text:1.8")
     api("org.jsoup:jsoup:1.14.1")
-    api("dev.kord:kord-rest:0.7.4")
     compileOnlyApi("com.greatmancode:craftconomy3:3.3.1")
     compileOnlyApi("me.lucko.luckperms:luckperms-api:4.3")
     testCompileOnly(files("../../libs/paper_server.jar"))
@@ -83,7 +82,7 @@ tasks {
         relocate("org.bson", "net.perfectdreams.libs.org.bson")
 
         exclude {
-            (it.file?.name?.startsWith("kotlin") == true && it.file?.name?.startsWith("kotlinx") == false) || it.file?.name?.startsWith("patched_") == true
+            it.file?.name?.startsWith("kotlin") == true || it.file?.name?.startsWith("patched_") == true
         }
     }
 
