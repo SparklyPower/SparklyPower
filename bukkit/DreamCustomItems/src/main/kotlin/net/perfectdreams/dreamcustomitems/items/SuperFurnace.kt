@@ -108,7 +108,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
 
         if (result == null) return null
 
-        result.amount += newAmount
+        result.amount = newAmount
 
         return result
     }

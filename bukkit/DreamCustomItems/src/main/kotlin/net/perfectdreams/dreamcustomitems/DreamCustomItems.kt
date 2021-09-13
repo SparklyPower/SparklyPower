@@ -14,7 +14,10 @@ import net.perfectdreams.dreamcustomitems.items.TrashCan
 import net.perfectdreams.dreamcustomitems.listeners.*
 import net.perfectdreams.dreamcustomitems.utils.BlockPosition
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
@@ -25,39 +28,21 @@ import java.util.concurrent.ConcurrentHashMap
 
 class DreamCustomItems : KotlinPlugin(), Listener {
 	private val recipes = mutableListOf<NamespacedKey>()
+
+	val oldmicrowaves = mutableMapOf<Location, Microwave>() //OLD MICROWAVE
+	val microwavesDataFile by lazy { File(dataFolder, "microwaves.yml") } //OLD MICROWAVE
+	val microwavesData by lazy { writeDataFile(microwavesDataFile); YamlConfiguration.loadConfiguration(microwavesDataFile) } //OLD MICROWAVE
+
+	val olsuperfurnace = mutableMapOf<Location, SuperFurnace>() //OLD SUPERFURNACE
+	val superfurnacesDataFile by lazy { File(dataFolder, "superfurnaces.yml") } //OLD SUPERFURNACE
+	val superfurnacesData by lazy { writeDataFile(superfurnacesDataFile); YamlConfiguration.loadConfiguration(superfurnacesDataFile) } //OLD SUPERFURNACE
+
+	val oldtrashcans =  mutableMapOf<Location, TrashCan>() //OLD TRASHCANS
+	val trashcansDataFile by lazy { File(dataFolder, "trashcans.yml") } //OLD TRASHCANS
+	val trashcansData by lazy { writeDataFile(trashcansDataFile); YamlConfiguration.loadConfiguration(trashcansDataFile) } //OLD TRASHCANS
+
 	val microwaves = mutableMapOf<Location, Microwave>()
-	val superfurnaces = mutableMapOf<Location, SuperFurnace>()
-	val trashcans = mutableMapOf<Location, TrashCan>()
-
-	val microwavesDataFile by lazy {
-		File(dataFolder, "microwaves.yml")
-	}
-
-	val superfurnacesDataFile by lazy {
-		File(dataFolder, "superfurnaces.yml")
-	}
-
-	val trashcansDataFile by lazy {
-		File(dataFolder, "trashcans.yml")
-	}
-
-	val microwavesData by lazy {
-		writeDataFile(microwavesDataFile)
-
-		YamlConfiguration.loadConfiguration(microwavesDataFile)
-	}
-
-	val superfurnacesData by lazy {
-		writeDataFile(superfurnacesDataFile)
-
-		YamlConfiguration.loadConfiguration(superfurnacesDataFile)
-	}
-
-	val trashcansData by lazy {
-		writeDataFile(trashcansDataFile)
-
-		YamlConfiguration.loadConfiguration(trashcansDataFile)
-	}
+    val superfurnaces = mutableMapOf<Location, SuperFurnace>()
 
 	// Custom Blocks in Worlds
 	val customBlocksInWorlds = ConcurrentHashMap<String, MutableSet<BlockPosition>>()
@@ -71,17 +56,39 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		dataFolder.mkdirs()
 		customBlocksFolder.mkdirs()
 
-		loadAllMicrowaves()
-		loadAllSuperFurnaces()
-		loadAllTrashCans()
+		loadAllMicrowaves() //OLD MICROWAVE
+		loadAllSuperFurnaces() //OLD SUPERFURNACE
+		loadAllTrashCans() //OLD TRASHCANS
 		loadAllCustomBlocks()
 
 		schedule {
 			while (true) {
 				waitFor(20 * (15 * 60)) // every 15m
-				saveAllMicrowaves()
-				saveAllSuperFurnaces()
-				saveAllTrashCans()
+
+				microwaves.forEach { (location, microwave) ->
+					var isEmpty = true
+
+					for (i in 3..5) {
+						if (microwave.inventory.getItem(i) !== null)
+							isEmpty = false
+					}
+
+					if (isEmpty)
+						microwaves.remove(location)
+				}
+
+				superfurnaces.forEach { (location, superfurnace) ->
+					var isEmpty = true
+
+					for (i in listOf(0, 1, 2, 3, 4, 5, 18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32)) {
+						if (superfurnace.inventory.getItem(i) !== null)
+							isEmpty = false
+					}
+
+					if (isEmpty)
+						microwaves.remove(location)
+				}
+
 				saveAllCustomBlocks()
 			}
 		}
@@ -218,9 +225,6 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 	override fun softDisable() {
 		super.softDisable()
 
-		saveAllMicrowaves()
-		saveAllSuperFurnaces()
-		saveAllTrashCans()
 		saveAllCustomBlocks()
 
 		recipes.forEach {
@@ -228,7 +232,8 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		}
 	}
 
-	fun loadAllMicrowaves() {
+
+	fun loadAllMicrowaves() { //OLD MICROWAVES
 		if (microwavesData.contains("microwaves")) {
 			val list = microwavesData.get("microwaves", null) as List<Map<String, Any?>>
 
@@ -236,7 +241,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 				val location = entry["location"] as Location
 				val items = entry["items"] as List<ItemStack>
 
-				microwaves[location] = Microwave(this, location).apply {
+				oldmicrowaves[location] = Microwave(this, location).apply {
 					for ((index, item) in items.withIndex()) {
 						inventory.setItem(
 							3 + index,
@@ -248,7 +253,8 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		}
 	}
 
-	fun loadAllSuperFurnaces() {
+
+	fun loadAllSuperFurnaces() { //OLD SSUPERFURNACES
 		if (superfurnacesData.contains("superfurnaces")) {
 			val list = superfurnacesData.get("superfurnaces", null) as List<Map<String, Any?>>
 
@@ -256,7 +262,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 				val location = entry["location"] as Location
 				val items = entry["items"] as List<ItemStack>
 
-				superfurnaces[location] = SuperFurnace(this, location).apply {
+				olsuperfurnace[location] = SuperFurnace(this, location).apply {
 					for ((index, item) in items.withIndex()) {
 						inventory.setItem(
 							0 + index,
@@ -268,90 +274,16 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		}
 	}
 
-	fun loadAllTrashCans() {
+	fun loadAllTrashCans() { //OLD TRASHCANS
 		if (trashcansData.contains("trashcans")) {
 			val list = trashcansData.get("trashcans", null) as List<Map<String, Any?>>
 
 			for (entry in list) {
 				val location = entry["location"] as Location
 
-				trashcans[location] = TrashCan(this, location)
+				oldtrashcans[location] = TrashCan(this, location)
 			}
 		}
-	}
-
-	fun saveAllMicrowaves() = saveAllLocations(
-		microwavesData,
-		"microwaves",
-		microwaves,
-		{ entry, map ->
-			val items = arrayOf(
-				entry.inventory.getItem(3),
-				entry.inventory.getItem(4),
-				entry.inventory.getItem(5)
-			)
-
-			map["items"] = items
-		},
-		microwavesDataFile
-	)
-
-	fun saveAllSuperFurnaces() = saveAllLocations(
-		superfurnacesData,
-		"superfurnaces",
-		superfurnaces,
-		{ entry, map ->
-			val items = arrayOf(
-				entry.inventory.getItem(0),
-				entry.inventory.getItem(1),
-				entry.inventory.getItem(2),
-				entry.inventory.getItem(3),
-				entry.inventory.getItem(4),
-				entry.inventory.getItem(5)
-			)
-
-			map["items"] = items
-		},
-		superfurnacesDataFile
-	)
-
-	fun saveAllTrashCans() = saveAllLocations(
-		trashcansData,
-		"trashcans",
-		trashcans,
-		{ k, v -> },
-		trashcansDataFile
-	)
-
-	private fun <T> saveAllLocations(
-		configuration: YamlConfiguration,
-		key: String,
-		locations: Map<Location, T>,
-		transformer: (T, MutableMap<Any, Any>) -> (Unit),
-		file: File
-	) {
-		if (locations.isEmpty()) {
-			logger.warning("No $key is present! Bug? We are going to ignore this save request...")
-			return
-		}
-
-		logger.info("Saving ${locations.size} $key to the file...")
-		configuration.set(key, null)
-
-		val list = mutableListOf<Map<Any, Any>>()
-
-		locations.forEach {
-			val map = mutableMapOf<Any, Any>(
-				"location" to it.key
-			)
-
-			transformer.invoke(it.value, map)
-
-			list.add(map)
-		}
-
-		configuration.set(key, list)
-		configuration.save(file)
 	}
 
 	private fun loadAllCustomBlocks() {
