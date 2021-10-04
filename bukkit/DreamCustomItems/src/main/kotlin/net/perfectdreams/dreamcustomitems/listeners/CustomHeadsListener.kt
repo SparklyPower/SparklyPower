@@ -1,7 +1,10 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
 import me.ryanhamshire.GriefPrevention.GriefPrevention
+import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
+import net.perfectdreams.dreamcore.utils.fromBase64Item
+import net.perfectdreams.dreamcore.utils.toBase64
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.holders.CustomItemRecipeHolder
 import net.perfectdreams.dreamcustomitems.holders.MicrowaveHolder
@@ -10,9 +13,10 @@ import net.perfectdreams.dreamcustomitems.items.Microwave
 import net.perfectdreams.dreamcustomitems.items.SuperFurnace
 import net.perfectdreams.dreamcustomitems.items.TrashCan
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
-import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
+import org.bukkit.block.Skull
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -20,7 +24,9 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 
 class CustomHeadsListener(val m: DreamCustomItems) : Listener {
@@ -30,15 +36,30 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
         val itemInHand = e.itemInHand
 
         if (itemInHand.type == Material.PLAYER_HEAD && itemInHand.hasItemMeta() && itemInHand.itemMeta.persistentDataContainer.has(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.BYTE)) {
-            m.microwaves[e.block.location] = Microwave(m, e.block.location)
+            val microwave = e.block.state as Skull
+            val microwaveDataModel = MicrowaveDataModel(e.block.location)
+            val microwaveJSONDataModel = DreamUtils.gson.toJson(microwaveDataModel)
+
+            microwave.persistentDataContainer.set(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.STRING, microwaveJSONDataModel)
+            microwave.update()
         }
 
         if (itemInHand.type == Material.PLAYER_HEAD && itemInHand.hasItemMeta() && itemInHand.itemMeta.persistentDataContainer.has(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.BYTE)) {
-            m.superfurnaces[e.block.location] = SuperFurnace(m, e.block.location)
+            val superfurnace = e.block.state as Skull
+            val superfurnaceDataModel = SuperfurnaceDataModel(e.block.location)
+            val superfurnaceJSONDataModel = DreamUtils.gson.toJson(superfurnaceDataModel)
+
+            superfurnace.persistentDataContainer.set(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING, superfurnaceJSONDataModel)
+            superfurnace.update()
         }
 
         if (itemInHand.type == Material.PLAYER_HEAD && itemInHand.hasItemMeta() && itemInHand.itemMeta.persistentDataContainer.has(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.BYTE)) {
-            m.trashcans[e.block.location] = TrashCan(m, e.block.location)
+            val trashcan = e.block.state as Skull
+            val trashcanDataModel = TrashCanDataModel(e.block.location)
+            val trashcanJSONDataModel = DreamUtils.gson.toJson(trashcanDataModel)
+
+            trashcan.persistentDataContainer.set(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.STRING, trashcanJSONDataModel)
+            trashcan.update()
         }
     }
 
@@ -47,18 +68,37 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
         val clickedBlock = e.block
 
         if (clickedBlock.type == Material.PLAYER_HEAD || clickedBlock.type == Material.PLAYER_WALL_HEAD) {
+
+            val MICROWAVE = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.STRING)
+            val SUPERFURNACE = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING)
+            val TRASHCAN = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.STRING)
+
             when {
-                m.microwaves[clickedBlock.location] != null -> {
-                    val microwave = m.microwaves[clickedBlock.location] ?: return
+                MICROWAVE != null -> {
+                    val microwaveDataModel = DreamUtils.gson.fromJson(MICROWAVE, MicrowaveDataModel::class.java)
+                    val microwaveItems: ArrayList<ItemStack> = arrayListOf()
 
-                    microwave.stop()
+                    if (m.microwaves[microwaveDataModel.location] != null) {
+                        val microwave = m.microwaves[microwaveDataModel.location] ?: return
 
-                    // Close inventory to avoid dupes when breaking a custom block while someone has the block's inventory open
-                    microwave.inventory.viewers.forEach {
-                        it.closeInventory()
+                        microwave.inventory.viewers.forEach {
+                            it.closeInventory()
+                        }
+
+                        m.microwaves.remove(microwaveDataModel.location)
+
+                        for (i in 3..5) {
+                            val item = microwave.inventory.getItem(i)
+
+                            if (item != null) microwaveItems.add(item)
+                        }
+                    } else {
+                        microwaveDataModel.items?.forEach {
+                            if (it != null)
+                                microwaveItems.add(it.fromBase64Item())
+                        }
                     }
 
-                    m.microwaves.remove(clickedBlock.location)
                     e.isCancelled = true
 
                     e.block.world.dropItemNaturally(
@@ -68,53 +108,61 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
 
                     e.block.type = Material.AIR
 
-                    for (i in 3..5) {
-                        val item = microwave.inventory.getItem(i)
-
-                        if (item != null)
-                            e.block.world.dropItemNaturally(
-                                    e.block.location,
-                                    item
-                            )
+                    microwaveItems.forEach {
+                        e.block.world.dropItemNaturally(
+                            e.block.location,
+                            it
+                        )
                     }
                 }
 
-                m.superfurnaces[clickedBlock.location] != null -> {
-                    val superfurnace = m.superfurnaces[clickedBlock.location] ?: return
-                    superfurnace.stop()
+                SUPERFURNACE != null -> {
+                    val superfurnaceData = DreamUtils.gson.fromJson(SUPERFURNACE, SuperfurnaceDataModel::class.java)
+                    val superFurnaceItems = arrayListOf<ItemStack>()
 
-                    // Close inventory to avoid dupes when breaking a custom block while someone has the block's inventory open
-                    superfurnace.inventory.viewers.forEach {
-                        it.closeInventory()
+                    if (m.superfurnaces[superfurnaceData.location] != null) {
+                        val superfurnace = m.superfurnaces[superfurnaceData.location] ?: return
+
+                        superfurnace.inventory.viewers.forEach {
+                            it.closeInventory()
+                        }
+
+                        m.superfurnaces.remove(superfurnaceData.location)
+
+                        val superFurnaceSlots = listOf(0, 1, 2, 3, 4, 5, 18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32)
+
+                        for (i in superFurnaceSlots) {
+                            val item = superfurnace.inventory.getItem(i)
+
+                            if (item != null) superFurnaceItems.add(item)
+                        }
+                    } else {
+                        superfurnaceData.items?.forEach {
+                            if (it != null)
+                                superFurnaceItems.add(it.fromBase64Item())
+                        }
                     }
 
-                    m.superfurnaces.remove(clickedBlock.location)
                     e.isCancelled = true
 
                     e.block.world.dropItemNaturally(
-                            e.block.location,
-                            CustomItems.SUPERFURNACE.clone()
+                        e.block.location,
+                        CustomItems.SUPERFURNACE.clone()
                     )
 
                     e.block.type = Material.AIR
 
-                    listOf(0, 1, 2, 3, 4, 5, 18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32).forEach { i ->
-                        val item = superfurnace.inventory.getItem(i)
-                        if (item != null)
-                            e.block.world.dropItemNaturally(
-                                    e.block.location,
-                                    item
-                            )
-
+                    superFurnaceItems.forEach {
+                        e.block.world.dropItemNaturally(
+                            e.block.location,
+                            it
+                        )
                     }
                 }
 
-                m.trashcans[clickedBlock.location] != null -> {
-                    val watercontainer = m.trashcans[clickedBlock.location] ?: return
-
-                    m.trashcans.remove(clickedBlock.location)
-
+                TRASHCAN != null -> {
                     e.isCancelled = true
+
                     e.block.world.dropItemNaturally(
                             e.block.location,
                             CustomItems.TRASHCAN.clone()
@@ -145,28 +193,112 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                 return
             }
 
+            val SUPERFURNACE = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING)
+            val TRASHCAN = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.STRING)
+            val MICROWAVE = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.STRING)
+
             when {
-                m.microwaves[clickedBlock.location] != null -> {
-                    val microwave = m.microwaves[clickedBlock.location] ?: return
+                MICROWAVE != null -> {
+                    val microwaveDataModel = DreamUtils.gson.fromJson(MICROWAVE, MicrowaveDataModel::class.java)
+
+                    if (m.microwaves[microwaveDataModel.location] == null) {
+                        val newMicrowave = Microwave(m, microwaveDataModel.location)
+                        newMicrowave.inventory.setItem(3, microwaveDataModel.items?.get(0)?.fromBase64Item())
+                        newMicrowave.inventory.setItem(4, microwaveDataModel.items?.get(1)?.fromBase64Item())
+                        newMicrowave.inventory.setItem(5, microwaveDataModel.items?.get(2)?.fromBase64Item())
+
+                        m.microwaves[microwaveDataModel.location] = newMicrowave
+                    }
+
+                    val microwave = m.microwaves[microwaveDataModel.location] ?: return
 
                     microwave.open(e.player)
                 }
 
-                m.superfurnaces[clickedBlock.location] != null -> {
-                    val superfurnace = m.superfurnaces[clickedBlock.location] ?: return
+                SUPERFURNACE != null -> {
+                    val superfurnaceData = DreamUtils.gson.fromJson(SUPERFURNACE, SuperfurnaceDataModel::class.java)
+
+                    if (m.superfurnaces[superfurnaceData.location] == null) {
+                        val newSuperFurnace = SuperFurnace(m, superfurnaceData.location)
+
+                        val superFurnaceSlots = listOf(0, 1, 2, 3, 4, 5, 18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32)
+
+                        for ((index, slot) in superFurnaceSlots.withIndex()) {
+                            if (superfurnaceData.items?.get(index) != null)
+                                newSuperFurnace.inventory.setItem(slot, superfurnaceData.items[index]?.fromBase64Item())
+                        }
+
+                        m.superfurnaces[superfurnaceData.location] = newSuperFurnace
+                    }
+
+                    val superfurnace = m.superfurnaces[superfurnaceData.location] ?: return
 
                     if (!e.player.hasPermission("group.vip") && !e.player.hasPermission("group.vip+") && !e.player.hasPermission("group.vip++")) {
                         e.player.sendMessage("§cVocê não tem permissão para usar essa ferramenta, apenas §b§lVIPs§c!")
-						return
+                        return
                     }
 
                     superfurnace.open(e.player)
                 }
 
-                m.trashcans[clickedBlock.location] != null -> {
-                    val trashCan = m.trashcans[clickedBlock.location] ?: return
+                TRASHCAN != null -> {
+                    val trashcanData = DreamUtils.gson.fromJson(TRASHCAN, TrashCanDataModel::class.java)
+
+                    val trashCan = TrashCan(m, trashcanData.location)
 
                     trashCan.open(e.player)
+                }
+
+                //OLD MICROWAVES
+                m.oldmicrowaves[clickedBlock.location] != null -> {
+                    println("OLD MICROWAVE")
+
+                    val oldMicrowave = m.oldmicrowaves[clickedBlock.location] ?: return
+
+                    val items = arrayOf(
+                        oldMicrowave.inventory.getItem(3)?.toBase64(),
+                        oldMicrowave.inventory.getItem(4)?.toBase64(),
+                        oldMicrowave.inventory.getItem(5)?.toBase64()
+                    )
+
+                    val microwave = clickedBlock.state as Skull
+                    val microwaveDataModel = MicrowaveDataModel(clickedBlock.location, items)
+                    val microwaveJSONDataModel = DreamUtils.gson.toJson(microwaveDataModel)
+
+                    microwave.persistentDataContainer.set(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.STRING, microwaveJSONDataModel)
+                    microwave.update()
+                }
+
+                //OLD SUPERFURNACE
+                m.olsuperfurnace[clickedBlock.location] != null -> {
+                    println("OLD SUPERFURNACE")
+                    
+                    val olsSuperfurnace = m.olsuperfurnace[clickedBlock.location] ?: return
+
+                    val items = arrayListOf<String?>()
+
+                    for(slot in listOf(0, 1, 2, 3, 4, 5, 18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32)) {
+                        items.add(olsSuperfurnace.inventory.getItem(slot)?.toBase64())
+                    }
+
+                    val superfurnace = clickedBlock.state as Skull
+                    val superfurnaceDataModel = SuperfurnaceDataModel(clickedBlock.location, items)
+                    val superfurnaceDataModelJson = DreamUtils.gson.toJson(superfurnaceDataModel)
+
+                    superfurnace.persistentDataContainer.set(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING, superfurnaceDataModelJson)
+                    superfurnace.update()
+                }
+
+                //OLD TRASHCANS
+                m.oldtrashcans[clickedBlock.location] != null -> {
+                    println("OLD TRASHCAN")
+
+                    val trashcan = clickedBlock.state as Skull
+                    val trashcanDataModel = TrashCanDataModel(clickedBlock.location)
+                    val trashcanJSONDataModel = DreamUtils.gson.toJson(trashcanDataModel)
+
+                    trashcan.persistentDataContainer.set(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.STRING, trashcanJSONDataModel)
+                    trashcan.update()
                 }
 
                 else -> return
@@ -236,4 +368,46 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
             else -> return
         }
     }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onInventoryClose(e: InventoryCloseEvent) {
+        val holder = e.inventory.holder
+
+        when(holder) {
+            is MicrowaveHolder -> {
+                val items = arrayOf(
+                    e.inventory.getItem(3)?.toBase64(),
+                    e.inventory.getItem(4)?.toBase64(),
+                    e.inventory.getItem(5)?.toBase64()
+                )
+
+                val microwave = holder.m.location.block.state as Skull
+                val microwaveDataModel = MicrowaveDataModel(holder.m.location, items)
+                val microwaveDataModelJson = DreamUtils.gson.toJson(microwaveDataModel)
+
+                microwave.persistentDataContainer.set(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.STRING, microwaveDataModelJson)
+                microwave.update()
+            }
+
+            is SuperFurnaceHolder -> {
+                val superFurnaceSlots = listOf(0, 1, 2, 3, 4, 5, 18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32)
+                val items = arrayListOf<String?>()
+
+                for(slot in superFurnaceSlots) {
+                    items.add(e.inventory.getItem(slot)?.toBase64())
+                }
+
+                val superfurnace = holder.m.location.block.state as Skull
+                val superfurnaceDataModel = SuperfurnaceDataModel(holder.m.location, items)
+                val superfurnaceDataModelJson = DreamUtils.gson.toJson(superfurnaceDataModel)
+
+                superfurnace.persistentDataContainer.set(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING, superfurnaceDataModelJson)
+                superfurnace.update()
+            }
+        }
+    }
 }
+
+class MicrowaveDataModel(val location: Location, val items: Array<String?>? = null)
+class SuperfurnaceDataModel(val location: Location, val items: ArrayList<String?>? = null)
+class TrashCanDataModel(val location: Location)
