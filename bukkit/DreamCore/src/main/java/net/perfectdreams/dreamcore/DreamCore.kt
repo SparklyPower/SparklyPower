@@ -3,6 +3,9 @@ package net.perfectdreams.dreamcore
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.commands.*
+import net.perfectdreams.dreamcore.commands.declarations.DreamCoreCommand
+import net.perfectdreams.dreamcore.commands.declarations.MeninaCommand
+import net.perfectdreams.dreamcore.commands.declarations.MeninoCommand
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.eventmanager.DreamEventManager
 import net.perfectdreams.dreamcore.listeners.EntityListener
@@ -87,14 +90,19 @@ class DreamCore : KotlinPlugin() {
 		try { VaultUtils.setupEconomy() } catch (e: NoClassDefFoundError) {}
 		try { VaultUtils.setupPermissions() } catch (e: NoClassDefFoundError) {}
 
-		dreamCommandManager.registerCommand(DreamCoreCommand.command(this))
-		dreamCommandManager.registerCommand(DreamCoreEvalCommand.command(this))
-		dreamCommandManager.registerCommand(DreamCoreReloadCommand.command(this))
-		dreamCommandManager.registerCommand(DreamCoreUnloadCommand.command(this))
-		dreamCommandManager.registerCommand(DreamCoreSetSpawnCommand.command(this))
-		dreamCommandManager.registerCommand(DreamCoreReloadConfigCommand.command(this))
-		dreamCommandManager.registerCommand(MeninaCommand.command(this))
-		dreamCommandManager.registerCommand(MeninoCommand.command(this))
+		sparklyCommandManager.register(
+			DreamCoreCommand,
+			DreamCoreExecutor(),
+			DreamCoreEvalExecutor(this),
+			DreamCoreReloadExecutor(this),
+			DreamCoreUnloadExecutor(this),
+			DreamCoreSetSpawnExecutor(this),
+			DreamCoreReloadConfigExecutor(this)
+		)
+		sparklyCommandManager.register(MeninoCommand, MeninoExecutor(this))
+		sparklyCommandManager.register(MeninaCommand, MeninaExecutor(this))
+		// Test command, should not be registered!
+		// sparklyCommandManager.register(TestCommand, HelloWorldCommandExecutor(), HelloLoriCommandExecutor(), HelloCommandExecutor(), DoYouLikeCommandExecutor(), TellExecutor())
 
 		val scheduler = Bukkit.getScheduler()
 

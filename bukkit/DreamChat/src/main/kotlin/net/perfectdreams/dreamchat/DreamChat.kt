@@ -17,6 +17,7 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.delay
 import net.perfectdreams.dreamchat.commands.*
+import net.perfectdreams.dreamchat.commands.declarations.TellCommand
 import net.perfectdreams.dreamchat.dao.ChatUser
 import net.perfectdreams.dreamchat.dao.DiscordAccount
 import net.perfectdreams.dreamchat.dao.EventMessage
@@ -120,7 +121,12 @@ class DreamChat : KotlinPlugin() {
 		registerEvents(ChatListener(this))
 		registerEvents(SignListener(this))
 		registerCommand(MuteCommand())
-		registerCommand(TellCommand(this))
+		registerCommand(
+			TellCommand,
+			TellExecutor(this),
+			TellUnlockExecutor(this),
+			TellLockExecutor(this)
+		)
 		registerCommand(QuickReplyCommand(this))
 		registerCommand(NickCommand(this))
 		registerCommand(QueroTagCommand(this))

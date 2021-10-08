@@ -6,6 +6,8 @@ import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.commands.*
+import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclarationWrapper
+import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import net.perfectdreams.dreamcore.utils.scheduler.BukkitDispatcher
 import org.bukkit.event.HandlerList
 import org.bukkit.plugin.java.JavaPlugin
@@ -26,6 +28,7 @@ open class KotlinPlugin : JavaPlugin() {
 	@Deprecated("Please use dreamCommandManager")
 	val bukkitCommandManager by lazy { BukkitCommandManager(this) }
 	val dreamCommandManager by lazy { DreamCommandManager(this) }
+	val sparklyCommandManager by lazy { SparklyCommandManager(this) }
 	val serverEvents = mutableListOf<ServerEvent>()
 	val activeJobs = ConcurrentLinkedQueue<Job>()
 
@@ -114,6 +117,10 @@ open class KotlinPlugin : JavaPlugin() {
 
 	fun <Plugin> registerCommand(command: DSLCommandBase<Plugin>) {
 		dreamCommandManager.registerCommand(command.command(this as Plugin))
+	}
+
+	fun registerCommand(command: SparklyCommandDeclarationWrapper, vararg executors: SparklyCommandExecutor) {
+		sparklyCommandManager.register(command, *executors)
 	}
 
 	/**

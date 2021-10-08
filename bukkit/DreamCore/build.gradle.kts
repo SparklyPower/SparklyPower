@@ -60,6 +60,7 @@ dependencies {
     api("com.github.ben-manes.caffeine:caffeine:2.6.2")
     api("org.apache.commons:commons-text:1.8")
     api("org.jsoup:jsoup:1.14.1")
+    api("me.lucko:commodore:1.10") // Used for Mojang's Brigadier API
     compileOnlyApi("com.greatmancode:craftconomy3:3.3.1")
     compileOnlyApi("me.lucko.luckperms:luckperms-api:4.3")
     testCompileOnly(files("../../libs/paper_server.jar"))
