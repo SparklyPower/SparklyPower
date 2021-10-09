@@ -38,7 +38,7 @@ class TellLockExecutor(val m: DreamChat) : SparklyCommandExecutor() {
         // If the message is null, then the user wants to lock a tell with someone!
         m.lockedTells[sender] = receiver.name
         sender.sendMessage("§aSeu chat foi travado com ${receiver.artigo} §b${receiver.displayName}§a! Agora você pode enviar mensagens no chat e elas irão ir para a caixa privada d${receiver.artigo} §b${receiver.displayName}§a!")
-        sender.sendMessage("§7Para desativar, use §6/tell lock")
+        sender.sendMessage("§7Para desativar, use §6/tell unlock")
         return
     }
 }
