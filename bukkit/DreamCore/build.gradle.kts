@@ -38,7 +38,7 @@ dependencies {
     api("net.perfectdreams.commands:command-framework-core:0.0.8")
     api("com.github.SparklyPower:PacketWrapper:88ddd591d8")
     compileOnlyApi("net.milkbowl.vault:VaultAPI:1.6")
-    compileOnlyApi("com.github.MascusJeoraly:LanguageUtils:1.9")
+    compileOnlyApi("com.github.apachezy:LangUtils:3.2.2")
     api(project(":common:tables"))
     api("com.google.code.gson:gson:2.8.7")
     api("org.mongodb:mongo-java-driver:3.7.0-rc0")
