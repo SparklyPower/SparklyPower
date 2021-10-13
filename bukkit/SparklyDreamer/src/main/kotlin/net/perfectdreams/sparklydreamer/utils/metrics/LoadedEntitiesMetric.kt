@@ -16,7 +16,13 @@ class LoadedEntitiesMetric : Metric() {
             for ((entityType, entities) in world.entities.groupBy { it.type })
                 LOADED_ENTITIES.labels(
                     world.name,
-                    entityType.key.key
+                    try {
+                        entityType.key.key
+                    } catch (e: IllegalArgumentException) {
+                        // I'm not really sure when this can happen, but it does.
+                        // "java.lang.IllegalArgumentException: EntityType doesn't have key! Is it UNKNOWN?"
+                        "unknown"
+                    }
                 ).set(entities.size.toDouble())
     }
 }
