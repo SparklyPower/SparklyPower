@@ -66,7 +66,7 @@ open class KotlinPlugin : JavaPlugin() {
 
 	}
 
-	fun launchMainThread(block: suspend CoroutineScope.() -> Unit) {
+	fun launchMainThread(block: suspend CoroutineScope.() -> Unit): Job {
 		val job = GlobalScope.launch(
 			BukkitDispatcher(this, false) + PLUGIN_TASK_THREAD_LOCAL.asContextElement(value = this@KotlinPlugin),
 			block = block
@@ -78,9 +78,11 @@ open class KotlinPlugin : JavaPlugin() {
 		job.invokeOnCompletion {
 			activeJobs.remove(job)
 		}
+
+		return job
 	}
 
-	fun launchAsyncThread(block: suspend CoroutineScope.() -> Unit) {
+	fun launchAsyncThread(block: suspend CoroutineScope.() -> Unit): Job {
 		val job = GlobalScope.launch(
 			BukkitDispatcher(this, true) + PLUGIN_TASK_THREAD_LOCAL.asContextElement(value = this@KotlinPlugin),
 			block = block
@@ -92,6 +94,40 @@ open class KotlinPlugin : JavaPlugin() {
 		job.invokeOnCompletion {
 			activeJobs.remove(job)
 		}
+
+		return job
+	}
+
+	fun <T> launchMainThreadDeferred(block: suspend CoroutineScope.() -> T): Deferred<T> {
+		val job = GlobalScope.async(
+			BukkitDispatcher(this, false) + PLUGIN_TASK_THREAD_LOCAL.asContextElement(value = this@KotlinPlugin),
+			block = block
+		)
+		// Yes, the order matters, since sometimes the invokeOnCompletion would be invoked before the job was
+		// added to the list, causing leaks.
+		// invokeOnCompletion is also invoked even if the job was already completed at that point, so no worries!
+		activeJobs.add(job)
+		job.invokeOnCompletion {
+			activeJobs.remove(job)
+		}
+
+		return job
+	}
+
+	fun <T> launchAsyncThreadDeferred(block: suspend CoroutineScope.() -> T): Deferred<T> {
+		val job = GlobalScope.async(
+			BukkitDispatcher(this, false) + PLUGIN_TASK_THREAD_LOCAL.asContextElement(value = this@KotlinPlugin),
+			block = block
+		)
+		// Yes, the order matters, since sometimes the invokeOnCompletion would be invoked before the job was
+		// added to the list, causing leaks.
+		// invokeOnCompletion is also invoked even if the job was already completed at that point, so no worries!
+		activeJobs.add(job)
+		job.invokeOnCompletion {
+			activeJobs.remove(job)
+		}
+
+		return job
 	}
 
 	/**

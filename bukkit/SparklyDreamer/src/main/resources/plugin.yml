@@ -1,0 +1,5 @@
+name: SparklyDreamer
+main: net.perfectdreams.sparklydreamer.SparklyDreamer
+version: 1.0.0
+softdepend: ["DreamCore"]
+api-version: 1.13

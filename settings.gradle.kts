@@ -77,6 +77,7 @@ include(":bukkit:DreamPvPTweaks")
 include(":bukkit:DreamRoadProtector")
 include(":bukkit:DreamEmptyWorldGenerator")
 include(":bukkit:DreamCorreios")
+include(":bukkit:SparklyDreamer")
 // include(":bukkit:DreamNews")
 
 // ===[ BUNGEE ]===
