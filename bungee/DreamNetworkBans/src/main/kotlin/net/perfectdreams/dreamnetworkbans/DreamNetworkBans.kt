@@ -1,6 +1,8 @@
 package net.perfectdreams.dreamnetworkbans
 
 import club.minnced.discord.webhook.WebhookClient
+import club.minnced.discord.webhook.send.WebhookEmbed
+import club.minnced.discord.webhook.send.WebhookEmbedBuilder
 import net.md_5.bungee.config.ConfigurationProvider
 import net.md_5.bungee.config.YamlConfiguration
 import net.perfectdreams.dreamcorebungee.KotlinPlugin
@@ -11,6 +13,7 @@ import net.perfectdreams.dreamnetworkbans.listeners.ServerConnectListener
 import net.perfectdreams.dreamnetworkbans.listeners.SocketListener
 import net.perfectdreams.dreamnetworkbans.tables.*
 import net.perfectdreams.dreamnetworkbans.utils.ASNManager
+import net.perfectdreams.dreamnetworkbans.utils.DateUtils
 import net.perfectdreams.minecraftmojangapi.MinecraftMojangAPI
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -41,6 +44,11 @@ class DreamNetworkBans : KotlinPlugin() {
 
 	val punishmentWebhook by lazy {
 		WebhookClient.withUrl(config.getString("punishment-webhook"))
+	}
+
+	// Used for Ban Warnings like "User tried joining, but they are banned!"
+	val banWarningsWebhook by lazy {
+		WebhookClient.withUrl(config.getString("ban-warnings-webhook"))
 	}
 
 	val loggedInPlayers = Collections.newSetFromMap(ConcurrentHashMap<UUID, Boolean>())
@@ -102,5 +110,9 @@ class DreamNetworkBans : KotlinPlugin() {
 				PremiumUsers
 			)
 		}
+	}
+
+	fun sendBanWarningToDiscord(reason: String) {
+		banWarningsWebhook.send(reason)
 	}
 }
