@@ -5,6 +5,7 @@ import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.commands.bukkit.SubcommandPermission
+import net.perfectdreams.dreamcore.utils.extensions.healAndFeed
 import net.perfectdreams.dreamquiz.DreamQuiz
 import net.perfectdreams.dreamquiz.utils.QuizConfig
 import net.perfectdreams.dreamquiz.utils.QuizQuestion
@@ -22,6 +23,8 @@ class QuizCommand(val m: DreamQuiz) : SparklyCommand(arrayOf("quiz")) {
 
         if (DreamQuiz.QUIZ.started)
             return sender.sendMessage("${DreamQuiz.PREFIX} O Evento Quiz já começou!")
+
+        sender.healAndFeed() // Heal and Feed the user, there's also a listener that will make the player never lose its hunger
 
         val spawn = DreamQuiz.CONFIG.spawn.toLocation()
 
