@@ -1,13 +1,14 @@
 package net.perfectdreams.dreammini.commands
 
 import net.perfectdreams.commands.bukkit.SparklyCommand
-import net.perfectdreams.dreamcore.utils.blacklistedTeleport
 import net.perfectdreams.dreamcore.utils.commands.annotation.ArgumentType
 import net.perfectdreams.dreamcore.utils.commands.annotation.InjectArgument
 import net.perfectdreams.commands.annotation.Subcommand
-import net.perfectdreams.dreamcore.utils.generateCommandInfo
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreammini.DreamMini
 import net.perfectdreams.dreammini.utils.TpaRequest
+import org.bukkit.Bukkit
+import org.bukkit.World
 import org.bukkit.entity.Player
 
 class TpaCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpa", "tpask", "call"), permission = "dreammini.tpa") {
@@ -19,7 +20,7 @@ class TpaCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpa", "tpask", "cal
 	}
 
 	@Subcommand
-	fun request(sender: Player, @InjectArgument(ArgumentType.PLAYER) requestee: Player?) {
+	fun request(sender: Player, @InjectArgument(ArgumentType.PLAYER) requestee: Player?, @InjectArgument(ArgumentType.ARGUMENTS_AS_STRING) confirm: String? = "") {
 		if (requestee == null) {
 			sender.sendMessage("§cPlayer não existe ou está offline!")
 			return
@@ -38,6 +39,13 @@ class TpaCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpa", "tpask", "cal
 
 		if (requestee.location.blacklistedTeleport) {
 			sender.sendMessage("§cNossos sistemas de localização não permitem que você se teletransporte para aonde §b${requestee.displayName}§c está!")
+			return
+		}
+
+		if (requestee.location.world.environment == World.Environment.NETHER && confirm != "confirmar") {
+			sender.sendMessage("§cEste player está no nether, você tem §c§lcerteza §r§cque deseja se teleportar até ele?")
+			sender.sendMessage("§cLembrando que, no nether, você pode perder seus §6itens§c, §lcuidado!")
+			sender.sendMessage("§cDigite §6/tpa ${requestee.displayName} confirmar §cse quiser ir mesmo assim.")
 			return
 		}
 

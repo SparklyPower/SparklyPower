@@ -18,12 +18,17 @@ import net.perfectdreams.dreamcorebungee.utils.extensions.toBaseComponent
 import net.perfectdreams.dreamcorebungee.utils.extensions.toTextComponent
 import net.perfectdreams.dreamnetworkbans.DreamNetworkBans
 import net.perfectdreams.dreamnetworkbans.PunishmentManager
-import net.perfectdreams.dreamnetworkbans.dao.*
+import net.perfectdreams.dreamnetworkbans.dao.Ban
+import net.perfectdreams.dreamnetworkbans.dao.Fingerprint
+import net.perfectdreams.dreamnetworkbans.dao.GeoLocalization
+import net.perfectdreams.dreamnetworkbans.dao.IpBan
 import net.perfectdreams.dreamnetworkbans.tables.*
 import net.perfectdreams.dreamnetworkbans.utils.DateUtils
 import net.perfectdreams.dreamnetworkbans.utils.GeoUtils
 import net.perfectdreams.dreamnetworkbans.utils.LoginConnectionStatus
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.lang.reflect.Field
 import java.util.*
@@ -213,8 +218,6 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 			m.logger.info("Player ${event.connection} was successfully logged in as a premium user!")
 		}
 
-		val playerIp = event.connection.address.hostString
-
 		event.registerIntent(m)
 
 		m.proxy.scheduler.runAsync(m) {
@@ -242,14 +245,12 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 				event.setCancelReason(*"""
 				§eVocê parece ser alguém famoso...
 					|
-					|§aCaso você seja §b${event.connection.name}§a, por favor, entre no nosso servidor no Discord (§3https://discord.gg/sparklypower§a) confirmando a sua identidade!, obrigado! :)
+					|§aCaso você seja §b${event.connection.name}§a, por favor, mande um email confirmando a sua identidade para §3mrpowergamerbr@perfectdreams.net§a, obrigado! :)
 					|
 					|§aSei que é chato, mas sempre existem aquelas pessoas mal intencionadas que tentam se passar por YouTubers... :(
 					""".trimMargin().toBaseComponent())
 				addToConnectionLog(event, LoginConnectionStatus.USING_YOUTUBER_NAME)
 				event.completeIntent(m)
-
-				m.sendBanWarningToDiscord("Usuário ${event.connection.name}/$playerIp tentou entrar no servidor com um nick que parece ser de YouTuber")
 				return@runAsync
 			}
 
@@ -316,8 +317,6 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 						""".trimIndent().toBaseComponent())
 				addToConnectionLog(event, LoginConnectionStatus.BLACKLISTED_ASN)
 				event.completeIntent(m)
-
-				m.sendBanWarningToDiscord("Usuário ${event.connection.name}/$playerIp tentou entrar com uma VPN/Proxy")
 				return@runAsync
 			}
 
@@ -357,12 +356,11 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 							
 							§a${ban.reason}
 							§cPor: ${PunishmentManager.getPunisherName(ban.punishedBy)}
-							${if (ban.temporary) "§c Expira em: §e${DateUtils.formatDateDiff(ban.expiresAt!!)}" else ""}
+							${if (ban.temporary) "§c Expira em: §e${DateUtils.formatDateDiff(ban.expiresAt!!)}" else
+						"§3Quer tentar uma segunda chance? Acesse o link, leia e preencha com atenção: §6bit.ly/sparklypower-unban"}
 						""".trimIndent().toBaseComponent())
 					addToConnectionLog(event, LoginConnectionStatus.BANNED)
 					event.completeIntent(m)
-
-					m.sendBanWarningToDiscord("Usuário ${event.connection.name}/$playerIp tentou entrar no servidor, mas está banido!")
 					return@runAsync
 				}
 			}
@@ -381,80 +379,13 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 							
 							§a${ipBan.reason}
 							§cPor: ${PunishmentManager.getPunisherName(ipBan.punishedBy)}
-							${if (ipBan.temporary) "§c Expira em: §e${DateUtils.formatDateDiff(ipBan.expiresAt!!)}" else ""}
+							${if (ipBan.temporary) "§c Expira em: §e${DateUtils.formatDateDiff(ipBan.expiresAt!!)}" else
+						"§3Quer tentar uma segunda chance? Acesse o link, leia e preencha com atenção: §6bit.ly/sparklypower-unban"}
 						""".trimIndent().toBaseComponent())
 					addToConnectionLog(event, LoginConnectionStatus.IP_BANNED)
 					event.completeIntent(m)
-
-					m.sendBanWarningToDiscord("Usuário ${event.connection.name}/$playerIp tentou entrar no servidor, mas está banido por IP!")
 					return@runAsync
 				}
-			}
-
-			// This is from the dupeip command
-			// Agora vamos achar todos os players que tem o mesmo IP
-			val connectionLogEntries = transaction(Databases.databaseNetwork) {
-				ConnectionLogEntry.find {
-					ConnectionLogEntries.ip eq playerIp
-				}.toList()
-			}
-
-			// And now we are going to try getting all players that also have the same latest IP
-			val connectionLogEntriesAndLastIPs = transaction(Databases.databaseNetwork) {
-				ConnectionLogEntry.find {
-					ConnectionLogEntries.player inList connectionLogEntries.map { it.player }
-				}.orderBy(ConnectionLogEntries.connectedAt to SortOrder.DESC)
-					.limit(1)
-					.toList()
-					.filter {
-						it.ip == playerIp
-					}
-			}
-
-			val onlyMatchingAnyIP = connectionLogEntries.filterNot { entry ->
-				connectionLogEntriesAndLastIPs.any {
-					it.player == entry.player
-				}
-			}
-
-			val uniqueIds = connectionLogEntriesAndLastIPs.distinctBy { it.player }.map { it.player }
-			val anyIPUniqueIds = onlyMatchingAnyIP.distinctBy { it.player }.map { it.player }
-
-			val matchingBannedLastIPsAccounts = uniqueIds.mapNotNull {
-				transaction(Databases.databaseNetwork) {
-					Ban.find {
-						(Bans.player eq it) and (Bans.temporary eq false or (Bans.temporary eq true and Bans.expiresAt.greaterEq(
-							System.currentTimeMillis()
-						)))
-					}.firstOrNull()
-				}
-			}
-
-			val matchingBannedAnyIPsAccounts = anyIPUniqueIds.mapNotNull {
-				// Está banido?
-				transaction(Databases.databaseNetwork) {
-					Ban.find {
-						(Bans.player eq it) and (Bans.temporary eq false or (Bans.temporary eq true and Bans.expiresAt.greaterEq(
-							System.currentTimeMillis()
-						)))
-					}.firstOrNull()
-				}
-			}
-
-			if (matchingBannedLastIPsAccounts.isNotEmpty() || matchingBannedAnyIPsAccounts.isNotEmpty()) {
-				m.sendBanWarningToDiscord(
-					buildString {
-						append("\uD83D\uDEA8 **Usuário ${event.connection.name}/$playerIp parece meio sus!** \uD83D\uDEA8")
-						append("\n")
-						if (matchingBannedLastIPsAccounts.isNotEmpty()) {
-							append("**Contas banidas que usaram o mesmo IP na última entrada ao servidor:** ${matchingBannedLastIPsAccounts.joinToString { transaction(Databases.databaseNetwork) { User.findById(it.player) }?.username ?: "???" }}")
-							append("\n")
-						}
-
-						if (matchingBannedAnyIPsAccounts.isNotEmpty())
-							append("**Contas banidas que usaram o mesmo IP alguma vez na vida:** ${matchingBannedAnyIPsAccounts.joinToString { transaction(Databases.databaseNetwork) { User.findById(it.player) }?.username ?: "???" }}")
-					}
-				)
 			}
 
 			addToConnectionLog(event, LoginConnectionStatus.OK)
