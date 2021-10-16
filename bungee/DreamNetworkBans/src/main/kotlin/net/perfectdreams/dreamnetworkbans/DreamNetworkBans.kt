@@ -25,7 +25,7 @@ class DreamNetworkBans : KotlinPlugin() {
 	companion object {
 		lateinit var INSTANCE: DreamNetworkBans
 		var bypassPremiumCheck = false
-		const val GEYSER_LISTENER_MOTD = "&1Geyser Listener"
+		const val GEYSER_LISTENER_MOTD = "§1Geyser Listener"
 	}
 
 	val youtubersFile by lazy { File(this.dataFolder, "youtubers.json") }
