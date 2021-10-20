@@ -92,7 +92,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 						}
 
 						val inventory = Bukkit.createInventory(null, 54)
-						mochilas.forEach {
+						mochilas.drop(skip?.toIntOrNull() ?: 0).forEach {
 							inventory.addItem(
 								it.createItem()
 							)
