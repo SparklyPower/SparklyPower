@@ -109,7 +109,7 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                             )
                         }
 
-                        m.doMcMMOStuff(e.player, e.block.state, dropsAsItems)
+                        m.doMcMMOStuff(e.player, location.block.state, dropsAsItems)
 
                         // Do not update physics, this tries to avoid a lot of "notify()" calls
                         // See: https://cdn.discordapp.com/attachments/513405772911345664/869387512924209182/wLnOZAeMZ5.sparkprofile
