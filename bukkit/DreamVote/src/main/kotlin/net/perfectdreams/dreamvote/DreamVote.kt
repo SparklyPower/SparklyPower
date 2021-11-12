@@ -129,7 +129,7 @@ class DreamVote : KotlinPlugin() {
 
 	fun giveVoteAward(username: String, serviceName: String, broadcast: Boolean = true) {
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
-			val uniqueId = DreamUtils.retrieveUserUniqueId(username)
+			val uniqueId = DreamUtils.retrieveUserUniqueId(username.trim())
 			giveVoteAward(uniqueId, serviceName, broadcast)
 		}
 	}
