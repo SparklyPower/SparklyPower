@@ -17,10 +17,10 @@ import net.perfectdreams.dreamscoreboard.utils.PlayerScoreboard
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Statistic
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_17_R1.scoreboard.CraftScoreboard
-import org.bukkit.craftbukkit.v1_17_R1.scoreboard.CraftScoreboardManager
-import org.bukkit.craftbukkit.v1_17_R1.util.WeakCollection
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_18_R1.scoreboard.CraftScoreboard
+import org.bukkit.craftbukkit.v1_18_R1.scoreboard.CraftScoreboardManager
+import org.bukkit.craftbukkit.v1_18_R1.util.WeakCollection
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener

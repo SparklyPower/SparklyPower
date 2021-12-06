@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":bukkit:DreamCore"))
     implementation("com.github.ChestShop-authors:ChestShop-3:3.11")
 }
 

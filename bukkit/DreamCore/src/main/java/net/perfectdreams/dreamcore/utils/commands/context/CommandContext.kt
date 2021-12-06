@@ -3,12 +3,12 @@ package net.perfectdreams.dreamcore.utils.commands.context
 import com.mojang.brigadier.context.CommandContext
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
-import net.minecraft.commands.CommandListenerWrapper
+import net.minecraft.commands.CommandSourceStack
 import net.perfectdreams.dreamcore.utils.commands.exceptions.CommandException
 import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.entity.Player
 
-class CommandContext(val nmsContext: CommandContext<CommandListenerWrapper>) {
+class CommandContext(val nmsContext: CommandContext<CommandSourceStack>) {
     companion object {
         val MISSING_PERMISSIONS: () -> (Component) = {
             Component.text {

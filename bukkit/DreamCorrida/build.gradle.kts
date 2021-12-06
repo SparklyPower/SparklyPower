@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamCash"))
     compileOnly(project(":bukkit:DreamChat"))
     compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")

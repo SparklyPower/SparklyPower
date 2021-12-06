@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamAuth"))
     compileOnly(files("../../libs/NoteBlockAPI.jar"))
     implementation("net.citizensnpcs:citizens:2.0.26-SNAPSHOT")

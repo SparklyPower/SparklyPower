@@ -15,7 +15,7 @@ import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.BlockPosition
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData
+import org.bukkit.craftbukkit.v1_18_R1.block.data.CraftBlockData
 import us.myles.ViaVersion.api.minecraft.chunks.ChunkSection
 import us.myles.ViaVersion.api.type.types.version.ChunkSectionType1_16
 import java.util.*

@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":bukkit:DreamCore"))
     implementation("net.citizensnpcs:citizens:2.0.26-SNAPSHOT")
     implementation("net.luckperms:api:5.0")
 }

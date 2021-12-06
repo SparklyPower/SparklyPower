@@ -3,19 +3,16 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     kotlin("jvm")
+    id("io.papermc.paperweight.userdev") version "1.3.1"
     id("com.github.johnrengelman.shadow") version "5.2.0"
-}
-
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-    maven("https://repo.perfectdreams.net/")
-    maven("https://papermc.io/repo/repository/maven-public/")
 }
 
 dependencies {
     api(kotlin("stdlib-jdk8"))
-    compileOnly(files("../../libs/paper_server.jar"))
+    // api("net.sparklypower.sparklypaper:sparklypaper-api:1.18-R0.1-SNAPSHOT")
+    // api("net.sparklypower.sparklypaper:sparklypaper-server:1.18-R0.1-SNAPSHOT")
+    paperDevBundle("1.18-R0.1-SNAPSHOT")
+    // paperweightDevBundle("net.sparklypower.sparklypaper", "1.18-R0.1-SNAPSHOT")
     compileOnly("io.github.waterfallmc:waterfall-api:1.13-SNAPSHOT")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.5.1")

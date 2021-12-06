@@ -1,17 +1,17 @@
 package net.perfectdreams.dreamcore.utils
 
-import net.minecraft.world.entity.projectile.EntityFireworks
-import net.minecraft.world.level.World
+import net.minecraft.world.entity.projectile.FireworkRocketEntity
+import net.minecraft.world.level.Level
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_18_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack
 import org.bukkit.entity.Firework
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-class InstantFirework(world: World, location: Location) : EntityFireworks(
+class InstantFirework(world: Level, location: Location) : FireworkRocketEntity(
 	world,
 	location.x,
 	location.y,
@@ -22,7 +22,7 @@ class InstantFirework(world: World, location: Location) : EntityFireworks(
 
 	init {
 		// TODO: Fix
-		this.a(0.25, 0.25)
+		// a(0.25, 0.25)
 	}
 
 	override fun tick() {
@@ -30,8 +30,8 @@ class InstantFirework(world: World, location: Location) : EntityFireworks(
 			return
 
 		gone = true
-		this.world.broadcastEntityEffect(this, 17.toByte())
-		this.die()
+		this.level.broadcastEntityEvent(this, 17.toByte())
+		this.remove(RemovalReason.KILLED)
 	}
 
 	companion object {
@@ -53,7 +53,7 @@ class InstantFirework(world: World, location: Location) : EntityFireworks(
 				meta.addEffect(effect)
 				bukkitEntity.fireworkMeta = meta
 
-				if (nmsWorld.addEntity(firework))
+				if (nmsWorld.addFreshEntity(firework))
 					firework.isInvisible = true
 			} catch (e: Exception) {
 				e.printStackTrace()

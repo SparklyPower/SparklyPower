@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamCash"))
     compileOnly(files("../../libs/NoteBlockAPI.jar"))
 }

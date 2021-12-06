@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":bukkit:DreamCore"))
     compileOnly("fr.neatmonster:nocheatplus:3.16.1-SNAPSHOT")
 }
 
