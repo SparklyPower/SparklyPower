@@ -27,16 +27,7 @@ jobs:
     - name: Setup Java JDK
       uses: actions/setup-java@v1.4.3
       with:
-        java-version: 16
-
-    - name: Download Paper
-      run: wget -O paperclip.jar https://cdn.discordapp.com/attachments/691041345275691021/863060804671373342/SparklyPaper-1.17.1-R0.1-SNAPSHOT.jar
-      
-    - name: Run Paper
-      run: java -Dpaperclip.patchonly=true -jar paperclip.jar
-      
-    - name: Copy Patched JAR
-      run: cp cache/patched_*.jar libs/paper_server.jar
+        java-version: 17
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
@@ -48,21 +39,18 @@ jobs:
     # Upload Artifacts to GitHub
     - uses: actions/upload-artifact@v2
       name: "Upload Common Plugins"
-      if: ${{ always() }}
       with:
         name: SparklyPower Common Plugins
         path: "common/*/build/libs/*.jar"
 
     - uses: actions/upload-artifact@v2
       name: "Upload Bukkit Plugins"
-      if: ${{ always() }}
       with:
         name: SparklyPower Bukkit Plugins
-        path: "bukkit/*/build/libs/*.jar"
+        path: "bukkit/*/build/libs/*-reobf.jar"
 
     - uses: actions/upload-artifact@v2
       name: "Upload BungeeCord Plugins"
-      if: ${{ always() }}
       with:
         name: SparklyPower BungeeCord Plugins
         path: "bungee/*/build/libs/*.jar"
