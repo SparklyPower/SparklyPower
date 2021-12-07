@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.5.31"
     kotlin("plugin.serialization") version "1.5.31" apply false
+    id("io.papermc.paperweight.userdev") version Versions.PAPERWEIGHT_USERDEV apply false
 }
 
 group = "net.perfectdreams.sparklypower"
@@ -29,6 +30,7 @@ allprojects {
         maven("https://papermc.io/repo/repository/maven-public/")
         maven("https://repo.citizensnpcs.co/")
         maven("https://maven.fabricmc.net") // Required by paperweight userdev
+        maven("https://repo.viaversion.com")
     }
 }
 

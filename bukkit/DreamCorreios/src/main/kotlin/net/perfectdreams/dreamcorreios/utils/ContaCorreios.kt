@@ -22,8 +22,8 @@ class ContaCorreios @BsonCreator constructor(
 
 		caixasPostais.forEach {
 			it.transformToInventory()
-			nullItemStacks.addAll(it.postalItems.contents)
-			fromPostalBox.addAll(it.postalItems.contents)
+			nullItemStacks.addAll(it.postalItems.contents!!)
+			fromPostalBox.addAll(it.postalItems.contents!!)
 		}
 
 		nullItemStacks.addAll(_itemStacks)

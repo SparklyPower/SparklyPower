@@ -6,7 +6,7 @@ plugins {
     `java-library`
     id("com.github.johnrengelman.shadow") version "5.2.0"
     kotlin("plugin.serialization")
-    id("io.papermc.paperweight.userdev") version "1.3.1"
+    id("io.papermc.paperweight.userdev")
 }
 
 repositories {
@@ -30,8 +30,8 @@ val shadowWithRuntimeDependencies by configurations.creating {
 
 dependencies {
     compileOnlyApi(project(":common:KotlinRuntime"))
-    paperDevBundle("1.18-R0.1-SNAPSHOT")
-    compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.6.0")
+    paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
+    compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.8.0-SNAPSHOT")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
     compileOnlyApi(files("../../libs/WorldGuard.jar"))
     compileOnlyApi("com.github.TechFortress:GriefPrevention:16036bdc19") // Using commits instead of pinning a version because GP hasn't released a new version yet
@@ -75,6 +75,8 @@ dependencies {
     api("io.ktor:ktor-server-netty:${Versions.KTOR}")
     api("io.ktor:ktor-client-cio:${Versions.KTOR}")
 
+    api("com.viaversion:viaversion-api:4.1.1") // Used for packet manipulation
+
     compileOnlyApi("com.greatmancode:craftconomy3:3.3.1")
     compileOnlyApi("me.lucko.luckperms:luckperms-api:4.3")
     // testCompileOnly(files("../../libs/paper_server.jar"))
@@ -101,7 +103,14 @@ tasks {
         }
     }
 
+    reobfJar {
+        // For some reason the userdev plugin is using "unspecified" as the suffix, and that's not a good name
+        // So we are going to change it to "PluginName-reobf.jar"
+        outputJar.set(layout.buildDirectory.file("libs/${project.name}-reobf.jar"))
+    }
+
     "build" {
         dependsOn(shadowJar)
+        dependsOn(reobfJar)
     }
 }

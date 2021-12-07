@@ -58,7 +58,16 @@ class Mochila(id: EntityID<Long>) : LongEntity(id) {
                 // E criar ele com o nosso holder personalizado
                 val inventory = Bukkit.createInventory(MochilaHolder(this), Math.min(54, size), "§d§lMochila")
 
-                inventory.contents = blahInventory.contents
+                val blahInventoryContents = blahInventory.contents
+                if (blahInventoryContents != null) {
+                    // When serializing, the items are stored as "ItemStack?" if it is AIR
+                    // So we are going to workaround this by replacing all null values with a AIR ItemStack!
+                    inventory.setContents(
+                        blahInventoryContents.map {
+                            it ?: ItemStack(Material.AIR)
+                        }.toTypedArray()
+                    )
+                }
 
                 cachedInventory = inventory
 
@@ -75,8 +84,8 @@ class Mochila(id: EntityID<Long>) : LongEntity(id) {
 
     fun createItem(): ItemStack {
         var item = ItemStack(Material.CARROT_ON_A_STICK)
-                .rename("§rMochila")
-                .storeMetadata("isMochila", "true")
+            .rename("§rMochila")
+            .storeMetadata("isMochila", "true")
 
         val meta = item.itemMeta
         meta as Damageable
@@ -90,9 +99,9 @@ class Mochila(id: EntityID<Long>) : LongEntity(id) {
         val playerName = Bukkit.getOfflinePlayer(owner)?.name ?: "???"
 
         item = item.lore(
-                "§7Mochila de §b${playerName}",
-                "§7",
-                "§6${funnyId}"
+            "§7Mochila de §b${playerName}",
+            "§7",
+            "§6${funnyId}"
         ).storeMetadata("mochilaId", id.value.toString())
 
         return item

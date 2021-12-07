@@ -15,9 +15,6 @@ import net.perfectdreams.dreamvote.listeners.TagListener
 import net.perfectdreams.dreamvote.listeners.VoteListener
 import net.perfectdreams.dreamvote.tables.Votes
 import net.perfectdreams.dreamvote.utils.VoteAward
-import net.perfectdreams.libs.com.mongodb.client.MongoCollection
-import net.perfectdreams.libs.com.mongodb.client.model.Filters
-import net.perfectdreams.libs.org.bson.Document
 import org.bukkit.Bukkit
 import org.bukkit.Bukkit.getPlayerExact
 import org.bukkit.entity.Player

@@ -13,9 +13,9 @@ include(":common:KotlinRuntime")
 include(":common:tables")
 
 // ===[ PAPER ]===
-// include(":bukkit:DreamAntiAFK")
+include(":bukkit:DreamAntiAFK")
 include(":bukkit:DreamCore")
-/* include(":bukkit:DreamAuth")
+include(":bukkit:DreamAuth")
 include(":bukkit:DreamCash")
 include(":bukkit:DreamVote")
 include(":bukkit:DreamQuiz")
@@ -91,4 +91,4 @@ include(":bukkit:SparklyDreamer")
 // ===[ BUNGEE ]===
 include(":bungee:DreamCoreBungee")
 include(":bungee:DreamMOTDBungee")
-include(":bungee:DreamNetworkBans") */
+include(":bungee:DreamNetworkBans")
