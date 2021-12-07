@@ -102,7 +102,7 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
                                     // Okay, so it is a note block... but what if it is a *custom* block?
                                     val position = BlockPosition(
                                         coordinateX + x,
-                                        y + (16 * i) - worldMinHeight, // The sections are from the bottom to the top, so the section 0 is at the world's min height!
+                                        y + (16 * i) - worldMinHeight.absoluteValue, // The sections are from the bottom to the top, so the section 0 is at the world's min height!
                                         coordinateZ + z
                                     )
 
@@ -114,8 +114,18 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
                                     val isCustomBlock = m.getCustomBlocksInWorld(playerWorld.name).contains(position)
 
                                     // If it is a custom block, leave the block as is :3
-                                    if (isCustomBlock)
+                                    if (isCustomBlock) {
+                                        // println("Custom Note Block!")
+                                        // println("Coordinate X: ${position.x}")
+                                        // println("Coordinate Y: ${position.y}")
+                                        // println("Coordinate Z: ${position.z}")
                                         continue
+                                    }
+
+                                    // println("Not-custom Note Block!")
+                                    // println("Coordinate X: ${position.x}")
+                                    // println("Coordinate Y: ${position.y}")
+                                    // println("Coordinate Z: ${position.z}")
 
                                     section.setFlatBlock(
                                         x,
@@ -138,7 +148,7 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
                 // println("Requires edit, so we are going to clear the read buffer")
                 // Only rewrite the packet if we really need to edit the packet
                 val byteBuf = Unpooled.buffer()
-                sections.filterNotNull().forEach {
+                sections.forEach {
                     chunkSectionType.write(byteBuf, it)
                 }
 
@@ -153,6 +163,7 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
             if (wrapper.blockData.type == Material.NOTE_BLOCK) {
                 // So, we are changing a note block? Interesting...
 
+                println("Updating note block at ${wrapper.location.x}, ${wrapper.location.y}, ${wrapper.location.z}")
                 // If it is a custom block, just leave it as is :3
                 if (m.getCustomBlocksInWorld(playerWorld.name).contains(
                         BlockPosition(
