@@ -97,9 +97,9 @@ class DreamElevador : KotlinPlugin(), Listener {
         updateStoryTrack(sign)
         var idx = 0
         val world = sign.world
-        for (y in 0..world.maxHeight) {
+        for (y in world.minHeight..world.maxHeight) {
             val block = world.getBlockAt(sign.x, y, sign.z)
-            val material = block?.type ?: continue
+            val material = block.type
 
             if (!material.name.contains("SIGN"))
                 continue
