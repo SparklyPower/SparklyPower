@@ -24,7 +24,7 @@ class FightArena(var m: DreamFight) {
     lateinit var exit: Location
     var winner: Location? = null
     var players = ArrayList<Player>()
-    var inventories = HashMap<Player, Array<ItemStack>>()
+    var inventories = HashMap<Player, Array<ItemStack?>>()
     var started = false
     var preStart = false
     var p1: Player? = null
@@ -633,14 +633,14 @@ class FightArena(var m: DreamFight) {
 
     fun storeInventoryOf(player: Player?) {
         if (player != null) {
-            inventories[player] = player.inventory.contents.clone()
+            inventories[player] = player.inventory.contents!!.clone()
         }
     }
 
     fun restoreInventoryOf(player: Player?) {
         if (player != null) {
             val inventory = inventories[player] ?: return
-            player.inventory.contents = inventory
+            player.inventory.setContents(inventory.filterNotNull().toTypedArray())
         }
     }
 

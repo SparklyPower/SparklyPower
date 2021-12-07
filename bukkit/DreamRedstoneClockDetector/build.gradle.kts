@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
+    id("io.papermc.paperweight.userdev")
 }
 
 repositories {
@@ -11,6 +12,7 @@ repositories {
 }
 
 dependencies {
+    paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     implementation(kotlin("stdlib-jdk8"))
     implementation(files("../../libs/paper_server.jar"))
     implementation(files("../../libs/DreamCore-shadow.jar"))

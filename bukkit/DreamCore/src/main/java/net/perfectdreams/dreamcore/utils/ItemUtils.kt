@@ -1,13 +1,14 @@
 package net.perfectdreams.dreamcore.utils
 
-import net.minecraft.nbt.NBTCompressedStreamTools
-import net.minecraft.nbt.NBTTagCompound
-import net.minecraft.nbt.NBTTagList
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
+import net.minecraft.nbt.NbtIo
+import net.minecraft.nbt.Tag
 import net.perfectdreams.dreamcore.utils.extensions.getCompoundTag
 import net.perfectdreams.dreamcore.utils.extensions.setCompoundTag
 import net.perfectdreams.dreamcore.utils.tags.NbtTagsUtils
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
@@ -123,25 +124,25 @@ fun ItemStack.getStorageData(key: UUID): String? {
 fun ItemStack.toBase64(): String {
 	val outputStream = ByteArrayOutputStream();
 	val dataOutput = DataOutputStream(outputStream)
-	val nbtTagListItems = NBTTagList()
-	val nbtTagCompoundItem = NBTTagCompound()
+	val nbtTagListItems = ListTag()
+	val nbtTagCompoundItem = CompoundTag()
 	val nmsItem = CraftItemStack.asNMSCopy(this)
 	nmsItem.save(nbtTagCompoundItem)
 	nbtTagListItems.add(nbtTagCompoundItem)
-	NBTCompressedStreamTools.a(nbtTagCompoundItem, dataOutput as DataOutput)
+	NbtIo.write(nbtTagCompoundItem, dataOutput as DataOutput)
 	return BigInteger(1, outputStream.toByteArray()).toString(32);
 }
 
 fun String.fromBase64Item(): ItemStack {
 	val inputStream = ByteArrayInputStream(BigInteger(this, 32).toByteArray())
-	var nbtTagCompoundRoot: NBTTagCompound? = null
+	var nbtTagCompoundRoot: CompoundTag? = null
 	try {
-		nbtTagCompoundRoot = NBTCompressedStreamTools.a(DataInputStream(inputStream) as DataInput)
+		nbtTagCompoundRoot = NbtIo.read(DataInputStream(inputStream) as DataInput)
 	} catch (e: IOException) {
 		e.printStackTrace()
 	}
 
-	val nmsItem = net.minecraft.world.item.ItemStack.a(nbtTagCompoundRoot ?: error("NBT Tag Compound Root is null, why?"))
+	val nmsItem = net.minecraft.world.item.ItemStack.of(nbtTagCompoundRoot ?: error("NBT Tag Compound Root is null, why?"))
 	return CraftItemStack.asBukkitCopy(nmsItem)
 }
 

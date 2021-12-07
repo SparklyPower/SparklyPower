@@ -6,6 +6,7 @@ plugins {
     `java-library`
     id("com.github.johnrengelman.shadow") version "5.2.0"
     kotlin("plugin.serialization")
+    id("io.papermc.paperweight.userdev")
 }
 
 repositories {
@@ -29,15 +30,16 @@ val shadowWithRuntimeDependencies by configurations.creating {
 
 dependencies {
     compileOnlyApi(project(":common:KotlinRuntime"))
-    compileOnlyApi(files("../../libs/paper_server.jar"))
-    // compileOnly(files("../../libs/ProtocolSupport.jar"))
-    compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.6.0")
+    paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
+    compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.8.0-SNAPSHOT")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
     compileOnlyApi(files("../../libs/WorldGuard.jar"))
     compileOnlyApi("com.github.TechFortress:GriefPrevention:16036bdc19") // Using commits instead of pinning a version because GP hasn't released a new version yet
     api("net.perfectdreams.commands:command-framework-core:0.0.8")
     api("com.github.SparklyPower:PacketWrapper:88ddd591d8")
-    compileOnlyApi("net.milkbowl.vault:VaultAPI:1.6")
+    compileOnlyApi("net.milkbowl.vault:VaultAPI:1.6") {
+        exclude("org.bukkit", "bukkit") // Vault includes the Bukkit 1.9 API, this breaks our project
+    }
     compileOnlyApi("com.github.apachezy:LangUtils:3.2.2")
     api(project(":common:tables"))
     api("com.google.code.gson:gson:2.8.7")
@@ -62,7 +64,7 @@ dependencies {
     api("org.jsoup:jsoup:1.14.1")
 
     // Used for Mojang's Brigadier API
-    api("me.lucko:commodore:1.10")
+    api("me.lucko:commodore:1.11")
 
     // Prometheus, for metrics
     api("io.prometheus:simpleclient:${Versions.PROMETHEUS}")
@@ -73,9 +75,11 @@ dependencies {
     api("io.ktor:ktor-server-netty:${Versions.KTOR}")
     api("io.ktor:ktor-client-cio:${Versions.KTOR}")
 
+    api("com.viaversion:viaversion-api:4.1.1") // Used for packet manipulation
+
     compileOnlyApi("com.greatmancode:craftconomy3:3.3.1")
     compileOnlyApi("me.lucko.luckperms:luckperms-api:4.3")
-    testCompileOnly(files("../../libs/paper_server.jar"))
+    // testCompileOnly(files("../../libs/paper_server.jar"))
     testCompileOnly("org.junit.jupiter:junit-jupiter-api:5.3.0-M1")
     testCompileOnly("org.junit.jupiter:junit-jupiter-engine:5.3.0-M1")
     testCompileOnly("io.mockk:mockk:1.9")
@@ -99,7 +103,14 @@ tasks {
         }
     }
 
+    reobfJar {
+        // For some reason the userdev plugin is using "unspecified" as the suffix, and that's not a good name
+        // So we are going to change it to "PluginName-reobf.jar"
+        outputJar.set(layout.buildDirectory.file("libs/${project.name}-reobf.jar"))
+    }
+
     "build" {
         dependsOn(shadowJar)
+        dependsOn(reobfJar)
     }
 }

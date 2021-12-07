@@ -4,6 +4,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import net.minecraft.commands.arguments.selector.EntitySelector
+import net.perfectdreams.dreamcore.utils.DefaultFontInfo
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOption
 import net.perfectdreams.dreamcore.utils.commands.options.PlayerCommandOption
 import org.bukkit.entity.Player
@@ -24,7 +25,7 @@ class CommandArguments(val context: CommandContext) {
     fun getAndValidate(argument: CommandOption<Player>, reason: () -> (Component) = PLAYER_NOT_FOUND): Player {
         val entitySelector = context.nmsContext.getArgument(argument.name, EntitySelector::class.java)
         try {
-            return entitySelector.c(context.nmsContext.source).bukkitEntity as Player
+            return entitySelector.findSinglePlayer(context.nmsContext.source).bukkitEntity as Player
         } catch (e: CommandSyntaxException) {
             context.fail(reason.invoke())
         }
@@ -34,7 +35,7 @@ class CommandArguments(val context: CommandContext) {
         // ===[ SPECIAL CASES ]===
         if (argument is PlayerCommandOption) {
             val entitySelector = context.nmsContext.getArgument(argument.name, EntitySelector::class.java)
-            return entitySelector.c(context.nmsContext.source).bukkitEntity as T // T should always be a (Craft)Player
+            return entitySelector.findSinglePlayer(context.nmsContext.source).bukkitEntity as T // T should always be a (Craft)Player
         }
 
         return context.nmsContext.getArgument(argument.name, T::class.java)

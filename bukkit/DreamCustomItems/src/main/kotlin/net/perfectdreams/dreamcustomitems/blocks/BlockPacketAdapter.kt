@@ -2,23 +2,25 @@ package net.perfectdreams.dreamcustomitems.blocks
 
 import com.comphenix.packetwrapper.WrapperPlayServerBlockChange
 import com.comphenix.protocol.PacketType
-import com.comphenix.protocol.events.ListenerOptions
-import com.comphenix.protocol.events.ListenerPriority
-import com.comphenix.protocol.events.PacketAdapter
-import com.comphenix.protocol.events.PacketEvent
+import com.comphenix.protocol.events.*
 import com.comphenix.protocol.wrappers.WrappedBlockData
+import com.viaversion.viaversion.api.minecraft.chunks.PaletteType
+import com.viaversion.viaversion.api.type.types.version.ChunkSectionType1_18
 import io.netty.buffer.Unpooled
-import net.minecraft.network.protocol.game.PacketPlayOutMapChunk
+import net.minecraft.core.Registry
+import net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData
+import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket
+import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
-import net.perfectdreams.dreamcore.utils.DefaultFontInfo
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.BlockPosition
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_17_R1.block.data.CraftBlockData
-import us.myles.ViaVersion.api.minecraft.chunks.ChunkSection
-import us.myles.ViaVersion.api.type.types.version.ChunkSectionType1_16
-import java.util.*
+import org.bukkit.craftbukkit.v1_18_R1.block.data.CraftBlockData
+import sun.misc.Unsafe
+import java.lang.reflect.Field
+import kotlin.math.absoluteValue
+
 
 class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
     m,
@@ -32,6 +34,10 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
     // It *should* be fine since we don't call the Bukkit API (except to get the player's world)
     ListenerOptions.ASYNC
 ) {
+    companion object {
+        val chunkSectionType = ChunkSectionType1_18(Block.BLOCK_STATE_REGISTRY.size(), Registry.BIOME_SOURCE.size())
+    }
+
     override fun onPacketSending(event: PacketEvent) {
         // println(event.packetType)
         val packet = event.packet
@@ -40,41 +46,45 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
         val playerWorld = event.player.world
 
         if (event.packetType == PacketType.Play.Server.MAP_CHUNK) {
-            val chunkX = packet.integers.read(0)
-            val chunkZ = packet.integers.read(1)
-            val coordinateX = chunkX * 16
-            val coordinateZ = chunkZ * 16
+            // This is actually pretty weird
+            // there is actually a "nested" (?) packet
+            // and because ProtocolLib reads the non-nested packet, we need to cast to the NMS object and read it from there
+            //
+            // Very useful! https://nms.screamingsandals.org/
+            val clientboundLevelChunkWithLightPacket = event.packet.handle as ClientboundLevelChunkWithLightPacket
+            val chunkX = clientboundLevelChunkWithLightPacket.x
+            val chunkZ = clientboundLevelChunkWithLightPacket.z
+            val coordinateX = clientboundLevelChunkWithLightPacket.x * 16
+            val coordinateZ = clientboundLevelChunkWithLightPacket.z * 16
+            val chunkDataPacket = clientboundLevelChunkWithLightPacket.chunkData
+
+            val worldMinHeight = playerWorld.minHeight
+            val worldMaxHeight = playerWorld.maxHeight
+            val worldTrueHeight = (worldMinHeight.absoluteValue + worldMaxHeight)
+            val ySectionCount = worldTrueHeight / 16
+
+            // And then we read the byte array from there!
+            val readBuffer = chunkDataPacket.readBuffer
+            val byteArray = readBuffer.array()
+
+            // println("Chunk at $coordinateX, $coordinateZ")
 
             // println("Current Chunk: $chunkX, $chunkZ")
+            val buf = Unpooled.copiedBuffer(byteArray)
 
-            // https://launcher.mojang.com/v1/objects/41285beda6d251d190f2bf33beadd4fee187df7a/server.txt
-            // idk how to read this
-            // I hate this, but ProtocolLib doesn't have a way to read a BitSet
-            val nmsPacket = event.packet.handle as PacketPlayOutMapChunk
-            val sectionsMask = nmsPacket.e() // Reads the BitSet, this is just a getter
-
-            val chunkDataByteArray = event.packet.byteArrays.read(0)
-
-            // Read sections
-            val sections = arrayOfNulls<ChunkSection>(16)
-            val buf = Unpooled.copiedBuffer(chunkDataByteArray)
+            val sections = (0 until ySectionCount)
+                .map { chunkSectionType.read(buf) }
 
             var requiresEdits = false
+            // println("World: ${event.player.world.minHeight}")
+            // println("Sections: $ySectionCount")
 
-            // TODO: 1.17 doesn't always have 16 sections, this needs to be updated!
-            for (i in 0..15) {
-                if (!sectionsMask.get(i)) continue // Section not set
-                val nonAirBlocksCount: Short = buf.readShort()
-                val section = ChunkSectionType1_16().read(buf)
-                section.nonAirBlocksCount = nonAirBlocksCount.toInt()
-                sections[i] = section
+            for ((i, section) in sections.withIndex()) {
+                val blockPalette = section.palette(PaletteType.BLOCKS)
 
                 // Quick fail: Only edit if the palette contains note blocks
-                // Empty palette = Global palette (I think?)
-                // d = global palette
-                if (section.palette.isNotEmpty() && !section.palette.any { net.minecraft.world.level.chunk.ChunkSection.d.a(
-                        it
-                    )?.bukkitMaterial == Material.NOTE_BLOCK })
+                // !(0 until blockPalette.size()).any { blockPalette.idByIndex(it) == Block.BLOCK_STATE_REGISTRY.getId(Blocks.NOTE_BLOCK.defaultBlockState()) }
+                if (blockPalette == null) // Does not have any palette...
                     continue
 
                 var hasNoteBlock = false
@@ -85,19 +95,18 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
                         for (z in 0 until 16) {
                             val blockId = section.getFlatBlock(x, y, z)
 
-                            // d = global palette
-                            // a = getObject
-                            val blockData = net.minecraft.world.level.chunk.ChunkSection.d.a(blockId)
+                            val blockData = Block.BLOCK_STATE_REGISTRY.byId(blockId)
 
                             if (blockData != null) {
                                 if (blockData.bukkitMaterial == Material.NOTE_BLOCK) {
                                     // Okay, so it is a note block... but what if it is a *custom* block?
                                     val position = BlockPosition(
                                         coordinateX + x,
-                                        y + (16 * i),
+                                        y + (16 * i) - worldMinHeight, // The sections are from the bottom to the top, so the section 0 is at the world's min height!
                                         coordinateZ + z
                                     )
 
+                                    // println("Note Block!")
                                     // println("Coordinate X: ${position.x}")
                                     // println("Coordinate Y: ${position.y}")
                                     // println("Coordinate Z: ${position.z}")
@@ -112,10 +121,7 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
                                         x,
                                         y,
                                         z,
-                                        net.minecraft.world.level.chunk.ChunkSection.d.a(
-                                            // Check the proper name in the obfuscated code, the name is "note_block"
-                                            Blocks.aC.blockData
-                                        )
+                                        Block.BLOCK_STATE_REGISTRY.getId(Blocks.NOTE_BLOCK.defaultBlockState())
                                     )
                                     hasNoteBlock = true
                                 }
@@ -129,13 +135,17 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
             }
 
             if (requiresEdits) {
+                // println("Requires edit, so we are going to clear the read buffer")
                 // Only rewrite the packet if we really need to edit the packet
                 val byteBuf = Unpooled.buffer()
                 sections.filterNotNull().forEach {
-                    byteBuf.writeShort(it.nonAirBlocksCount)
-                    ChunkSectionType1_16().write(byteBuf, it)
+                    chunkSectionType.write(byteBuf, it)
                 }
-                packet.byteArrays.write(0, byteBuf.array())
+
+                writeByteArrayDataToLevelChunkDataPacket(
+                    chunkDataPacket,
+                    byteBuf.array()
+                )
             }
         } else if (event.packetType == PacketType.Play.Server.BLOCK_CHANGE) {
             val wrapper = WrapperPlayServerBlockChange(event.packet)
@@ -157,8 +167,7 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
                 }
 
                 // Oh no, NMS!!!
-                // Check the proper name in the obfuscated code, the name is "note_block"
-                wrapper.blockData = WrappedBlockData.createData(CraftBlockData.fromData(Blocks.aC.blockData))
+                wrapper.blockData = WrappedBlockData.createData(CraftBlockData.fromData(Blocks.NOTE_BLOCK.defaultBlockState()))
             }
 
             event.packet = wrapper.handle
@@ -228,5 +237,16 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
             // And write the new array to the packet
             event.packet.blockDataArrays.write(0, array.toTypedArray())
         }
+    }
+
+    private fun writeByteArrayDataToLevelChunkDataPacket(packet: ClientboundLevelChunkPacketData, data: ByteArray) {
+        val unsafeField: Field = Unsafe::class.java.getDeclaredField("theUnsafe")
+        unsafeField.isAccessible = true
+        val unsafe: Unsafe = unsafeField.get(null) as Unsafe
+
+        // buffer = c, see https://nms.screamingsandals.org/1.18/net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData.html
+        val ourField: Field = ClientboundLevelChunkPacketData::class.java.getDeclaredField("c")
+        val staticFieldOffset: Long = unsafe.objectFieldOffset(ourField)
+        unsafe.putObject(packet, staticFieldOffset, data)
     }
 }

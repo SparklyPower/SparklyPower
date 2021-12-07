@@ -52,7 +52,8 @@ fun Inventory.toBase64(i: Int): String {
 		if (i == 1) {
 			dataOutput.writeUTF("???")
 		}
-		for ((index, itemStack) in this.contents.withIndex()) {
+		val contents = this.contents ?: error("Inventory contents is null!")
+		for ((index, itemStack) in contents.withIndex()) {
 			if (itemStack != null) {
 				dataOutput.writeObject(itemStack.toBase64())
 			} else {

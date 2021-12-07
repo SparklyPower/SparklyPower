@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamcore.listeners
 
 import com.github.salomonbrys.kotson.*
+import net.kyori.adventure.text.Component
 import net.md_5.bungee.api.chat.BaseComponent
 import net.perfectdreams.dreamcore.network.socket.SocketReceivedEvent
 import net.perfectdreams.dreamcore.network.socket.SocketUtils
@@ -207,6 +208,10 @@ class SocketListener : Listener {
 		}
 
 		override fun spigot() = spigot
+
+		override fun name(): Component {
+			TODO("Not yet implemented")
+		}
 
 		override fun getName() = fakeName
 

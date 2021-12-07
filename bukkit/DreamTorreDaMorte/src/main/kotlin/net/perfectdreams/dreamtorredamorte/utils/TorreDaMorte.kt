@@ -19,7 +19,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
     var spawns = mutableListOf<Location>()
     var players = mutableListOf<Player>()
     var playersInQueue = mutableListOf<Player>()
-    var storedPlayerInventory = mutableMapOf<Player, Array<ItemStack>>()
+    var storedPlayerInventory = mutableMapOf<Player, Array<ItemStack?>>()
     var canAttack = false
     var isStarted = false
     var isPreStart = false
@@ -123,7 +123,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             player.removeAllPotionEffects()
             players.add(player)
 
-            storedPlayerInventory[player] = player.inventory.contents.clone()
+            storedPlayerInventory[player] = player.inventory.contents!!.clone()
             player.openInventory.close()
             player.inventory.clear()
 
@@ -226,7 +226,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
         // Restaurar o inventário do player
         val storedInventory = storedPlayerInventory[player]
         if (storedInventory != null)
-            player.inventory.contents = storedInventory
+            player.inventory.setContents(storedInventory.filterNotNull().toTypedArray())
 
         val killer = lastHits[player]
         if (killer != null && players.contains(killer)) {
