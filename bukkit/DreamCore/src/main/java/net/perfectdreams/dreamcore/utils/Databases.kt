@@ -3,14 +3,9 @@ package net.perfectdreams.dreamcore.utils
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.util.IsolationLevel
-import net.perfectdreams.dreamcore.DreamCore
 import org.jetbrains.exposed.sql.DEFAULT_REPETITION_ATTEMPTS
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
-import org.jetbrains.exposed.sql.transactions.DEFAULT_REPETITION_ATTEMPTS
-import org.jetbrains.exposed.sql.transactions.TransactionManager
-import java.io.File
-import java.sql.Connection
 
 object Databases {
 	private val DRIVER_CLASS_NAME = "org.postgresql.Driver"

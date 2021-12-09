@@ -1,6 +1,6 @@
 package net.perfectdreams.dreamcore.tables
 
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 object EventVictories : LongIdTable() {
 	val user = uuid("user").index()

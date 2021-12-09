@@ -1,6 +1,6 @@
 package net.perfectdreams.dreamnetworkbans.tables
 
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 object PremiumUsers : LongIdTable() {
 	val premiumUniqueId = uuid("premium_uuid").index()

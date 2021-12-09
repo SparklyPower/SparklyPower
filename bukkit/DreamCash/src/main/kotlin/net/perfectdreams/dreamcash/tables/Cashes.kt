@@ -8,6 +8,8 @@ import java.util.*
 object Cashes : IdTable<UUID>() {
     override val id: Column<EntityID<UUID>>
         get() = uniqueId
-    val uniqueId = uuid("id").primaryKey().entityId()
+    val uniqueId = uuid("id").entityId()
     val cash = long("cash")
+
+    override val primaryKey = PrimaryKey(uniqueId)
 }

@@ -1,6 +1,6 @@
 package net.perfectdreams.dreamnetworkbans.tables
 
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 // Esta table é um long boi
 // Ao inserir na tabela, o ID irá incrementar (1 -> 2 -> 3... etc)

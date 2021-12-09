@@ -1,6 +1,6 @@
 package net.perfectdreams.dreamnetworkbans.tables
 
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 object GeoLocalizations : LongIdTable() {
 	val ip = text("ip")

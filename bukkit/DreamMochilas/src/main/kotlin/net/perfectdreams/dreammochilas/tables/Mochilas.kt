@@ -1,7 +1,7 @@
 package net.perfectdreams.dreammochilas.tables
 
 import net.perfectdreams.dreamcore.DreamCore
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 object Mochilas : LongIdTable() {
     override val tableName: String

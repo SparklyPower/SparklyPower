@@ -1,6 +1,6 @@
 package net.perfectdreams.dreamvote.tables
 
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 object Votes : LongIdTable() {
     val player = uuid("player").index()

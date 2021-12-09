@@ -1,7 +1,7 @@
 package net.perfectdreams.dreamclubes.tables
 
 import net.perfectdreams.dreamclubes.tables.Clubes.nullable
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.Table
 

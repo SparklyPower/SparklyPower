@@ -1,6 +1,6 @@
 package net.perfectdreams.dreamraspadinha.tables
 
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 object Raspadinhas : LongIdTable() {
     val receivedById = uuid("received_by").index()

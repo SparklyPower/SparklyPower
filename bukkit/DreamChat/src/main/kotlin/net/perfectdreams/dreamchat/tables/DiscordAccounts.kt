@@ -1,6 +1,6 @@
 package net.perfectdreams.dreamchat.tables
 
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 object DiscordAccounts : LongIdTable() {
     val minecraftId = uuid("minecraft_id").index()

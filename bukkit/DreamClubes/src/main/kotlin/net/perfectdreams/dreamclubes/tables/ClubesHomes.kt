@@ -1,6 +1,6 @@
 package net.perfectdreams.dreamclubes.tables
 
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 object ClubesHomes : LongIdTable() {
     val worldName = text("world_name")

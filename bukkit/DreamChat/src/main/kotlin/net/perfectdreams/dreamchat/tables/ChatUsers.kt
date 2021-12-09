@@ -8,7 +8,7 @@ object ChatUsers : IdTable<UUID>() {
 	override val tableName: String
 		get() = "${DreamCore.dreamConfig.getTablePrefix()}_chatusers"
 
-	val _id = uuid("id").primaryKey()
+	val _id = uuid("id")
 
 	// Parece idiota, mas precisa ser assim para poder fazer DSL insert corretamente
 	override val id = _id.entityId()
@@ -16,4 +16,6 @@ object ChatUsers : IdTable<UUID>() {
 	val nickname = text("nickname").nullable()
 	val tag = text("tag").nullable()
 	val playOneMinute = integer("play_one_minute").nullable().index()
+
+	override val primaryKey = PrimaryKey(_id)
 }

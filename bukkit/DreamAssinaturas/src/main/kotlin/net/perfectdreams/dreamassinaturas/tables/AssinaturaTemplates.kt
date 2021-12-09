@@ -8,10 +8,12 @@ object AssinaturaTemplates : IdTable<UUID>() {
     override val tableName: String
         get() = "${DreamCore.dreamConfig.getTablePrefix()}_assinaturatemplates"
 
-    val _id = uuid("id").primaryKey()
+    val _id = uuid("id")
 
     // Parece idiota, mas precisa ser assim para poder fazer DSL insert corretamente
     override val id = _id.entityId()
 
     val template = text("template")
+
+    override val primaryKey = PrimaryKey(_id)
 }

@@ -1,7 +1,7 @@
 package net.perfectdreams.dreamnetworkbans.tables
 
 import net.md_5.bungee.api.connection.ProxiedPlayer
-import org.jetbrains.exposed.dao.LongIdTable
+import org.jetbrains.exposed.dao.id.LongIdTable
 
 // Tabela de fingerprints, serve para guardar informações sobre players que podem ser usadas para ser identificadas mesmo se mudar de conta!
 object Fingerprints : LongIdTable() {

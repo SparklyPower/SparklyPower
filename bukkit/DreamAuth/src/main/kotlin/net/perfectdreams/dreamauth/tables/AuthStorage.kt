@@ -9,7 +9,7 @@ object AuthStorage : IdTable<UUID>() {
 	override val id: Column<EntityID<UUID>>
 		get() = uniqueId
 
-	val uniqueId = uuid("id").primaryKey().entityId()
+	val uniqueId = uuid("id").entityId()
 	val password = varchar("password", 60)
 	val lastIp = text("last_ip")
 	val lastLogin = long("last_login")
@@ -19,4 +19,6 @@ object AuthStorage : IdTable<UUID>() {
 	val email = text("email").nullable()
 	val requestedPasswordChangeAt = long("requested_password_change_at").nullable()
 	val token = text("token").nullable()
+
+	override val primaryKey = PrimaryKey(uniqueId)
 }
