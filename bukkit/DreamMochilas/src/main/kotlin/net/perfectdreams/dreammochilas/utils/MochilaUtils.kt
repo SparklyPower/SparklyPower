@@ -9,6 +9,7 @@ import net.perfectdreams.dreamcore.utils.toBase64
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.tables.Mochilas
 import org.bukkit.Bukkit
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Color
@@ -111,42 +112,8 @@ object MochilaUtils {
                         mochila.content = inventory.toBase64(1)
                     }
 
-                    if (mochilaItem != null) {
-                        val currentLore = mochilaItem.lore
-
-                        // Only update if the lore exists... it should always exist
-                        if (currentLore?.isNotEmpty() == true) {
-                            val lastLineOfTheLore = currentLore.last()
-                            val newLore = currentLore.toMutableList()
-
-                            if (!lastLineOfTheLore.contains("slots"))
-                                newLore.add("\n")
-                            else
-                                newLore.removeLast()
-
-                            var usedSize = inventory.count { it != null } // Count non empty slots
-                            if (usedSize == -1)
-                                usedSize = inventory.size
-
-                            // Do a nice transition from green to red, depending on how many slots are used
-                            val totalSizeInPercentage = usedSize / inventory.size.toDouble()
-                            val r = 0 + (200 * totalSizeInPercentage).toInt()
-                            val g = 255 - (255 * totalSizeInPercentage).toInt()
-                            val b = 125 - (125 * totalSizeInPercentage).toInt()
-                            val colorToBeUsed = ChatColor.of(Color(r, g, b))
-
-                            newLore.add(
-                                buildString {
-                                    append("$colorToBeUsed$usedSize/${inventory.size} §7slots usados")
-                                    if (usedSize == inventory.size) {
-                                        append(" §c§lCHEIA!")
-                                    }
-                                }
-                            )
-
-                            mochilaItem.lore = newLore
-                        }
-                    }
+                    if (mochilaItem != null)
+                        updateMochilaItemLore(inventory, mochilaItem)
 
                     plugin.logger.info { "Saved backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
                 } else {
@@ -182,6 +149,46 @@ object MochilaUtils {
     suspend fun storeCachedMochila(mochila: Mochila) {
         mochilaLoadSaveMutex.withLock {
             loadedMochilas[mochila.id.value] = mochila
+        }
+    }
+
+    /**
+     * Updates the [mochilaItem] metadata
+     */
+    private fun updateMochilaItemLore(inventory: Inventory, mochilaItem: ItemStack) {
+        val currentLore = mochilaItem.lore
+
+        // Only update if the lore exists... it should always exist
+        if (currentLore?.isNotEmpty() == true) {
+            val lastLineOfTheLore = currentLore.last()
+            val newLore = currentLore.toMutableList()
+
+            if (!lastLineOfTheLore.contains("slots"))
+                newLore.add("\n")
+            else
+                newLore.removeLast()
+
+            var usedSize = inventory.count { it != null } // Count non empty slots
+            if (usedSize == -1)
+                usedSize = inventory.size
+
+            // Do a nice transition from green to red, depending on how many slots are used
+            val totalSizeInPercentage = usedSize / inventory.size.toDouble()
+            val r = 0 + (200 * totalSizeInPercentage).toInt()
+            val g = 255 - (255 * totalSizeInPercentage).toInt()
+            val b = 125 - (125 * totalSizeInPercentage).toInt()
+            val colorToBeUsed = ChatColor.of(Color(r, g, b))
+
+            newLore.add(
+                buildString {
+                    append("$colorToBeUsed$usedSize/${inventory.size} §7slots usados")
+                    if (usedSize == inventory.size) {
+                        append(" §c§lCHEIA!")
+                    }
+                }
+            )
+
+            mochilaItem.lore = newLore
         }
     }
 }
