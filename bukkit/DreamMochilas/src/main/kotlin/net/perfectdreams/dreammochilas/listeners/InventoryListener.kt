@@ -1,19 +1,14 @@
 package net.perfectdreams.dreammochilas.listeners
 
+import com.Acrobot.ChestShop.Configuration.Properties.SHOP_INTERACTION_INTERVAL
 import com.Acrobot.ChestShop.Events.PreTransactionEvent
 import com.Acrobot.ChestShop.Events.TransactionEvent
 import com.Acrobot.ChestShop.Listeners.Player.PlayerInteract
 import com.Acrobot.ChestShop.Listeners.PreTransaction.SpamClickProtector
 import com.Acrobot.ChestShop.Signs.ChestShopSign
-import com.github.salomonbrys.kotson.set
-import com.google.gson.JsonObject
-import com.okkero.skedule.BukkitDispatcher
-import com.okkero.skedule.SynchronizationContext
-import com.okkero.skedule.schedule
+import com.sk89q.worldguard.bukkit.util.Events
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.perfectdreams.dreamcore.network.socket.SocketUtils
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
@@ -22,7 +17,6 @@ import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.FunnyIds
 import net.perfectdreams.dreammochilas.dao.Mochila
-import net.perfectdreams.dreammochilas.tables.Mochilas
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -38,7 +32,6 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -69,6 +62,13 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 this.isAccessible = true
             }.get(protector) as WeakHashMap<Player, Long>
         }
+    }
+
+    val mochilasCooldown = ConcurrentHashMap<Player, Long>()
+
+    @EventHandler
+    fun onQuit(e: PlayerQuitEvent) {
+        mochilasCooldown.remove(e.player)
     }
 
     @InternalCoroutinesApi
@@ -127,6 +127,16 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                             Bukkit.getPluginManager().callEvent(r)
 
+                            // We are going to replace the cooldown with OUR OWN cooldown, haha!!
+                            val lastTimeUserInteractedWithThis = mochilasCooldown[e.player] ?: 0
+                            val diff = System.currentTimeMillis() - lastTimeUserInteractedWithThis
+
+                            if (diff > SHOP_INTERACTION_INTERVAL) {
+                                m.logger.info { "Player ${e.player.name} tried selling but it was during a cooldown! Backpack ID: $mochilaId" }
+                                r.setCancelled(PreTransactionEvent.TransactionOutcome.SPAM_CLICKING_PROTECTION)
+                                return@onMainThread false
+                            }
+
                             if (r.isCancelled) {
                                 m.logger.info { "Pre Transaction Event for ${e.player.name} was cancelled! ${r.transactionType} ${r.transactionOutcome}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
                                 return@onMainThread false
@@ -142,6 +152,8 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                             }
 
                             m.logger.info { "Transaction Event for ${e.player.name} was successfully completed! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
+
+                            mochilasCooldown[e.player] = System.currentTimeMillis()
 
                             return@onMainThread true
                         } catch (var8: SecurityException) {
@@ -306,7 +318,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                 MochilaUtils.saveMochila(
                     if (isMochila == true) item else null // Maybe the user changed the held item?
-                , holder.mochila, "${e.player.name} mochila inventory close")
+                    , holder.mochila, "${e.player.name} mochila inventory close")
             }
         }
     }
