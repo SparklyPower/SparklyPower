@@ -36,7 +36,7 @@ object MochilaUtils {
             val memoryMochila = loadedMochilas[mochilaId]
 
             if (memoryMochila != null) {
-                plugin.logger.info { "Loaded backpack $mochilaId from memory! Triggered by $triggerType" }
+                plugin.logger.info { "Loaded backpack $mochilaId ($memoryMochila) from memory! Triggered by $triggerType" }
                 return memoryMochila
             }
 
@@ -46,10 +46,10 @@ object MochilaUtils {
             }
 
             if (mochila != null) {
-                plugin.logger.info { "Loaded backpack $mochilaId from database! Triggered by $triggerType" }
+                plugin.logger.info { "Loaded backpack $mochilaId ($mochila) from database! Triggered by $triggerType" }
                 loadedMochilas[mochilaId] = mochila
             } else {
-                plugin.logger.info { "Tried loading backpack $mochilaId from database, but it doesn't exist! Triggered by $triggerType" }
+                plugin.logger.info { "Tried loading backpack $mochilaId ($mochila) from database, but it doesn't exist! Triggered by $triggerType" }
             }
 
             return mochila
@@ -68,15 +68,15 @@ object MochilaUtils {
         val viewerCount = mochila.getOrCreateMochilaInventory().viewers.size
         val isManipulationLocked = mochila.mochilaInventoryManipulationLock.isLocked
 
-        plugin.logger.info { "Saving backpack ${mochila.id.value}, triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}; Viewer Count: $viewerCount; Is Manipulation Locked? $isManipulationLocked" }
+        plugin.logger.info { "Saving backpack ${mochila.id.value} ($mochila), triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}; Viewer Count: $viewerCount; Is Manipulation Locked? $isManipulationLocked" }
 
         if (viewerCount > 1) {
-            plugin.logger.info { "Not going to save backpack ${mochila.id.value} on database because there's $viewerCount looking at it! Triggered by $triggerType" }
+            plugin.logger.info { "Not going to save backpack ${mochila.id.value} ($mochila) on database because there's $viewerCount looking at it! Triggered by $triggerType" }
             return
         }
 
         if (isManipulationLocked) {
-            plugin.logger.info { "Not going to save backpack ${mochila.id.value} on database because it is locked for manipulation! Triggered by $triggerType" }
+            plugin.logger.info { "Not going to save backpack ${mochila.id.value} ($mochila) on database because it is locked for manipulation! Triggered by $triggerType" }
             return
         }
 
@@ -89,7 +89,7 @@ object MochilaUtils {
 
                 // If the inventory is null, then it means that the inventory wasn't manipulated, so we don't need to save it
                 if (inventory != null) {
-                    plugin.logger.info { "Saving backpack ${mochila.id.value} on database! Triggered by $triggerType" }
+                    plugin.logger.info { "Saving backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
 
                     transaction(Databases.databaseNetwork) {
                         mochila.content = inventory.toBase64(1)
@@ -132,22 +132,22 @@ object MochilaUtils {
                         }
                     }
 
-                    plugin.logger.info { "Saved backpack ${mochila.id.value} on database! Triggered by $triggerType" }
+                    plugin.logger.info { "Saved backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
                 } else {
-                    plugin.logger.info { "Decided not to save backpack ${mochila.id.value} because the inventory is null! Triggered by $triggerType" }
+                    plugin.logger.info { "Decided not to save backpack ${mochila.id.value} ($mochila) because the inventory is null! Triggered by $triggerType" }
                 }
 
                 // Remove from memory
-                plugin.logger.info { "Removing backpack ${mochila.id.value} from memory, triggered by $triggerType" }
+                plugin.logger.info { "Removing backpack ${mochila.id.value} ($mochila) from memory, triggered by $triggerType" }
                 loadedMochilas.remove(mochila.id.value)
             }
         } else {
-            plugin.logger.info { "Not going to save backpack ${mochila.id.value} on database! Triggered by $triggerType" }
+            plugin.logger.info { "Not going to save backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
         }
     }
 
     suspend fun removeCachedMochila(mochila: Mochila, triggerType: String? = null) {
-        plugin.logger.info { "Removing backpack ${mochila.id.value} from cache (no save), triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}" }
+        plugin.logger.info { "Removing backpack ${mochila.id.value} ($mochila) from cache (no save), triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}" }
 
         mochilaLoadSaveMutex.withLock {
             loadedMochilas.remove(mochila.id.value)
