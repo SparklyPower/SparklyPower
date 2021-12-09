@@ -27,7 +27,7 @@ tasks {
         // So we are going to change it to "PluginName-reobf.jar"
         outputJar.set(layout.buildDirectory.file("libs/${project.name}-reobf.jar"))
     }
-    
+
     // Configure reobfJar to run when invoking the build task
     build {
         dependsOn(reobfJar)

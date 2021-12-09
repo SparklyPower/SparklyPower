@@ -2,60 +2,37 @@ package net.perfectdreams.dreamcore.utils
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import com.zaxxer.hikari.util.IsolationLevel
 import net.perfectdreams.dreamcore.DreamCore
+import org.jetbrains.exposed.sql.DEFAULT_REPETITION_ATTEMPTS
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.DatabaseConfig
+import org.jetbrains.exposed.sql.transactions.DEFAULT_REPETITION_ATTEMPTS
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import java.io.File
 import java.sql.Connection
 
 object Databases {
+	private val DRIVER_CLASS_NAME = "org.postgresql.Driver"
+	private val ISOLATION_LEVEL = IsolationLevel.TRANSACTION_REPEATABLE_READ // We use repeatable read to avoid dirty and non-repeatable reads! Very useful and safe!!
+
 	val hikariConfig by lazy {
-		val config = HikariConfig()
+		val hikariConfig = HikariConfig()
 
+		hikariConfig.driverClassName = DRIVER_CLASS_NAME
 
-		var jdbcUrlPrefix: String? = null
-		var driverClassName: String? = null
-		var dbPath: String? = null
-		val sqLiteDbFile = File(DreamCore.INSTANCE.dataFolder, "dream.db")
+		// Exposed uses autoCommit = false, so we need to set this to false to avoid HikariCP resetting the connection to
+		// autoCommit = true when the transaction goes back to the pool, because resetting this has a "big performance impact"
+		// https://stackoverflow.com/a/41206003/7271796
+		hikariConfig.isAutoCommit = false
 
-		val databaseConfig = DreamCore.dreamConfig.networkDatabase
-		val databaseType = databaseConfig?.type ?: "SQLite"
+		// Useful to check if a connection is not returning to the pool, will be shown in the log as "Apparent connection leak detected"
+		hikariConfig.leakDetectionThreshold = 30L * 1000
+		hikariConfig.transactionIsolation = IsolationLevel.TRANSACTION_REPEATABLE_READ.name // We use repeatable read to avoid dirty and non-repeatable reads! Very useful and safe!!
 
-		when (databaseType) {
-			"SQLite" -> {
-				jdbcUrlPrefix = "sqlite"
-				driverClassName = "org.sqlite.JDBC"
-				dbPath = "${sqLiteDbFile.toPath()}"
-			}
-			"SQLiteMemory" -> {
-				jdbcUrlPrefix = "sqlite"
-				driverClassName = "org.sqlite.JDBC"
-				dbPath = ":memory:"
-			}
-			"PostgreSQL" -> {
-				if (databaseConfig != null) {
-					jdbcUrlPrefix = "postgresql"
-					driverClassName = "org.postgresql.Driver"
-					dbPath = "//${databaseConfig.ip}:${databaseConfig.port}/${databaseConfig.databaseName}"
-				}
-
-			}
-			else -> throw RuntimeException("Unsupported Database Dialect $databaseType")
-		}
-
-		config.jdbcUrl = "jdbc:$jdbcUrlPrefix:$dbPath"
-		config.username = databaseConfig?.user
-		if (databaseConfig?.password != null)
-			config.password = databaseConfig.password
-
-		config.driverClassName = driverClassName
-
-		config.maximumPoolSize = 10
-		config.addDataSourceProperty("cachePrepStmts", "true")
-		config.addDataSourceProperty("prepStmtCacheSize", "250")
-		config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
-		return@lazy config
+		hikariConfig
 	}
+
 	val dataSource by lazy { HikariDataSource(hikariConfig) }
 	@Deprecated("Please use hikariConfig")
 	val hikariConfigServer = hikariConfig
@@ -64,11 +41,13 @@ object Databases {
 	val dataSourceServer = dataSource
 
 	val databaseNetwork by lazy {
-		val db = Database.connect(dataSource)
-		if (true) {
-			TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
-		}
-		db
+		Database.connect(
+			HikariDataSource(dataSource),
+			databaseConfig = DatabaseConfig {
+				defaultRepetitionAttempts = DEFAULT_REPETITION_ATTEMPTS
+				defaultIsolationLevel = ISOLATION_LEVEL.levelId // Change our default isolation level
+			}
+		)
 	}
 	@Deprecated("Please use databaseNetwork")
 	val databaseServer = databaseNetwork
