@@ -14,6 +14,13 @@ open class CommandOptions {
 
     fun boolean(name: String, suggests: SuggestsBlock = null) = BooleanCommandOptionBuilder(name, suggests)
 
+    fun integer(name: String, suggests: SuggestsBlock = null) = IntegerCommandOptionBuilder(name, suggests)
+    fun integer(name: String, min: Int, suggests: SuggestsBlock = null) = IntegerMinCommandOptionBuilder(name, min, suggests)
+    fun integer(name: String, min: Int, max: Int, suggests: SuggestsBlock = null) = IntegerMinMaxCommandOptionBuilder(name, min, max, suggests)
+    fun optionalInteger(name: String, suggests: SuggestsBlock = null) = OptionalIntegerCommandOptionBuilder(name, suggests)
+    fun optionalInteger(name: String, min: Int, suggests: SuggestsBlock = null) = OptionalIntegerMinCommandOptionBuilder(name, min, suggests)
+    fun optionalInteger(name: String, min: Int, max: Int, suggests: SuggestsBlock = null) = OptionalIntegerMinMaxCommandOptionBuilder(name, min, max, suggests)
+
     fun double(name: String, suggests: SuggestsBlock = null) = DoubleCommandOptionBuilder(name, suggests)
     fun double(name: String, min: Double, suggests: SuggestsBlock = null) = DoubleMinCommandOptionBuilder(name, min, suggests)
     fun double(name: String, min: Double, max: Double, suggests: SuggestsBlock = null) = DoubleMinMaxCommandOptionBuilder(name, min, max, suggests)

@@ -3,6 +3,7 @@ package net.perfectdreams.dreamcore.utils.commands
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.DoubleArgumentType
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
@@ -134,6 +135,32 @@ class SparklyBukkitBrigadierCommandWrapper(
                                 is BooleanCommandOption -> RequiredArgumentBuilder.argument<CommandSourceStack, Boolean>(
                                     it.name,
                                     BoolArgumentType.bool()
+                                )
+
+                                // ===[ INTEGER ]===
+                                is IntegerCommandOption -> RequiredArgumentBuilder.argument<CommandSourceStack, Int>(
+                                    it.name,
+                                    IntegerArgumentType.integer()
+                                )
+                                is IntegerMinCommandOption -> RequiredArgumentBuilder.argument<CommandSourceStack, Int>(
+                                    it.name,
+                                    IntegerArgumentType.integer(it.min)
+                                )
+                                is IntegerMinMaxCommandOption -> RequiredArgumentBuilder.argument<CommandSourceStack, Int>(
+                                    it.name,
+                                    IntegerArgumentType.integer(it.min, it.max)
+                                )
+                                is OptionalIntegerCommandOption -> RequiredArgumentBuilder.argument<CommandSourceStack, Int>(
+                                    it.name,
+                                    IntegerArgumentType.integer()
+                                )
+                                is OptionalIntegerMinCommandOption -> RequiredArgumentBuilder.argument<CommandSourceStack, Int>(
+                                    it.name,
+                                    IntegerArgumentType.integer(it.min)
+                                )
+                                is OptionalIntegerMinMaxCommandOption -> RequiredArgumentBuilder.argument<CommandSourceStack, Int>(
+                                    it.name,
+                                    IntegerArgumentType.integer(it.min, it.max)
                                 )
 
                                 // ===[ DOUBLE ]===

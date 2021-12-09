@@ -23,6 +23,24 @@ class OptionalGreedyStringCommandOptionBuilder(name: String, suggests: SuggestsB
 class BooleanCommandOptionBuilder(name: String, suggests: SuggestsBlock) : CommandOptionBuilder<Boolean>(name, suggests) {
     override fun build() = BooleanCommandOption(name, suggests)
 }
+class IntegerCommandOptionBuilder(name: String, suggests: SuggestsBlock) : CommandOptionBuilder<Int>(name, suggests) {
+    override fun build() = IntegerCommandOption(name, suggests)
+}
+class IntegerMinCommandOptionBuilder(name: String, val min: Int, suggests: SuggestsBlock) : CommandOptionBuilder<Int>(name, suggests) {
+    override fun build() = IntegerMinCommandOption(name, min, suggests)
+}
+class IntegerMinMaxCommandOptionBuilder(name: String, val min: Int, val max: Int, suggests: SuggestsBlock) : CommandOptionBuilder<Int>(name, suggests) {
+    override fun build() = IntegerMinMaxCommandOption(name, min, max, suggests)
+}
+class OptionalIntegerCommandOptionBuilder(name: String, suggests: SuggestsBlock) : CommandOptionBuilder<Int?>(name, suggests) {
+    override fun build() = OptionalIntegerCommandOption(name, suggests)
+}
+class OptionalIntegerMinCommandOptionBuilder(name: String, val min: Int, suggests: SuggestsBlock) : CommandOptionBuilder<Int?>(name, suggests) {
+    override fun build() = OptionalIntegerMinCommandOption(name, min, suggests)
+}
+class OptionalIntegerMinMaxCommandOptionBuilder(name: String, val min: Int, val max: Int, suggests: SuggestsBlock) : CommandOptionBuilder<Int?>(name, suggests) {
+    override fun build() = OptionalIntegerMinMaxCommandOption(name, min, max, suggests)
+}
 class DoubleCommandOptionBuilder(name: String, suggests: SuggestsBlock) : CommandOptionBuilder<Double>(name, suggests) {
     override fun build() = DoubleCommandOption(name, suggests)
 }

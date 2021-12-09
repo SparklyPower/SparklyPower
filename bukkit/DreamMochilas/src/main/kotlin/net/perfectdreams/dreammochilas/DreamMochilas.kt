@@ -6,6 +6,8 @@ import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreammochilas.commands.*
+import net.perfectdreams.dreammochilas.commands.declarations.MochilaCommand
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.listeners.InventoryListener
 import net.perfectdreams.dreammochilas.tables.Mochilas
@@ -66,82 +68,12 @@ class DreamMochilas : KotlinPlugin(), Listener {
 		FunnyIds.adjectives.addAll(config.getStringList("Adjectives"))
 
 		registerCommand(
-			object: SparklyCommand(arrayOf("mochila"), "sparklymochilas.give") {
-				@Subcommand(["get"])
-				fun mochila(sender: Player, damageValue: String = "1") {
-					val item = createMochila(damageValue.toInt())
-
-					sender.inventory.addItem(item)
-
-					sender.sendMessage("Prontinho patrão, usando meta value $damageValue")
-				}
-
-				@Subcommand(["player"])
-				fun getPlayerMochilas(sender: Player, playerName: String, skip: String? = null) {
-					scheduler().schedule(INSTANCE) {
-						switchContext(SynchronizationContext.ASYNC)
-						val uniqueId = DreamUtils.retrieveUserUniqueId(playerName)
-						switchContext(SynchronizationContext.SYNC)
-
-						sender.sendMessage("§aCriando inventário com mochilas de $uniqueId")
-
-						val mochilas = transaction(Databases.databaseNetwork) {
-							Mochila.find {
-								Mochilas.owner eq uniqueId
-							}.toMutableList()
-						}
-
-						val inventory = Bukkit.createInventory(null, 54)
-						mochilas.drop(skip?.toIntOrNull() ?: 0).forEach {
-							inventory.addItem(
-								it.createItem()
-							)
-						}
-
-						sender.openInventory(inventory)
-
-						sender.sendMessage("§7É possível pular entradas usando §6/mochila player $playerName QuantidadeDeMochilasParaPular")
-					}
-				}
-
-				@Subcommand(["fake_interact"])
-				fun fakeInteract(sender: Player, delay: String) {
-					sender.sendMessage("Starting Fake Interact...")
-
-					schedule {
-						waitFor(delay.toInt() * 20L)
-
-						// open backpack
-						val ev = PlayerInteractEvent(
-							sender,
-							Action.RIGHT_CLICK_BLOCK,
-							sender.inventory.itemInMainHand,
-							sender.location.block.getRelative(BlockFace.DOWN),
-							BlockFace.NORTH
-						)
-
-						Bukkit.getPluginManager().callEvent(ev)
-
-						// trigger sell event
-						val ev2 = PlayerInteractEvent(
-							sender,
-							Action.LEFT_CLICK_BLOCK,
-							sender.inventory.itemInMainHand,
-							sender.getTargetBlock(6),
-							BlockFace.NORTH
-						)
-
-						Bukkit.getPluginManager().callEvent(ev)
-						Bukkit.getPluginManager().callEvent(ev2)
-
-						sender.sendMessage("Interacted? " + ev.useInteractedBlock())
-						sender.sendMessage("Item In Hand? " + ev.useItemInHand())
-
-						sender.sendMessage("Interacted? " + ev2.useInteractedBlock())
-						sender.sendMessage("Item In Hand? " + ev2.useItemInHand())
-					}
-				}
-			}
+			MochilaCommand,
+			GetMochilaExecutor(),
+			GetPlayerMochilasExecutor(),
+			MochilasMemoryExecutor(this),
+			FakeInteractAndOpenExecutor(this),
+			FakeInteractAutoClickExecutor(this)
 		)
 	}
 

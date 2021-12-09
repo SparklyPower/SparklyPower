@@ -20,6 +20,22 @@ object MochilaUtils {
     val mochilaLoadSaveMutex = Mutex()
     val mochilaCreationMutex = Mutex()
 
+    suspend fun interactWithMochila(itemStack: ItemStack, mochilaId: Long, triggerType: String?, doesntExistBlock: () -> (Unit), block: suspend (Mochila) -> (Unit)) {
+        val mochila = retrieveMochila(mochilaId, triggerType)
+        if (mochila == null) {
+            doesntExistBlock.invoke()
+            return
+        }
+
+        mochila.lock()
+        try {
+            block.invoke(mochila)
+        } finally {
+            mochila.unlock()
+            saveMochila(itemStack, mochila, triggerType)
+        }
+    }
+
     /**
      * Retrieves the mochila from the database or, if it is loaded in memory, gets the already loaded mochila
      *
@@ -139,7 +155,7 @@ object MochilaUtils {
 
                 // Remove from memory
                 plugin.logger.info { "Removing backpack ${mochila.id.value} ($mochila) from memory, triggered by $triggerType" }
-                loadedMochilas.remove(mochila.id.value)
+                removeCachedMochilaWithinLock(mochila, triggerType)
             }
         } else {
             plugin.logger.info { "Not going to save backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
@@ -147,10 +163,19 @@ object MochilaUtils {
     }
 
     suspend fun removeCachedMochila(mochila: Mochila, triggerType: String? = null) {
-        plugin.logger.info { "Removing backpack ${mochila.id.value} ($mochila) from cache (no save), triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}" }
-
         mochilaLoadSaveMutex.withLock {
+            removeCachedMochilaWithinLock(mochila, "$triggerType (no db save)")
+        }
+    }
+
+    private suspend fun removeCachedMochilaWithinLock(mochila: Mochila, triggerType: String? = null) {
+        val count = mochila.getLockCount()
+
+        if (count == 0) {
+            plugin.logger.info { "Removing backpack ${mochila.id.value} ($mochila) from memory, triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}" }
             loadedMochilas.remove(mochila.id.value)
+        } else {
+            plugin.logger.info { "Not removing backpack ${mochila.id.value} ($mochila) from memory because there is still $count locks on it! Triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}" }
         }
     }
 

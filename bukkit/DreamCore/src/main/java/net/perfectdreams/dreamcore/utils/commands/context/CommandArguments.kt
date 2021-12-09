@@ -38,6 +38,14 @@ class CommandArguments(val context: CommandContext) {
             return entitySelector.findSinglePlayer(context.nmsContext.source).bukkitEntity as T // T should always be a (Craft)Player
         }
 
-        return context.nmsContext.getArgument(argument.name, T::class.java)
+        return try {
+            context.nmsContext.getArgument(argument.name, T::class.java)
+        } catch (e: IllegalArgumentException) {
+            // Sadly there isn't any other way to check if an argument is present or not
+            if (argument.optional)
+                return null as T // If it is optional, then it *should* accept this, right?
+            else
+                throw e
+        }
     }
 }

@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.utils.fromBase64Inventory
 import net.perfectdreams.dreamcore.utils.lore
 import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreammochilas.tables.Mochilas
+import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -17,6 +18,8 @@ import org.bukkit.inventory.meta.Damageable
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.logging.Level
 
 class Mochila(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<Mochila>(Mochilas)
@@ -31,6 +34,8 @@ class Mochila(id: EntityID<Long>) : LongEntity(id) {
     // Public to allow other plugins locking
     val mochilaInventoryCreationLock = Mutex()
     val mochilaInventoryManipulationLock = Mutex()
+    private val locksMutex = Mutex()
+    private var locks = 0
 
     /* fun createMochilaInventory(): Inventory {
         val blahInventory = content.fromBase64Inventory() // Vamos pegar o inventário original
@@ -42,6 +47,22 @@ class Mochila(id: EntityID<Long>) : LongEntity(id) {
 
         return inventory
     } */
+
+    suspend fun getLockCount() = locksMutex.withLock { locks }
+    suspend fun lock() = locksMutex.withLock { locks++ }
+    suspend fun unlock() {
+        locksMutex.withLock {
+            val lockCount = locks--
+            if (0 > lockCount) {
+                try {
+                    error("Mochila ${id.value} has less than 0 locks ($lockCount locks)! Bug? We are going to revert it to 0 just to avoid issues but this is a bug that should be fixed!")
+                } catch (e: Exception) {
+                    MochilaUtils.plugin.logger.log(Level.WARNING, "Mochila ${id.value} unlock issues that should never happen", e)
+                    locks = 0
+                }
+            }
+        }
+    }
 
     suspend fun <T> lockForInventoryManipulation(callback: suspend (Inventory) -> (T)): T {
         return mochilaInventoryManipulationLock.withLock {

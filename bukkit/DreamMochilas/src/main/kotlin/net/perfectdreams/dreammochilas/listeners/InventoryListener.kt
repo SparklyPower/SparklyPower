@@ -104,83 +104,77 @@ class InventoryListener(val m: DreamMochilas) : Listener {
             m.launchAsyncThread {
                 m.logger.info { "Player ${e.player.name} is doing transaction, is mutex locked? Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
 
-                val triggerType = "${e.player.name} buying/selling stuff"
-                val mochila = MochilaUtils.retrieveMochila(mochilaId, triggerType)
+                // We are going to replace the cooldown with OUR OWN cooldown, haha!!
+                // The reason we check it here instead of checking after the mochila is loaded is to avoid loading mochilas from the database/cache every time
+                val lastTimeUserInteractedWithThis = mochilasCooldown[e.player] ?: 0
+                val diff = System.currentTimeMillis() - lastTimeUserInteractedWithThis
 
-                if (mochila == null) {
-                    e.player.sendMessage("§cEssa mochila não existe!")
-                    // Uuuuuh, what are you doing then?
+                if (SHOP_INTERACTION_INTERVAL > diff && !e.player.hasPermission("dreammochilas.bypasscooldown")) {
+                    m.logger.info { "Player ${e.player.name} tried selling but it was during a cooldown! Backpack ID: $mochilaId" }
                     return@launchAsyncThread
                 }
 
-                val triggerMochilaSave = mochila.lockForInventoryManipulation {
-                    onMainThread {
-                        val sign = clickedBlock.state as Sign
-                        try {
-                            m.logger.info { "Preparing Pre Transaction Event for ${e.player.name}... Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
+                mochilasCooldown[e.player] = System.currentTimeMillis()
 
-                            val r = preparePreTransactionEventMethod.invoke(null as Any?, sign, e.player, e.action) as PreTransactionEvent
+                val triggerType = "${e.player.name} buying/selling stuff"
+                MochilaUtils.interactWithMochila(
+                    item,
+                    mochilaId,
+                    triggerType,
+                    { e.player.sendMessage("§cEssa mochila não existe!") }
+                ) {
+                    it.lockForInventoryManipulation {
+                        onMainThread {
+                            val sign = clickedBlock.state as Sign
+                            try {
+                                m.logger.info { "Preparing Pre Transaction Event for ${e.player.name}... Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
 
-                            r.clientInventory = mochila.getOrCreateMochilaInventory()
-                            // We need to remove from the spam click protector because, if we don't, it will just ignore the event
-                            chestShopSpamClickProtectorMap.remove(e.player)
+                                val r = preparePreTransactionEventMethod.invoke(null as Any?, sign, e.player, e.action) as PreTransactionEvent
 
-                            Bukkit.getPluginManager().callEvent(r)
+                                r.clientInventory = it
 
-                            // We are going to replace the cooldown with OUR OWN cooldown, haha!!
-                            val lastTimeUserInteractedWithThis = mochilasCooldown[e.player] ?: 0
-                            val diff = System.currentTimeMillis() - lastTimeUserInteractedWithThis
+                                // We need to remove from the spam click protector because, if we don't, it will just ignore the event
+                                chestShopSpamClickProtectorMap.remove(e.player)
 
-                            if (SHOP_INTERACTION_INTERVAL > diff && !e.player.hasPermission("dreammochilas.bypasscooldown")) {
-                                m.logger.info { "Player ${e.player.name} tried selling but it was during a cooldown! Backpack ID: $mochilaId" }
-                                r.setCancelled(PreTransactionEvent.TransactionOutcome.SPAM_CLICKING_PROTECTION)
+                                Bukkit.getPluginManager().callEvent(r)
+
+                                if (r.isCancelled) {
+                                    m.logger.info { "Pre Transaction Event for ${e.player.name} was cancelled! ${r.transactionType} ${r.transactionOutcome}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
+                                    return@onMainThread false
+                                }
+
+                                val tEvent = TransactionEvent(r, sign)
+
+                                Bukkit.getPluginManager().callEvent(tEvent)
+
+                                if (tEvent.isCancelled) {
+                                    m.logger.info { "Transaction Event for ${e.player.name} was cancelled! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
+                                    return@onMainThread false
+                                }
+
+                                m.logger.info { "Transaction Event for ${e.player.name} was successfully completed! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
+
+                                return@onMainThread true
+                            } catch (var8: SecurityException) {
+                                var8.printStackTrace()
+                                return@onMainThread false
+                            } catch (var8: IllegalAccessException) {
+                                var8.printStackTrace()
+                                return@onMainThread false
+                            } catch (var8: java.lang.IllegalArgumentException) {
+                                var8.printStackTrace()
+                                return@onMainThread false
+                            } catch (var8: InvocationTargetException) {
+                                var8.printStackTrace()
+                                return@onMainThread false
+                            } catch (var8: NoSuchMethodException) {
+                                var8.printStackTrace()
                                 return@onMainThread false
                             }
-
-                            if (r.isCancelled) {
-                                m.logger.info { "Pre Transaction Event for ${e.player.name} was cancelled! ${r.transactionType} ${r.transactionOutcome}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
-                                return@onMainThread false
-                            }
-
-                            val tEvent = TransactionEvent(r, sign)
-
-                            Bukkit.getPluginManager().callEvent(tEvent)
-
-                            if (tEvent.isCancelled) {
-                                m.logger.info { "Transaction Event for ${e.player.name} was cancelled! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
-                                return@onMainThread false
-                            }
-
-                            m.logger.info { "Transaction Event for ${e.player.name} was successfully completed! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
-
-                            mochilasCooldown[e.player] = System.currentTimeMillis()
-
-                            return@onMainThread true
-                        } catch (var8: SecurityException) {
-                            var8.printStackTrace()
-                            return@onMainThread false
-                        } catch (var8: IllegalAccessException) {
-                            var8.printStackTrace()
-                            return@onMainThread false
-                        } catch (var8: java.lang.IllegalArgumentException) {
-                            var8.printStackTrace()
-                            return@onMainThread false
-                        } catch (var8: InvocationTargetException) {
-                            var8.printStackTrace()
-                            return@onMainThread false
-                        } catch (var8: NoSuchMethodException) {
-                            var8.printStackTrace()
-                            return@onMainThread false
                         }
                     }
-                }
 
-                m.logger.info { "Player ${e.player.name} transaction finished! Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId; Result: $triggerMochilaSave" }
-
-                if (triggerMochilaSave) {
-                    MochilaUtils.saveMochila(item, mochila, triggerType)
-                } else {
-                    MochilaUtils.removeCachedMochila(mochila, triggerType)
+                    m.logger.info { "Player ${e.player.name} transaction finished! Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId;" }
                 }
             }
         }
@@ -244,6 +238,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                         // Handle just like a normal mochila would
                         // Should NEVER be null
                         val loadedFromDatabaseMochila = MochilaUtils.retrieveMochila(mochila.id.value, "${e.player.name} mochila creation")!!
+                        loadedFromDatabaseMochila.lock()
 
                         val inventory = loadedFromDatabaseMochila.getOrCreateMochilaInventory()
                         onMainThread {
@@ -280,6 +275,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                     m.logger.info { "Player ${e.player.name} opened a backpack. Backpack ID: ${mochila.id.value}" }
 
+                    mochila.lock()
                     val inventory = mochila.getOrCreateMochilaInventory()
 
                     e.player.openInventory(inventory)
@@ -316,9 +312,11 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                 val isMochila = item.getStoredMetadata("isMochila")?.toBoolean()
 
+                holder.mochila.unlock()
                 MochilaUtils.saveMochila(
-                    if (isMochila == true) item else null // Maybe the user changed the held item?
-                    , holder.mochila, "${e.player.name} mochila inventory close")
+                    if (isMochila == true) item else null, // Maybe the user changed the held item?
+                    holder.mochila, "${e.player.name} mochila inventory close"
+                )
             }
         }
     }
