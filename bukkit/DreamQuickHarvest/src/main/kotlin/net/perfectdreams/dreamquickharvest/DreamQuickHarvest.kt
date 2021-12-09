@@ -102,7 +102,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 				if (mochila != null) {
 					onAsyncThread {
-						// Let's unlock the inventory lock!
+						// Let's unlock both the global mochila lock and inventory lock!
+						mochila.unlock()
 						mochila.mochilaInventoryManipulationLock.unlock()
 						MochilaUtils.saveMochila(mochilaItem, mochila, "${e.player.name} harvesting")
 					}
@@ -121,7 +122,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 				if (mochila != null) {
 					onAsyncThread {
-						// Let's unlock the inventory lock!
+						// Let's unlock both the global mochila lock and inventory lock!
+						mochila.unlock()
 						mochila.mochilaInventoryManipulationLock.unlock()
 						MochilaUtils.saveMochila(mochilaItem, mochila, "${e.player.name} harvesting")
 					}
