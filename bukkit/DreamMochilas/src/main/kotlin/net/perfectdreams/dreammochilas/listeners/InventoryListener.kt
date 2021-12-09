@@ -131,7 +131,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                             val lastTimeUserInteractedWithThis = mochilasCooldown[e.player] ?: 0
                             val diff = System.currentTimeMillis() - lastTimeUserInteractedWithThis
 
-                            if (diff > SHOP_INTERACTION_INTERVAL && !e.player.hasPermission("dreammochilas.bypasscooldown")) {
+                            if (SHOP_INTERACTION_INTERVAL > diff && !e.player.hasPermission("dreammochilas.bypasscooldown")) {
                                 m.logger.info { "Player ${e.player.name} tried selling but it was during a cooldown! Backpack ID: $mochilaId" }
                                 r.setCancelled(PreTransactionEvent.TransactionOutcome.SPAM_CLICKING_PROTECTION)
                                 return@onMainThread false
