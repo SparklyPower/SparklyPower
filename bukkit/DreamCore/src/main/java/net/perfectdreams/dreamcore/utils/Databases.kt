@@ -3,6 +3,8 @@ package net.perfectdreams.dreamcore.utils
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.util.IsolationLevel
+import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.tables.Users.username
 import org.jetbrains.exposed.sql.DEFAULT_REPETITION_ATTEMPTS
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
@@ -12,7 +14,14 @@ object Databases {
 	private val ISOLATION_LEVEL = IsolationLevel.TRANSACTION_REPEATABLE_READ // We use repeatable read to avoid dirty and non-repeatable reads! Very useful and safe!!
 
 	val hikariConfig by lazy {
+		val databaseConfig = DreamCore.dreamConfig.networkDatabase
 		val hikariConfig = HikariConfig()
+
+		hikariConfig.jdbcUrl = "jdbc:postgresql://${databaseConfig?.ip}:${databaseConfig?.port}/${databaseConfig?.databaseName}"
+
+		hikariConfig.username = databaseConfig?.user
+		if (databaseConfig?.password != null)
+			hikariConfig.password = databaseConfig.password
 
 		hikariConfig.driverClassName = DRIVER_CLASS_NAME
 
