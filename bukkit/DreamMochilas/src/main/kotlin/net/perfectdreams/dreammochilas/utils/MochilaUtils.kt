@@ -82,7 +82,13 @@ object MochilaUtils {
     suspend fun saveMochila(mochilaItem: ItemStack?, mochila: Mochila, triggerType: String? = null) {
         DreamUtils.assertAsyncThread(true)
 
-        val viewerCount = mochila.getOrCreateMochilaInventory().viewers.size
+        val cachedInventory = mochila.cachedInventory
+        if (cachedInventory == null) {
+            plugin.logger.info { "Not going to save backpack ${mochila.id.value} ($mochila) on database because there isn't a cached inventory present, so its content weren't modified! Triggered by $triggerType" }
+            return
+        }
+
+        val viewerCount = cachedInventory.viewers.size
         val isManipulationLocked = mochila.mochilaInventoryManipulationLock.isLocked
 
         plugin.logger.info { "Saving backpack ${mochila.id.value} ($mochila), triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}; Viewer Count: $viewerCount; Is Manipulation Locked? $isManipulationLocked" }
