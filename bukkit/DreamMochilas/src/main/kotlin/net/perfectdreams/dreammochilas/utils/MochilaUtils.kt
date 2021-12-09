@@ -108,23 +108,17 @@ object MochilaUtils {
             mochilaLoadSaveMutex.withLock {
                 // Save ONLY if there's less (or equal to) one viewer
                 // The reason there's a 1 >= check is because on InventoryCloseEvent the inventory is not closed yet
-                val inventory = mochila.cachedInventory
 
-                // If the inventory is null, then it means that the inventory wasn't manipulated, so we don't need to save it
-                if (inventory != null) {
-                    plugin.logger.info { "Saving backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
+                plugin.logger.info { "Saving backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
 
-                    transaction(Databases.databaseNetwork) {
-                        mochila.content = inventory.toBase64(1)
-                    }
-
-                    if (mochilaItem != null)
-                        updateMochilaItemLore(inventory, mochilaItem)
-
-                    plugin.logger.info { "Saved backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
-                } else {
-                    plugin.logger.info { "Decided not to save backpack ${mochila.id.value} ($mochila) because the inventory is null! Triggered by $triggerType" }
+                transaction(Databases.databaseNetwork) {
+                    mochila.content = cachedInventory.toBase64(1)
                 }
+
+                if (mochilaItem != null)
+                    updateMochilaItemLore(cachedInventory, mochilaItem)
+
+                plugin.logger.info { "Saved backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
 
                 // Remove from memory
                 plugin.logger.info { "Removing backpack ${mochila.id.value} ($mochila) from memory, triggered by $triggerType" }
