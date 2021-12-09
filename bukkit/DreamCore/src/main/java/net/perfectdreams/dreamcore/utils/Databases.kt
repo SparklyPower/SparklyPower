@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.tables.Users.username
 import org.jetbrains.exposed.sql.DEFAULT_REPETITION_ATTEMPTS
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
+import java.sql.Connection
 
 object Databases {
 	private val DRIVER_CLASS_NAME = "org.postgresql.Driver"
@@ -32,17 +33,12 @@ object Databases {
 
 		// Useful to check if a connection is not returning to the pool, will be shown in the log as "Apparent connection leak detected"
 		hikariConfig.leakDetectionThreshold = 30L * 1000
-		hikariConfig.transactionIsolation = IsolationLevel.TRANSACTION_REPEATABLE_READ.name // We use repeatable read to avoid dirty and non-repeatable reads! Very useful and safe!!
+		hikariConfig.transactionIsolation = ISOLATION_LEVEL.name // We use repeatable read to avoid dirty and non-repeatable reads! Very useful and safe!!
 
 		hikariConfig
 	}
 
 	val dataSource by lazy { HikariDataSource(hikariConfig) }
-	@Deprecated("Please use hikariConfig")
-	val hikariConfigServer = hikariConfig
-
-	@Deprecated("Please use dataSource")
-	val dataSourceServer = dataSource
 
 	val databaseNetwork by lazy {
 		Database.connect(
