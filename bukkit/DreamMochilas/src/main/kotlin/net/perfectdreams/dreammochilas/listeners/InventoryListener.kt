@@ -129,7 +129,6 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                             if (r.isCancelled) {
                                 m.logger.info { "Pre Transaction Event for ${e.player.name} was cancelled! ${r.transactionType} ${r.transactionOutcome}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
-                                MochilaUtils.removeCachedMochila(mochila)
                                 return@onMainThread false
                             }
 
@@ -139,7 +138,6 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                             if (tEvent.isCancelled) {
                                 m.logger.info { "Transaction Event for ${e.player.name} was cancelled! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
-                                MochilaUtils.removeCachedMochila(mochila)
                                 return@onMainThread false
                             }
 
