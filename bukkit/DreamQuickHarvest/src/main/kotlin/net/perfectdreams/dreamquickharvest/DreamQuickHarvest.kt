@@ -68,7 +68,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			launchMainThread {
-				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e)
+				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e, "${e.player.name} harvesting crops")
 
 				doQuickHarvestOnCrop(
 					e.player,
@@ -84,7 +84,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						// The reason we use the inventory target holder to release, is because we don't really care about *what* access we are closing actually
 						// If we were closing by using "mochila.release()", another part of the code may close the already closed MochilaAccessHolder, which causes issues!
 						(inventoryTarget.holder as MochilaInventoryHolder).accessHolders.poll()
-							?.release("${e.player.name} harvesting")
+							?.release("${e.player.name} harvesting crops")
 					}
 
 					if (mochilaItem != null)
@@ -101,7 +101,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			launchMainThread {
-				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e)
+				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e, "${e.player.name} harvesting cocoa")
 
 				val ttl = System.nanoTime()
 				doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget)
@@ -113,7 +113,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						// The reason we use the inventory target holder to release, is because we don't really care about *what* access we are closing actually
 						// If we were closing by using "mochila.release()", another part of the code may close the already closed MochilaAccessHolder, which causes issues!
 						(inventoryTarget.holder as MochilaInventoryHolder).accessHolders.poll()
-							?.release("${e.player.name} harvesting")
+							?.release("${e.player.name} harvesting cocoa")
 					}
 
 					if (mochilaItem != null)
@@ -127,7 +127,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			launchMainThread {
-				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e)
+				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e, "${e.player.name} harvesting sugar cane")
 
 				doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget)
 
@@ -137,7 +137,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						// The reason we use the inventory target holder to release, is because we don't really care about *what* access we are closing actually
 						// If we were closing by using "mochila.release()", another part of the code may close the already closed MochilaAccessHolder, which causes issues!
 						(inventoryTarget.holder as MochilaInventoryHolder).accessHolders.poll()
-							?.release("${e.player.name} harvesting")
+							?.release("${e.player.name} harvesting sugar cane")
 					}
 
 					if (mochilaItem != null)
@@ -148,7 +148,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		}
 	}
 
-	suspend fun getInventoryTarget(e: BlockBreakEvent): InventoryTargetResult {
+	suspend fun getInventoryTarget(e: BlockBreakEvent, triggerType: String): InventoryTargetResult {
 		var inventoryTarget: Inventory = e.player.inventory
 		var mochila: MochilaAccessHolder? = null
 		val item = e.player.inventory.itemInMainHand
@@ -159,7 +159,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 			if (isMochilaItem) {
 				mochila = onAsyncThread {
-					MochilaUtils.retrieveMochilaAndHold(mochilaId, "${e.player.name} harvesting")
+					MochilaUtils.retrieveMochilaAndHold(mochilaId, triggerType)
 				}
 
 				if (mochila != null) {
