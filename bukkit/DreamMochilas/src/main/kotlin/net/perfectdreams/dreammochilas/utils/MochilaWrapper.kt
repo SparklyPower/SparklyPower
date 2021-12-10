@@ -77,18 +77,17 @@ class MochilaWrapper(
         val cachedInventory = cachedInventory
         if (cachedInventory == null) {
             plugin.logger.info { "Not going to save backpack ${mochila.id.value} ($this) on database because there isn't a cached inventory present, so its content weren't modified! Triggered by $triggerType" }
-            return
+        } else {
+            plugin.logger.info { "Saving backpack ${mochila.id.value} ($this) on database! Triggered by $triggerType" }
+
+            transaction(Databases.databaseNetwork) {
+                mochila.content = cachedInventory.toBase64(1)
+            }
+
+            plugin.logger.info { "Saved backpack ${mochila.id.value} ($this) on database! Triggered by $triggerType" }
         }
 
-        plugin.logger.info { "Saving backpack ${mochila.id.value} ($this) on database! Triggered by $triggerType" }
-
-        transaction(Databases.databaseNetwork) {
-            mochila.content = cachedInventory.toBase64(1)
-        }
-
-        plugin.logger.info { "Saved backpack ${mochila.id.value} ($this) on database! Triggered by $triggerType" }
-
-        // Remove from memory after successful database save
+        // Remove from memory after successful database save/no save
         // This method should ONLY be ran after all holds are released, so this shouldn't cause any issues... well, that's what I hope :S
         plugin.logger.info { "Removing backpack ${mochila.id.value} ($this) from memory, triggered by $triggerType" }
         MochilaUtils.loadedMochilas.remove(mochila.id.value)
