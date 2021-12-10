@@ -121,12 +121,6 @@ class ChatListener(val m: DreamChat) : Listener {
 
 	@EventHandler
 	fun onJoin(e: PlayerCommandPreprocessEvent) {
-		// Log4j exploit workaround, remove this when this isn't an issue anymore
-		if (e.message.contains("\${")) {
-			e.isCancelled = true
-			return
-		}
-
 		if (!m.eventoChat.running)
 			return
 
@@ -178,11 +172,6 @@ class ChatListener(val m: DreamChat) : Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onChat(e: AsyncPlayerChatEvent) {
 		e.isCancelled = true
-
-		// Log4j exploit workaround, remove this when this isn't an issue anymore
-		if (e.message.contains("\${")) {
-			return
-		}
 
 		val lockedTellPlayer = m.lockedTells[e.player]
 		if (lockedTellPlayer != null) {
