@@ -11,7 +11,9 @@ import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreammochilas.commands.*
 import net.perfectdreams.dreammochilas.commands.declarations.MochilaCommand
 import net.perfectdreams.dreammochilas.dao.Mochila
+import net.perfectdreams.dreammochilas.listeners.ChestShopListener
 import net.perfectdreams.dreammochilas.listeners.InventoryListener
+import net.perfectdreams.dreammochilas.listeners.UpgradeSizeSignListener
 import net.perfectdreams.dreammochilas.tables.Mochilas
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import org.bukkit.Bukkit
@@ -63,6 +65,8 @@ class DreamMochilas : KotlinPlugin(), Listener {
 		INSTANCE = this
 
 		registerEvents(InventoryListener(this))
+		registerEvents(ChestShopListener())
+		registerEvents(UpgradeSizeSignListener(this))
 
 		val config = YamlConfiguration.loadConfiguration(File(dataFolder, "funny.yml"))
 

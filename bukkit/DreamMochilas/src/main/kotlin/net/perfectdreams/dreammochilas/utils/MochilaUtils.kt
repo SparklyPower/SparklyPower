@@ -61,6 +61,7 @@ object MochilaUtils {
                 //
                 // We also need to do some precautions, to avoid an instance where a thread may release a mochila, but at the same time another thread may ask for a hold lock
                 // This would cause the mochila to be removed from the cache but an instance of it would be kept in memory
+                // This is remedied by using the local mochila lock: If it is in a save process, the lock would be held and, when released, the holds will be 0
                 memoryMochila.withLocalMochilaLock {
                     // THIS AIN'T THE PROPER WAY TO HANDLE THOSE HELD LOCKS BUT THERE ISN'T ANY OTHER WAY TO HANDLE THEM!!
                     if (memoryMochila.holds != 0) {
