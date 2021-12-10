@@ -179,6 +179,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 // Releasing locks...
                 (inventory.holder as MochilaInventoryHolder).accessHolders.poll()
                     ?.release(triggerType)
+                MochilaUtils.updateMochilaItemLore(inventory, item)
             }
         }
     }
