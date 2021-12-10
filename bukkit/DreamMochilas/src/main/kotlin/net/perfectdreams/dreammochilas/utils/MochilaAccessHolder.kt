@@ -17,7 +17,7 @@ class MochilaAccessHolder(
 
     suspend fun release(triggerType: String? = null) {
         if (!isHolding)
-            error("Tried to release a mochila hold status that is not being held anymore! Triggered by $triggerType")
+            error("Tried to release a mochila ${mochila.id.value} (${wrapper}) hold status that is not being held anymore! Triggered by $triggerType")
         wrapper.release(triggerType)
         isHolding = false
     }

@@ -81,8 +81,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				if (mochila != null) {
 					onAsyncThread {
 						// Let's unlock the mochila lock and the inventory lock!
+						// The reason we use the inventory target holder to release, is because we don't really care about *what* access we are closing actually
+						// If we were closing by using "mochila.release()", another part of the code may close the already closed MochilaAccessHolder, which causes issues!
 						(inventoryTarget.holder as MochilaInventoryHolder).accessHolders.poll()
-						mochila.release("${e.player.name} harvesting")
+							?.release("${e.player.name} harvesting")
 					}
 
 					if (mochilaItem != null)
@@ -108,8 +110,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				if (mochila != null) {
 					onAsyncThread {
 						// Let's unlock the mochila lock and the inventory lock!
+						// The reason we use the inventory target holder to release, is because we don't really care about *what* access we are closing actually
+						// If we were closing by using "mochila.release()", another part of the code may close the already closed MochilaAccessHolder, which causes issues!
 						(inventoryTarget.holder as MochilaInventoryHolder).accessHolders.poll()
-						mochila.release("${e.player.name} harvesting")
+							?.release("${e.player.name} harvesting")
 					}
 
 					if (mochilaItem != null)
@@ -130,8 +134,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				if (mochila != null) {
 					onAsyncThread {
 						// Let's unlock the mochila lock and the inventory lock!
+						// The reason we use the inventory target holder to release, is because we don't really care about *what* access we are closing actually
+						// If we were closing by using "mochila.release()", another part of the code may close the already closed MochilaAccessHolder, which causes issues!
 						(inventoryTarget.holder as MochilaInventoryHolder).accessHolders.poll()
-						mochila.release("${e.player.name} harvesting")
+							?.release("${e.player.name} harvesting")
 					}
 
 					if (mochilaItem != null)

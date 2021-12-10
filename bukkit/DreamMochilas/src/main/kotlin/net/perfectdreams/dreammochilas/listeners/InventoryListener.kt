@@ -178,7 +178,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 m.logger.info { "Player ${e.player.name} transaction finished! Holding mochila locks... Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId; Status: $status" }
                 // Releasing locks...
                 (inventory.holder as MochilaInventoryHolder).accessHolders.poll()
-                mochilaAccessHolder.release(triggerType)
+                    ?.release(triggerType)
             }
         }
     }
@@ -274,7 +274,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                     if (e.player.openInventory.topInventory.type != InventoryType.CRAFTING) {
                         m.logger.warning { "Player ${e.player.name} tried opening a backpack when they already had a inventory open! ${e.player.openInventory.topInventory.type} Backpack ID: ${mochilaAccessHolder.mochila.id.value}" }
                         onAsyncThread {
-                            mochilaAccessHolder.release()
+                            mochilaAccessHolder.release("${e.player.name} mochila opening but already had an inventory open")
                         }
                         return@onMainThread
                     }
