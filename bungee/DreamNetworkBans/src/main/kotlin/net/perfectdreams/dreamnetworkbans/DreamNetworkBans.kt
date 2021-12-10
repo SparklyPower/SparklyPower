@@ -8,6 +8,7 @@ import net.md_5.bungee.config.YamlConfiguration
 import net.perfectdreams.dreamcorebungee.KotlinPlugin
 import net.perfectdreams.dreamcorebungee.utils.Databases
 import net.perfectdreams.dreamnetworkbans.commands.*
+import net.perfectdreams.dreamnetworkbans.listeners.Log4jExploitFilterListener
 import net.perfectdreams.dreamnetworkbans.listeners.LoginListener
 import net.perfectdreams.dreamnetworkbans.listeners.ServerConnectListener
 import net.perfectdreams.dreamnetworkbans.listeners.SocketListener
@@ -88,6 +89,7 @@ class DreamNetworkBans : KotlinPlugin() {
 		this.proxy.pluginManager.registerListener(this, LoginListener(this))
 		this.proxy.pluginManager.registerListener(this, ServerConnectListener(this))
 		this.proxy.pluginManager.registerListener(this, SocketListener(this))
+		this.proxy.pluginManager.registerListener(this, Log4jExploitFilterListener())
 
 		if (!youtubersFile.exists()) {
 			youtubersFile.createNewFile()
