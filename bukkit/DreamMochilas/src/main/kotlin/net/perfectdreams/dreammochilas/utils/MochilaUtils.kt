@@ -1,11 +1,12 @@
 package net.perfectdreams.dreammochilas.utils
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
-import net.perfectdreams.dreamcore.utils.toBase64
+import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.tables.Mochilas
 import org.bukkit.Bukkit
@@ -14,47 +15,66 @@ import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Color
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 
 object MochilaUtils {
-    val loadedMochilas = ConcurrentHashMap<Long, Mochila>()
-    val plugin = Bukkit.getPluginManager().getPlugin("DreamMochilas")!!
-    val mochilaLoadSaveMutex = Mutex()
+    val loadedMochilas = ConcurrentHashMap<Long, MochilaWrapper>()
+    private val plugin = Bukkit.getPluginManager().getPlugin("DreamMochilas")!!
+    private val mochilaDataLoadMutexes = Caffeine.newBuilder()
+        .expireAfterAccess(1, TimeUnit.MINUTES)
+        .build<Long, Mutex>()
+        .asMap()
+
     val mochilaCreationMutex = Mutex()
 
-    suspend fun interactWithMochila(itemStack: ItemStack, mochilaId: Long, triggerType: String?, doesntExistBlock: () -> (Unit), block: suspend (Mochila) -> (Unit)) {
-        val mochila = retrieveMochila(mochilaId, triggerType)
-        if (mochila == null) {
-            doesntExistBlock.invoke()
-            return
-        }
-
-        mochila.lock()
-        try {
-            block.invoke(mochila)
-        } finally {
-            mochila.unlock()
-            saveMochila(itemStack, mochila, triggerType)
-        }
-    }
+    private fun getMutexForMochila(mochilaId: Long) = mochilaDataLoadMutexes.getOrPut(mochilaId) { Mutex() }
 
     /**
      * Retrieves the mochila from the database or, if it is loaded in memory, gets the already loaded mochila
      *
+     * This will also increase the held lock count on the [MochilaWrapper] instance by 1, please use [MochilaWrapper.release] after you don't need the mochila anymore!
+     *
      * @param mochilaId the mochila ID
      * @return the mochila object
      */
-    suspend fun retrieveMochila(mochilaId: Long, triggerType: String? = null): Mochila? {
+    suspend fun retrieveMochilaAndHold(mochilaId: Long, triggerType: String? = null): MochilaAccessHolder? {
         DreamUtils.assertAsyncThread(true)
 
-        plugin.logger.info { "Loading backpack $mochilaId, triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}" }
-
-        mochilaLoadSaveMutex.withLock {
+        val mutex = getMutexForMochila(mochilaId)
+        mutex.withLock {
             // Load from memory if it exists
             val memoryMochila = loadedMochilas[mochilaId]
 
             if (memoryMochila != null) {
-                plugin.logger.info { "Loaded backpack $mochilaId ($memoryMochila) from memory! Triggered by $triggerType" }
-                return memoryMochila
+                // Okay, so the memory mochila exists, we need to check something beforehand tho
+                //
+                // The mochila may be SAVING!! Do you know that!?!
+                //
+                // So we need to avoid using a mochila that doesn't have any held locks, because if it doesn't, MAYBE IT IS BEING USED FOR SAVING
+                // You may ask "what is the issue of using a mochila that doesn't have any held locks smh"... well...
+                // A RACE CONDITION WHERE PLUGINS ARE USING A "WAS-IN-MEMORY-BEFORE" MOCHILA, WHICH CAUSES DESYNC BETWEEN THE TRUTH X DATABASE
+                // And you know what that can cause...?
+                // A DUPE BUG!
+                //
+                // So what's the fix then?
+                // We will only return the mochila IF and only IF the held locks count is NOT zero
+                //
+                // We also need to do some precautions, to avoid an instance where a thread may release a mochila, but at the same time another thread may ask for a hold lock
+                // This would cause the mochila to be removed from the cache but an instance of it would be kept in memory
+                memoryMochila.withLocalMochilaLock {
+                    // THIS AIN'T THE PROPER WAY TO HANDLE THOSE HELD LOCKS BUT THERE ISN'T ANY OTHER WAY TO HANDLE THEM!!
+                    if (memoryMochila.holds != 0) {
+                        memoryMochila.holds++
+
+                        plugin.logger.info { "Loaded backpack $mochilaId ($memoryMochila) from memory! Now the current held lock count is ${memoryMochila.holds}! Triggered by $triggerType" }
+
+                        return MochilaAccessHolder(memoryMochila).also {
+                            it.isHolding = true
+                        }
+                    }
+                }
+
+                plugin.logger.info { "Tried loading backpack $mochilaId ($memoryMochila) from memory but its held locks count is zero! To avoid dupe issues, we will pull the data from the database... Triggered by $triggerType" }
             }
 
             val mochila = transaction(Databases.databaseNetwork) {
@@ -62,100 +82,22 @@ object MochilaUtils {
                     .firstOrNull()
             }
 
-            if (mochila != null) {
-                plugin.logger.info { "Loaded backpack $mochilaId ($mochila) from database! Triggered by $triggerType" }
-                loadedMochilas[mochilaId] = mochila
+            return if (mochila != null) {
+                val mochilaWrapper = MochilaWrapper(plugin as DreamMochilas, mochila)
+                plugin.logger.info { "Loaded backpack $mochilaId ($mochila/$mochilaWrapper) from database! Triggered by $triggerType" }
+                loadedMochilas[mochilaId] = mochilaWrapper
+                MochilaAccessHolder(mochilaWrapper).also { it.hold(triggerType) }
             } else {
                 plugin.logger.info { "Tried loading backpack $mochilaId ($mochila) from database, but it doesn't exist! Triggered by $triggerType" }
+                null
             }
-
-            return mochila
         }
     }
 
     /**
-     * Saves the mochila to the database, but ONLY if the mochila inventory doesn't have any viewers AND mochilaInventoryManipulationLock is not locked
-     *
-     * @param mochilaItem the mochila item, used for the slot size in the lore, if null, the lore won't be updated
-     * @param mochila     the mochila object
+     * Updates the [mochilaItem] metadata based on the [inventory]'s information
      */
-    suspend fun saveMochila(mochilaItem: ItemStack?, mochila: Mochila, triggerType: String? = null) {
-        DreamUtils.assertAsyncThread(true)
-
-        val cachedInventory = mochila.cachedInventory
-        if (cachedInventory == null) {
-            plugin.logger.info { "Not going to save backpack ${mochila.id.value} ($mochila) on database because there isn't a cached inventory present, so its content weren't modified! Triggered by $triggerType" }
-            return
-        }
-
-        val viewerCount = cachedInventory.viewers.size
-        val isManipulationLocked = mochila.mochilaInventoryManipulationLock.isLocked
-
-        plugin.logger.info { "Saving backpack ${mochila.id.value} ($mochila), triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}; Viewer Count: $viewerCount; Is Manipulation Locked? $isManipulationLocked" }
-
-        if (viewerCount > 1) {
-            plugin.logger.info { "Not going to save backpack ${mochila.id.value} ($mochila) on database because there's $viewerCount looking at it! Triggered by $triggerType" }
-            return
-        }
-
-        if (isManipulationLocked) {
-            plugin.logger.info { "Not going to save backpack ${mochila.id.value} ($mochila) on database because it is locked for manipulation! Triggered by $triggerType" }
-            return
-        }
-
-        // Unless if we are running this in the event itself (impossible because needs to be in a async task), this will be 0
-        if (0 == viewerCount && !isManipulationLocked) {
-            mochilaLoadSaveMutex.withLock {
-                // Save ONLY if there's less (or equal to) one viewer
-                // The reason there's a 1 >= check is because on InventoryCloseEvent the inventory is not closed yet
-
-                plugin.logger.info { "Saving backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
-
-                transaction(Databases.databaseNetwork) {
-                    mochila.content = cachedInventory.toBase64(1)
-                }
-
-                if (mochilaItem != null)
-                    updateMochilaItemLore(cachedInventory, mochilaItem)
-
-                plugin.logger.info { "Saved backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
-
-                // Remove from memory
-                plugin.logger.info { "Removing backpack ${mochila.id.value} ($mochila) from memory, triggered by $triggerType" }
-                removeCachedMochilaWithinLock(mochila, triggerType)
-            }
-        } else {
-            plugin.logger.info { "Not going to save backpack ${mochila.id.value} ($mochila) on database! Triggered by $triggerType" }
-        }
-    }
-
-    suspend fun removeCachedMochila(mochila: Mochila, triggerType: String? = null) {
-        mochilaLoadSaveMutex.withLock {
-            removeCachedMochilaWithinLock(mochila, "$triggerType (no db save)")
-        }
-    }
-
-    private suspend fun removeCachedMochilaWithinLock(mochila: Mochila, triggerType: String? = null) {
-        val count = mochila.getLockCount()
-
-        if (count == 0) {
-            plugin.logger.info { "Removing backpack ${mochila.id.value} ($mochila) from memory, triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}" }
-            loadedMochilas.remove(mochila.id.value)
-        } else {
-            plugin.logger.info { "Not removing backpack ${mochila.id.value} ($mochila) from memory because there is still $count locks on it! Triggered by $triggerType; Is mutex locked? ${mochilaLoadSaveMutex.isLocked}" }
-        }
-    }
-
-    suspend fun storeCachedMochila(mochila: Mochila) {
-        mochilaLoadSaveMutex.withLock {
-            loadedMochilas[mochila.id.value] = mochila
-        }
-    }
-
-    /**
-     * Updates the [mochilaItem] metadata
-     */
-    private fun updateMochilaItemLore(inventory: Inventory, mochilaItem: ItemStack) {
+    fun updateMochilaItemLore(inventory: Inventory, mochilaItem: ItemStack) {
         val currentLore = mochilaItem.lore
 
         // Only update if the lore exists... it should always exist

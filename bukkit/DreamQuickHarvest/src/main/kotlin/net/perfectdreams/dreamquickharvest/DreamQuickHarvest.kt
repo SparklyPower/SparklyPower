@@ -15,7 +15,10 @@ import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreammochilas.dao.Mochila
+import net.perfectdreams.dreammochilas.utils.MochilaAccessHolder
+import net.perfectdreams.dreammochilas.utils.MochilaInventoryHolder
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
+import net.perfectdreams.dreammochilas.utils.MochilaWrapper
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.block.Block
@@ -63,7 +66,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				return
 
 			e.isCancelled = true
-			
+
 			launchMainThread {
 				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e)
 
@@ -77,11 +80,13 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 				if (mochila != null) {
 					onAsyncThread {
-						// Let's unlock both the global mochila lock and inventory lock!
-						mochila.unlock()
-						mochila.mochilaInventoryManipulationLock.unlock()
-						MochilaUtils.saveMochila(mochilaItem, mochila, "${e.player.name} harvesting")
+						// Let's unlock the mochila lock and the inventory lock!
+						(inventoryTarget.holder as MochilaInventoryHolder).accessHolders.poll()
+						mochila.release("${e.player.name} harvesting")
 					}
+
+					if (mochilaItem != null)
+						MochilaUtils.updateMochilaItemLore(inventoryTarget, mochilaItem)
 				}
 			}
 			return
@@ -102,11 +107,13 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 				if (mochila != null) {
 					onAsyncThread {
-						// Let's unlock both the global mochila lock and inventory lock!
-						mochila.unlock()
-						mochila.mochilaInventoryManipulationLock.unlock()
-						MochilaUtils.saveMochila(mochilaItem, mochila, "${e.player.name} harvesting")
+						// Let's unlock the mochila lock and the inventory lock!
+						(inventoryTarget.holder as MochilaInventoryHolder).accessHolders.poll()
+						mochila.release("${e.player.name} harvesting")
 					}
+
+					if (mochilaItem != null)
+						MochilaUtils.updateMochilaItemLore(inventoryTarget, mochilaItem)
 				}
 			}
 			return
@@ -122,11 +129,13 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 				if (mochila != null) {
 					onAsyncThread {
-						// Let's unlock both the global mochila lock and inventory lock!
-						mochila.unlock()
-						mochila.mochilaInventoryManipulationLock.unlock()
-						MochilaUtils.saveMochila(mochilaItem, mochila, "${e.player.name} harvesting")
+						// Let's unlock the mochila lock and the inventory lock!
+						(inventoryTarget.holder as MochilaInventoryHolder).accessHolders.poll()
+						mochila.release("${e.player.name} harvesting")
 					}
+
+					if (mochilaItem != null)
+						MochilaUtils.updateMochilaItemLore(inventoryTarget, mochilaItem)
 				}
 			}
 			return
@@ -135,7 +144,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 	suspend fun getInventoryTarget(e: BlockBreakEvent): InventoryTargetResult {
 		var inventoryTarget: Inventory = e.player.inventory
-		var mochila: Mochila? = null
+		var mochila: MochilaAccessHolder? = null
 		val item = e.player.inventory.itemInMainHand
 
 		if (item.type == Material.CARROT_ON_A_STICK) {
@@ -144,19 +153,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 			if (isMochilaItem) {
 				mochila = onAsyncThread {
-					MochilaUtils.retrieveMochila(mochilaId, "${e.player.name} harvesting")
+					MochilaUtils.retrieveMochilaAndHold(mochilaId, "${e.player.name} harvesting")
 				}
 
 				if (mochila != null) {
-					// HODL THE LOCK!!
-					mochila.lock()
-					val lockSuccess = mochila.mochilaInventoryManipulationLock.tryLock()
-
-					// Only allow using the mochila if the lock was a success
-					if (lockSuccess)
-						inventoryTarget = mochila.getOrCreateMochilaInventory()
-					else
-						mochila.unlock()
+					inventoryTarget = mochila.getOrCreateMochilaInventoryAndHold()
 				}
 			}
 		}
@@ -167,7 +168,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	data class InventoryTargetResult(
 		val inventoryTarget: Inventory,
 		val mochilaItem: ItemStack?,
-		val mochila: Mochila?
+		val mochila: MochilaAccessHolder?
 	)
 
 	fun shouldCancelCropEvent(e: BlockBreakEvent, block: Block): Boolean {

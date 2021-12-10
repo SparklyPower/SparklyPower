@@ -15,8 +15,8 @@ class MochilasMemoryExecutor(private val m: DreamMochilas) : SparklyCommandExecu
         context.sendMessage("Mochilas in memory (cached):")
 
         m.launchMainThread {
-            MochilaUtils.loadedMochilas.forEach {
-                context.sendMessage("${it.key} - locks: ${it.value.getLockCount()}")
+            MochilaUtils.loadedMochilas.toList().sortedBy { it.first }.forEach {
+                context.sendMessage("${it.first} - locks: ${it.second.heldLocksCount()}")
             }
         }
     }

@@ -6,17 +6,18 @@ import com.Acrobot.ChestShop.Events.TransactionEvent
 import com.Acrobot.ChestShop.Listeners.Player.PlayerInteract
 import com.Acrobot.ChestShop.Listeners.PreTransaction.SpamClickProtector
 import com.Acrobot.ChestShop.Signs.ChestShopSign
-import com.sk89q.worldguard.bukkit.util.Events
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.FunnyIds
 import net.perfectdreams.dreammochilas.dao.Mochila
+import net.perfectdreams.dreammochilas.utils.MochilaInventoryHolder
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -102,7 +103,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 return
 
             m.launchAsyncThread {
-                m.logger.info { "Player ${e.player.name} is doing transaction, is mutex locked? Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
+                m.logger.info { "Player ${e.player.name} is doing transaction! Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
 
                 // We are going to replace the cooldown with OUR OWN cooldown, haha!!
                 // The reason we check it here instead of checking after the mochila is loaded is to avoid loading mochilas from the database/cache every time
@@ -117,65 +118,67 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 mochilasCooldown[e.player] = System.currentTimeMillis()
 
                 val triggerType = "${e.player.name} buying/selling stuff"
-                MochilaUtils.interactWithMochila(
-                    item,
-                    mochilaId,
-                    triggerType,
-                    { e.player.sendMessage("§cEssa mochila não existe!") }
-                ) {
-                    it.lockForInventoryManipulation {
-                        onMainThread {
-                            val sign = clickedBlock.state as Sign
-                            try {
-                                m.logger.info { "Preparing Pre Transaction Event for ${e.player.name}... Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
-
-                                val r = preparePreTransactionEventMethod.invoke(null as Any?, sign, e.player, e.action) as PreTransactionEvent
-
-                                r.clientInventory = it
-
-                                // We need to remove from the spam click protector because, if we don't, it will just ignore the event
-                                chestShopSpamClickProtectorMap.remove(e.player)
-
-                                Bukkit.getPluginManager().callEvent(r)
-
-                                if (r.isCancelled) {
-                                    m.logger.info { "Pre Transaction Event for ${e.player.name} was cancelled! ${r.transactionType} ${r.transactionOutcome}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
-                                    return@onMainThread false
-                                }
-
-                                val tEvent = TransactionEvent(r, sign)
-
-                                Bukkit.getPluginManager().callEvent(tEvent)
-
-                                if (tEvent.isCancelled) {
-                                    m.logger.info { "Transaction Event for ${e.player.name} was cancelled! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
-                                    return@onMainThread false
-                                }
-
-                                m.logger.info { "Transaction Event for ${e.player.name} was successfully completed! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
-
-                                return@onMainThread true
-                            } catch (var8: SecurityException) {
-                                var8.printStackTrace()
-                                return@onMainThread false
-                            } catch (var8: IllegalAccessException) {
-                                var8.printStackTrace()
-                                return@onMainThread false
-                            } catch (var8: java.lang.IllegalArgumentException) {
-                                var8.printStackTrace()
-                                return@onMainThread false
-                            } catch (var8: InvocationTargetException) {
-                                var8.printStackTrace()
-                                return@onMainThread false
-                            } catch (var8: NoSuchMethodException) {
-                                var8.printStackTrace()
-                                return@onMainThread false
-                            }
-                        }
-                    }
-
-                    m.logger.info { "Player ${e.player.name} transaction finished! Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId;" }
+                val mochilaAccessHolder = MochilaUtils.retrieveMochilaAndHold(mochilaId, triggerType)
+                if (mochilaAccessHolder == null) {
+                    e.player.sendMessage("§cEssa mochila não existe!")
+                    return@launchAsyncThread
                 }
+
+                val inventory = mochilaAccessHolder.getOrCreateMochilaInventoryAndHold()
+
+                val status = onMainThread {
+                    val sign = clickedBlock.state as Sign
+                    try {
+                        m.logger.info { "Preparing Pre Transaction Event for ${e.player.name}... Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
+
+                        val r = preparePreTransactionEventMethod.invoke(null as Any?, sign, e.player, e.action) as PreTransactionEvent
+
+                        r.clientInventory = inventory
+
+                        // We need to remove from the spam click protector because, if we don't, it will just ignore the event
+                        chestShopSpamClickProtectorMap.remove(e.player)
+
+                        Bukkit.getPluginManager().callEvent(r)
+
+                        if (r.isCancelled) {
+                            m.logger.info { "Pre Transaction Event for ${e.player.name} was cancelled! ${r.transactionType} ${r.transactionOutcome}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
+                            return@onMainThread false
+                        }
+
+                        val tEvent = TransactionEvent(r, sign)
+
+                        Bukkit.getPluginManager().callEvent(tEvent)
+
+                        if (tEvent.isCancelled) {
+                            m.logger.info { "Transaction Event for ${e.player.name} was cancelled! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
+                            return@onMainThread false
+                        }
+
+                        m.logger.info { "Transaction Event for ${e.player.name} was successfully completed! ${tEvent.transactionType}; Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
+
+                        return@onMainThread true
+                    } catch (var8: SecurityException) {
+                        var8.printStackTrace()
+                        return@onMainThread false
+                    } catch (var8: IllegalAccessException) {
+                        var8.printStackTrace()
+                        return@onMainThread false
+                    } catch (var8: java.lang.IllegalArgumentException) {
+                        var8.printStackTrace()
+                        return@onMainThread false
+                    } catch (var8: InvocationTargetException) {
+                        var8.printStackTrace()
+                        return@onMainThread false
+                    } catch (var8: NoSuchMethodException) {
+                        var8.printStackTrace()
+                        return@onMainThread false
+                    }
+                }
+
+                m.logger.info { "Player ${e.player.name} transaction finished! Holding mochila locks... Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId; Status: $status" }
+                // Releasing locks...
+                (inventory.holder as MochilaInventoryHolder).accessHolders.poll()
+                mochilaAccessHolder.release(triggerType)
             }
         }
     }
@@ -237,10 +240,10 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                         // Handle just like a normal mochila would
                         // Should NEVER be null
-                        val loadedFromDatabaseMochila = MochilaUtils.retrieveMochila(mochila.id.value, "${e.player.name} mochila creation")!!
-                        loadedFromDatabaseMochila.lock()
+                        val loadedFromDatabaseMochila = MochilaUtils.retrieveMochilaAndHold(mochila.id.value, "${e.player.name} mochila creation")!!
 
-                        val inventory = loadedFromDatabaseMochila.getOrCreateMochilaInventory()
+                        val inventory = loadedFromDatabaseMochila.getOrCreateMochilaInventoryAndHold()
+
                         onMainThread {
                             var item = item
 
@@ -260,24 +263,25 @@ class InventoryListener(val m: DreamMochilas) : Listener {
             }
 
             m.launchAsyncThread {
-                val mochila = MochilaUtils.retrieveMochila(mochilaId, "${e.player.name} mochila opening")
+                val mochilaAccessHolder = MochilaUtils.retrieveMochilaAndHold(mochilaId, "${e.player.name} mochila opening")
 
                 onMainThread {
-                    if (mochila == null) {
+                    if (mochilaAccessHolder == null) {
                         e.player.sendMessage("§cEssa mochila não existe!")
                         return@onMainThread
                     }
 
                     if (e.player.openInventory.topInventory.type != InventoryType.CRAFTING) {
-                        m.logger.warning { "Player ${e.player.name} tried opening a backpack when they already had a inventory open! ${e.player.openInventory.topInventory.type} Backpack ID: ${mochila.id.value}" }
+                        m.logger.warning { "Player ${e.player.name} tried opening a backpack when they already had a inventory open! ${e.player.openInventory.topInventory.type} Backpack ID: ${mochilaAccessHolder.mochila.id.value}" }
+                        onAsyncThread {
+                            mochilaAccessHolder.release()
+                        }
                         return@onMainThread
                     }
 
-                    m.logger.info { "Player ${e.player.name} opened a backpack. Backpack ID: ${mochila.id.value}" }
+                    m.logger.info { "Player ${e.player.name} opened a backpack. Backpack ID: ${mochilaAccessHolder.mochila.id.value}" }
 
-                    mochila.lock()
-                    val inventory = mochila.getOrCreateMochilaInventory()
-
+                    val inventory = mochilaAccessHolder.getOrCreateMochilaInventoryAndHold()
                     e.player.openInventory(inventory)
                 }
             }
@@ -289,9 +293,17 @@ class InventoryListener(val m: DreamMochilas) : Listener {
     fun onClose(e: InventoryCloseEvent) {
         val holder = e.inventory.holder
 
-        if (holder is Mochila.MochilaHolder && e.inventory.viewers.size == 1) { // Nenhuma pessoa está vendo o inventário, então vamos salvar!
-            // Antes de fechar, vamos verificar se a mochila está dentro da mochila
-            val closingMochilaId = holder.mochila.id.value
+        if (holder is MochilaInventoryHolder) { // Closed a mochila inventory holder inventory
+            // We don't *really* care about what access holder we will get tbh
+            val mochilaAccessHolder = holder.accessHolders.poll()
+
+            if (mochilaAccessHolder == null) {
+                m.logger.warning { "Received a InventoryCloseEvent for a MochilaInventoryHolder, but there isn't any access holders available! Bug?" }
+                return
+            }
+
+            // Antes de fechar, vamos verificar se a mochila está na mochila
+            val closingMochilaId = mochilaAccessHolder.mochila.id.value
             for (idx in 0 until e.inventory.size) {
                 val item = e.inventory.getItem(idx) ?: continue
 
@@ -312,11 +324,13 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                 val isMochila = item.getStoredMetadata("isMochila")?.toBoolean()
 
-                holder.mochila.unlock()
-                MochilaUtils.saveMochila(
-                    if (isMochila == true) item else null, // Maybe the user changed the held item?
-                    holder.mochila, "${e.player.name} mochila inventory close"
-                )
+                mochilaAccessHolder.release("${e.player.name} closing inventory")
+                if (isMochila == true) {
+                    MochilaUtils.updateMochilaItemLore(
+                        e.inventory,
+                        item
+                    )
+                }
             }
         }
     }
@@ -328,8 +342,10 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
         val holder = e.inventory.holder
 
-        if (holder is Mochila.MochilaHolder) {
-            if (holder.mochila.id.value == mochilaId) {
+        if (holder is MochilaInventoryHolder) {
+            // Just a liiil peek ewe
+            val peekedElement = holder.accessHolders.peek()
+            if (peekedElement.mochila.id.value == mochilaId) {
                 e.isCancelled = true
             }
         }
@@ -342,8 +358,10 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
         val holder = e.destination.holder
 
-        if (holder is Mochila.MochilaHolder) {
-            if (holder.mochila.id.value == mochilaId) {
+        if (holder is MochilaInventoryHolder) {
+            // Just a liiil peek ewe
+            val peekedElement = holder.accessHolders.peek()
+            if (peekedElement.mochila.id.value == mochilaId) {
                 e.isCancelled = true
             }
         }

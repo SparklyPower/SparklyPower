@@ -2,10 +2,12 @@ package net.perfectdreams.dreammochilas
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.runBlocking
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreammochilas.commands.*
 import net.perfectdreams.dreammochilas.commands.declarations.MochilaCommand
 import net.perfectdreams.dreammochilas.dao.Mochila
@@ -79,14 +81,8 @@ class DreamMochilas : KotlinPlugin(), Listener {
 
 	override fun softDisable() {
 		// Save all backpacks
-		transaction(Databases.databaseNetwork) {
-			for (loadedMochila in MochilaUtils.loadedMochilas.values) {
-				val inventory = loadedMochila.cachedInventory
-
-				if (inventory != null) {
-					loadedMochila.content = inventory.toBase64(1)
-				}
-			}
+		for (loadedMochila in MochilaUtils.loadedMochilas.values) {
+			loadedMochila.saveMochila("Server is shutting down")
 		}
 	}
 }
