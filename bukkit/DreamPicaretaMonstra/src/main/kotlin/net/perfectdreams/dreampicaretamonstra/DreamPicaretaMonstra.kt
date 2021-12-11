@@ -35,7 +35,6 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 			Material.SMOOTH_BASALT,
 			Material.AMETHYST_BLOCK,
 			Material.TUFF,
-			Material.COBBLED_DEEPSLATE,
 			Material.DEEPSLATE
 		)
 
