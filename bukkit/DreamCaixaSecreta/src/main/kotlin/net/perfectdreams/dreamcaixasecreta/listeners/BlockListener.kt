@@ -142,7 +142,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onBlock(e: BlockBreakEvent) {
-		if (e.block.type != Material.STONE)
+		if (e.block.type != Material.STONE || e.block.type != Material.DEEPSLATE || e.block.type != Material.TUFF)
 			return
 
 		if (e.player.inventory.itemInMainHand.containsEnchantment(Enchantment.SILK_TOUCH))
