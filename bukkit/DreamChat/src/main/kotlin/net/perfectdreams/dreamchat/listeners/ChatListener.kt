@@ -650,7 +650,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			if (response.handleResponse(message, e)) {
 				val response = response.getResponse(message, e) ?: return
 				ChatUtils.sendResponseAsBot(player, response)
-				return
+				break
 			}
 		}
 
