@@ -9,11 +9,6 @@ plugins {
     id("io.papermc.paperweight.userdev")
 }
 
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-}
-
 // This is our DreamCore configuration that has all the dependencies (so plugins can just need to include the project as a project dependency)
 //
 // The reason we needed to do this is because we want ALL the declared "api" dependencies here BUT we also want the relocated dependencies
