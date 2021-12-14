@@ -71,8 +71,14 @@ class MochilaWrapper(
         }
     }
 
-    fun saveMochila(triggerType: String? = null) {
-        DreamUtils.assertAsyncThread(true)
+    fun saveMochila(
+        triggerType: String? = null,
+        bypassAssertAsyncThreadCheck: Boolean = false,
+        removeFromMemory: Boolean = true
+    ) {
+        // We need to bypass when shutting down the server
+        if (!bypassAssertAsyncThreadCheck)
+            DreamUtils.assertAsyncThread(true)
 
         val cachedInventory = cachedInventory
         if (cachedInventory == null) {
@@ -87,9 +93,11 @@ class MochilaWrapper(
             plugin.logger.info { "Saved backpack ${mochila.id.value} ($this) on database! Triggered by $triggerType" }
         }
 
-        // Remove from memory after successful database save/no save
-        // This method should ONLY be ran after all holds are released, so this shouldn't cause any issues... well, that's what I hope :S
-        plugin.logger.info { "Removing backpack ${mochila.id.value} ($this) from memory, triggered by $triggerType" }
-        MochilaUtils.loadedMochilas.remove(mochila.id.value)
+        if (removeFromMemory) {
+            // Remove from memory after successful database save/no save
+            // This method should ONLY be ran after all holds are released, so this shouldn't cause any issues... well, that's what I hope :S
+            plugin.logger.info { "Removing backpack ${mochila.id.value} ($this) from memory, triggered by $triggerType" }
+            MochilaUtils.loadedMochilas.remove(mochila.id.value)
+        }
     }
 }

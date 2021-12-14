@@ -70,6 +70,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			launchMainThread {
 				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e, "${e.player.name} harvesting crops")
 
+				val ttl = System.currentTimeMillis()
 				doQuickHarvestOnCrop(
 					e.player,
 					e.block,
@@ -77,6 +78,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					e.player.inventory.itemInMainHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS),
 					inventoryTarget
 				)
+				logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest normal crops!" }
 
 				if (mochila != null) {
 					onAsyncThread {
@@ -103,9 +105,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			launchMainThread {
 				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e, "${e.player.name} harvesting cocoa")
 
-				val ttl = System.nanoTime()
+				val ttl = System.currentTimeMillis()
 				doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget)
-				logger.info { "Took ${System.nanoTime() - ttl}ns to harvest cocoa" }
+				logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest cocoa!" }
 
 				if (mochila != null) {
 					onAsyncThread {
@@ -129,7 +131,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			launchMainThread {
 				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e, "${e.player.name} harvesting sugar cane")
 
+				val ttl = System.currentTimeMillis()
 				doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget)
+				logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest sugar canes!" }
 
 				if (mochila != null) {
 					onAsyncThread {

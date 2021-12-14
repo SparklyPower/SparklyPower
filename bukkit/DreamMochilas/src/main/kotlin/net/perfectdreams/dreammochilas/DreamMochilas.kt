@@ -2,11 +2,13 @@ package net.perfectdreams.dreammochilas
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreammochilas.commands.*
 import net.perfectdreams.dreammochilas.commands.declarations.MochilaCommand
@@ -76,17 +78,36 @@ class DreamMochilas : KotlinPlugin(), Listener {
 		registerCommand(
 			MochilaCommand,
 			GetMochilaExecutor(),
+			GetMochilaIdExecutor(),
 			GetPlayerMochilasExecutor(),
 			MochilasMemoryExecutor(this),
 			FakeInteractAndOpenExecutor(this),
 			FakeInteractAutoClickExecutor(this)
 		)
+
+		launchAsyncThread {
+			while (true) {
+				// Save all backpacks
+				logger.info { "Saving all mochilas to the database... (Periodic Save)" }
+				for (loadedMochila in MochilaUtils.loadedMochilas.values) {
+					loadedMochila.saveMochila(
+						"Periodic Save",
+						removeFromMemory = false
+					)
+				}
+
+				delay(60_000)
+			}
+		}
 	}
 
 	override fun softDisable() {
 		// Save all backpacks
 		for (loadedMochila in MochilaUtils.loadedMochilas.values) {
-			loadedMochila.saveMochila("Server is shutting down")
+			loadedMochila.saveMochila(
+				"Server is shutting down",
+				bypassAssertAsyncThreadCheck = true
+			)
 		}
 	}
 }
