@@ -21,7 +21,7 @@ allprojects {
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
         maven("https://repo.perfectdreams.net/")
         maven("https://papermc.io/repo/repository/maven-public/")
-        maven("https://ci.dmulloy2.net/nexus/repository/public/")
+        maven("https://repo.dmulloy2.net/repository/public/")
         maven("https://nexus.wesjd.net/repository/thirdparty/")
         maven("https://maven.sk89q.com/repo/")
         maven("https://repo.aikar.co/content/groups/aikar/")
