@@ -3,13 +3,14 @@ package net.perfectdreams.dreamterrainadditions
 import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import me.ryanhamshire.GriefPrevention.Claim
 import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
-import net.perfectdreams.dreamcore.utils.DreamUtils
-import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamcore.utils.scheduler
+import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamterrainadditions.commands.*
+import net.perfectdreams.dreamterrainadditions.commands.declarations.TempTrustCommand
+import net.perfectdreams.dreamterrainadditions.commands.declarations.TempTrustListCommand
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -18,11 +19,15 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockFormEvent
+import org.bukkit.event.block.BlockGrowEvent
+import org.bukkit.event.block.BlockSpreadEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
+import java.util.*
 
 class DreamTerrainAdditions : KotlinPlugin(), Listener {
 	var claimsAdditionsList = mutableListOf<ClaimAdditions>()
@@ -36,12 +41,15 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		registerCommand(RetirarCommand)
 		registerCommand(ConfigureClaimCommand)
 		registerCommand(ListarBanidosCommand)
+		registerCommand(TempTrustCommand, TempTrustExecutor(this))
+		registerCommand(TempTrustListCommand, TempTrustListExecutor(this))
 
 		dataFolder.mkdir()
 
 		if (File(dataFolder, "additions.json").exists()) {
 			claimsAdditionsList = DreamUtils.gson.fromJson(File(dataFolder, "additions.json").readText())
 		}
+		startCheckingTemporaryTrustsExpirationDate()
 	}
 
 	fun save() {
@@ -71,6 +79,11 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 
 	fun getClaimAdditionsById(claimId: Long): ClaimAdditions? {
 		return claimsAdditionsList.firstOrNull { it.claimId == claimId }
+	}
+
+	fun getOrCreateClaimAdditionsWithId(claimId: Long): ClaimAdditions {
+		return getClaimAdditionsById(claimId)
+			?: return ClaimAdditions(claimId).also { claimsAdditionsList.add(it) }
 	}
 
 	val passiveMobs = listOf(
@@ -169,6 +182,27 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 	}
 
 	@EventHandler
+	fun onBlockGrowth(e: BlockGrowEvent) {
+		val entityClaim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null) ?: return
+		val cropsGrowthDisabled = getClaimAdditionsById(entityClaim.id)?.disableCropGrowth ?: return
+
+		if (cropsGrowthDisabled) {
+			e.isCancelled = true
+		}
+	}
+
+	@EventHandler
+	fun onBlockSpread(event: BlockSpreadEvent) {
+		if (event.source.type == Material.BROWN_MUSHROOM|| event.block.type == Material.RED_MUSHROOM || event.block.type == Material.VINE) {
+			val entityClaim = GriefPrevention.instance.dataStore.getClaimAt(event.block.location, false, null) ?: return
+			val plantsSpreadingDisabled = getClaimAdditionsById(entityClaim.id)?.disablePlantsSpreading ?: return
+			if (plantsSpreadingDisabled) {
+				event.isCancelled = true
+			}
+		}
+	}
+
+	@EventHandler
 	fun onBlockForm(e: BlockFormEvent) {
 		val entityClaim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null) ?: return
 
@@ -210,12 +244,46 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		}
 	}
 
+	@EventHandler
+	fun onTrustChange(event: TrustChangedEvent) {
+		val claim = event.claims.getOrNull(0) ?: return
+		val claimAdditions = getClaimAdditionsById(claim.id) ?: return
+
+		val userUniqueId = DreamUtils.retrieveUserUniqueId(event.identifier)
+		if (claimAdditions.temporaryTrustedPlayers.containsKey(userUniqueId) && !event.isGiven) {
+			claimAdditions.temporaryTrustedPlayers.remove(userUniqueId)
+		}
+	}
+
+	private val claimMemoization = mutableMapOf<ClaimAdditions, Claim>()
+	private fun startCheckingTemporaryTrustsExpirationDate() {
+		object: BukkitRunnable() {
+			override fun run() {
+				claimsAdditionsList.associateWith { it.temporaryTrustedPlayers }.forEach { (claim, temporaryTrusted) ->
+					temporaryTrusted.forEach { (uuid, millis) ->
+						val griefPreventionClaim = claimMemoization[claim] ?: GriefPrevention.instance.dataStore.getClaim(claim.claimId)
+							.also { claimMemoization[claim] = it } ?: return let { claimsAdditionsList.remove(claim) }
+						if (millis <= System.currentTimeMillis()) {
+							temporaryTrusted.remove(uuid);
+
+							griefPreventionClaim.dropPermission(uuid.toString())
+							GriefPrevention.instance.dataStore.saveClaim(griefPreventionClaim)
+						}
+					}
+				}
+			}
+		}.runTaskTimerAsynchronously(this, 20L, 120L);
+	}
+
 	class ClaimAdditions(val claimId: Long) {
 		val bannedPlayers = mutableListOf<String>()
+		val temporaryTrustedPlayers = mutableMapOf<UUID, Long>()
 		var pvpEnabled = false
+		var disableCropGrowth = false
 		var disablePassiveMobs = false
 		var disableHostileMobs = false
 		var disableSnowFormation = false
+		var disablePlantsSpreading = false
 		var disableTrapdoorAndDoorAccess = false
 	}
 }

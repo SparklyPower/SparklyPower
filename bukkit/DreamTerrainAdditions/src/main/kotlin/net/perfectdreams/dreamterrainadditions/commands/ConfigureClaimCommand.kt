@@ -34,7 +34,7 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
 
                 val claimAdditions = _claimAdditions
 
-                val menu = createMenu(36, "§cConfiguração do terreno") {
+                val menu = createMenu(45, "§cConfiguração do terreno") {
 
                     slot(1, 1) {
 
@@ -229,6 +229,50 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                         onClick {
                             it.closeInventory()
                             player.performCommand("claimbanlist")
+                        }
+                    }
+                    slot(1, 3) {
+                        item = ItemStack(Material.WHEAT_SEEDS)
+                            .meta<ItemMeta> {
+                                this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+
+                                if (claimAdditions.disableCropGrowth) {
+                                    setDisplayName("§a§lPermitir o crescimento de sementes e plantações no terreno")
+                                } else {
+                                    setDisplayName("§b§lImpedir o crescimento de sementes e plantações no terreno")
+                                }
+
+                                lore = listOf(
+                                    "§7Bloqueie o crescimento de qualquer tipo de sementes em seu terreno.",
+                                )
+                            }
+
+                        onClick {
+                            it.closeInventory()
+                            claimAdditions.disableCropGrowth = !claimAdditions.disableCropGrowth
+                            it.sendMessage("§aO bloqueio de crescimento de plantações está agora ${humanizeBoolean(claimAdditions.disableCropGrowth)} no seu terreno!")
+                        }
+                    }
+                    slot(3, 3) {
+                        item = ItemStack(Material.VINE)
+                            .meta<ItemMeta> {
+                                this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+
+                                if (claimAdditions.disablePlantsSpreading) {
+                                    setDisplayName("§a§lPermitir o espalhamento de plantas no terreno")
+                                } else {
+                                    setDisplayName("§b§lImpedir o espalhamento de plantas no terreno")
+                                }
+
+                                lore = listOf(
+                                    "§7Bloqueie o espalhamento de qualquer tipo de plantas em seu terreno, como vinhas.",
+                                )
+                            }
+
+                        onClick {
+                            it.closeInventory()
+                            claimAdditions.disablePlantsSpreading = !claimAdditions.disablePlantsSpreading
+                            it.sendMessage("§aO bloqueio de crescimento de plantas está agora ${humanizeBoolean(claimAdditions.disablePlantsSpreading)} no seu terreno!")
                         }
                     }
                 }
