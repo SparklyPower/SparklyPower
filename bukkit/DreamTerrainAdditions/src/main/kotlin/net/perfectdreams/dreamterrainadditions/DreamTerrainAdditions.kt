@@ -10,7 +10,6 @@ import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamterrainadditions.commands.*
 import net.perfectdreams.dreamterrainadditions.commands.declarations.TempTrustCommand
-import net.perfectdreams.dreamterrainadditions.commands.declarations.TempTrustListCommand
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -42,7 +41,6 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		registerCommand(ConfigureClaimCommand)
 		registerCommand(ListarBanidosCommand)
 		registerCommand(TempTrustCommand, TempTrustExecutor(this))
-		registerCommand(TempTrustListCommand, TempTrustListExecutor(this))
 
 		dataFolder.mkdir()
 
