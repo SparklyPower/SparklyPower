@@ -3,6 +3,18 @@ package net.perfectdreams.dreamterrainadditions
 import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.LongAsStringSerializer
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.Json
 import me.ryanhamshire.GriefPrevention.Claim
 import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
@@ -45,14 +57,14 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		dataFolder.mkdir()
 
 		if (File(dataFolder, "additions.json").exists()) {
-			claimsAdditionsList = DreamUtils.gson.fromJson(File(dataFolder, "additions.json").readText())
+			claimsAdditionsList = Json.decodeFromString(File(dataFolder, "additions.json").readText())
 		}
 		startCheckingTemporaryTrustsExpirationDate()
 	}
 
 	fun save() {
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
-			File(dataFolder, "additions.json").writeText(DreamUtils.gson.toJson(claimsAdditionsList))
+			File(dataFolder, "additions.json").writeText(Json.encodeToString(claimsAdditionsList))
 		}
 	}
 
@@ -253,35 +265,36 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		}
 	}
 
-	private val claimMemoization = mutableMapOf<ClaimAdditions, Claim>()
 	private fun startCheckingTemporaryTrustsExpirationDate() {
-		object: BukkitRunnable() {
-			override fun run() {
-				claimsAdditionsList.associateWith { it.temporaryTrustedPlayers }.forEach { (claim, temporaryTrusted) ->
-					temporaryTrusted.forEach { (uuid, millis) ->
-						val griefPreventionClaim = claimMemoization[claim] ?: GriefPrevention.instance.dataStore.getClaim(claim.claimId)
-							.also { claimMemoization[claim] = it } ?: return let { claimsAdditionsList.remove(claim) }
-						if (millis <= System.currentTimeMillis()) {
-							temporaryTrusted.remove(uuid);
-
-							griefPreventionClaim.dropPermission(uuid.toString())
-							GriefPrevention.instance.dataStore.saveClaim(griefPreventionClaim)
-						}
-					}
-				}
-			}
-		}.runTaskTimerAsynchronously(this, 20L, 120L);
+		ClaimTrustExpirationTask(this).runTaskTimerAsynchronously(this, 20L, 120L);
 	}
 
-	class ClaimAdditions(val claimId: Long) {
-		val bannedPlayers = mutableListOf<String>()
-		val temporaryTrustedPlayers = mutableMapOf<UUID, Long>()
-		var pvpEnabled = false
-		var disableCropGrowth = false
-		var disablePassiveMobs = false
-		var disableHostileMobs = false
-		var disableSnowFormation = false
-		var disablePlantsSpreading = false
-		var disableTrapdoorAndDoorAccess = false
+	@Serializable
+	data class ClaimAdditions(
+		val claimId: Long,
+		val bannedPlayers: MutableList<String> = mutableListOf(),
+		val temporaryTrustedPlayers: MutableMap<@Serializable(UUIDAsStringSerializer::class) UUID, Long> = mutableMapOf(),
+		var pvpEnabled: Boolean = false,
+		var disableCropGrowth: Boolean = false,
+		var disablePassiveMobs: Boolean = false,
+		var disableHostileMobs: Boolean = false,
+		var disableSnowFormation: Boolean = false,
+		var disablePlantsSpreading: Boolean = false,
+		var disableTrapdoorAndDoorAccess: Boolean = false
+	) {
+		val temporaryTrustedPlayersMutex = Mutex()
+	}
+
+	object UUIDAsStringSerializer : KSerializer<UUID> {
+		override val descriptor: SerialDescriptor =
+			PrimitiveSerialDescriptor("UUIDAsStringSerializer", PrimitiveKind.STRING)
+
+		override fun serialize(encoder: Encoder, value: UUID) {
+			encoder.encodeString(value.toString())
+		}
+
+		override fun deserialize(decoder: Decoder): UUID {
+			return UUID.fromString(decoder.decodeString())
+		}
 	}
 }

@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamterrainadditions.commands
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.sync.withLock
 import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.DreamUtils
@@ -29,32 +30,39 @@ class TempTrustExecutor(val plugin: DreamTerrainAdditions): SparklyCommandExecut
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun execute(context: CommandContext, args: CommandArguments) = plugin.launchAsyncThread {
-        val targetName = args[options.target] ?: context.fail("§e/temptrust <player> <tempo>")
-        val rawTime: String = args[options.time] ?: context.fail("§e/temptrust <player> <tempo>")
-        val player = context.sender as? Player ?: context.fail("§Você precisa ser uma pessoa real para executar este comando.")
+    override fun execute(context: CommandContext, args: CommandArguments) {
+        plugin.launchAsyncThread {
+            val targetName = args[options.target]
+            val rawTime: String = args[options.time]
+            val player = context.sender as? Player ?: context.fail("§Você precisa ser uma pessoa real para executar este comando.")
 
-        val claim = GriefPrevention.instance.dataStore.getClaimAt(player.location, false, null)
-            ?: return@launchAsyncThread player.sendMessage("§cVocê precisa estar em seu terreno para conceder permissão à alguém.")
-        if (!(claim.ownerName == player.name || claim.allowGrantPermission(player) == null)) {
-            return@launchAsyncThread player.sendMessage(withoutPermission)
-        }
-        if (targetName == player.name) {
-            return@launchAsyncThread context.sender.sendMessage("§cVocê não pode dar um trust temporário em você mesmo! Não é assim que você irá conseguir ter auto confiança em si mesmo...")
-        }
-        val targetUniqueId = DreamUtils.retrieveUserUniqueId(targetName)
-        val wrappedTime = TimeUtils.convertToLocalDateTimeRelativeToNow(rawTime)
-        val wrappedTimeInMillis = wrappedTime.toEpochSecond() * 1000
-        val differenceBetweenTargetAndCurrentTime = wrappedTimeInMillis - System.currentTimeMillis()
+            val claim = GriefPrevention.instance.dataStore.getClaimAt(player.location, false, null)
+                ?: return@launchAsyncThread player.sendMessage("§cVocê precisa estar em seu terreno para conceder permissão à alguém.")
 
-        if (differenceBetweenTargetAndCurrentTime <= 0 || differenceBetweenTargetAndCurrentTime > MAXIMUM_TRUST_TIME_LIMIT) {
-            return@launchAsyncThread player.sendMessage("")
-        }
+            if (!(claim.ownerName == player.name || claim.allowGrantPermission(player) == null))
+                return@launchAsyncThread player.sendMessage(withoutPermission)
 
-        val claimAdditions = plugin.getOrCreateClaimAdditionsWithId(claim.id)
-        claimAdditions.temporaryTrustedPlayers[targetUniqueId] = (wrappedTime.toEpochSecond() * 1000)
-        claim.setPermission(targetUniqueId.toString(), ClaimPermission.Build)
-        GriefPrevention.instance.dataStore.saveClaim(claim)
-        return@launchAsyncThread player.sendMessage("§aVocê concedeu permissões à §f$targetName §apara editar seu terreno temporariamente.")
-    }.let { Unit }
+            if (targetName == player.name)
+                return@launchAsyncThread context.sender.sendMessage("§cVocê não pode dar um trust temporário em você mesmo! Não é assim que você irá conseguir ter auto confiança em si mesmo...")
+
+            val targetUniqueId = DreamUtils.retrieveUserUniqueId(targetName)
+            val wrappedTime = TimeUtils.convertToLocalDateTimeRelativeToNow(rawTime)
+            val wrappedTimeInMillis = wrappedTime.toEpochSecond() * 1000
+            val differenceBetweenTargetAndCurrentTime = wrappedTimeInMillis - System.currentTimeMillis()
+
+            if (differenceBetweenTargetAndCurrentTime <= 0 || differenceBetweenTargetAndCurrentTime > MAXIMUM_TRUST_TIME_LIMIT)
+                return@launchAsyncThread player.sendMessage("")
+
+            val claimAdditions = plugin.getOrCreateClaimAdditionsWithId(claim.id)
+
+            claimAdditions.temporaryTrustedPlayersMutex.withLock {
+                claimAdditions.temporaryTrustedPlayers[targetUniqueId] = (wrappedTime.toEpochSecond() * 1000)
+            }
+
+            claim.setPermission(targetUniqueId.toString(), ClaimPermission.Build)
+            GriefPrevention.instance.dataStore.saveClaim(claim)
+
+            player.sendMessage("§aVocê concedeu permissões à §f$targetName §apara editar seu terreno temporariamente.")
+        }
+    }
 }
