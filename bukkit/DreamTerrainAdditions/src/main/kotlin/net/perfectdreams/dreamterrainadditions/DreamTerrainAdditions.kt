@@ -45,7 +45,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		registerCommand(RetirarCommand)
 		registerCommand(ConfigureClaimCommand)
 		registerCommand(ListarBanidosCommand)
-		registerCommand(TempTrustCommand, TempTrustExecutor(this))
+		registerCommand(TempTrustCommand, TempTrustExecutor(this), TempTrustListExecutor(this))
 
 		dataFolder.mkdir()
 
