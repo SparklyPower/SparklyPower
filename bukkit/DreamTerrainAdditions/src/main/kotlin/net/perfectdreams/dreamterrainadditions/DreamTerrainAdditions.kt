@@ -57,10 +57,19 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		startCheckingTemporaryTrustsExpirationDate()
 	}
 
-	fun save() {
+	override fun softDisable() {
+		super.softDisable()
+		save()
+	}
+
+	fun saveInAsyncTask() {
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
-			File(dataFolder, "additions.json").writeText(Json.encodeToString(claimsAdditionsList.map { it.data }))
+			save()
 		}
+	}
+
+	private fun save() {
+		File(dataFolder, "additions.json").writeText(Json.encodeToString(claimsAdditionsList.map { it.data }))
 	}
 
 	@EventHandler
@@ -76,10 +85,6 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 
 			e.player.sendTitle("§f", "§cVocê está banido deste terreno", 0, 60, 0)
 		}
-	}
-
-	override fun softDisable() {
-		super.softDisable()
 	}
 
 	fun getClaimAdditionsById(claimId: Long): ClaimAdditions? {

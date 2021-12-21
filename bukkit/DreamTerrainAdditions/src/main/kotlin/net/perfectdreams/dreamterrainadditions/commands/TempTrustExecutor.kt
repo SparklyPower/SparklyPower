@@ -64,7 +64,7 @@ class TempTrustExecutor(val plugin: DreamTerrainAdditions): SparklyCommandExecut
 
             player.sendMessage("§aVocê concedeu permissões à §f$targetName §apara editar seu terreno temporariamente.")
 
-            plugin.save()
+            plugin.saveInAsyncTask()
         }
     }
 }

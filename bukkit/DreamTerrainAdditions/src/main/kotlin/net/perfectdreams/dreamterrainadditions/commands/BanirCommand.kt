@@ -56,7 +56,7 @@ object BanirCommand : DSLCommandBase<DreamTerrainAdditions> {
                 claimAdditions.bannedPlayers.add(playerName)
                 player.sendMessage("§b$playerName§a foi banido do terreno!")
                 player.sendMessage("§7Veja os players banidos do seu terreno usando §6/claimbanlist")
-                plugin.save()
+                plugin.saveInAsyncTask()
             } else {
                 player.sendMessage(withoutPermission)
                 return@executes

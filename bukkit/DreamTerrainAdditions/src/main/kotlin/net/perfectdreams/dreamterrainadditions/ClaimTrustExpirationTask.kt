@@ -29,6 +29,6 @@ class ClaimTrustExpirationTask(val m: DreamTerrainAdditions) : BukkitRunnable() 
 
         // Save additions.json file if any claim had a change
         if (isDirty)
-            m.save()
+            m.saveInAsyncTask()
     }
 }

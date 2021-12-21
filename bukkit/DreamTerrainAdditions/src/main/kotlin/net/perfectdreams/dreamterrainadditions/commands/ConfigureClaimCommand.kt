@@ -55,6 +55,8 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                                     humanizeBoolean(claim.areExplosivesAllowed,
                                             "Explosões agora podem danificar seu terreno.",
                                             "Explosões não irão danificar seu terreno."))
+
+                            plugin.saveInAsyncTask()
                         }
                     }
 
@@ -84,6 +86,8 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                                     humanizeBoolean(claimAdditions.disableTrapdoorAndDoorAccess,
                                             "Players sem trust não irão conseguir abrir ou fechar portas e alçapões.",
                                             "Players sem trust conseguirão abrir ou fechar portas e alçapões."))
+
+                            plugin.saveInAsyncTask()
                         }
                     }
 
@@ -110,6 +114,8 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                             claimAdditions.disableSnowFormation = !claimAdditions.disableSnowFormation
 
                             it.sendMessage("§aBloqueio de formação de neve agora está ${humanizeBoolean(claimAdditions.disableSnowFormation)} no seu terreno!")
+
+                            plugin.saveInAsyncTask()
                         }
                     }
 
@@ -147,6 +153,8 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                                     humanizeBoolean(claimAdditions.disablePassiveMobs,
                                             "Mobs que não atacam irão parar de spawnar em seu terreno.",
                                             "Mobs que não atacam, agora, irão spawnar normalmente em seu terreno."))
+
+                            plugin.saveInAsyncTask()
                         }
                     }
 
@@ -174,6 +182,8 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                                     humanizeBoolean(claimAdditions.disableHostileMobs,
                                             "Mobs que atacam irão parar de spawnar em seu terreno.",
                                             "Mobs que atacam irão voltar a spawnar em seu terreno."))
+
+                            plugin.saveInAsyncTask()
                         }
                     }
 
@@ -200,6 +210,8 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                             it.closeInventory()
                             claimAdditions.pvpEnabled = !claimAdditions.pvpEnabled
                             it.sendMessage("§aPvP agora está ${humanizeBoolean(claimAdditions.pvpEnabled)} no seu terreno!")
+
+                            plugin.saveInAsyncTask()
                         }
                     }
 
@@ -244,6 +256,8 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                             it.closeInventory()
                             claimAdditions.disableCropGrowth = !claimAdditions.disableCropGrowth
                             it.sendMessage("§aO bloqueio de crescimento de plantações está agora ${humanizeBoolean(claimAdditions.disableCropGrowth)} no seu terreno!")
+
+                            plugin.saveInAsyncTask()
                         }
                     }
                     slot(3, 3) {
@@ -266,6 +280,8 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                             it.closeInventory()
                             claimAdditions.disablePlantsSpreading = !claimAdditions.disablePlantsSpreading
                             it.sendMessage("§aO bloqueio de crescimento de plantas está agora ${humanizeBoolean(claimAdditions.disablePlantsSpreading)} no seu terreno!")
+
+                            plugin.saveInAsyncTask()
                         }
                     }
                 }
@@ -278,7 +294,6 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
     }
 
     fun humanizeBoolean(bool: Boolean, whenEnabled: String = "§2habilitado§a", whenDisabled: String = "§cdesabilitado§a"): String {
-
         return if (bool) whenEnabled else whenDisabled
     }
 }

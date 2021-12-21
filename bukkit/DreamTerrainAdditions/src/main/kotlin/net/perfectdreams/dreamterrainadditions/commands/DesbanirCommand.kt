@@ -35,7 +35,7 @@ object DesbanirCommand : DSLCommandBase<DreamTerrainAdditions> {
                 claimAdditions.bannedPlayers.remove(playerName)
                 player.sendMessage("§b$playerName§a foi desbanido do terreno!")
                 player.sendMessage("§7Para banir alguém, use §6/banir")
-                plugin.save()
+                plugin.saveInAsyncTask()
             } else {
                 player.sendMessage(withoutPermission)
                 return@executes
