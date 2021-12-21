@@ -25,12 +25,7 @@ object DesbanirCommand : DSLCommandBase<DreamTerrainAdditions> {
             }
 
             if (claim.ownerName == player.name || claim.managers.contains(player.name)) {
-                var claimAdditions = plugin.getClaimAdditionsById(claim.id)
-
-                if (claimAdditions == null) {
-                    claimAdditions = DreamTerrainAdditions.ClaimAdditions(claim.id)
-                    plugin.claimsAdditionsList.add(claimAdditions)
-                }
+                val claimAdditions = plugin.getOrCreateClaimAdditionsWithId(claim.id)
 
                 if (!claimAdditions.bannedPlayers.contains(playerName)) {
                     player.sendMessage("§b$playerName§c não está banido deste terreno!")

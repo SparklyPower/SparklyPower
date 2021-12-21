@@ -29,12 +29,7 @@ object BanirCommand : DSLCommandBase<DreamTerrainAdditions> {
             }
 
             if (claim.ownerName == player.name || claim.allowGrantPermission(player) == null) {
-                var claimAdditions = plugin.getClaimAdditionsById(claim.id)
-
-                if (claimAdditions == null) {
-                    claimAdditions = DreamTerrainAdditions.ClaimAdditions(claim.id)
-                    plugin.claimsAdditionsList.add(claimAdditions)
-                }
+                val claimAdditions = plugin.getOrCreateClaimAdditionsWithId(claim.id)
 
                 if (claimAdditions.bannedPlayers.contains(playerName)) {
                     player.sendMessage("§b$playerName§c já está banido deste terreno!")

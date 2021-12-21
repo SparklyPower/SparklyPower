@@ -25,14 +25,7 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
             }
 
             if (claim.ownerName == player.name || claim.allowGrantPermission(player) == null) {
-                var _claimAdditions = plugin.getClaimAdditionsById(claim.id)
-
-                if (_claimAdditions == null) {
-                    _claimAdditions = DreamTerrainAdditions.ClaimAdditions(claim.id)
-                    plugin.claimsAdditionsList.add(_claimAdditions)
-                }
-
-                val claimAdditions = _claimAdditions
+                val claimAdditions = plugin.getOrCreateClaimAdditionsWithId(claim.id)
 
                 val menu = createMenu(45, "§cConfiguração do terreno") {
 

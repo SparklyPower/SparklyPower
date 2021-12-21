@@ -1,21 +1,15 @@
 package net.perfectdreams.dreamterrainadditions
 
-import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.serialization.KSerializer
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.LongAsStringSerializer
-import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.*
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
-import me.ryanhamshire.GriefPrevention.Claim
 import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent
@@ -36,7 +30,6 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
-import org.bukkit.scheduler.BukkitRunnable
 import java.io.File
 import java.util.*
 
@@ -57,14 +50,16 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		dataFolder.mkdir()
 
 		if (File(dataFolder, "additions.json").exists()) {
-			claimsAdditionsList = Json.decodeFromString(File(dataFolder, "additions.json").readText())
+			claimsAdditionsList = Json.decodeFromString<List<ClaimAdditionsData>>(File(dataFolder, "additions.json").readText())
+				.map { ClaimAdditions(it) }
+				.toMutableList()
 		}
 		startCheckingTemporaryTrustsExpirationDate()
 	}
 
 	fun save() {
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
-			File(dataFolder, "additions.json").writeText(Json.encodeToString(claimsAdditionsList))
+			File(dataFolder, "additions.json").writeText(Json.encodeToString(claimsAdditionsList.map { it.data }))
 		}
 	}
 
@@ -93,7 +88,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 
 	fun getOrCreateClaimAdditionsWithId(claimId: Long): ClaimAdditions {
 		return getClaimAdditionsById(claimId)
-			?: return ClaimAdditions(claimId).also { claimsAdditionsList.add(it) }
+			?: return ClaimAdditions(ClaimAdditionsData(claimId)).also { claimsAdditionsList.add(it) }
 	}
 
 	val passiveMobs = listOf(
@@ -269,8 +264,25 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		ClaimTrustExpirationTask(this).runTaskTimerAsynchronously(this, 20L, 120L);
 	}
 
+	class ClaimAdditions(
+		val data: ClaimAdditionsData
+	) {
+		val claimId by data::claimId
+		val bannedPlayers by data::bannedPlayers
+		val temporaryTrustedPlayers by data::temporaryTrustedPlayers
+		var pvpEnabled by data::pvpEnabled
+		var disableCropGrowth by data::disableCropGrowth
+		var disablePassiveMobs by data::disablePassiveMobs
+		var disableHostileMobs by data::disableHostileMobs
+		var disableSnowFormation by data::disableSnowFormation
+		var disablePlantsSpreading by data::disablePlantsSpreading
+		var disableTrapdoorAndDoorAccess by data::disableTrapdoorAndDoorAccess
+
+		val temporaryTrustedPlayersMutex = Mutex()
+	}
+
 	@Serializable
-	data class ClaimAdditions(
+	data class ClaimAdditionsData(
 		val claimId: Long,
 		val bannedPlayers: MutableList<String> = mutableListOf(),
 		val temporaryTrustedPlayers: MutableMap<@Serializable(UUIDAsStringSerializer::class) UUID, Long> = mutableMapOf(),
@@ -281,9 +293,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		var disableSnowFormation: Boolean = false,
 		var disablePlantsSpreading: Boolean = false,
 		var disableTrapdoorAndDoorAccess: Boolean = false
-	) {
-		val temporaryTrustedPlayersMutex = Mutex()
-	}
+	)
 
 	object UUIDAsStringSerializer : KSerializer<UUID> {
 		override val descriptor: SerialDescriptor =
