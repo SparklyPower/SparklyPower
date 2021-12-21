@@ -179,7 +179,9 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 // Releasing locks...
                 (inventory.holder as MochilaInventoryHolder).accessHolders.poll()
                     ?.release(triggerType)
-                MochilaUtils.updateMochilaItemLore(inventory, item)
+                onMainThread {
+                    MochilaUtils.updateMochilaItemLore(inventory, item)
+                }
             }
         }
     }
@@ -327,10 +329,12 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                 mochilaAccessHolder.release("${e.player.name} closing inventory")
                 if (isMochila == true) {
-                    MochilaUtils.updateMochilaItemLore(
-                        e.inventory,
-                        item
-                    )
+                    onMainThread {
+                        MochilaUtils.updateMochilaItemLore(
+                            e.inventory,
+                            item
+                        )
+                    }
                 }
             }
         }

@@ -99,6 +99,9 @@ object MochilaUtils {
      * Updates the [mochilaItem] metadata based on the [inventory]'s information
      */
     fun updateMochilaItemLore(inventory: Inventory, mochilaItem: ItemStack) {
+        // Items can only be manipulated in the main thread, if else the server doesn't like it
+        // (Race conditions where the server reads the ItemMeta while another thread is changing it, causing a full server crash)
+        DreamUtils.assertMainThread(true)
         val currentLore = mochilaItem.lore
 
         // Only update if the lore exists... it should always exist
