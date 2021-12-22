@@ -80,11 +80,16 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
             // println("Sections: $ySectionCount")
 
             for ((i, section) in sections.withIndex()) {
-                val blockPalette = section.palette(PaletteType.BLOCKS)
+                val blockPalette = section.palette(PaletteType.BLOCKS) ?: continue // Does not have any block palette...
 
                 // Quick fail: Only edit if the palette contains note blocks
-                // !(0 until blockPalette.size()).any { blockPalette.idByIndex(it) == Block.BLOCK_STATE_REGISTRY.getId(Blocks.NOTE_BLOCK.defaultBlockState()) }
-                if (blockPalette == null) // Does not have any palette...
+                val hasNoteBlockInPalette = (0 until blockPalette.size()).any {
+                    val blockId = blockPalette.idByIndex(it)
+                    Block.BLOCK_STATE_REGISTRY.byId(blockId)?.bukkitMaterial == Material.NOTE_BLOCK
+                }
+
+                // Does not have any note blocks in the block palette...
+                if (!hasNoteBlockInPalette)
                     continue
 
                 var hasNoteBlock = false
@@ -163,7 +168,6 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
             if (wrapper.blockData.type == Material.NOTE_BLOCK) {
                 // So, we are changing a note block? Interesting...
 
-                println("Updating note block at ${wrapper.location.x}, ${wrapper.location.y}, ${wrapper.location.z}")
                 // If it is a custom block, just leave it as is :3
                 if (m.getCustomBlocksInWorld(playerWorld.name).contains(
                         BlockPosition(
