@@ -27,6 +27,11 @@ import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 class DreamCustomItems : KotlinPlugin(), Listener {
+	companion object {
+		// The number of threads to use for block processing
+		private const val WORKER_THREADS = 4
+	}
+
 	private val recipes = mutableListOf<NamespacedKey>()
 
 	val oldmicrowaves = mutableMapOf<Location, Microwave>() //OLD MICROWAVE
@@ -100,8 +105,12 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		registerEvents(CustomBlocksListener(this))
 		registerEvents(EstalinhoListener(this))
 
+		// https://gist.github.com/aadnk/8119275
 		val protocolManager = ProtocolLibrary.getProtocolManager()
-		protocolManager.addPacketListener(BlockPacketAdapter(this))
+		protocolManager
+			.asynchronousManager
+			.registerAsyncHandler(BlockPacketAdapter(this))
+			.start(WORKER_THREADS)
 
 		registerCommand(CustomItemsCommand)
 		registerCommand(CustomItemRecipeCommand)
