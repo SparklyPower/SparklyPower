@@ -80,6 +80,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		File(dataFolder, "additions.json").writeText(
 			Json.encodeToString(
 				claimsAdditionsMap.values
+					.map { it.data }
 			)
 		)
 	}
