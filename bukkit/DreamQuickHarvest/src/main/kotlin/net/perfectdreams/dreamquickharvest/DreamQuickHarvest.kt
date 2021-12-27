@@ -7,6 +7,7 @@ import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.player.UserManager
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
+import net.perfectdreams.dreamcore.commands.TellExecutor.Companion.Options.player
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.canHoldItem
@@ -14,11 +15,9 @@ import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
-import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.utils.MochilaAccessHolder
 import net.perfectdreams.dreammochilas.utils.MochilaInventoryHolder
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
-import net.perfectdreams.dreammochilas.utils.MochilaWrapper
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.block.Block
@@ -32,6 +31,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.experimental.and
 
 @OptIn(InternalCoroutinesApi::class)
@@ -71,13 +71,16 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e, "${e.player.name} harvesting crops")
 
 				val ttl = System.currentTimeMillis()
+				val mcMMOXp = AtomicInteger()
 				doQuickHarvestOnCrop(
 					e.player,
 					e.block,
 					e.block.type,
 					e.player.inventory.itemInMainHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS),
-					inventoryTarget
+					inventoryTarget,
+					mcMMOXp
 				)
+				giveMcMMOHerbalismXP(e.player, mcMMOXp)
 				logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest normal crops!" }
 
 				if (mochila != null) {
@@ -106,7 +109,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e, "${e.player.name} harvesting cocoa")
 
 				val ttl = System.currentTimeMillis()
-				doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget)
+				val mcMMOXp = AtomicInteger()
+				doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget, mcMMOXp)
+				giveMcMMOHerbalismXP(e.player, mcMMOXp)
 				logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest cocoa!" }
 
 				if (mochila != null) {
@@ -132,7 +137,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(e, "${e.player.name} harvesting sugar cane")
 
 				val ttl = System.currentTimeMillis()
-				doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget)
+				val mcMMOXp = AtomicInteger()
+				doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget, mcMMOXp)
+				giveMcMMOHerbalismXP(e.player, mcMMOXp)
 				logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest sugar canes!" }
 
 				if (mochila != null) {
@@ -210,7 +217,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		return true
 	}
 
-	fun giveMcMMOHerbalismXP(player: Player, block: Block, material: Material? = null) {
+	fun addMcMMOHerbalismXP(
+		player: Player,
+		block: Block,
+		material: Material? = null,
+		mcMMOXp: AtomicInteger
+	) {
 		if (mcMMO.getPlaceStore().isTrue(block.state))
 			return
 
@@ -240,17 +252,34 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		// bringing our sweet TPS down the drain
 		//
 		// So we add the XP directly via the "beginXpGain" method, which is what the "addXP" uses behind the scenes
-		//
-		// TODO: Optimize this further, we can add all the XP first and then give out the XP, instead of giving XP for each crop broken
+		mcMMOXp.addAndGet(xpValue)
+	}
+
+	fun giveMcMMOHerbalismXP(
+		player: Player,
+		mcMMOXp: AtomicInteger
+	) {
+		// We accumulate all XP and then give the XP to the player
+		// This avoids lag spikes due to mcMMO trying to add XP to the player on every single block they are breaking
+		val xpToBeGiven = mcMMOXp.get()
+		if (0 >= xpToBeGiven)
+			return
+
 		UserManager.getPlayer(player).beginXpGain(
 			PrimarySkillType.HERBALISM,
-			xpValue.toFloat(),
+			xpToBeGiven.toFloat(),
 			XPGainReason.UNKNOWN,
 			XPGainSource.CUSTOM
 		)
 	}
-
-	suspend fun doQuickHarvestOnCrop(player: Player, block: Block, type: Material, fortuneLevel: Int, inventory: Inventory) {
+	suspend fun doQuickHarvestOnCrop(
+		player: Player,
+		block: Block,
+		type: Material,
+		fortuneLevel: Int,
+		inventory: Inventory,
+		mcMMOXp: AtomicInteger
+	) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
 
@@ -360,7 +389,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					farmBlock.blockData = ageable
 				}
 
-				giveMcMMOHerbalismXP(player, block, type) // mcMMO EXP
+				addMcMMOHerbalismXP(player, block, type, mcMMOXp) // mcMMO EXP
 
 				player.world.spawnParticle(
 					Particle.VILLAGER_HAPPY,
@@ -374,7 +403,13 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		}
 	}
 
-	suspend fun doQuickHarvestOnCocoa(e: BlockBreakEvent, player: Player, block: Block, inventory: Inventory) {
+	suspend fun doQuickHarvestOnCocoa(
+		e: BlockBreakEvent,
+		player: Player,
+		block: Block,
+		inventory: Inventory,
+		mcMMOXp: AtomicInteger
+	) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
 
@@ -418,21 +453,27 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		delay(100)
 
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH), inventory)
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH), inventory)
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.EAST), inventory)
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.WEST), inventory)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH), inventory, mcMMOXp)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH), inventory, mcMMOXp)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.EAST), inventory, mcMMOXp)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.WEST), inventory, mcMMOXp)
 		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH_EAST), inventory)
 		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH_WEST), inventory)
 		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH_EAST), inventory)
 		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH_WEST), inventory)
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.UP), inventory)
-		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.DOWN), inventory)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.UP), inventory, mcMMOXp)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.DOWN), inventory, mcMMOXp)
 
-		giveMcMMOHerbalismXP(player, block) // mcMMO EXP
+		addMcMMOHerbalismXP(player, block, mcMMOXp = mcMMOXp) // mcMMO EXP
 	}
 
-	suspend fun doQuickHarvestOnSugarCane(e: BlockBreakEvent, player: Player, block: Block, inventory: Inventory) {
+	suspend fun doQuickHarvestOnSugarCane(
+		e: BlockBreakEvent,
+		player: Player,
+		block: Block,
+		inventory: Inventory,
+		mcMMOXp: AtomicInteger
+	) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
 
@@ -475,7 +516,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 			inventory.addItem(itemStack)
 
-			giveMcMMOHerbalismXP(player, bottom) // mcMMO EXP
+			addMcMMOHerbalismXP(player, bottom, mcMMOXp = mcMMOXp) // mcMMO EXP
 
 			bottom.type = Material.AIR
 
@@ -486,14 +527,14 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		delay(100)
 
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH), inventory)
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH), inventory)
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.EAST), inventory)
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.WEST), inventory)
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH_WEST), inventory)
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_WEST), inventory)
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH_EAST), inventory)
-		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_EAST), inventory)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH), inventory, mcMMOXp)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH), inventory, mcMMOXp)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.EAST), inventory, mcMMOXp)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.WEST), inventory, mcMMOXp)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH_WEST), inventory, mcMMOXp)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_WEST), inventory, mcMMOXp)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.NORTH_EAST), inventory, mcMMOXp)
+		doQuickHarvestOnSugarCane(e, player, bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_EAST), inventory, mcMMOXp)
 	}
 
 	fun sendInventoryFullTitle(player: Player) {
