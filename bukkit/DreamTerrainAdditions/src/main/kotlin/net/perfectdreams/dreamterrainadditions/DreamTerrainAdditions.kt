@@ -256,12 +256,13 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onTrustChange(event: TrustChangedEvent) {
-		val claim = event.claims.getOrNull(0) ?: return
-		val claimAdditions = getClaimAdditionsById(claim.id) ?: return
+		for (claim in event.claims) {
+			val claimAdditions = getClaimAdditionsById(claim.id) ?: return
 
-		val userUniqueId = DreamUtils.retrieveUserUniqueId(event.identifier)
-		if (claimAdditions.temporaryTrustedPlayers.containsKey(userUniqueId) && !event.isGiven) {
-			claimAdditions.temporaryTrustedPlayers.remove(userUniqueId)
+			val userUniqueId = DreamUtils.retrieveUserUniqueId(event.identifier)
+			if (claimAdditions.temporaryTrustedPlayers.containsKey(userUniqueId) && !event.isGiven) {
+				claimAdditions.temporaryTrustedPlayers.remove(userUniqueId)
+			}
 		}
 	}
 

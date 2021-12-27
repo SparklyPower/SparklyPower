@@ -13,7 +13,6 @@ repositories {
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
-    compileOnly("com.github.TechFortress:GriefPrevention:16.17.1")
 }
 
 tasks.withType<KotlinCompile> {
