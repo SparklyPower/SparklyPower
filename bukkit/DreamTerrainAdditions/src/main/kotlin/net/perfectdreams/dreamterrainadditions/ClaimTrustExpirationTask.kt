@@ -10,7 +10,7 @@ class ClaimTrustExpirationTask(val m: DreamTerrainAdditions) : BukkitRunnable() 
         var isDirty = false
 
         runBlocking {
-            m.claimsAdditionsList.forEach { additions ->
+            m.claimsAdditionsMap.values.forEach { additions ->
                 additions.temporaryTrustedPlayersMutex.withLock {
                     additions.temporaryTrustedPlayers.forEach { (uuid, millis) ->
                         val griefPreventionClaim = GriefPrevention.instance.dataStore.getClaim(additions.claimId)

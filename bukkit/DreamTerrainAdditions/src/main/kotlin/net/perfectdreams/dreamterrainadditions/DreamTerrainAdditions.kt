@@ -34,7 +34,12 @@ import java.io.File
 import java.util.*
 
 class DreamTerrainAdditions : KotlinPlugin(), Listener {
-	var claimsAdditionsList = mutableListOf<ClaimAdditions>()
+	// We use a Map to make all claims additions check O1
+	// Using a list would require looping all claim additions just to check what matches what we want...
+	// and that's SUPER intensive!
+	//
+	// TODO: Maybe also save the data as a Map instead of a List!
+	var claimsAdditionsMap = mutableMapOf<Long, ClaimAdditions>()
 
 	override fun softEnable() {
 		super.softEnable()
@@ -50,9 +55,12 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		dataFolder.mkdir()
 
 		if (File(dataFolder, "additions.json").exists()) {
-			claimsAdditionsList = Json.decodeFromString<List<ClaimAdditionsData>>(File(dataFolder, "additions.json").readText())
+			Json.decodeFromString<List<ClaimAdditionsData>>(File(dataFolder, "additions.json").readText())
 				.map { ClaimAdditions(it) }
 				.toMutableList()
+				.forEach {
+					claimsAdditionsMap[it.claimId]
+				}
 		}
 		startCheckingTemporaryTrustsExpirationDate()
 	}
@@ -69,7 +77,11 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 	}
 
 	private fun save() {
-		File(dataFolder, "additions.json").writeText(Json.encodeToString(claimsAdditionsList.map { it.data }))
+		File(dataFolder, "additions.json").writeText(
+			Json.encodeToString(
+				claimsAdditionsMap.values
+			)
+		)
 	}
 
 	@EventHandler
@@ -88,12 +100,11 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 	}
 
 	fun getClaimAdditionsById(claimId: Long): ClaimAdditions? {
-		return claimsAdditionsList.firstOrNull { it.claimId == claimId }
+		return claimsAdditionsMap[claimId]
 	}
 
 	fun getOrCreateClaimAdditionsWithId(claimId: Long): ClaimAdditions {
-		return getClaimAdditionsById(claimId)
-			?: return ClaimAdditions(ClaimAdditionsData(claimId)).also { claimsAdditionsList.add(it) }
+		return getClaimAdditionsById(claimId) ?: return ClaimAdditions(ClaimAdditionsData(claimId)).also { claimsAdditionsMap[claimId] = it }
 	}
 
 	val passiveMobs = listOf(
