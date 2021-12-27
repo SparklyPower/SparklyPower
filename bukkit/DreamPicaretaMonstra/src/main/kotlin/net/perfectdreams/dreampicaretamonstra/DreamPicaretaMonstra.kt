@@ -109,24 +109,6 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 				)
 			)
 		}
-
-		if (BlockUtils.affectedByGigaDrillBreaker(blockState) && com.gmail.nossr50.util.ItemUtils.isShovel(heldItem) && PrimarySkillType.EXCAVATION.getPermissions(
-				player
-			) && !mcMMO.getPlaceStore().isTrue(blockState)
-		) {
-			val excavationManager: ExcavationManager = mcMMOPlayer.excavationManager
-			excavationManager.excavationBlockCheck(blockState)
-
-			// For my friend mcMMO xoxo
-			Bukkit.getPluginManager().callEvent(
-				FakeBlockDropItemEvent(
-					blockState.block,
-					blockState,
-					player,
-					drops
-				)
-			)
-		}
 	}
 
 	fun doMcMMOStuffExcavation(player: Player, blockState: BlockState, drops: List<Item>) {
