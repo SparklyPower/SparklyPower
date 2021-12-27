@@ -1,11 +1,18 @@
 package net.perfectdreams.dreampicaretamonstra
 
+import com.gmail.nossr50.datatypes.experience.XPGainReason
 import com.gmail.nossr50.datatypes.player.McMMOPlayer
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
+import com.gmail.nossr50.datatypes.skills.SubSkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.skills.excavation.ExcavationManager
+import com.gmail.nossr50.skills.mining.Mining
 import com.gmail.nossr50.skills.mining.MiningManager
+import com.gmail.nossr50.util.BlockUtils
+import com.gmail.nossr50.util.Permissions
 import com.gmail.nossr50.util.player.UserManager
+import com.gmail.nossr50.util.random.RandomChanceUtil
+import com.gmail.nossr50.util.skills.SkillUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreampicaretamonstra.commands.PaMonstraCommand
@@ -73,7 +80,7 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 		else isValidShovellingBlock(block)
 	}
 
-	fun doMcMMOStuff(player: Player, blockState: BlockState, drops: List<Item>) {
+	fun doMcMMOStuffMining(player: Player, blockState: BlockState, drops: List<Item>, heldItemHasSilkTouch: Boolean) {
 		val mcMMOPlayer: McMMOPlayer = UserManager.getPlayer(player) ?: return
 
 		val heldItem = player.inventory.itemInMainHand
@@ -83,7 +90,14 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 			) && !mcMMO.getPlaceStore().isTrue(blockState)
 		) {
 			val miningManager: MiningManager = mcMMOPlayer.miningManager
-			miningManager.miningBlockCheck(blockState)
+			miningBlockCheck(
+				player,
+				mcMMOPlayer,
+				PrimarySkillType.MINING,
+				miningManager,
+				blockState,
+				heldItemHasSilkTouch
+			)
 
 			// For my friend mcMMO xoxo
 			Bukkit.getPluginManager().callEvent(
@@ -96,7 +110,7 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 			)
 		}
 
-		if (com.gmail.nossr50.util.BlockUtils.affectedByGigaDrillBreaker(blockState) && com.gmail.nossr50.util.ItemUtils.isShovel(heldItem) && PrimarySkillType.EXCAVATION.getPermissions(
+		if (BlockUtils.affectedByGigaDrillBreaker(blockState) && com.gmail.nossr50.util.ItemUtils.isShovel(heldItem) && PrimarySkillType.EXCAVATION.getPermissions(
 				player
 			) && !mcMMO.getPlaceStore().isTrue(blockState)
 		) {
@@ -112,6 +126,67 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 					drops
 				)
 			)
+		}
+	}
+
+	fun doMcMMOStuffExcavation(player: Player, blockState: BlockState, drops: List<Item>) {
+		val mcMMOPlayer: McMMOPlayer = UserManager.getPlayer(player) ?: return
+
+		val heldItem = player.inventory.itemInMainHand
+
+		if (BlockUtils.affectedByGigaDrillBreaker(blockState) && com.gmail.nossr50.util.ItemUtils.isShovel(heldItem) && PrimarySkillType.EXCAVATION.getPermissions(
+				player
+			) && !mcMMO.getPlaceStore().isTrue(blockState)
+		) {
+			val excavationManager: ExcavationManager = mcMMOPlayer.excavationManager
+			excavationManager.excavationBlockCheck(blockState)
+
+			// For my friend mcMMO xoxo
+			Bukkit.getPluginManager().callEvent(
+				FakeBlockDropItemEvent(
+					blockState.block,
+					blockState,
+					player,
+					drops
+				)
+			)
+		}
+	}
+
+	// This is the same thing as mcMMO's "miningBlockCheck" in MiningManager, however we have a "heldItemHasSilkTouch" boolean to avoid checking the "containsEnchantment", which is very intensive
+	private fun miningBlockCheck(
+		player: Player,
+		mmoPlayer: McMMOPlayer,
+		skillType: PrimarySkillType,
+		miningManager: MiningManager,
+		blockState: BlockState,
+		heldItemHasSilkTouch: Boolean
+	) {
+		miningManager.applyXpGain(Mining.getBlockXp(blockState).toFloat(), XPGainReason.PVE)
+		if (Permissions.isSubSkillEnabled(player, SubSkillType.MINING_DOUBLE_DROPS)) {
+			if (mmoPlayer.getAbilityMode(mcMMO.p.skillTools.getSuperAbility(skillType))) {
+				SkillUtils.handleDurabilityChange(
+					player.inventory.itemInMainHand,
+					mcMMO.p.generalConfig.abilityToolDamage
+				)
+			}
+			if (mcMMO.p.generalConfig.getDoubleDropsEnabled(
+					PrimarySkillType.MINING,
+					blockState.type
+				) && miningManager.canDoubleDrop()
+			) {
+				if (!heldItemHasSilkTouch || mcMMO.p.advancedConfig.doubleDropSilkTouchEnabled) {
+					if (RandomChanceUtil.checkRandomChanceExecutionSuccess(
+							player,
+							SubSkillType.MINING_DOUBLE_DROPS,
+							true
+						)
+					) {
+						val useTriple = mmoPlayer.getAbilityMode(mcMMO.p.skillTools.getSuperAbility(skillType)) && mcMMO.p.advancedConfig.allowMiningTripleDrops
+						BlockUtils.markDropsAsBonus(blockState, useTriple)
+					}
+				}
+			}
 		}
 	}
 

@@ -51,6 +51,8 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
         val broken = e.block
         val heldItemType = inHand.type
 
+        val isPicaretaMonstra = heldItemType.name.contains("_PICKAXE")
+
         if (m.isValidForHeldItem(heldItemType, broken)) {
             e.isCancelled = true
 
@@ -109,7 +111,20 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                             )
                         }
 
-                        m.doMcMMOStuff(e.player, location.block.state, dropsAsItems)
+                        if (isPicaretaMonstra) {
+                            m.doMcMMOStuffMining(
+                                e.player,
+                                location.block.state,
+                                dropsAsItems,
+                                isSilky
+                            )
+                        } else {
+                            m.doMcMMOStuffExcavation(
+                                e.player,
+                                location.block.state,
+                                dropsAsItems
+                            )
+                        }
 
                         // Do not update physics, this tries to avoid a lot of "notify()" calls
                         // See: https://cdn.discordapp.com/attachments/513405772911345664/869387512924209182/wLnOZAeMZ5.sparkprofile
