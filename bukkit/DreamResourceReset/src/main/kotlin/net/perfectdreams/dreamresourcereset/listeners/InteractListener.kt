@@ -128,8 +128,6 @@ class InteractListener(val m: DreamResourceReset) : Listener {
             // bad bad
             waitFor(5L)
 
-            e.player.removePotionEffect(PotionEffectType.INVISIBILITY)
-
             val world = Bukkit.getWorld("Resources")!!
 
             var location: Location?
@@ -193,11 +191,14 @@ class InteractListener(val m: DreamResourceReset) : Listener {
                 }
             }
 
-            if (location == null)
+            if (location == null) {
+                e.player.removePotionEffect(PotionEffectType.INVISIBILITY)
                 return@schedule
+            }
 
             e.player.sendTitle("§bWoosh!", "", 0, 20, 10)
             e.player.teleport(location) // Teletransportar player
+            e.player.removePotionEffect(PotionEffectType.INVISIBILITY)
             e.player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 600, 1)) // Efeito de velocidade
             e.player.addPotionEffect(
                 PotionEffect(
