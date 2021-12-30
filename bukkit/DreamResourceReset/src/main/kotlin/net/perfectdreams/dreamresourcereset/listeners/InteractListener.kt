@@ -19,8 +19,15 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 class InteractListener(val m: DreamResourceReset) : Listener {
+    companion object {
+        private val FIVE_MINUTES_IN_TICKS = (30 * 60) * 20
+    }
+
     @EventHandler
     fun onTorchInteract(e: PlayerInteractEvent) {
         if (!e.rightClick && !e.leftClick)
@@ -134,60 +141,64 @@ class InteractListener(val m: DreamResourceReset) : Listener {
 
             // To avoid users getting into chunks that have too much "Player activity", we are going to get chunks with less
             // inhabited timer than other chunks
+            // First a quick check before we do more intensive stuff (calculating the square root)
+            // shl = convert chunk pos to block pos
+            // shr = convert block pos to chunk pos
+            var loadedChunkThatMatchesWhatWeWant = world.loadedChunks
+                .asSequence()
+                .filter { FIVE_MINUTES_IN_TICKS > m.getInhabitedChunkTimerInResourcesWorldAt(it.x shr 4, it.z shr 4) }
+                .filter { it.entities.filterIsInstance<Player>().isEmpty() }
+                .firstOrNull()
+
+            var chunksChecked = 0
             while (true) {
                 try {
-                    val x = DreamUtils.random.nextInt(-2500, 2501)
-                    val z = DreamUtils.random.nextInt(-2500, 2501)
-                    val chunkX = x shr 4
-                    val chunkY = z shr 4
+                    val (x, z) = if (loadedChunkThatMatchesWhatWeWant == null) {
+                        // https://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly
+                        val r = 2500 * sqrt(DreamUtils.random.nextDouble())
+                        val theta = DreamUtils.random.nextDouble() * 2 * Math.PI
+                        val x = (r * cos(theta)).toInt()
+                        val z = (r * sin(theta)).toInt()
 
-                    val inhabitedTimerInChunk = m.getInhabitedChunkTimerInResourcesWorldAt(chunkX, chunkY)
+                        val chunkX = x shr 4
+                        val chunkY = z shr 4
 
-                    m.logger.info { "Trying to use chunk ($x; $z = $chunkX, $chunkY); Inhabited timer in chunk is $inhabitedTimerInChunk" }
+                        val inhabitedTimerInChunk = m.getInhabitedChunkTimerInResourcesWorldAt(chunkX, chunkY)
 
-                    if (inhabitedTimerInChunk != 0L) {
-                        val topCachedInhabitedTimers = m.cachedInhabitedChunkTimers.values
-                            // We don't want to get inhabited timers that were active for less than 30 minutes
-                            .filter { it >= (30 * 60 * 20) }
-                            .sorted()
+                        m.logger.info { "Trying to use chunk ($x; $z = $chunkX, $chunkY); Inhabited timer in chunk is $inhabitedTimerInChunk" }
 
-                        // The getInhabitedChunkTimerInResourcesWorldAt gets the inhabited timer from the cache
-                        // this way we avoid loading the chunk if it is "too active"
-                        m.logger.info { "There are ${topCachedInhabitedTimers.size} valid (30m+) cached inhabited chunk timers" }
+                        // We are going to max check 60 chunks
+                        val bypassChecks = chunksChecked == 60
 
-                        // Only try to check the inhabited timers if there are a *lot* of entries
-                        if (topCachedInhabitedTimers.size >= 10) {
-                            val tooMuchActivenessInChunkTimer = topCachedInhabitedTimers[
-                                    (topCachedInhabitedTimers.size * 0.3)
-                                        .toInt()
-                            ]
-
-                            m.logger.info { "Using $tooMuchActivenessInChunkTimer ticks as the \"too active\" threshold" }
-
-                            // The current inhabited timer is more than the max activeness threshold, let's skip it!
-                            if (inhabitedTimerInChunk >= tooMuchActivenessInChunkTimer) {
-                                m.logger.info { "Skipping Chunk ($x, $z) due to too much activeness! $inhabitedTimerInChunk >= $tooMuchActivenessInChunkTimer" }
-                                waitFor(5L)
-                                continue
-                            }
+                        if (!bypassChecks && inhabitedTimerInChunk >= FIVE_MINUTES_IN_TICKS) {
+                            m.logger.info { "Skipping Chunk ($x, $z) due to too much activeness! $inhabitedTimerInChunk >= $FIVE_MINUTES_IN_TICKS" }
+                            waitFor(1L)
+                            chunksChecked++
+                            continue
                         }
-                    }
 
-                    val chunk = world.getChunkAt(chunkX, chunkY)
+                        val chunk = world.getChunkAt(chunkX, chunkY)
 
-                    // If there is any players in the current chunk, skip it
-                    if (chunk.entities.any { it is Player }) {
-                        m.logger.info { "Skipping Chunk ($x, $z) because there is another player in the same chunk!" }
-                        waitFor(5L)
-                        continue
-                    }
+                        // If there is any players in the current chunk, skip it
+                        if (!bypassChecks && chunk.entities.any { it is Player }) {
+                            m.logger.info { "Skipping Chunk ($x, $z) because there is another player in the same chunk!" }
+                            waitFor(1L)
+                            chunksChecked++
+                            continue
+                        }
+
+                        Pair(x, z)
+                    } else Pair(8 + (loadedChunkThatMatchesWhatWeWant.x shl 4), 8 + (loadedChunkThatMatchesWhatWeWant.z shl 4)) // Middle of the chunk
 
                     val highestY = world.getHighestBlockYAt(x, z)
                     location = Location(world, x.toDouble(), highestY.toDouble(), z.toDouble())
                         .getSafeDestination()
                     break
                 } catch (e: LocationUtils.HoleInFloorException) {
-                    waitFor(5L)
+                    // If there was an exception, let's remove the loadedChunkThatMatchesWhatWeWant reference, because if we are using that, we wanna find a new chunk!
+                    loadedChunkThatMatchesWhatWeWant = null
+                    waitFor(1L)
+                    chunksChecked++
                 }
             }
 
