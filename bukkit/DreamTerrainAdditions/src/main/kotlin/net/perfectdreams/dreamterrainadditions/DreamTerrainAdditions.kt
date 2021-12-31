@@ -59,7 +59,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 				.map { ClaimAdditions(it) }
 				.toMutableList()
 				.forEach {
-					claimsAdditionsMap[it.claimId]
+					claimsAdditionsMap[it.claimId] = it
 				}
 		}
 		startCheckingTemporaryTrustsExpirationDate()
