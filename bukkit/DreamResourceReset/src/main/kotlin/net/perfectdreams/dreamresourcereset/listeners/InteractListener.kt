@@ -146,7 +146,7 @@ class InteractListener(val m: DreamResourceReset) : Listener {
             // shr = convert block pos to chunk pos
             var loadedChunkThatMatchesWhatWeWant = world.loadedChunks
                 .asSequence()
-                .filter { FIVE_MINUTES_IN_TICKS > m.getInhabitedChunkTimerInResourcesWorldAt(it.x shr 4, it.z shr 4) }
+                .filter { FIVE_MINUTES_IN_TICKS > m.getInhabitedChunkTimerInResourcesWorldAt(it.x, it.z) }
                 .filter { it.entities.filterIsInstance<Player>().isEmpty() }
                 .firstOrNull()
 
