@@ -57,7 +57,6 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		if (File(dataFolder, "additions.json").exists()) {
 			Json.decodeFromString<List<ClaimAdditionsData>>(File(dataFolder, "additions.json").readText())
 				.map { ClaimAdditions(it) }
-				.toMutableList()
 				.forEach {
 					claimsAdditionsMap[it.claimId] = it
 				}
