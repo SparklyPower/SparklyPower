@@ -52,6 +52,11 @@ class DreamNetworkBans : KotlinPlugin() {
 		WebhookClient.withUrl(config.getString("ban-warnings-webhook"))
 	}
 
+	// Used for debugging, DO NOT ENABLE IN PRODUCTION!
+	val requireDreamAuthLogin by lazy {
+		config.getBoolean("require-dreamauth-login", true)
+	}
+
 	val loggedInPlayers = Collections.newSetFromMap(ConcurrentHashMap<UUID, Boolean>())
 	val geyserPlayers = Collections.newSetFromMap(ConcurrentHashMap<UUID, Boolean>())
 	val minecraftMojangApi = MinecraftMojangAPI()

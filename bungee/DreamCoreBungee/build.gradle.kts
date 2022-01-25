@@ -31,14 +31,14 @@ dependencies {
 
     api(project(":common:tables"))
 
-    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.2")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.1")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
 
     api("com.zaxxer:HikariCP:4.0.3")
     api("org.postgresql:postgresql:42.2.20")
-    api("org.jetbrains.exposed:exposed-core:0.32.1")
-    api("org.jetbrains.exposed:exposed-dao:0.32.1")
-    api("org.jetbrains.exposed:exposed-jdbc:0.32.1")
+    api("org.jetbrains.exposed:exposed-core:0.36.2")
+    api("org.jetbrains.exposed:exposed-dao:0.36.2")
+    api("org.jetbrains.exposed:exposed-jdbc:0.36.2")
     api("io.ktor:ktor-client-cio:1.5.4")
 
     api(Dependencies.DISCORD_WEBHOOKS)

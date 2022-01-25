@@ -23,9 +23,7 @@ class SocketListener(val m: DreamNetworkBans) : Listener {
 				"/login",
 				"/logar",
 				"/registrar",
-				"/register",
-				"/recuperar",
-				"/2fa"
+				"/register"
 		)
 	}
 

@@ -35,7 +35,7 @@ object LoginCommand : DSLCommandBase<DreamAuth> {
                     switchContext(SynchronizationContext.SYNC)
                     player.sendMessage("§cSenha incorreta! Verifique se você não colocou nada errado e se o caps lock está desativado!")
                     player.sendMessage("§c")
-                    player.sendMessage("§cEsqueceu a sua senha? Então use §6/recuperar email§c para recuperar a sua senha utilizando seu email!")
+                    player.sendMessage("§cEsqueceu a sua senha? A equipe do SparklyPower pode recuperar a sua senha caso você tenha associado a sua conta do SparklyPower com a do Discord! https://discord.gg/JYN6g2s")
 
                     val count = plugin.wrongPasswordCount.getOrDefault(player.address.address, 0) + 1
                     plugin.wrongPasswordCount[player.address.address] = count

@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
+    kotlin("plugin.serialization")
 }
 
 repositories {
@@ -10,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":bungee:DreamCoreBungee", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":bungee:DreamCoreBungee"))
     compileOnly("net.luckperms:api:5.2")
 }
 

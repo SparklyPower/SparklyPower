@@ -388,6 +388,10 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 				}
 			}
 
+			// THIS IS FOR DEBUGGING/DEV!!
+			if (!m.requireDreamAuthLogin)
+				m.loggedInPlayers.add(event.connection.uniqueId)
+
 			addToConnectionLog(event, LoginConnectionStatus.OK)
 			event.completeIntent(m)
 		}

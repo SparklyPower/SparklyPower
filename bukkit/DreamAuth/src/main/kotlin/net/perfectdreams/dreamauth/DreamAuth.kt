@@ -38,13 +38,7 @@ class DreamAuth : KotlinPlugin() {
 				"/login",
 				"/logar",
 				"/register",
-				"/registrar",
-				"/recovery",
-				"/recuperar",
-				"/2fa",
-				"/twofactor",
-				"/twofactorauth",
-				"/twofactorauthentication"
+				"/registrar"
 		)
 	}
 
