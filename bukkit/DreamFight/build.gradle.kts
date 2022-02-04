@@ -14,6 +14,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamChat"))
     compileOnly(project(":bukkit:DreamCash"))
+    compileOnly(project(":bukkit:DreamCustomItems"))
 }
 
 tasks.withType<KotlinCompile> {

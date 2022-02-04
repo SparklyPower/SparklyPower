@@ -6,6 +6,7 @@ import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.*
+import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import net.perfectdreams.dreamfight.DreamFight
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
@@ -345,8 +346,8 @@ class FightArena(var m: DreamFight) {
                     addUnsafeEnchantment(Enchantment.KNOCKBACK, 4)
                 }
         }
-        if (modifiers.contains(FightModifier.HAMBURGER_POWER)) { // sword = new ItemStackBuilder(Material.BREAD).buildMeta().withDisplayName("§6✪_§f䰛_§a§lSuper_Hamburger_da_Casa_do_João_§f䰛_§6✪").withLore("§7Ele voltou.").withEnchant(Enchantment.DAMAGE_ALL, 5, true).ItemStack().build();
-            sword = ItemStack(Material.BREAD)
+        if (modifiers.contains(FightModifier.HAMBURGER_POWER)) {
+            sword = CustomItems.HAMBURGER.clone()
                 .rename("§6✪ §a§lSuper Hamburger da Casa do João §6✪")
                 .lore("§7Ele voltou.")
                 .apply {
