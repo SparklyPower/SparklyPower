@@ -39,16 +39,18 @@ class FightArena(var m: DreamFight) {
     var multiplier = 1
     var winnerPrize = 15000
     var isPvPStarted = false
+    // Used to track how many players played matches
+    private val playersMatchesPlayed = mutableListOf<Player>()
 
     fun preStartFight() {
-        // MettatonEX.reserveEvent()
         preStart = true
         started = true
         p1 = null
         p2 = null
+        p3 = null
+        p4=  null
+        playersMatchesPlayed.clear()
         players.clear()
-        // Não é necessário isto, mas não custa nada deixar aí
-        DreamFight.Companion.lastFight = System.currentTimeMillis()
         m.eventoFight.running = true
         multiplier = 1
         prize = 75
@@ -189,7 +191,7 @@ class FightArena(var m: DreamFight) {
         if (1 >= players.size) {
             m.server
                 .broadcastMessage(
-                        DreamFight.prefix + "§cInfelizmente o Evento Fight acabou devido a §lfalta de players§c..."
+                    DreamFight.prefix + "§cInfelizmente o Evento Fight acabou devido a §lfalta de players§c..."
                 )
             for (p in players) {
                 if (p.isValid) {
@@ -205,166 +207,80 @@ class FightArena(var m: DreamFight) {
             preStart = false
             m.eventoFight.running = false
             m.eventoFight.lastTime = System.currentTimeMillis()
+            playersMatchesPlayed.clear()
             return
         }
         m.server.broadcastMessage(DreamFight.prefix + "§eEvento Fight §liniciou§e! Perdeu o evento? Então vá no camarote usando §e/fight camarote§e!")
         started = true
         preStart = false
-        DreamFight.Companion.lastFight = System.currentTimeMillis()
         preparePvP()
+    }
+
+    /**
+     * Chooses a random player in the [players] list, removing invalid players and selecting players that played less times than others, to make it fair
+     */
+    private fun chooseRandomPlayerForMatchWeighted(
+        playerCount: Int
+    ): PlayerSelectionResult {
+        val weightedMap = mutableMapOf<Player, Int>()
+
+        // Removes all non-valid players
+        players.removeIf { !it.isValid }
+
+        for (player in players) {
+            weightedMap[player] = playersMatchesPlayed.count { it == player }
+        }
+
+        val playersByPlayedCount = weightedMap.entries.sortedBy { it.value }
+        if (playerCount > playersByPlayedCount.size)
+            return NotEnoughPlayersResult
+
+        return SelectedPlayersResult(playersByPlayedCount.map { it.key }.take(playerCount))
     }
 
     fun preparePvP() {
         if (hasFightEnded())
             return
 
-        var p1 = players.random()
-        var p2 = players.random()
-        var p3 = players.random()
-        var p4 = players.random()
-
-        // Bukkit.broadcastMessage("1." + p1Str);
-// Bukkit.broadcastMessage("2." + p2Str);
-        while (!p1.isValid || p1 == p2) {
-            if (hasFightEnded())
+        when (val result = chooseRandomPlayerForMatchWeighted(2)) {
+            NotEnoughPlayersResult -> {
+                // If there aren't enough players, quit
+                hasFightEnded()
                 return
-
-            if (!p1.isValid)
-                players.remove(p1)
-
-            p1 = players.random()
-            // Bukkit.broadcastMessage("1." + p1Str);
-// Bukkit.broadcastMessage("2." + p2Str);
-            if (modifiers.contains(FightModifier.TWO_TEAM)) {
-                if (3 >= players.size) { // Bukkit.broadcastMessage("Desativando 2v2!");
-                    /*
-					 * Desative o TWO_TEAM modifier caso o número de players seja pequeno
-					 */
-                    modifiers.remove(FightModifier.TWO_TEAM)
-                    /*
-					 * Pegue os players novamente...
-					 */
-                    preparePvP()
-                    return
-                }
             }
-        }
-        if (hasFightEnded()) {
-            return
-        }
-        while (!p2.isValid || p1 == p2) {
-            if (hasFightEnded())
-                return
+            is SelectedPlayersResult -> {
+                val (p1, p2) = result.players
+                this.p1 = p1
+                this.p2 = p2
 
-            if (!p2.isValid)
-                players.remove(p2)
-
-            p2 = players.random()
-
-            if (modifiers.contains(FightModifier.TWO_TEAM)) {
-                if (3 >= players.size) { // Bukkit.broadcastMessage("Desativando 2v2!");
-/*
-					 * Desative o TWO_TEAM modifier caso o número de players seja pequeno
-					 */
-                    modifiers.remove(FightModifier.TWO_TEAM)
-                    /*
-					 * Pegue os players novamente...
-					 */preparePvP()
-                    return
-                }
-            }
-        }
-        /* if (modifiers.contains(FightModifier.TWO_TEAM)) {
-            while (!p3.isValid || p3 == p2 || p3 == p1 || p3 == p4) {
-                if (hasFightEnded())
-                    return
-
-                if (!p3 == null)
-                    players.remove(p1Str)
-
-                p3Str = players.random()
-                p3 = Bukkit.getPlayerExact(p3Str)
-                if (modifiers.contains(FightModifier.TWO_TEAM)) {
-                    if (3 >= players.size) { // Bukkit.broadcastMessage("Desativando 2v2!");
-/*
-						 * Desative o TWO_TEAM modifier caso o número de players seja pequeno
-						 */
-                        modifiers.remove(FightModifier.TWO_TEAM)
-                        /*
-						 * Pegue os players novamente...
-						 */preparePvP()
-                        return
+                sendToFightArena("§c§k§l*...* §e§l" + p1.getDisplayName().toString() + "§e §4§lVS §e§l" + p2.getDisplayName().toString() + " §c§k§L*...*")
+                var text = ""
+                if (!modifiers.isEmpty()) {
+                    val names = ArrayList<String?>()
+                    for (fa in modifiers) {
+                        names.add(fa.title)
                     }
+                    text = "(" + names.joinToString(", ").toString() + ") "
                 }
-            }
-            while (p4 == null || p4Str == p2Str || p4Str == p1Str || p4Str == p3Str) {
-                if (hasFightEnded()) {
-                    return
+                for (p in lobby.world.players) {
+                    p.sendTitle(
+                        "§a" + p1.getDisplayName().toString() + " §4§lVS §a" + p2.getDisplayName(),
+                        text,
+                        5,
+                        50,
+                        5
+                    )
                 }
-                if (p4 == null) {
-                    players.remove(p1Str)
-                }
-                p4Str = players.random()
-                p4 = Bukkit.getPlayerExact(p4Str)
-                if (modifiers.contains(FightModifier.TWO_TEAM)) {
-                    if (3 >= players.size) { // Bukkit.broadcastMessage("Desativando 2v2!");
-/*
-						 * Desative o TWO_TEAM modifier caso o número de players seja pequeno
-						 */
-                        modifiers.remove(FightModifier.TWO_TEAM)
-                        /*
-						 * Pegue os players novamente...
-						 */preparePvP()
-                        return
-                    }
-                }
+                countdownPvP(3, p1, p2)
             }
-        } */
-        if (hasFightEnded()) {
-            return
-        }
-        this.p1 = p1
-        this.p2 = p2
-        this.p3 = p3
-        this.p4 = p4
-        if (!modifiers.contains(FightModifier.TWO_TEAM)) {
-            sendToFightArena("§c§k§l*...* §e§l" + p1.getDisplayName().toString() + "§e §4§lVS §e§l" + p2.getDisplayName().toString() + " §c§k§L*...*")
-            var text = ""
-            if (!modifiers.isEmpty()) {
-                val names = ArrayList<String?>()
-                for (fa in modifiers) {
-                    names.add(fa.title)
-                }
-                text = "(" + names.joinToString(", ").toString() + ") "
-            }
-            for (p in lobby.world.players) {
-                p.sendTitle(
-                    "§a" + p1.getDisplayName().toString() + " §4§lVS §a" + p2.getDisplayName(),
-                    text,
-                    5,
-                    50,
-                    5
-                )
-            }
-            countdownPvP(3, p1, p2)
-        } else {
-            var time1: String = RandomTeamName.rtn.random()
-            val time2: String = RandomTeamName.rtn.random()
-            while (time1 == time2) {
-                time1 = RandomTeamName.rtn.random()
-            }
-
-            sendToFightArena("§c§k§l*...* §b§lTime " + time1 + ": §e§l" + p1.displayName + "§e e §e§l" + p2.displayName + " §c§k§L*...*")
-            sendToFightArena("§c§k§l*...* §4§lTime " + time2 + ": §e§l" + p3.displayName + "§e e §e§l" + p4.displayName + " §c§k§L*...*")
-            this.time1 = time1
-            this.time2 = time2
-            countdownPvPMulti(3, p1, p2, p3, p4)
         }
     }
 
     fun startPvPBetween(p1: Player, p2: Player) {
         initializeFightFor(p1)
         initializeFightFor(p2)
+        playersMatchesPlayed.add(p1)
+        playersMatchesPlayed.add(p2)
         p1.teleport(pos1)
         p2.teleport(pos2)
         isPvPStarted = true
@@ -511,7 +427,7 @@ class FightArena(var m: DreamFight) {
                 winner.healAndFeed()
                 winner.teleport(exit)
                 m.server.broadcastMessage(
-                        DreamFight.prefix + "§eNós encontramos o noss${winner.artigo} §4§lLutador" + (if (winner.girl) "a" else "") + "§e! §l" + winner.displayName + "§e §lvenceu o Evento Fight§e! §a+§l" + winnerPrize + "$§a e §cum pesadelo§a!"
+                    DreamFight.prefix + "§eNós encontramos o noss${winner.artigo} §4§lLutador" + (if (winner.girl) "a" else "") + "§e! §l" + winner.displayName + "§e §lvenceu o Evento Fight§e! §a+§l" + winnerPrize + "$§a e §cum pesadelo§a!"
                 )
                 winner.balance += winnerPrize
 
@@ -527,8 +443,7 @@ class FightArena(var m: DreamFight) {
                 DreamFight.lastWinner = winner.name
                 m.eventoFight.lastTime = System.currentTimeMillis()
                 m.eventoFight.running = false
-                DreamFight.lastFight = System.currentTimeMillis()
-                // MettatonEX.stopMyEvent()
+                playersMatchesPlayed.clear()
             }
             return true
         }
@@ -753,4 +668,7 @@ class FightArena(var m: DreamFight) {
         preparePvP()
     }
 
+    sealed class PlayerSelectionResult
+    class SelectedPlayersResult(val players: List<Player>) : PlayerSelectionResult()
+    object NotEnoughPlayersResult : PlayerSelectionResult()
 }
