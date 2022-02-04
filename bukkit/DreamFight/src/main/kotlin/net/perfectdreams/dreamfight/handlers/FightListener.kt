@@ -1,7 +1,6 @@
 package net.perfectdreams.dreamfight.handlers
 
 import net.perfectdreams.dreamfight.DreamFight
-import net.perfectdreams.dreamfight.utils.FancyAsriel
 import net.perfectdreams.dreamfight.utils.FightModifier
 import net.perfectdreams.dreamfight.utils.WinReason
 import net.perfectdreams.dreamcore.utils.extensions.healAndFeed

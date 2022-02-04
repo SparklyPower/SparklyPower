@@ -91,26 +91,26 @@ class FightArena(var m: DreamFight) {
         object : BukkitRunnable() {
             override fun run() {
                 if (!players.contains(p1) || !p1.isOnline) {
-                    sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
+                    sendToFightArena("§eAlguém saiu antes do PvP... :(")
                     players.remove(p1)
                     preparePvP()
                     this.cancel()
                     return
                 }
                 if (!players.contains(p2) || !p2.isOnline) {
-                    sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
+                    sendToFightArena("§eAlguém saiu antes do PvP... :(")
                     players.remove(p2)
                     preparePvP()
                     this.cancel()
                     return
                 }
                 if (count == 0) {
-                    sendToFightArena(FancyAsriel.fancy("§e§lLutem§e!"))
+                    sendToFightArena("§e§lLutem§e!")
                     startPvPBetween(p1, p2)
                     this.cancel()
                     return
                 }
-                sendToFightArena(FancyAsriel.fancy("§e§l$count§e..."))
+                sendToFightArena("§e§l$count§e...")
                 val modCount = count - 1
                 countdownPvP(modCount, p1, p2)
             }
@@ -121,40 +121,40 @@ class FightArena(var m: DreamFight) {
         object : BukkitRunnable() {
             override fun run() {
                 if (!players.contains(p1) || !p1.isOnline) {
-                    sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
+                    sendToFightArena("§eAlguém saiu antes do PvP... :(")
                     players.remove(p1)
                     preparePvP()
                     this.cancel()
                     return
                 }
                 if (!players.contains(p2) || !p2.isOnline) {
-                    sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
+                    sendToFightArena("§eAlguém saiu antes do PvP... :(")
                     players.remove(p2)
                     preparePvP()
                     this.cancel()
                     return
                 }
                 if (!players.contains(p3) || !p3.isOnline) {
-                    sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
+                    sendToFightArena("§eAlguém saiu antes do PvP... :(")
                     players.remove(p3)
                     preparePvP()
                     this.cancel()
                     return
                 }
                 if (!players.contains(p4) || !p4.isOnline) {
-                    sendToFightArena(FancyAsriel.fancy("§eAlguém saiu antes do PvP... :("))
+                    sendToFightArena("§eAlguém saiu antes do PvP... :(")
                     players.remove(p4)
                     preparePvP()
                     this.cancel()
                     return
                 }
                 if (count == 0) {
-                    sendToFightArena(FancyAsriel.fancy("§e§lLutem§e!"))
+                    sendToFightArena("§e§lLutem§e!")
                     startPvPBetween(p1, p2, p3, p4)
                     this.cancel()
                     return
                 }
-                sendToFightArena(FancyAsriel.fancy("§e§l$count§e..."))
+                sendToFightArena("§e§l$count§e...")
                 val modCount = count - 1
                 countdownPvPMulti(modCount, p1, p2, p3, p4)
             }
@@ -189,9 +189,7 @@ class FightArena(var m: DreamFight) {
         if (1 >= players.size) {
             m.server
                 .broadcastMessage(
-                    FancyAsriel.fancy(
                         DreamFight.prefix + "§cInfelizmente o Evento Fight acabou devido a §lfalta de players§c..."
-                    )
                 )
             for (p in players) {
                 if (p.isValid) {
@@ -209,7 +207,7 @@ class FightArena(var m: DreamFight) {
             m.eventoFight.lastTime = System.currentTimeMillis()
             return
         }
-        m.server.broadcastMessage(FancyAsriel.fancy(DreamFight.prefix + "§eEvento Fight §liniciou§e! Perdeu o evento? Então vá no camarote usando §e/fight camarote§e!"))
+        m.server.broadcastMessage(DreamFight.prefix + "§eEvento Fight §liniciou§e! Perdeu o evento? Então vá no camarote usando §e/fight camarote§e!")
         started = true
         preStart = false
         DreamFight.Companion.lastFight = System.currentTimeMillis()
@@ -513,9 +511,7 @@ class FightArena(var m: DreamFight) {
                 winner.healAndFeed()
                 winner.teleport(exit)
                 m.server.broadcastMessage(
-                    FancyAsriel.fancy(
                         DreamFight.prefix + "§eNós encontramos o noss${winner.artigo} §4§lLutador" + (if (winner.girl) "a" else "") + "§e! §l" + winner.displayName + "§e §lvenceu o Evento Fight§e! §a+§l" + winnerPrize + "$§a e §cum pesadelo§a!"
-                    )
                 )
                 winner.balance += winnerPrize
 
@@ -603,7 +599,7 @@ class FightArena(var m: DreamFight) {
 
     fun sendToFightArena(str: String) {
         for (p in lobby.world.players) {
-            p.sendMessage(FancyAsriel.fancy(DreamFight.prefix + str))
+            p.sendMessage(DreamFight.prefix + str)
         }
     }
 
@@ -616,11 +612,11 @@ class FightArena(var m: DreamFight) {
             p.removeAllPotionEffects()
             p.healAndFeed()
 
-            p.sendMessage(FancyAsriel.fancy(DreamFight.prefix + "§aVocê entrou no §lEvento Fight§a! Divirta-se!"))
-            p.sendMessage(FancyAsriel.fancy(DreamFight.prefix + "§7Ainda o Evento Fight §lnão iniciou§7, mas ele irá iniciar em breve..."))
-            p.sendMessage(FancyAsriel.fancy(DreamFight.prefix + "§7Após iniciar, espere até você ser chamado para ir no PvP! §lBoa Sorte§7!"))
+            p.sendMessage(DreamFight.prefix + "§aVocê entrou no §lEvento Fight§a! Divirta-se!")
+            p.sendMessage(DreamFight.prefix + "§7Ainda o Evento Fight §lnão iniciou§7, mas ele irá iniciar em breve...")
+            p.sendMessage(DreamFight.prefix + "§7Após iniciar, espere até você ser chamado para ir no PvP! §lBoa Sorte§7!")
         } else {
-            p.sendMessage(FancyAsriel.fancy(DreamFight.prefix + "§cVocê §ljá está§c no Fight!"))
+            p.sendMessage(DreamFight.prefix + "§cVocê §ljá está§c no Fight!")
         }
     }
 
