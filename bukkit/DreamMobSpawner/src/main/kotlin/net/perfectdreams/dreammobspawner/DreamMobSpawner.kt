@@ -115,7 +115,7 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 		val _damager = event.damager
 
 		val damager = if (_damager is Projectile) {
-			_damager.shooter as Entity
+			_damager.shooter as Entity?
 		} else _damager
 
 		if (damager is Player && entity is LivingEntity) {
