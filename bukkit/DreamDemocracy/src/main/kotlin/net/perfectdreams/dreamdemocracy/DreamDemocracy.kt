@@ -34,6 +34,10 @@ class DreamDemocracy : KotlinPlugin(), Listener {
 	}
 
 	fun checkSantinho(npc: NPC, mapId: Int, description: String) {
+		// If the NPC hasn't spawned yet, ignore the check!
+		if (!npc.isSpawned)
+			return
+
 		val players = npc.entity.location.world.players
 
 		forEach@for (player in players) {
