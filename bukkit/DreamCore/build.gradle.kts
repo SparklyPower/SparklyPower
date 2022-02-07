@@ -37,13 +37,10 @@ dependencies {
     }
     compileOnlyApi("com.github.apachezy:LangUtils:3.2.2")
     api(project(":common:tables"))
-    api("com.google.code.gson:gson:2.8.7")
+    api("com.google.code.gson:gson:2.8.9")
     api("org.mongodb:mongo-java-driver:3.7.0-rc0")
-    api("com.zaxxer:HikariCP:5.0.0")
-    api("org.postgresql:postgresql:42.2.5")
-    api("org.jetbrains.exposed:exposed-core:0.36.2")
-    api("org.jetbrains.exposed:exposed-dao:0.36.2")
-    api("org.jetbrains.exposed:exposed-jdbc:0.36.2")
+    api("com.zaxxer:HikariCP:5.0.1")
+    api("org.postgresql:postgresql:42.3.2")
     api("com.okkero.skedule:skedule:1.2.4.1-SNAPSHOT")
     api("com.github.kevinsawicki:http-request:6.0")
     api("org.ow2.asm:asm:7.0")
@@ -53,12 +50,9 @@ dependencies {
     api("org.mindrot:jbcrypt:0.4")
     api("com.github.salomonbrys.kotson:kotson:2.5.0")
     api(Dependencies.DISCORD_WEBHOOKS)
-    api("com.github.ben-manes.caffeine:caffeine:2.6.2")
+    api("com.github.ben-manes.caffeine:caffeine:3.0.5")
     api("org.apache.commons:commons-text:1.8")
-    api("org.jsoup:jsoup:1.14.1")
-
-    // Used for Mojang's Brigadier API
-    api("me.lucko:commodore:1.11")
+    api("org.jsoup:jsoup:1.14.3")
 
     // Prometheus, for metrics
     api("io.prometheus:simpleclient:${Versions.PROMETHEUS}")

@@ -9,9 +9,9 @@ repositories {
 }
 
 dependencies {
-    api("org.jetbrains.exposed:exposed-core:0.36.2")
-    api("org.jetbrains.exposed:exposed-dao:0.36.2")
-    api("org.jetbrains.exposed:exposed-jdbc:0.36.2")
+    api("org.jetbrains.exposed:exposed-core:0.37.3")
+    api("org.jetbrains.exposed:exposed-dao:0.37.3")
+    api("org.jetbrains.exposed:exposed-jdbc:0.37.3")
 }
 
 tasks.withType<KotlinCompile> {

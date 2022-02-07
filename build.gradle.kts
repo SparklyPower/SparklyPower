@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.31"
-    kotlin("plugin.serialization") version "1.5.31" apply false
+    kotlin("jvm") version "1.6.10"
+    kotlin("plugin.serialization") version "1.6.10" apply false
     id("io.papermc.paperweight.userdev") version Versions.PAPERWEIGHT_USERDEV apply false
 }
 
@@ -25,7 +25,8 @@ allprojects {
         maven("https://nexus.wesjd.net/repository/thirdparty/")
         maven("https://maven.sk89q.com/repo/")
         maven("https://repo.aikar.co/content/groups/aikar/")
-        maven("https://repo.codemc.org/repository/maven-public")
+        maven("https://repo.codemc.io/repository/maven-public/")
+        maven("https://repo.codemc.io/repository/maven-snapshots/") // ChangeSkin
         maven("https://jitpack.io")
         maven("https://papermc.io/repo/repository/maven-public/")
         maven("https://repo.citizensnpcs.co/")

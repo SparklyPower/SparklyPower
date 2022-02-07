@@ -11,16 +11,16 @@ dependencies {
     api(kotlin("stdlib-jdk8"))
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly("io.github.waterfallmc:waterfall-api:1.13-SNAPSHOT")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.5.1")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.5.1")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.6.0")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
     api(kotlin("reflect"))
     api(kotlin("script-util"))
     api(kotlin("compiler"))
     api(kotlin("scripting-compiler"))
-    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.2")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
-    api("io.github.microutils:kotlin-logging-jvm:2.0.10")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    api("io.github.microutils:kotlin-logging-jvm:2.1.21")
 }
 
 tasks.withType<KotlinCompile> {
