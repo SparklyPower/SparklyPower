@@ -20,10 +20,6 @@ jobs:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
 
-    - name: Get current time
-      uses: gerred/actions/current-time@master
-      id: current-time
-
     - name: Setup Java JDK
       uses: actions/setup-java@v1.4.3
       with:
@@ -31,10 +27,11 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-      
-    # Runs a single command using the runners shell
+
     - name: Build with Gradle
-      run: "./gradlew build -Dbuild.number=$GITHUB_RUN_NUMBER -Dgit.branch=$GITHUB_REF -Dcommit.hash=$GITHUB_SHA -Dcompiled.at=${{ steps.current-time.outputs.time }} --continue --parallel"
+      uses: gradle/gradle-build-action@v2
+      with:
+        arguments: build
 
     # Upload Artifacts to GitHub
     - uses: actions/upload-artifact@v2
