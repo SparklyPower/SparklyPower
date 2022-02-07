@@ -24,7 +24,6 @@ class BukkitDispatcher(val plugin: JavaPlugin, val async: Boolean = false) : Cor
         else
             bukkitScheduler::runTask
 
-    @ExperimentalCoroutinesApi
     override fun scheduleResumeAfterDelay(timeMillis: Long, continuation: CancellableContinuation<Unit>) {
         val task = runTaskLater(
             plugin,
