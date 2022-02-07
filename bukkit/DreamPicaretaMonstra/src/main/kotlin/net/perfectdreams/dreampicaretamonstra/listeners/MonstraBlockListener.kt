@@ -63,7 +63,7 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
             enchantmentLevel = inHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS)
             // By default, we will consider that all picareta monstras have a durability enchantment of 13
             // If a monster tool has unbreakable III, it will take ~30 minutes to break it!
-            efficiencyLevel = 8 + inHand.getEnchantmentLevel(Enchantment.DURABILITY)
+            efficiencyLevel = 16 + inHand.getEnchantmentLevel(Enchantment.DURABILITY)
             isSilky = inHand.getEnchantmentLevel(Enchantment.SILK_TOUCH) > 0
             var below = false
             if (e.player.location.y > e.block.y) {
