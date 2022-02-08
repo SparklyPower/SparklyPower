@@ -70,7 +70,7 @@ class DreamMOTDBungee : KotlinPlugin(), Listener {
 		e.response.descriptionComponent = "$top\n$bottom".toTextComponent()
 
 		e.response.players.sample = arrayOf(
-			createPlayerListMessage("§b✦§3§m                    §7§l[§4§lSparkly§b§lPower§7§l]§3§m                    §b✦"),
+			createPlayerListMessage("§b✦§3§m                    §8[§4§lSparkly§b§lPower§8]§3§m                    §b✦"),
 			createPlayerListMessage("§6✧ §fModéstia a parte, este servidor é §a§lincrível§f! §6✧"),
 			createPlayerListMessage(""),
 			createPlayerListMessage("§b✦ §6$online§e Players Online! §b✦"),
