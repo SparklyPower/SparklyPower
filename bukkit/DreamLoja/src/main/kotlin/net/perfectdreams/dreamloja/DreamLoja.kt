@@ -20,7 +20,9 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.count
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 import java.time.ZoneId
@@ -53,59 +55,6 @@ class DreamLoja : KotlinPlugin() {
 
 		registerEvents(SignListener(this))
 		registerEvents(TagListener())
-
-		scheduler().schedule(this, SynchronizationContext.SYNC) {
-			val itemQueue = mutableListOf<ItemStack>()
-			itemQueue.add(
-				ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE)
-					.rename("§7")
-			)
-
-			repeat(19) {
-				itemQueue.add(
-					ItemStack(Material.BLUE_STAINED_GLASS_PANE)
-						.rename("§7")
-				)
-			}
-
-			val trajectory = listOf(
-				0,
-				1,
-				2,
-				3,
-				4,
-				5,
-				6,
-				7,
-				8,
-				17,
-				26,
-				25,
-				24,
-				23,
-				22,
-				21,
-				20,
-				19,
-				18,
-				9
-			)
-
-			while (true) {
-				if (dreamMenu != null) {
-					val pop = itemQueue.get(0)
-					itemQueue.removeAt(0)
-					itemQueue.add(pop)
-
-					for ((index, slot) in trajectory.withIndex()) {
-						val itemToBeChanged = itemQueue[index]
-						dreamMenu?.setItem(slot, itemToBeChanged)
-					}
-				}
-
-				waitFor(4)
-			}
-		}
 
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
 			while (true) {
@@ -161,7 +110,7 @@ class DreamLoja : KotlinPlugin() {
 		DreamUtils.assertAsyncThread(true)
 
 		return createMenu(54, "§a§lComerciantes §8- §6§lLojas") {
-			for (i in 3..4) {
+			for (i in 1..4) {
 				slot(0, i) {
 					item = ItemStack(Material.BLACK_STAINED_GLASS_PANE)
 						.rename("§f")
@@ -171,6 +120,7 @@ class DreamLoja : KotlinPlugin() {
 						.rename("§f")
 				}
 			}
+
 			for (i in 0..8) {
 				if (i == 4)
 					continue
@@ -181,25 +131,25 @@ class DreamLoja : KotlinPlugin() {
 				}
 			}
 
-			for (i in 1..3) {
-				val material = if (i == 2) {
-					Material.WHITE_STAINED_GLASS_PANE
-				} else {
-					Material.CYAN_STAINED_GLASS_PANE
+			for (i in 0..3) {
+				val material = when (i) {
+					2 -> Material.WHITE_STAINED_GLASS_PANE
+					1 -> Material.CYAN_STAINED_GLASS_PANE
+					else -> Material.BLUE_STAINED_GLASS_PANE
 				}
 
-				slot(i, 1) {
+				slot(i, 0) {
 					item = ItemStack(material)
 						.rename("§f")
 				}
 
-				slot(i + 4, 1) {
+				slot(i + 4, 0) {
 					item = ItemStack(material)
 						.rename("§f")
 				}
 			}
 
-			slot(4, 1) {
+			slot(4, 0) {
 				item = ItemStack(Material.NETHER_STAR)
 					.rename("§a§lLoja Oficial do SparklyPower")
 					.lore(
@@ -227,21 +177,17 @@ class DreamLoja : KotlinPlugin() {
 				}
 			}
 
+			val receivedByCount = UserShopVotes.receivedBy.count()
+
 			run {
-				val votes = transaction(Databases.databaseNetwork) {
-					UserShopVote.find {
-						UserShopVotes.receivedAt greaterEq (System.currentTimeMillis() - 2_592_000_000) // 30 dias
-					}.toMutableList()
+				val bestShops = transaction(Databases.databaseNetwork) {
+					UserShopVotes.slice(UserShopVotes.receivedBy, receivedByCount)
+						.selectAll()
+						.groupBy(UserShopVotes.receivedBy)
+						.map {
+							it[UserShopVotes.receivedBy] to it[receivedByCount]
+						}
 				}
-
-				val map = mutableMapOf<UUID, Int>()
-
-				for (vote in votes) {
-					val voteCount = map.getOrDefault(vote.receivedBy, 0)
-					map[vote.receivedBy] = voteCount + 1
-				}
-
-				val bestShops = map.entries.sortedByDescending { it.value }
 
 				for (x in 1..7) {
 					val bestShop = bestShops.getOrNull(x - 1)
@@ -250,49 +196,46 @@ class DreamLoja : KotlinPlugin() {
 
 						val offlinePlayer = Bukkit.getOfflinePlayer(ownerUniqueId)
 
-						if (offlinePlayer != null) {
-							slot(x, 3) {
-								val _item = ItemStack(Material.PLAYER_HEAD)
-									.rename("§a§lLoja de §b${offlinePlayer.name}")
-									.storeItemLore(
-										"Uma das melhores lojas de todos os tempos!",
-										"Últimos 30 dias",
-										x,
-										ownerUniqueId
-									)
+						slot(x, 1) {
+							val _item = ItemStack(Material.PLAYER_HEAD)
+								.rename("§a§lLoja de §b${offlinePlayer.name}")
+								.storeItemLore(
+									"Uma das melhores lojas de todos os tempos!",
+									"Todos os Tempos",
+									x,
+									ownerUniqueId
+								)
 
-								val meta = _item.itemMeta as SkullMeta
-								meta.owningPlayer = offlinePlayer
-								_item.itemMeta = meta
+							val meta = _item.itemMeta as SkullMeta
+							meta.owningPlayer = offlinePlayer
+							_item.itemMeta = meta
 
-								item = _item
+							item = _item
 
-								onClick { clicker ->
-									clicker as Player
-									clicker.closeInventory()
-									clicker.performCommand("loja ${offlinePlayer.name}")
-								}
+							onClick { clicker ->
+								clicker as Player
+								clicker.closeInventory()
+								clicker.performCommand("loja ${offlinePlayer.name}")
 							}
 						}
 					}
 				}
 			}
 
-			run {
-				val votes = transaction(Databases.databaseNetwork) {
-					UserShopVote.find {
-						UserShopVotes.receivedAt greaterEq (System.currentTimeMillis() - 3_600_000) // 1 hora
-					}.toMutableList()
+			fun queryAndAppendTopShops(
+				y: Int,
+				type: String,
+				shortType: String,
+				time: Long
+			) {
+				val bestShops = transaction(Databases.databaseNetwork) {
+					UserShopVotes.slice(UserShopVotes.receivedBy, receivedByCount)
+						.select { UserShopVotes.receivedAt greaterEq (System.currentTimeMillis() - time) } // 30 dias
+						.groupBy(UserShopVotes.receivedBy)
+						.map {
+							it[UserShopVotes.receivedBy] to it[receivedByCount]
+						}
 				}
-
-				val map = mutableMapOf<UUID, Int>()
-
-				for (vote in votes) {
-					val voteCount = map.getOrDefault(vote.receivedBy, 0)
-					map[vote.receivedBy] = voteCount + 1
-				}
-
-				val bestShops = map.entries.sortedByDescending { it.value }
 
 				for (x in 1..7) {
 					val bestShop = bestShops.getOrNull(x - 1)
@@ -301,33 +244,35 @@ class DreamLoja : KotlinPlugin() {
 
 						val offlinePlayer = Bukkit.getOfflinePlayer(ownerUniqueId)
 
-						if (offlinePlayer != null) {
-							slot(x, 4) {
-								val _item = ItemStack(Material.PLAYER_HEAD)
-									.rename("§a§lLoja de §b${offlinePlayer.name}")
-									.storeItemLore(
-										"Uma das melhores lojas recentemente votadas!",
-										"Última hora",
-										x,
-										ownerUniqueId
-									)
+						slot(x, y) {
+							val _item = ItemStack(Material.PLAYER_HEAD)
+								.rename("§a§lLoja de §b${offlinePlayer.name}")
+								.storeItemLore(
+									type,
+									shortType,
+									x,
+									ownerUniqueId
+								)
 
-								val meta = _item.itemMeta as SkullMeta
-								meta.owningPlayer = offlinePlayer
-								_item.itemMeta = meta
+							val meta = _item.itemMeta as SkullMeta
+							meta.owningPlayer = offlinePlayer
+							_item.itemMeta = meta
 
-								item = _item
+							item = _item
 
-								onClick { clicker ->
-									clicker as Player
-									clicker.closeInventory()
-									clicker.performCommand("loja ${offlinePlayer.name}")
-								}
+							onClick { clicker ->
+								clicker as Player
+								clicker.closeInventory()
+								clicker.performCommand("loja ${offlinePlayer.name}")
 							}
 						}
 					}
 				}
 			}
+
+			queryAndAppendTopShops(2, "Uma das melhores lojas nos últimos 30 dias!", "Últimos 30 dias", 2_592_000_000)
+			queryAndAppendTopShops(3, "Uma das melhores lojas nos últimos 7 dias!", "Últimos 7 dias", 604_800_000)
+			queryAndAppendTopShops(4, "Uma das melhores lojas na última hora!", "Última hora", 3_600_000)
 		}
 	}
 
