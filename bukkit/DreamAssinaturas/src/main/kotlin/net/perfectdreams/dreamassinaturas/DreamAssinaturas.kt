@@ -97,22 +97,21 @@ class DreamAssinaturas : KotlinPlugin(), Listener {
 
 	fun loadSignatures() {
 		transaction(Databases.databaseNetwork) {
-			Assinaturas.selectAll()
-				.map {
-					val assinaturaLocation = Assinatura.AssinaturaLocation(
-						it[Assinaturas.worldName],
-						it[Assinaturas.x].toInt(),
-						it[Assinaturas.y].toInt(),
-						it[Assinaturas.z].toInt()
-					)
+			storedSignatures = Assinaturas.selectAll().associate {
+				val assinaturaLocation = Assinatura.AssinaturaLocation(
+					it[Assinaturas.worldName],
+					it[Assinaturas.x].toInt(),
+					it[Assinaturas.y].toInt(),
+					it[Assinaturas.z].toInt()
+				)
 
-					assinaturaLocation to Assinatura(
-						it[Assinaturas.id].value,
-						it[Assinaturas.signedBy],
-						Instant.ofEpochMilli(it[Assinaturas.signedAt]),
-						assinaturaLocation
-					)
-				}
+				assinaturaLocation to Assinatura(
+					it[Assinaturas.id].value,
+					it[Assinaturas.signedBy],
+					Instant.ofEpochMilli(it[Assinaturas.signedAt]),
+					assinaturaLocation
+				)
+			}
 		}
 	}
 }
