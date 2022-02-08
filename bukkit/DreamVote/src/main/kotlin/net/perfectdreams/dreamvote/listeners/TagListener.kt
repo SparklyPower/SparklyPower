@@ -7,10 +7,7 @@ import net.perfectdreams.dreamvote.DreamVote
 import net.perfectdreams.dreamvote.tables.Votes
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.jetbrains.exposed.sql.count
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.sum
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class TagListener(val m: DreamVote) : Listener {
@@ -37,6 +34,7 @@ class TagListener(val m: DreamVote) : Listener {
 			Votes.slice(Votes.player, sumPlayer)
 				.selectAll()
 				.groupBy(Votes.player)
+				.orderBy(sumPlayer, SortOrder.DESC)
 				.limit(1)
 				.firstOrNull()
 		}
