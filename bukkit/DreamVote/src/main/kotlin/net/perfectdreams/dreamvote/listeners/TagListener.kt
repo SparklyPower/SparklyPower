@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.*
 
 class TagListener(val m: DreamVote) : Listener {
 	@EventHandler
@@ -29,6 +30,53 @@ class TagListener(val m: DreamVote) : Listener {
 			)
 		}
 
+		val epochMillisAtTheBeginningOfTheMonth = ZonedDateTime
+			.now(ZoneId.of("America/Sao_Paulo"))
+			.withDayOfMonth(1)
+			.withHour(0)
+			.withMinute(0)
+			.withSecond(0)
+			.withNano(0)
+			.toInstant()
+			.toEpochMilli()
+
+		val isATopVoterThisMonth = transaction(Databases.databaseNetwork) {
+			// We do this because there may be multiple users that have the same vote count this month, so we will check the top user vote count and THEN
+			// check if the current player has that much votes
+			val sumPlayer = Votes.player.count()
+			val topVotesCount = Votes.slice(Votes.player, sumPlayer)
+				.select { Votes.votedAt greaterEq epochMillisAtTheBeginningOfTheMonth }
+				.groupBy(Votes.player)
+				.orderBy(sumPlayer, SortOrder.DESC)
+				.limit(1)
+				.firstOrNull()
+				?.getOrNull(sumPlayer)
+
+			if (topVotesCount != null) {
+				Votes.slice(Votes.player)
+					.select { Votes.votedAt greaterEq epochMillisAtTheBeginningOfTheMonth and (Votes.player eq e.player.uniqueId) }
+					.count() == topVotesCount
+			} else {
+				false
+			}
+		}
+
+		if (isATopVoterThisMonth) {
+			e.tags.add(
+				PlayerTag(
+					"§c§lTVM",
+					"§c§lTop Votador deste Mês",
+					listOf(
+						"§r§b${m.lastVoter}§r§7 é o top votador deste Mês!",
+						"",
+						"§7Que tal ajudar também? :3 §6/votar"
+					),
+					"/votar",
+					true
+				)
+			)
+		}
+
 		val topVoter = transaction(Databases.databaseNetwork) {
 			val sumPlayer = Votes.player.count()
 			Votes.slice(Votes.player, sumPlayer)
@@ -42,10 +90,10 @@ class TagListener(val m: DreamVote) : Listener {
 		if (topVoter != null && topVoter[Votes.player] == e.player.uniqueId) {
 			e.tags.add(
 				PlayerTag(
-					"§c§lT",
-					"§c§lTop Votador",
+					"§c§lTVT",
+					"§c§lTop Votador de Todos os Tempos",
 					listOf(
-						"§r§b${m.lastVoter}§r§7 é o top votador!",
+						"§r§b${m.lastVoter}§r§7 é o top votador de todos os tempos!",
 						"",
 						"§7Que tal ajudar também? :3 §6/votar"
 					),
