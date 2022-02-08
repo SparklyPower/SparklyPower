@@ -59,7 +59,7 @@ class DreamMOTDBungee : KotlinPlugin(), Listener {
 			)
 		} else {
 			e.response.setFavicon(favicons["pantufa_sortros"])
-			
+
 			// The colored part is "este servidor é incrível!
 			TextUtils.getCenteredMessage(
 				"§5§l»§d§l» §fModéstia à parte, §x§f§f§8§0§8§0e§x§f§f§9§f§8§0s§x§f§f§b§f§8§0t§x§f§f§d§f§8§0e§x§f§f§f§f§8§0 §x§d§f§f§f§8§0s§x§b§f§f§f§8§0e§x§9§f§f§f§8§0r§x§8§0§f§f§8§0v§x§8§0§f§f§9§fi§x§8§0§f§f§b§fd§x§8§0§f§f§d§fo§x§8§0§f§f§f§fr§x§8§0§d§f§f§f §x§8§0§b§f§f§fé§x§8§0§9§f§f§f §x§8§0§8§0§f§fi§x§9§f§8§0§f§fn§x§b§f§8§0§f§fc§x§d§f§8§0§f§fr§x§f§f§8§0§f§fí§x§f§f§8§0§d§fv§x§f§f§8§0§b§fe§x§f§f§8§0§9§fl§f! §d§l«§5§l«",
@@ -70,12 +70,29 @@ class DreamMOTDBungee : KotlinPlugin(), Listener {
 		e.response.descriptionComponent = "$top\n$bottom".toTextComponent()
 
 		e.response.players.sample = arrayOf(
-			ServerPing.PlayerInfo(
-				"i luv u!",
-				UUID.randomUUID()
-			)
+			createPlayerListMessage("§b✦§3§m                    §7§l[§4§lSparkly§b§lPower§7§l]§3§m                    §b✦"),
+			createPlayerListMessage("§6✧ §fModéstia a parte, este servidor é §a§lincrível§f! §6✧"),
+			createPlayerListMessage(""),
+			createPlayerListMessage("§b✦ §6$online§e Players Online! §b✦"),
+			createPlayerListMessage("§b✦ §eUm §6Survival§e que você §6jamais§e viu antes! §b✦"),
+			createPlayerListMessage("§b✦ §eServidor da §6Loritta Morenitta§e! §b✦"),
+			createPlayerListMessage("§b✦ §eItens §6personalizados§e! §b✦"),
+			createPlayerListMessage("§b✦ §eSem §6Lag§e! (as vezes né) §b✦"),
+			createPlayerListMessage("§b✦ §eDesde §62014§e divertindo nossos jogadores! §b✦"),
+			createPlayerListMessage("§b✦ §ee §6§lmuito§e mais! §b✦"),
+			createPlayerListMessage(""),
+			createPlayerListMessage("§5✸ §eentre agora... §5✸"),
+			createPlayerListMessage("§d✸ §eporque só falta você! §c✌ §d✸"),
 		)
 	}
+
+	private fun createPlayerListMessage(text: String) = ServerPing.PlayerInfo(
+		TextUtils.getCenteredMessage(
+			text,
+			128
+		),
+		UUID.randomUUID()
+	)
 
 	fun loadFavicons() {
 		favicons.clear()
