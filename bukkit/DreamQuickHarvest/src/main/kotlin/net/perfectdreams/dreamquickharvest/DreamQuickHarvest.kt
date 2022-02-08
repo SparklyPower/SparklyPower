@@ -339,7 +339,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						Material.NETHER_WART -> DreamUtils.random.nextInt(2, 5 + fortuneLevel)
 						Material.CARROTS -> DreamUtils.random.nextInt(1, 5)
 						Material.POTATOES -> DreamUtils.random.nextInt(1, 5)
-						Material.BEETROOTS -> DreamUtils.random.nextInt(1, 5)
+						Material.BEETROOTS -> 1
 						else -> 1
 					}
 				)
