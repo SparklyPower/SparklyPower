@@ -65,9 +65,9 @@ class TagListener(val m: DreamVote) : Listener {
 			e.tags.add(
 				PlayerTag(
 					"§c§lTVM",
-					"§c§lTop Votador deste Mês",
+					"§c§lTop Votador Mensal",
 					listOf(
-						"§r§b${m.lastVoter}§r§7 é o top votador deste Mês!",
+						"§r§b${e.player.name}§r§7 é o top votador deste Mês!",
 						"",
 						"§7Que tal ajudar também? :3 §6/votar"
 					),
@@ -91,9 +91,9 @@ class TagListener(val m: DreamVote) : Listener {
 			e.tags.add(
 				PlayerTag(
 					"§c§lTVT",
-					"§c§lTop Votador de Todos os Tempos",
+					"§c§lTop Votador Geral",
 					listOf(
-						"§r§b${m.lastVoter}§r§7 é o top votador de todos os tempos!",
+						"§r§b${e.player.name}§r§7 é o top votador de todos os tempos!",
 						"",
 						"§7Que tal ajudar também? :3 §6/votar"
 					),
