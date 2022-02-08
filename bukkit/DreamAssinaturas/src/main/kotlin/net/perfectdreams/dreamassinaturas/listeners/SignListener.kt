@@ -4,7 +4,8 @@ import com.Acrobot.ChestShop.Signs.ChestShopSign
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamassinaturas.DreamAssinaturas
-import net.perfectdreams.dreamassinaturas.dao.Assinatura
+import net.perfectdreams.dreamassinaturas.data.Assinatura
+import net.perfectdreams.dreamassinaturas.tables.Assinaturas
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
@@ -15,11 +16,10 @@ import net.perfectdreams.dreamcore.utils.stripColors
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.time.Instant
 import java.time.ZoneId
 
 class SignListener(val m: DreamAssinaturas) : Listener {
@@ -71,10 +71,13 @@ class SignListener(val m: DreamAssinaturas) : Listener {
 
             m.schedule(SynchronizationContext.ASYNC) {
                 transaction(Databases.databaseNetwork) {
-                    Assinatura.new {
-                        this.signedBy = e.player.uniqueId
-                        this.signedAt = System.currentTimeMillis()
-                        this.setLocation(e.block.location)
+                    Assinaturas.insert {
+                        it[Assinaturas.signedBy] = e.player.uniqueId
+                        it[Assinaturas.signedAt] = System.currentTimeMillis()
+                        it[Assinaturas.worldName] = e.block.location.world.name
+                        it[Assinaturas.x] = e.block.location.x
+                        it[Assinaturas.y] = e.block.location.y
+                        it[Assinaturas.z] = e.block.location.z
                     }
                 }
                 m.loadSignatures()
@@ -92,12 +95,20 @@ class SignListener(val m: DreamAssinaturas) : Listener {
         if (e.clickedBlock?.type?.name?.contains("SIGN") == false)
             return
 
-        val signature = m.storedSignatures.firstOrNull {
-            it.getLocation() == e.clickedBlock?.location
-        } ?: return
+        val clickedBlockLocation = e.clickedBlock?.location ?: return
+
+        val signature = m.storedSignatures[Assinatura.AssinaturaLocation(
+            clickedBlockLocation.world.name,
+            clickedBlockLocation.x.toInt(),
+            clickedBlockLocation.y.toInt(),
+            clickedBlockLocation.z.toInt()
+        )] ?: return
 
         // Wow, é uma assinatura! :3
-        val indexOf = m.storedSignatures.filter { it.signedBy == signature.signedBy }
+        val indexOf = m.storedSignatures.values
+            .asSequence()
+            .filter { it.signedBy == signature.signedBy }
+            .sortedBy(Assinatura::id)
             .indexOf(signature)
 
         // We will cancel the event to avoid propagating to ChestShop & stuff
@@ -109,8 +120,7 @@ class SignListener(val m: DreamAssinaturas) : Listener {
                 user?.username
             }
 
-            val instant = Instant.ofEpochMilli(signature.signedAt)
-                .atZone(ZoneId.of("America/Sao_Paulo"))
+            val instant = signature.signedAt.atZone(ZoneId.of("America/Sao_Paulo"))
             switchContext(SynchronizationContext.SYNC)
 
             e.player.sendMessage("§8[ §bAssinatura §8]".centralizeHeader())

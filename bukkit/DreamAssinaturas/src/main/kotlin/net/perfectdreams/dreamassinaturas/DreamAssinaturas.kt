@@ -5,7 +5,7 @@ import com.okkero.skedule.schedule
 import net.perfectdreams.dreamassinaturas.commands.AssinaturaCommand
 import net.perfectdreams.dreamassinaturas.commands.AssinaturaDeleteCommand
 import net.perfectdreams.dreamassinaturas.commands.AssinaturaTemplateCommand
-import net.perfectdreams.dreamassinaturas.dao.Assinatura
+import net.perfectdreams.dreamassinaturas.data.Assinatura
 import net.perfectdreams.dreamassinaturas.listeners.SignListener
 import net.perfectdreams.dreamassinaturas.tables.AssinaturaTemplates
 import net.perfectdreams.dreamassinaturas.tables.Assinaturas
@@ -16,13 +16,16 @@ import net.perfectdreams.dreamcore.utils.scheduler
 import org.bukkit.Particle
 import org.bukkit.event.Listener
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.Instant
 import java.util.*
 
 class DreamAssinaturas : KotlinPlugin(), Listener {
 	val storedTemplates = mutableMapOf<UUID, String>()
-	var storedSignatures = listOf<Assinatura>()
+	// We use a map here because then the check can be O(1) instead of O(n) (iterating the list)
+	var storedSignatures = mapOf<Assinatura.AssinaturaLocation, Assinatura>()
 
 	override fun softEnable() {
 		super.softEnable()
@@ -46,8 +49,8 @@ class DreamAssinaturas : KotlinPlugin(), Listener {
 		scheduler().schedule(this) {
 			while (true) {
 				// Nós iremos clonar a lista já que pode ter outra thread modificando a lista
-				for (signature in storedSignatures.toList()) {
-					val location = signature.getLocation()
+				for ((assinaturaLocation, assinaturaData) in storedSignatures.toList()) {
+					val location = assinaturaLocation.toBukkitLocation()
 
 					// Maybe someone added a signature in a deleted world!
 					if (location.isWorldLoaded) {
@@ -66,7 +69,9 @@ class DreamAssinaturas : KotlinPlugin(), Listener {
 							} else {
 								switchContext(SynchronizationContext.ASYNC)
 								transaction(Databases.databaseNetwork) {
-									signature.delete()
+									Assinaturas.deleteWhere {
+										Assinaturas.id eq assinaturaData.id
+									}
 								}
 								switchContext(SynchronizationContext.SYNC)
 							}
@@ -92,7 +97,22 @@ class DreamAssinaturas : KotlinPlugin(), Listener {
 
 	fun loadSignatures() {
 		transaction(Databases.databaseNetwork) {
-			storedSignatures = Assinatura.all().sortedBy { it.signedAt }.toList()
+			Assinaturas.selectAll()
+				.map {
+					val assinaturaLocation = Assinatura.AssinaturaLocation(
+						it[Assinaturas.worldName],
+						it[Assinaturas.x].toInt(),
+						it[Assinaturas.y].toInt(),
+						it[Assinaturas.z].toInt()
+					)
+
+					assinaturaLocation to Assinatura(
+						it[Assinaturas.id].value,
+						it[Assinaturas.signedBy],
+						Instant.ofEpochMilli(it[Assinaturas.signedAt]),
+						assinaturaLocation
+					)
+				}
 		}
 	}
 }

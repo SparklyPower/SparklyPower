@@ -16,6 +16,4 @@ object Assinaturas : LongIdTable() {
     val x = double("x")
     val y = double("y")
     val z = double("z")
-    val yaw = float("yaw")
-    val pitch = float("pitch")
 }
