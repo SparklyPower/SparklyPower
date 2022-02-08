@@ -19,10 +19,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.count
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 import java.time.ZoneId
@@ -184,6 +181,7 @@ class DreamLoja : KotlinPlugin() {
 					UserShopVotes.slice(UserShopVotes.receivedBy, receivedByCount)
 						.selectAll()
 						.groupBy(UserShopVotes.receivedBy)
+						.orderBy(receivedByCount, SortOrder.DESC)
 						.map {
 							it[UserShopVotes.receivedBy] to it[receivedByCount]
 						}
@@ -232,6 +230,7 @@ class DreamLoja : KotlinPlugin() {
 					UserShopVotes.slice(UserShopVotes.receivedBy, receivedByCount)
 						.select { UserShopVotes.receivedAt greaterEq (System.currentTimeMillis() - time) } // 30 dias
 						.groupBy(UserShopVotes.receivedBy)
+						.orderBy(receivedByCount, SortOrder.DESC)
 						.map {
 							it[UserShopVotes.receivedBy] to it[receivedByCount]
 						}
