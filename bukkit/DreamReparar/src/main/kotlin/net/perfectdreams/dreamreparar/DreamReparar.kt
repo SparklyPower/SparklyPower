@@ -157,7 +157,7 @@ class DreamReparar : KotlinPlugin(), Listener {
 		}
 
 		if (itemStack.getStoredMetadata("isMonsterPickaxe") == "true") { // Picareta Monstra
-			price *= 13.5f
+			price *= 3.375f
 		}
 
 		when {
