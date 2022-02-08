@@ -7,7 +7,9 @@ import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcustomitems.blocks.BlockPacketAdapter
 import net.perfectdreams.dreamcustomitems.commands.CustomItemRecipeCommand
-import net.perfectdreams.dreamcustomitems.commands.CustomItemsCommand
+import net.perfectdreams.dreamcustomitems.commands.CustomItemsGiveExecutor
+import net.perfectdreams.dreamcustomitems.commands.CustomItemsMetaExecutor
+import net.perfectdreams.dreamcustomitems.commands.declarations.DreamCustomItemsCommand
 import net.perfectdreams.dreamcustomitems.items.Microwave
 import net.perfectdreams.dreamcustomitems.items.SuperFurnace
 import net.perfectdreams.dreamcustomitems.items.TrashCan
@@ -112,8 +114,12 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			.registerAsyncHandler(BlockPacketAdapter(this))
 			.start(WORKER_THREADS)
 
-		registerCommand(CustomItemsCommand)
 		registerCommand(CustomItemRecipeCommand)
+		registerCommand(
+			DreamCustomItemsCommand,
+			CustomItemsGiveExecutor(),
+			CustomItemsMetaExecutor()
+		)
 
 		addRecipe(
 			"hamburger",

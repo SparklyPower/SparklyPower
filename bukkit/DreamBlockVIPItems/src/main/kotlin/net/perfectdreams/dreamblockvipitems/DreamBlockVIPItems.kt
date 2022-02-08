@@ -1,13 +1,15 @@
 package net.perfectdreams.dreamblockvipitems
 
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.extensions.hasStoredMetadataWithKey
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.lore
 import net.perfectdreams.dreamcore.utils.registerEvents
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
-import org.bukkit.event.Cancellable
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -15,8 +17,12 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.inventory.PrepareAnvilEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 
 class DreamBlockVIPItems : KotlinPlugin(), Listener {
+	val ITEM_OWNER_KEY = SparklyNamespacedKey("item_owner")
+
 	override fun softEnable() {
 		super.softEnable()
 
@@ -101,7 +107,13 @@ class DreamBlockVIPItems : KotlinPlugin(), Listener {
 	}
 
 	fun checkIfUserCanUseTheItem(player: Player, item: ItemStack): Boolean {
-		val owner = item.getStoredMetadata("itemOwner")
+		val owner = item.itemMeta?.persistentDataContainer?.get(ITEM_OWNER_KEY, PersistentDataType.STRING)
+
+		// Old owner item check
+		if (item.hasStoredMetadataWithKey("itemOwner"))
+			item.meta<ItemMeta> {
+				persistentDataContainer.set(ITEM_OWNER_KEY, PersistentDataType.STRING, item.getStoredMetadata("itemOwner")!!)
+			}
 
 		val requiredPermission = when {
 			item.lore?.any { it.contains("§7Apenas §b§lVIPs§7") } == true -> "group.vip"
@@ -123,13 +135,11 @@ class DreamBlockVIPItems : KotlinPlugin(), Listener {
 	}
 
 	fun applyItemOwnership(player: Player, itemStack: ItemStack) {
-		val index = player.inventory.indexOf(itemStack)
-		player.inventory.setItem(
-			index,
-			itemStack
-				.lore(itemStack.lore!! + "§7" + "§7Item de §a${player.name}")
-				.storeMetadata("itemOwner", player.uniqueId.toString())
-		)
+		itemStack
+			.lore(itemStack.lore!! + "§7" + "§7Item de §a${player.name}")
+			.meta<ItemMeta> {
+				persistentDataContainer.set(ITEM_OWNER_KEY, PersistentDataType.STRING, player.uniqueId.toString())
+			}
 	}
 
 	fun isAVIPOnlyItem(itemStack: ItemStack): Boolean {
