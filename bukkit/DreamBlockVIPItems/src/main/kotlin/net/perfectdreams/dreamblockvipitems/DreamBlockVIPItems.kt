@@ -110,10 +110,16 @@ class DreamBlockVIPItems : KotlinPlugin(), Listener {
 		val owner = item.itemMeta?.persistentDataContainer?.get(ITEM_OWNER_KEY, PersistentDataType.STRING)
 
 		// Old owner item check
-		if (item.hasStoredMetadataWithKey("itemOwner"))
+		if (item.hasStoredMetadataWithKey("itemOwner")) {
 			item.meta<ItemMeta> {
-				persistentDataContainer.set(ITEM_OWNER_KEY, PersistentDataType.STRING, item.getStoredMetadata("itemOwner")!!)
+				persistentDataContainer.set(
+					ITEM_OWNER_KEY,
+					PersistentDataType.STRING,
+					item.getStoredMetadata("itemOwner")!!
+				)
 			}
+			return checkIfUserCanUseTheItem(player, item)
+		}
 
 		val requiredPermission = when {
 			item.lore?.any { it.contains("§7Apenas §b§lVIPs§7") } == true -> "group.vip"
