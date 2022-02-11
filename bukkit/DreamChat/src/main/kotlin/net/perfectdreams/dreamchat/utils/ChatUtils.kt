@@ -65,7 +65,7 @@ object ChatUtils {
 				"""§6✪ §a§lSobre a §r${DreamChat.BOT_NAME} §6✪
 						|
 						|§eGênero: §d♀
-						|§eGrana: §6Incontáveis Sonhos
+						|§eGrana: §6Incontáveis Sonecas
 						|§eKDR: §6PvP é para os fracos, 2bj :3
 						|§eOnline no SparklyPower Survival por §6mais tempo que você
 					""".trimMargin().toBaseComponent())
@@ -131,7 +131,7 @@ object ChatUtils {
 				"""§6✪ §a§lSobre a §r${DreamChat.LORITTA_NAME} §6✪
 						|
 						|§eGênero: §d♀
-						|§eGrana: §6Incontáveis Sonhos
+						|§eGrana: §6Incontáveis Sonecas
 						|§eKDR: §6PvP é para os fracos, 2bj :3
 						|§eOnline no SparklyPower Survival por §6mais tempo que você
 						|

@@ -43,7 +43,7 @@ class InventoryListener(val m: DreamRaspadinha) : Listener {
             return when (char) {
                 'L' -> ItemStack(Material.WOODEN_HOE)
                     .rename("§a§lLoritta")
-                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.LORITTA_COMBO} sonhos§7!")
+                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.LORITTA_COMBO} sonecas§7!")
                     .meta<ItemMeta> {
                         this.isUnbreakable = true
                         this.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
@@ -53,7 +53,7 @@ class InventoryListener(val m: DreamRaspadinha) : Listener {
                     }
                 'P' -> ItemStack(Material.WOODEN_HOE)
                     .rename("§a§lPantufa")
-                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.LORITTA_COMBO} sonhos§7!")
+                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.LORITTA_COMBO} sonecas§7!")
                     .meta<ItemMeta> {
                         this.isUnbreakable = true
                         this.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
@@ -63,7 +63,7 @@ class InventoryListener(val m: DreamRaspadinha) : Listener {
                     }
                 'B' -> ItemStack(Material.WOODEN_HOE)
                     .rename("§a§lGabriela")
-                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.GABI_COMBO} sonhos§7!")
+                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.GABI_COMBO} sonecas§7!")
                     .meta<ItemMeta> {
                         this.isUnbreakable = true
                         this.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
@@ -73,7 +73,7 @@ class InventoryListener(val m: DreamRaspadinha) : Listener {
                     }
                 'D' -> ItemStack(Material.WOODEN_HOE)
                     .rename("§a§lDokyo")
-                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.DOKYO_COMBO} sonhos§7!")
+                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.DOKYO_COMBO} sonecas§7!")
                     .meta<ItemMeta> {
                         this.isUnbreakable = true
                         this.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
@@ -83,7 +83,7 @@ class InventoryListener(val m: DreamRaspadinha) : Listener {
                     }
                 'G' -> ItemStack(Material.WOODEN_HOE)
                     .rename("§a§lGessy")
-                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.GESSY_COMBO} sonhos§7!")
+                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.GESSY_COMBO} sonecas§7!")
                     .meta<ItemMeta> {
                         this.isUnbreakable = true
                         this.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
@@ -93,7 +93,7 @@ class InventoryListener(val m: DreamRaspadinha) : Listener {
                     }
                 'T' -> ItemStack(Material.WOODEN_HOE)
                     .rename("§a§lTobias")
-                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.TOBIAS_COMBO} sonhos§7!")
+                    .lore("§7Ao conseguir um combo de 3 emojis, você irá ganhar §a§l${ScratchCardCommand.TOBIAS_COMBO} sonecas§7!")
                     .meta<ItemMeta> {
                         this.isUnbreakable = true
                     }
@@ -187,7 +187,7 @@ class InventoryListener(val m: DreamRaspadinha) : Listener {
                     player.sendMessage("${DreamRaspadinha.PREFIX} §cQue pena, você não ganhou nada...")
                 } else {
                     player.balance += prize
-                    player.sendMessage("${DreamRaspadinha.PREFIX} §aParabéns, você ganhou $prize sonhos!")
+                    player.sendMessage("${DreamRaspadinha.PREFIX} §aParabéns, você ganhou $prize sonecas!")
                 }
             }
         }

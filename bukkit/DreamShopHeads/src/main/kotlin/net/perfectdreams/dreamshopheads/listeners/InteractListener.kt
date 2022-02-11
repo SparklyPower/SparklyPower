@@ -33,7 +33,7 @@ class InteractListener : Listener {
         e.isCancelled = true
 
         if (500 > e.player.balance) {
-            e.player.sendMessage("§8[§9§lLoja§8] §cVocê não tem Sonhos suficientes!")
+            e.player.sendMessage("§8[§9§lLoja§8] §cVocê não tem Sonecas suficientes!")
             return
         }
 
@@ -54,6 +54,6 @@ class InteractListener : Listener {
         e.player.balance -= 500
         e.player.inventory.addItem(playerHead)
 
-        e.player.sendMessage("§8[§9§lLoja§8] §aVocê comprou §9a cabeça§a por §2500 sonhos§a!")
+        e.player.sendMessage("§8[§9§lLoja§8] §aVocê comprou §9a cabeça§a por §2500 sonecas§a!")
     }
 }

@@ -64,7 +64,7 @@ class DreamVote : KotlinPlugin() {
 					VaultUtils.econ.depositPlayer(lastVoter, 15.0)
 					earnedMoney += 15.0
 					if (earnedMoney % 180.0 == 165.0) {
-						Bukkit.broadcastMessage("§b$lastVoter§d já ganhou §2$earnedMoney sonhos§d apenas mantendo a tag de §c§lÚltimo Votador§d, roube a tag votando! §6/votar")
+						Bukkit.broadcastMessage("§b$lastVoter§d já ganhou §2$earnedMoney sonecas§d apenas mantendo a tag de §c§lÚltimo Votador§d, roube a tag votando! §6/votar")
 					}
 				}
 				waitFor(5 * 20)

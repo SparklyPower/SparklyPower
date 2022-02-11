@@ -121,7 +121,7 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
                     if (isRight) {
                         val balance = (index + 1) * 268
 
-                        it.sendMessage("${DreamQuiz.PREFIX} Yay! Você acertou! Parabéns! §a+$balance sonhos")
+                        it.sendMessage("${DreamQuiz.PREFIX} Yay! Você acertou! Parabéns! §a+$balance sonecas")
 
                         it.balance += balance
 

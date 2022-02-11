@@ -41,19 +41,19 @@ class ScratchCardCommand(val m: DreamRaspadinha) : SparklyCommand(arrayOf("raspa
         player.sendMessage("${DreamRaspadinha.PREFIX} §eGanhe prêmios comprando um ticket para raspar!")
         player.sendMessage("${DreamRaspadinha.PREFIX} §eAo comprar, raspe o ticket e veja o que você pode ganhar!")
         player.sendMessage("${DreamRaspadinha.PREFIX} §eSe tiver alguma combinação na horizontal, vertical ou na diagonal, você pode ganhar prêmios!")
-        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Loritta:§e ${LORITTA_COMBO} sonhos")
-        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Pantufa:§e ${PANTUFA_COMBO} sonhos")
-        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Gabriela:§e ${GABI_COMBO} sonhos")
-        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Dokyo:§e ${DOKYO_COMBO} sonhos")
-        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Gessy:§e ${GESSY_COMBO} sonhoeres")
-        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Tobias:§e ${TOBIAS_COMBO} sonhos")
-        player.sendMessage("${DreamRaspadinha.PREFIX} §aCompre uma raspadinha por 375 sonhos usando §6/raspadinha comprar§a!")
+        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Loritta:§e ${LORITTA_COMBO} sonecas")
+        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Pantufa:§e ${PANTUFA_COMBO} sonecas")
+        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Gabriela:§e ${GABI_COMBO} sonecas")
+        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Dokyo:§e ${DOKYO_COMBO} sonecas")
+        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Gessy:§e ${GESSY_COMBO} sonecas")
+        player.sendMessage("${DreamRaspadinha.PREFIX} §d§lCombinação de Tobias:§e ${TOBIAS_COMBO} sonecas")
+        player.sendMessage("${DreamRaspadinha.PREFIX} §aCompre uma raspadinha por 375 sonecas usando §6/raspadinha comprar§a!")
     }
 
     @Subcommand(["comprar"])
     fun buyRaspadinha(player: Player) {
         if ((125 * 3) > player.balance) {
-            player.sendMessage("${DreamRaspadinha.PREFIX} §cVocê precisa de 375 sonhos para comprar uma raspadinha!")
+            player.sendMessage("${DreamRaspadinha.PREFIX} §cVocê precisa de 375 sonecas para comprar uma raspadinha!")
             return
         }
 

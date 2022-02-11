@@ -50,7 +50,7 @@ object CabecasPersonalizadasCommand : DSLCommandBase<DreamVIPStuff> {
 
                 if (!isValidCustomHeadUrl) {
                     player.sendMessage("§6/vipcabeças url")
-                    player.sendMessage("§cCada cabeça custa 10k sonhos")
+                    player.sendMessage("§cCada cabeça custa 10k sonecas")
                     player.sendMessage("§cEnvie URLs do https://minecraft-heads.com/ da seção de \"Custom Heads\"!")
                     return@executes
                 }
@@ -107,7 +107,7 @@ object CabecasPersonalizadasCommand : DSLCommandBase<DreamVIPStuff> {
                 }
             } else {
                 player.sendMessage("§6/vipcabeças url")
-                player.sendMessage("§cCada cabeça custa 10k sonhos")
+                player.sendMessage("§cCada cabeça custa 10k sonecas")
                 player.sendMessage("§cEnvie URLs do https://minecraft-heads.com/ da seção de \"Custom Heads\"!")
             }
         }

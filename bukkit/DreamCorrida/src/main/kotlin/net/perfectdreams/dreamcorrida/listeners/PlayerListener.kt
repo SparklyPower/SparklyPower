@@ -130,9 +130,9 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                         e.player.teleport(DreamCore.dreamConfig.getSpawn())
 
                         if (howMuchNightmaresWillBeGiven == 1)
-                            Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
+                            Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
                         else
-                            Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a!")
+                            Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a!")
 
                         if (eventoCorrida.wonPlayers.size == 3) { // Finalizar corrida
                             Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §eEvento Corrida acabou, obrigado a todos que participaram! ^-^")

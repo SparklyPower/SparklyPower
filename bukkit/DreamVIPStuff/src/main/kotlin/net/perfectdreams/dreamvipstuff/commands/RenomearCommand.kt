@@ -53,10 +53,10 @@ object RenomearCommand : DSLCommandBase<DreamVIPStuff> {
                     val totalPrice = price * itemInMainHand.amount
 
                     if (totalPrice > player.balance) {
-                        player.sendMessage("§cCadê os $totalPrice sonhos? Seu Zé não trabalha de graça não parça!")
+                        player.sendMessage("§cCadê os $totalPrice sonecas? Seu Zé não trabalha de graça não parça!")
                     } else {
                         player.inventory.setItemInMainHand(itemInMainHand.rename(args.joinToString(" ").colorize()).storeMetadata("renamedBySeuZe", "true"))
-                        player.sendMessage("§aTá feito meu chapa! Cobrei $totalPrice sonhos de você para deixar o nome do seu item chaveeeexxx")
+                        player.sendMessage("§aTá feito meu chapa! Cobrei $totalPrice sonecas de você para deixar o nome do seu item chaveeeexxx")
                         player.balance -= totalPrice
                     }
                 }

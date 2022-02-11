@@ -44,19 +44,19 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 		var amount = 0
 
 		if (caixaSecretaWorld == "Resources") {
-			val sonhosChance = chanceMultiplied(1.0, level)
+			val sonecasChance = chanceMultiplied(1.0, level)
 			val pesadelosChance = chanceMultiplied(0.1, level)
 			val nitroClassicChance = chanceMultiplied(0.005, level)
 
-			if (chance(sonhosChance)) {
-				val sonhos = DreamUtils.random.nextInt(25_000, 50_001)
+			if (chance(sonecasChance)) {
+				val sonecas = DreamUtils.random.nextInt(25_000, 50_001)
 
-				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §2§l$sonhos sonhos§a pela caixa secreta! Parabéns!!")
+				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §2§l$sonecas sonecas§a pela caixa secreta! Parabéns!!")
 
-				e.player.balance += sonhos
+				e.player.balance += sonecas
 
 				try {
-					m.nitroNotifyWebhook.send("`${e.player.name}` conseguiu `$sonhos` pela caixa secreta!")
+					m.nitroNotifyWebhook.send("`${e.player.name}` conseguiu `$sonecas` sonecas pela caixa secreta!")
 				} catch(e: Exception) {
 					e.printStackTrace()
 				}

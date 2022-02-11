@@ -129,11 +129,11 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 				// Player não possui dinheiro suficiente para pagar?
 				if (spawner.price > damager.balance) {
 					event.isCancelled = true
-					damager.sendMessage("§cVocê precisa ter §2+${spawner.price - damager.balance} Sonhos§c para poder matar este pobre animal!")
+					damager.sendMessage("§cVocê precisa ter §2+${spawner.price - damager.balance} Sonecas§c para poder matar este pobre animal!")
 					return
 				} else {
 					damager.balance -= spawner.price
-					damager.sendMessage("§7Você pagou §2${spawner.price} Sonhos§7 para matar este pobre animal!")
+					damager.sendMessage("§7Você pagou §2${spawner.price} Sonecas§7 para matar este pobre animal!")
 				}
 			}
 		} else if (damager is Tameable && entity is LivingEntity) {

@@ -135,7 +135,7 @@ class DreamBroadcast : KotlinPlugin(), Listener {
 						}
 						15 -> {
 							message.addExtra(
-								"§eVisite a §6/lojacash§e, o lugar para gastar seus pesadelos com §3§lVIPs§e, sonhos e muito mais!".toTextComponent()
+								"§eVisite a §6/lojacash§e, o lugar para gastar seus pesadelos com §3§lVIPs§e, sonecas e muito mais!".toTextComponent()
 							)
 						}
 						16 -> {

@@ -151,7 +151,7 @@ class ClubesCommand(val m: DreamClubes) : SparklyCommand(arrayOf("clube", "clube
                 }
             }
             if (!hasClan) {
-                player.sendMessage("/clube criar - Cria uma clube! §aCusto: 150000 sonhos")
+                player.sendMessage("/clube criar - Cria uma clube! §aCusto: 150000 sonecas")
             }
             player.sendMessage("/clube lista - Mostra os 10 clube mais poderosos")
             player.sendMessage("/clube leaderboard - Mostra os 10 players com maior KDR")
@@ -198,7 +198,7 @@ class ClubesCommand(val m: DreamClubes) : SparklyCommand(arrayOf("clube", "clube
         }
 
         if (150_000 > player.balance) {
-            player.sendMessage("${DreamClubes.PREFIX} §cVocê precisa ter 150000 sonhos para criar um clube!")
+            player.sendMessage("${DreamClubes.PREFIX} §cVocê precisa ter 150000 sonecas para criar um clube!")
             return
         }
 

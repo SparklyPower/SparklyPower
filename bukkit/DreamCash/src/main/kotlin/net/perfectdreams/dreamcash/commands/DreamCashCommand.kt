@@ -31,7 +31,7 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
             switchContext(SynchronizationContext.SYNC)
 
             m.logger.info { "${sender.name} possui $cash pesadelos" }
-            sender.sendMessage("${DreamCash.PREFIX} §eVocê tem §c${cash} pesadelos§e! Você pode comprar VIPs, sonhos e muito mais com pesadelos na §6/lojacash§e, dê uma passadinha lá!")
+            sender.sendMessage("${DreamCash.PREFIX} §eVocê tem §c${cash} pesadelos§e! Você pode comprar VIPs, sonecas e muito mais com pesadelos na §6/lojacash§e, dê uma passadinha lá!")
         }
     }
 

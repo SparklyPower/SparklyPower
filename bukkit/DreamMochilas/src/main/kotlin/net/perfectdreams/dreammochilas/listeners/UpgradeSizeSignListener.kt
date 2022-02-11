@@ -40,7 +40,7 @@ class UpgradeSizeSignListener(val m: DreamMochilas) : Listener {
 
         if (isMochila) {
             if (2_000 > e.player.balance) {
-                e.player.sendMessage("§cVocê precisa ter 2000 sonhos para poder fazer um upgrade maroto na sua mochila!")
+                e.player.sendMessage("§cVocê precisa ter 2000 sonecas para poder fazer um upgrade maroto na sua mochila!")
                 return
             }
 

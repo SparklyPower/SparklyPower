@@ -83,9 +83,9 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         winner.teleportToServerSpawn()
 
         if (howMuchNightmaresWillBeGiven == 1)
-            Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} §b${winner.displayName}§a venceu o labirinto em ${wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
+            Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} §b${winner.displayName}§a venceu o labirinto em ${wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
         else
-            Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} §b${winner.displayName}§a venceu o labirinto em ${wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonhos§a!")
+            Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} §b${winner.displayName}§a venceu o labirinto em ${wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a!")
 
         if (wonPlayers.size == 3) { // Finalizar labirinto
             Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} §eEvento Labirinto acabou, obrigado a todos que participaram! ^-^")

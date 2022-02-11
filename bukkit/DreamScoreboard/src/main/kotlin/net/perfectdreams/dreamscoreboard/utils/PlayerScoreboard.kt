@@ -202,7 +202,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 
 	private fun setupMoney(_idx: Int): Int {
 		var idx = _idx
-		phoenix.setText("§2➦ §a§lSonhos", idx--)
+		phoenix.setText("§2➦ §a§lSonecas", idx--)
 		val df = DecimalFormat("#")
 		df.maximumFractionDigits = 8
 		phoenix.setText("§a${df.format(player.balance)}$", idx--)

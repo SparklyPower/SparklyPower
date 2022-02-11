@@ -563,7 +563,7 @@ class ChatListener(val m: DreamChat) : Listener {
 				"§6✪ §a§lSobre ${player.artigo} §r§b${toDisplay}§r §6✪",
 				"",
 				"§eGênero: §d${if (!player.girl) { "§3♂" } else { "§d♀" }}",
-				"§eGrana: §6${player.balance} Sonhos",
+				"§eGrana: §6${player.balance} Sonecas",
 				"§eKDR: §6PvP é para os fracos, 2bj :3",
 				"§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!",
 				"§eUsando a Resource Pack? $rpStatus",

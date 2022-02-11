@@ -73,12 +73,12 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
         }
 
         if (sender.balance < 7500) {
-            sender.sendMessage("$PREFIX É, casamentos são caros e necessitam de dinheiro para serem mantidos. Você precisa de mais §b${7500 - sender.balance}§e sonhos para se casar!")
+            sender.sendMessage("$PREFIX É, casamentos são caros e necessitam de dinheiro para serem mantidos. Você precisa de mais §b${7500 - sender.balance}§e sonecas para se casar!")
             return
         }
 
         if (player.balance < 7500) {
-            sender.sendMessage("$PREFIX É, casamentos são caros e necessitam de dinheiro para serem mantidos. §b${player.name}§e precisa de mais §b${7500 - player.balance}§e sonhos para se casar!")
+            sender.sendMessage("$PREFIX É, casamentos são caros e necessitam de dinheiro para serem mantidos. §b${player.name}§e precisa de mais §b${7500 - player.balance}§e sonecas para se casar!")
             return
         }
 
@@ -111,12 +111,12 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
         val requestSender = request.sender
 
         if (sender.balance < 7500) {
-            sender.sendMessage("$PREFIX É, casamentos são caros e necessitam de dinheiro para serem mantidos. Você precisa de mais §b${7500 - sender.balance}§e sonhos para se casar!")
+            sender.sendMessage("$PREFIX É, casamentos são caros e necessitam de dinheiro para serem mantidos. Você precisa de mais §b${7500 - sender.balance}§e sonecas para se casar!")
             return
         }
 
         if (requestSender.balance < 7500) {
-            sender.sendMessage("$PREFIX É, casamentos são caros e necessitam de dinheiro para serem mantidos. §b${requestSender.name}§e precisa de mais §b${7500 - requestSender.balance}§e sonhos para se casar!")
+            sender.sendMessage("$PREFIX É, casamentos são caros e necessitam de dinheiro para serem mantidos. §b${requestSender.name}§e precisa de mais §b${7500 - requestSender.balance}§e sonecas para se casar!")
             return
         }
 

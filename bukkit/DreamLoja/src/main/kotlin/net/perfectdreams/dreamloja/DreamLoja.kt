@@ -164,7 +164,7 @@ class DreamLoja : KotlinPlugin() {
 				item = ItemStack(Material.EMERALD)
 					.rename("§c§lLoja de Pesadelos do SparklyPower")
 					.lore(
-						"§7O lugar de VIPs, Sonhos, Blocos de Proteção e muito mais!"
+						"§7O lugar de VIPs, Sonecas, Blocos de Proteção e muito mais!"
 					)
 
 				onClick { clicker ->

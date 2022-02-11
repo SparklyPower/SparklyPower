@@ -81,11 +81,11 @@ class DreamCassino : KotlinPlugin(), Listener {
 
 		if (50 > e.player.balance) {
 			e.isCancelled = true
-			e.player.sendMessage("${PREFIX} §cVocê precisa ter §2+${50 - e.player.balance} Sonhos§c para poder apostar!")
+			e.player.sendMessage("${PREFIX} §cVocê precisa ter §2+${50 - e.player.balance} Sonecas§c para poder apostar!")
 			return
 		}
 
-		e.player.sendMessage("${PREFIX} §aVocê apostou §250 Sonhos§a!")
+		e.player.sendMessage("${PREFIX} §aVocê apostou §250 Sonecas§a!")
 		e.player.balance -= 50
 
 		val randomNumber1 = DreamUtils.random.nextInt(0, 20)
@@ -157,7 +157,7 @@ class DreamCassino : KotlinPlugin(), Listener {
 
 			for ((icon, payout) in prizes) {
 				if (icon == value1 && icon == value2 && icon == value3) {
-					player.sendMessage("${PREFIX} §aSortudo! Você conseguiu §2${payout} Sonhos§a! Que tal ir novamente? ʕ•ᴥ•ʔ")
+					player.sendMessage("${PREFIX} §aSortudo! Você conseguiu §2${payout} Sonecas§a! Que tal ir novamente? ʕ•ᴥ•ʔ")
 					player.balance += payout
 					player.world.spawnParticle(Particle.VILLAGER_HAPPY, position, 25, 0.5, 0.5, 0.5)
 					return@schedule
