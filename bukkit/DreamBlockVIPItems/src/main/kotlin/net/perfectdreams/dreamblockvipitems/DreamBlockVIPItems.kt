@@ -110,7 +110,7 @@ class DreamBlockVIPItems : KotlinPlugin(), Listener {
 		val owner = item.itemMeta?.persistentDataContainer?.get(ITEM_OWNER_KEY, PersistentDataType.STRING)
 
 		// Old owner item check
-		if (item.hasStoredMetadataWithKey("itemOwner")) {
+		if (owner == null && item.hasStoredMetadataWithKey("itemOwner")) {
 			item.meta<ItemMeta> {
 				persistentDataContainer.set(
 					ITEM_OWNER_KEY,
