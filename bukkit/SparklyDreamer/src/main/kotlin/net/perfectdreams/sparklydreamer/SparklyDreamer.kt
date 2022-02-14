@@ -23,8 +23,8 @@ class SparklyDreamer : KotlinPlugin(), Listener {
 		apiServer.start()
 	}
 
-	override fun onDisable() {
-		super.onDisable()
+	override fun softDisable() {
+		super.softDisable()
 
 		apiServer.stop()
 	}
