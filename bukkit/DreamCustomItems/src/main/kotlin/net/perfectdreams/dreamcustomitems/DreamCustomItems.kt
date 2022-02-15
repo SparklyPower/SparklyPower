@@ -36,18 +36,6 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 
 	private val recipes = mutableListOf<NamespacedKey>()
 
-	val oldmicrowaves = mutableMapOf<Location, Microwave>() //OLD MICROWAVE
-	val microwavesDataFile by lazy { File(dataFolder, "microwaves.yml") } //OLD MICROWAVE
-	val microwavesData by lazy { writeDataFile(microwavesDataFile); YamlConfiguration.loadConfiguration(microwavesDataFile) } //OLD MICROWAVE
-
-	val olsuperfurnace = mutableMapOf<Location, SuperFurnace>() //OLD SUPERFURNACE
-	val superfurnacesDataFile by lazy { File(dataFolder, "superfurnaces.yml") } //OLD SUPERFURNACE
-	val superfurnacesData by lazy { writeDataFile(superfurnacesDataFile); YamlConfiguration.loadConfiguration(superfurnacesDataFile) } //OLD SUPERFURNACE
-
-	val oldtrashcans =  mutableMapOf<Location, TrashCan>() //OLD TRASHCANS
-	val trashcansDataFile by lazy { File(dataFolder, "trashcans.yml") } //OLD TRASHCANS
-	val trashcansData by lazy { writeDataFile(trashcansDataFile); YamlConfiguration.loadConfiguration(trashcansDataFile) } //OLD TRASHCANS
-
 	val microwaves = mutableMapOf<Location, Microwave>()
     val superfurnaces = mutableMapOf<Location, SuperFurnace>()
 
@@ -63,9 +51,6 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		dataFolder.mkdirs()
 		customBlocksFolder.mkdirs()
 
-		loadAllMicrowaves() //OLD MICROWAVE
-		loadAllSuperFurnaces() //OLD SUPERFURNACE
-		loadAllTrashCans() //OLD TRASHCANS
 		loadAllCustomBlocks()
 
 		schedule {
@@ -244,60 +229,6 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 
 		recipes.forEach {
 			Bukkit.removeRecipe(it)
-		}
-	}
-
-
-	fun loadAllMicrowaves() { //OLD MICROWAVES
-		if (microwavesData.contains("microwaves")) {
-			val list = microwavesData.get("microwaves", null) as List<Map<String, Any?>>
-
-			for (entry in list) {
-				val location = entry["location"] as Location
-				val items = entry["items"] as List<ItemStack>
-
-				oldmicrowaves[location] = Microwave(this, location).apply {
-					for ((index, item) in items.withIndex()) {
-						inventory.setItem(
-							3 + index,
-							item
-						)
-					}
-				}
-			}
-		}
-	}
-
-
-	fun loadAllSuperFurnaces() { //OLD SSUPERFURNACES
-		if (superfurnacesData.contains("superfurnaces")) {
-			val list = superfurnacesData.get("superfurnaces", null) as List<Map<String, Any?>>
-
-			for (entry in list) {
-				val location = entry["location"] as Location
-				val items = entry["items"] as List<ItemStack>
-
-				olsuperfurnace[location] = SuperFurnace(this, location).apply {
-					for ((index, item) in items.withIndex()) {
-						inventory.setItem(
-							0 + index,
-							item
-						)
-					}
-				}
-			}
-		}
-	}
-
-	fun loadAllTrashCans() { //OLD TRASHCANS
-		if (trashcansData.contains("trashcans")) {
-			val list = trashcansData.get("trashcans", null) as List<Map<String, Any?>>
-
-			for (entry in list) {
-				val location = entry["location"] as Location
-
-				oldtrashcans[location] = TrashCan(this, location)
-			}
 		}
 	}
 
