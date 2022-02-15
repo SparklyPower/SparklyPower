@@ -1,5 +1,5 @@
 name: DreamChestShopStuff
 main: net.perfectdreams.dreamchestshopstuff.DreamChestShopStuff
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "ChestShop"]
 api-version: 1.13

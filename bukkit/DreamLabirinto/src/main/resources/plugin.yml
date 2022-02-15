@@ -1,5 +1,5 @@
 name: DreamLabirinto
 main: net.perfectdreams.dreamlabirinto.DreamLabirinto
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "DreamChat", "DreamCash"]
 api-version: 1.13

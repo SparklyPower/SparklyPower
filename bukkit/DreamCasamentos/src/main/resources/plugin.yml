@@ -2,8 +2,5 @@ name: DreamCasamentos
 main: net.perfectdreams.dreamcasamentos.DreamCasamentos
 version: 1.0-SNAPSHOT
 api-version: 1.13
-
 author: MrGaabriel
-
-depend:
-  - DreamCore
+depend: ["DreamCore", "DreamVanish"]

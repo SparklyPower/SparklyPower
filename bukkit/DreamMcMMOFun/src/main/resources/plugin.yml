@@ -1,5 +1,5 @@
 name: DreamMcMMOFun
 main: net.perfectdreams.dreammcmmofun.DreamMcMMOFun
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "DreamCash", "mcMMO"]
 api-version: 1.13

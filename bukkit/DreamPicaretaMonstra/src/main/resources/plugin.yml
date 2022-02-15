@@ -1,5 +1,5 @@
 name: DreamPicaretaMonstra
 main: net.perfectdreams.dreampicaretamonstra.DreamPicaretaMonstra
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "DreamCustomItems", "mcMMO", "GriefPrevention"]
 api-version: 1.13

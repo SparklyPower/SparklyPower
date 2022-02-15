@@ -1,8 +1,6 @@
 name: DreamTerrainAdditions
 main: net.perfectdreams.dreamterrainadditions.DreamTerrainAdditions
 version: 1.0-SNAPSHOT
-
 author: MrPowerGamerBR
-
-depend: [DreamCore]
+depend: ["DreamCore", "GriefPrevention"]
 api-version: 1.13

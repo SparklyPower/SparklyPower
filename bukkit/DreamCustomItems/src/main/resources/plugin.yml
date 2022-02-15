@@ -1,5 +1,5 @@
 name: DreamCustomItems
 main: net.perfectdreams.dreamcustomitems.DreamCustomItems
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "GriefPrevention", "mcMMO"]
 api-version: 1.13

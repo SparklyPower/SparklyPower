@@ -2,4 +2,5 @@ name: DreamEmptyWorldGenerator
 main: net.perfectdreams.dreamemptyworldgenerator.DreamEmptyWorldGenerator
 version: 1.0.0
 load: STARTUP
+depend: ["KotlinRuntime"]
 api-version: 1.13

@@ -1,5 +1,5 @@
 name: DreamKits
 main: net.perfectdreams.dreamkits.DreamKits
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "DreamCorreios"]
 api-version: 1.13

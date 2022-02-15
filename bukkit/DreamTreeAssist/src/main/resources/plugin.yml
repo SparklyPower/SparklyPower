@@ -1,5 +1,5 @@
 name: DreamTreeAssist
 main: net.perfectdreams.dreamtreeassist.DreamTreeAssist
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "mcMMO", "GriefPrevention"]
 api-version: 1.13

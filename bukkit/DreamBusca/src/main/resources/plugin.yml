@@ -1,5 +1,5 @@
 name: DreamBusca
 main: net.perfectdreams.dreambusca.DreamBusca
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "WorldGuard", "GriefPrevention"]
 api-version: 1.13

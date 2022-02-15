@@ -1,5 +1,5 @@
 name: DreamCaixaSecreta
 main: net.perfectdreams.dreamcaixasecreta.DreamCaixaSecreta
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "NoteBlockAPI"]
 api-version: 1.13

@@ -1,5 +1,5 @@
 name: DreamQuickHarvest
 main: net.perfectdreams.dreamquickharvest.DreamQuickHarvest
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "mcMMO"]
 api-version: 1.13
