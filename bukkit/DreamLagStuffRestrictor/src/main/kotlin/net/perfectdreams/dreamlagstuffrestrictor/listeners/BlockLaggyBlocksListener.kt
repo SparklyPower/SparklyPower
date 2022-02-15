@@ -24,10 +24,9 @@ class BlockLaggyBlocksListener : Listener {
 
             for (x in 0..15) {
                 for (z in 0..15) {
-                    for (y in 0..255) {
+                    for (y in e.block.world.minHeight until e.block.world.maxHeight) {
                         val block = e.block.chunk.getBlock(x, y, z)
                         if (block.type == e.block.type) {
-                            println("Block at ${block.location} matches ${e.block.type}, current count is $count")
                             count++
 
                             if (count > (restrictCount + 1)) {
