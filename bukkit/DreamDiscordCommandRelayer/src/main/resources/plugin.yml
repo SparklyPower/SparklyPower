@@ -1,5 +1,5 @@
 name: DreamDiscordCommandRelayer
 main: net.perfectdreams.dreamdiscordcommandrelayer.DreamDiscordCommandRelayer
 version: 1.0.0
-softdepend: ["DreamCore"]
+depend: ["DreamCore"]
 api-version: 1.13

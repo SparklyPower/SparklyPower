@@ -1,5 +1,5 @@
 name: DreamPicaretaMonstra
 main: net.perfectdreams.dreampicaretamonstra.DreamPicaretaMonstra
 version: 1.0.0
-softdepend: ["DreamCore"]
+depend: ["DreamCore"]
 api-version: 1.13

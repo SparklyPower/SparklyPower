@@ -1,5 +1,6 @@
 name: DreamCore
 main: net.perfectdreams.dreamcore.DreamCore
 version: 1.0.0
-softdepend: ["Multiverse-Core", "ProtocolLib", "KotlinRuntime", "Vault"]
+depend: ["KotlinRuntime"]
+softdepend: ["Multiverse-Core", "ProtocolLib", "Vault"]
 api-version: 1.13

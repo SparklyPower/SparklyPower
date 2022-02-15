@@ -1,5 +1,5 @@
 name: DreamChat
 main: net.perfectdreams.dreamchat.DreamChat
 version: 1.0.0
-softdepend: ["DreamCore", "DreamMeninaAPI", "DreamCasamentos", "DreamVote", "DreamMini"]
+depend: ["DreamCore", "DreamCasamentos", "DreamVote", "DreamMini"]
 api-version: 1.13

@@ -5,5 +5,5 @@ api-version: 1.13
 
 author: MrGaabriel
 
-softdepend:
+depend:
   - DreamCore

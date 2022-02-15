@@ -2,5 +2,5 @@ name: DreamMoverSpawners
 main: net.perfectdreams.dreammoverspawners.DreamMoverSpawners
 version: 1.0-SNAPSHOT
 api-version: 1.13
-softdepend:
+depend:
   - DreamCore

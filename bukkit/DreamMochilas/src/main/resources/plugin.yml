@@ -1,5 +1,5 @@
 name: DreamMochilas
 main: net.perfectdreams.dreammochilas.DreamMochilas
 version: 1.0.0
-softdepend: ["DreamCore"]
+depend: ["DreamCore"]
 api-version: 1.13

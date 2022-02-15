@@ -1,5 +1,5 @@
 name: DreamBedrockBypass
 main: net.perfectdreams.dreambedrockbypass.DreamBedrockBypass
 version: 1.0.0
-softdepend: ["DreamCore"]
+depend: ["DreamCore"]
 api-version: 1.13

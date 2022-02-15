@@ -1,5 +1,5 @@
 name: DreamTrails
 main: net.perfectdreams.dreamtrails.DreamTrails
 version: 1.0.0
-softdepend: ["DreamCore"]
+depend: ["DreamCore"]
 api-version: 1.13

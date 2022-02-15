@@ -3,5 +3,5 @@ main: net.perfectdreams.dreamcash.DreamCash
 version: 1.0-SNAPSHOT
 author: KaikeCarlos
 api-version: 1.13
-softdepend:
+depend:
   - DreamCore

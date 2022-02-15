@@ -3,5 +3,5 @@ main: net.perfectdreams.dreamdropparty.DreamDropParty
 version: 1.0-SNAPSHOT
 author: MrGaabriel
 api-version: 1.13
-softdepend:
+depend:
   - DreamCore

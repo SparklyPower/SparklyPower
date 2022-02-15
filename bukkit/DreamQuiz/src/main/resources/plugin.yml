@@ -3,4 +3,4 @@ main: net.perfectdreams.dreamquiz.DreamQuiz
 version: 1.0-SNAPSHOT
 api-version: 1.13
 author: MrGaabriel
-softdepend: [DreamCore]
+depend: [DreamCore]

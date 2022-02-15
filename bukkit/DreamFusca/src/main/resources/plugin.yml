@@ -1,5 +1,5 @@
 name: DreamFusca
 main: net.perfectdreams.dreamfusca.DreamFusca
 version: 1.0.0
-softdepend: ["DreamCore", "ProtocolLib"]
+depend: ["DreamCore", "ProtocolLib"]
 api-version: 1.13

@@ -4,5 +4,5 @@ version: 1.0-SNAPSHOT
 
 author: MrGaabriel
 
-softdepend: [DreamCore]
+depend: [DreamCore]
 api-version: 1.13
