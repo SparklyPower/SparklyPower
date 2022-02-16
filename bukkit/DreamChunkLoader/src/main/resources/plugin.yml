@@ -1,0 +1,5 @@
+name: DreamChunkLoader
+main: net.perfectdreams.dreamchunkloader.DreamChunkLoader
+version: 1.0.0
+depend: ["DreamCore", "DreamCash", "GriefPrevention"]
+api-version: 1.13
