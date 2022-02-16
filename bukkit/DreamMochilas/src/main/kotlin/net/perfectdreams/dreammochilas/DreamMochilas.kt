@@ -1,37 +1,24 @@
 package net.perfectdreams.dreammochilas
 
-import com.okkero.skedule.SynchronizationContext
-import com.okkero.skedule.schedule
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import net.perfectdreams.commands.annotation.Subcommand
-import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
-import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreammochilas.commands.*
+import net.perfectdreams.dreammochilas.commands.declarations.DreamMochilaCommand
 import net.perfectdreams.dreammochilas.commands.declarations.MochilaCommand
-import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.listeners.ChestShopListener
 import net.perfectdreams.dreammochilas.listeners.InventoryListener
 import net.perfectdreams.dreammochilas.listeners.UpgradeSizeSignListener
 import net.perfectdreams.dreammochilas.tables.Mochilas
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
-import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.block.BlockFace
 import org.bukkit.configuration.file.YamlConfiguration
-import org.bukkit.entity.Player
 import org.bukkit.event.Listener
-import org.bukkit.event.block.Action
-import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
-import java.util.*
 
 class DreamMochilas : KotlinPlugin(), Listener {
 	companion object {
@@ -76,13 +63,18 @@ class DreamMochilas : KotlinPlugin(), Listener {
 		FunnyIds.adjectives.addAll(config.getStringList("Adjectives"))
 
 		registerCommand(
-			MochilaCommand,
+			DreamMochilaCommand,
 			GetMochilaExecutor(),
-			GetMochilaIdExecutor(),
 			GetPlayerMochilasExecutor(),
 			MochilasMemoryExecutor(this),
 			FakeInteractAndOpenExecutor(this),
 			FakeInteractAutoClickExecutor(this)
+		)
+
+		registerCommand(
+			MochilaCommand,
+			GetMochilaIdExecutor(),
+			ToggleShopAllExecutor(this)
 		)
 
 		launchAsyncThread {

@@ -78,16 +78,16 @@ class InventoryListener(val m: DreamMochilas) : Listener {
         val clickedBlock = e.clickedBlock ?: return
         val item = e.player.inventory.itemInMainHand
 
-        val isMochila = item.getStoredMetadata("isMochila")?.toBoolean() ?: return
-        val mochilaId = item.getStoredMetadata("mochilaId")?.toLong() ?: return
-
-        if (!isMochila)
-            return
-
         // Gigantic workaround
         val isSign = clickedBlock.type.name.endsWith("_SIGN")
 
         if (!isSign)
+            return
+
+        val isMochila = item.getStoredMetadata("isMochila")?.toBoolean() ?: return
+        val mochilaId = item.getStoredMetadata("mochilaId")?.toLong() ?: return
+
+        if (!isMochila)
             return
 
         // If it is a mochila, just stop here right there
