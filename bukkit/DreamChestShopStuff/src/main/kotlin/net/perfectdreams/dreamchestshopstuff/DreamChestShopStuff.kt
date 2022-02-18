@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamchestshopstuff
 
+import net.perfectdreams.dreamchestshopstuff.listeners.ColorizeShopSignsListener
 import net.perfectdreams.dreamchestshopstuff.listeners.ShopListener
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
@@ -10,6 +11,7 @@ class DreamChestShopStuff : KotlinPlugin(), Listener {
 		super.softEnable()
 
 		registerEvents(ShopListener())
+		registerEvents(ColorizeShopSignsListener(this))
 	}
 
 	override fun softDisable() {

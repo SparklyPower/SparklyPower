@@ -13,7 +13,7 @@ repositories {
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
-    implementation("com.github.ChestShop-authors:ChestShop-3:3.11")
+    implementation("com.github.ChestShop-authors:ChestShop-3:3.12")
 }
 
 tasks.withType<KotlinCompile> {
