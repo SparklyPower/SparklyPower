@@ -66,8 +66,13 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     fun onTransaction(event: TransactionEvent) {
-        for (shopSign in uBlock.findConnectedShopSigns(event.ownerInventory.holder)) {
-            updateSignColorBasedOnStockQuantity(shopSign, event.ownerInventory)
+        if (ChestShopSign.isAdminShop(event.sign)) {
+            // Admin Shops return null for the "event.ownerInventory.holder", so will only update the sign that is provided in the event
+            updateSignColorBasedOnStockQuantity(event.sign, event.ownerInventory)
+        } else {
+            for (shopSign in uBlock.findConnectedShopSigns(event.ownerInventory.holder)) {
+                updateSignColorBasedOnStockQuantity(shopSign, event.ownerInventory)
+            }
         }
     }
 
@@ -98,9 +103,9 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
     }
 
     private fun buildColoredSign(lines: List<String>): List<String> {
-        val ownerLine = lines[0]
         val newLines = lines.map { ChatColor.stripColor(it) }
             .toMutableList()
+        val ownerLine = newLines[0]
 
         // Items in the chest, update it to be our custom ChestShop sign color!
         // Owner
