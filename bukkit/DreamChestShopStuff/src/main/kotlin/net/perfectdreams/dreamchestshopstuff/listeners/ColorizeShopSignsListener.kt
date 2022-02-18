@@ -2,6 +2,7 @@ package net.perfectdreams.dreamchestshopstuff.listeners
 
 import com.Acrobot.Breeze.Utils.InventoryUtil
 import com.Acrobot.ChestShop.Events.PreShopCreationEvent
+import com.Acrobot.ChestShop.Events.PreTransactionEvent
 import com.Acrobot.ChestShop.Events.TransactionEvent
 import com.Acrobot.ChestShop.Listeners.Modules.StockCounterModule
 import com.Acrobot.ChestShop.Signs.ChestShopSign
@@ -61,6 +62,16 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
                 return
 
             updateSignColorBasedOnStockQuantity(shopSign, event.inventory)
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    fun onTransaction(event: PreTransactionEvent) {
+        // Used to retroactively apply the new stock counter to old signs
+        if (event.transactionOutcome == PreTransactionEvent.TransactionOutcome.NOT_ENOUGH_STOCK_IN_CHEST) {
+            for (shopSign in uBlock.findConnectedShopSigns(event.ownerInventory.holder)) {
+                updateSignColorBasedOnStockQuantity(shopSign, event.ownerInventory)
+            }
         }
     }
 
