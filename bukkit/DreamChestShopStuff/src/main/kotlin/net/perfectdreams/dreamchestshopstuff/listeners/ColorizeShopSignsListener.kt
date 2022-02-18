@@ -1,26 +1,35 @@
 package net.perfectdreams.dreamchestshopstuff.listeners
 
 import com.Acrobot.Breeze.Utils.InventoryUtil
+import com.Acrobot.ChestShop.Commands.AccessToggle
 import com.Acrobot.ChestShop.Events.PreShopCreationEvent
 import com.Acrobot.ChestShop.Events.PreTransactionEvent
 import com.Acrobot.ChestShop.Events.TransactionEvent
 import com.Acrobot.ChestShop.Listeners.Modules.StockCounterModule
+import com.Acrobot.ChestShop.Listeners.Player.PlayerInteract
 import com.Acrobot.ChestShop.Signs.ChestShopSign
 import com.Acrobot.ChestShop.Signs.ChestShopSign.ITEM_LINE
 import com.Acrobot.ChestShop.Utils.uBlock
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamchestshopstuff.DreamChestShopStuff
+import net.perfectdreams.dreamcore.commands.TellExecutor.Companion.Options.player
 import net.perfectdreams.dreamcore.tables.EventVictories.event
 import net.perfectdreams.dreamcore.utils.DefaultFontInfo
+import net.perfectdreams.dreamcore.utils.PlayerUtils
+import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
+import net.perfectdreams.dreamcore.utils.extensions.rightClick
+import org.bukkit.DyeColor
+import org.bukkit.Material
 import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import java.awt.Color
-import kotlin.math.sign
 
 class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
     companion object {
@@ -28,12 +37,57 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
         private val COLOR_LOGO_AQUA = ChatColor.of(Color(1, 235, 247))
     }
 
+    val RAINBOW_NAME_SHOP_SIGN_KEY = SparklyNamespacedKey("rainbow_name_shop_sign")
+
+    // We can't ignore cancelled events because ChestShop may have already cancelled our event here
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    fun onInteract(event: PlayerInteractEvent) {
+        if (!event.rightClick)
+            return
+
+        val clickedBlock = event.clickedBlock ?: return
+        val item = event.item ?: return
+
+        if (!(item.type == Material.WHITE_WOOL && item.itemMeta?.hasCustomModelData() == true && item.itemMeta?.customModelData == 1))
+            return
+
+        // Checks from PlayerInteract
+        val sign = clickedBlock.state as? Sign ?: return
+        if (!ChestShopSign.isValid(sign))
+            return
+
+        val player = event.player
+
+        if (!(!AccessToggle.isIgnoring(player) && ChestShopSign.canAccess(player, sign) && !ChestShopSign.isAdminShop(sign)))
+            return
+
+        if (sign.persistentDataContainer.has(RAINBOW_NAME_SHOP_SIGN_KEY, PersistentDataType.BYTE)) {
+            player.sendMessage("§cO poder da lã arco-íris já está incorporado a sua placa de loja!")
+            return
+        }
+        sign.persistentDataContainer.set(RAINBOW_NAME_SHOP_SIGN_KEY, PersistentDataType.BYTE, 1)
+
+        val chestShopInventory = uBlock.findConnectedContainer(sign).inventory
+
+        updateSignColorBasedOnStockQuantity(sign, chestShopInventory)
+
+        item.amount--
+
+        player.sendMessage("§aO poder da lã arco-íris foi incorporado a sua placa de loja, deixando o seu nome na placa colorido!")
+    }
+
     // https://github.com/ChestShop-authors/ChestShop-3/issues/503
     @EventHandler(priority = EventPriority.MONITOR)
     fun onPreShopCreation(event: PreShopCreationEvent) {
         val isAdminShop = ChestShopSign.isAdminShop(ChatColor.stripColor(event.getSignLine(0)))
         if (isAdminShop) {
-            event.signLines = buildColoredSign(event.signLines.toList(), true, true).toTypedArray()
+            event.signLines = buildColoredSign(
+                event.signLines.toList(),
+                true,
+                true,
+                event.sign.persistentDataContainer.has(RAINBOW_NAME_SHOP_SIGN_KEY, PersistentDataType.BYTE),
+                event.sign.color
+            ).toTypedArray()
             return
         }
 
@@ -46,8 +100,12 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
         event.signLines = buildColoredSign(
             event.signLines.toList(),
             numTradedItemsInChest != 0,
-            hasSpaceInChest
+            hasSpaceInChest,
+            event.sign.persistentDataContainer.has(RAINBOW_NAME_SHOP_SIGN_KEY, PersistentDataType.BYTE),
+            event.sign.color
         ).toTypedArray()
+        event.sign.color = DyeColor.BLUE
+        event.sign.update()
         return
     }
 
@@ -98,7 +156,9 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
             buildColoredSign(
                 (0 until 4).map { sign.getLine(it) },
                 numTradedItemsInChest != 0,
-                hasSpaceInChest
+                hasSpaceInChest,
+                sign.persistentDataContainer.has(RAINBOW_NAME_SHOP_SIGN_KEY, PersistentDataType.BYTE),
+                sign.color
             ).forEachIndexed { index, s ->
                 sign.setLine(index, s)
             }
@@ -108,10 +168,17 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
             return
         }
 
+        // Retroactively apply the blue dye on old signs
+        if (sign.getLine(0).startsWith("§1")) {
+            sign.color = DyeColor.BLUE
+        }
+
         buildColoredSign(
             (0 until 4).map { sign.getLine(it) },
             true,
-            true
+            true,
+            sign.persistentDataContainer.has(RAINBOW_NAME_SHOP_SIGN_KEY, PersistentDataType.BYTE),
+            sign.color
         ).forEachIndexed { index, s ->
             sign.setLine(index, s)
         }
@@ -123,7 +190,9 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
     private fun buildColoredSign(
         lines: List<String>,
         hasStock: Boolean,
-        hasSpaceInChest: Boolean
+        hasSpaceInChest: Boolean,
+        hasRainbowName: Boolean,
+        color: DyeColor?
     ): List<String> {
         val newLines = lines.map { ChatColor.stripColor(it) }
             .toMutableList()
@@ -142,8 +211,17 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
         if (ChestShopSign.isAdminShop(ownerLine)) {
             newLines[0] = "${COLOR_LOGO_RED}§lSparkly${COLOR_LOGO_AQUA}§lShop"
         } else {
-            newLines[0] = "§1" + newLines[0]
+            println("Sign color: $color")
+            if (hasRainbowName) {
+                newLines[0] = rainbowify(newLines[0])
+            } else {
+                // This will use the sign's "sign.color" color!
+                newLines[0] = newLines[0]
+            }
         }
+
+        // Quantity
+        newLines[1] = "§0" + newLines[1]
 
         // Price
         newLines[2] = newLines[2]
@@ -170,5 +248,22 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
         newLines[3] = "§9" + newLines[3]
 
         return newLines
+    }
+
+    private fun rainbowify(str: String): String {
+        var h = 0.0f
+        val s = 1f
+        val b = 1f
+
+        val steps = 1f / str.length
+
+        var rainbowifiedText = ""
+        for (c in str) {
+            rainbowifiedText += ChatColor.of(Color.getHSBColor(h, s, b))
+            rainbowifiedText += c
+            h += steps
+        }
+
+        return rainbowifiedText
     }
 }
