@@ -187,7 +187,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
     }
 
     @InternalCoroutinesApi
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     fun onOpen(e: PlayerInteractEvent) {
         if (!e.rightClick)
             return
