@@ -153,6 +153,11 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
             val numTradedItemsInChest: Int = InventoryUtil.getAmount(itemTradedByShop, chestShopInventory)
             val hasSpaceInChest = InventoryUtil.fits(itemTradedByShop, chestShopInventory)
 
+            // Retroactively apply the blue dye on old signs
+            if (sign.getLine(0).startsWith("§1")) {
+                sign.color = DyeColor.BLUE
+            }
+
             buildColoredSign(
                 (0 until 4).map { sign.getLine(it) },
                 numTradedItemsInChest != 0,
@@ -166,11 +171,6 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
             // TODO: We could check if the sign really needs to be updated, instead of calling the update method every time
             sign.update(true)
             return
-        }
-
-        // Retroactively apply the blue dye on old signs
-        if (sign.getLine(0).startsWith("§1")) {
-            sign.color = DyeColor.BLUE
         }
 
         buildColoredSign(
@@ -211,12 +211,16 @@ class ColorizeShopSignsListener(val m: DreamChestShopStuff) : Listener {
         if (ChestShopSign.isAdminShop(ownerLine)) {
             newLines[0] = "${COLOR_LOGO_RED}§lSparkly${COLOR_LOGO_AQUA}§lShop"
         } else {
-            println("Sign color: $color")
             if (hasRainbowName) {
                 newLines[0] = rainbowify(newLines[0])
             } else {
                 // This will use the sign's "sign.color" color!
-                newLines[0] = newLines[0]
+                if (color == DyeColor.BLUE) {
+                    // Because this blue is more vibrant, idk why
+                    newLines[0] = "§1${newLines[0]}"
+                } else {
+                    newLines[0] = newLines[0]
+                }
             }
         }
 
