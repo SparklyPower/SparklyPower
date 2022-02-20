@@ -69,7 +69,7 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 		}
 
 		m.logger.info { "Count of players with IP ${event.connection.address.address.hostAddress} connected to the server: $onlinePlayersWithSpecificIp" }
-		if (onlinePlayersWithSpecificIp >= 2) { // Se for maior que três...
+		if (onlinePlayersWithSpecificIp >= 5) { // Se for maior que três...
 			// get dunked!!
 			event.isCancelled = true
 			event.setCancelReason(*"§cJá existem muitas contas logadas com o mesmo IP no servidor!".toBaseComponent())
@@ -120,7 +120,8 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 		event.registerIntent(m)
 
 		m.proxy.scheduler.runAsync(m) {
-			if (DreamNetworkBans.bypassPremiumCheck) {
+			// Don't check if the user is premium if they are using Geyser
+			if (DreamNetworkBans.bypassPremiumCheck || isGeyser) {
 				m.logger.info("Bypassing Premium Check for ${event.connection}")
 				event.completeIntent(m)
 				return@runAsync
