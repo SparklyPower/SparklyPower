@@ -24,7 +24,7 @@ class NameSubCommand(val m: DreamClubes) : WithClubeSubCommand {
         val name = args.joinToString(" ")
 
         async {
-            if (!selfMember.canExecute(ClubePermissionLevel.OWNER)) { // Sem permissão
+            if (!selfMember.canExecute(ClubePermissionLevel.ADMIN)) { // Sem permissão
                 player.sendMessage("${DreamClubes.PREFIX} §cVocê não tem permissão!")
                 return@async
             }
