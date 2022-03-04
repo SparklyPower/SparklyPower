@@ -32,7 +32,7 @@ class NameSubCommand(val m: DreamClubes) : WithClubeSubCommand {
             val colorizedName = name.translateColorCodes()
 
             transaction(Databases.databaseNetwork) {
-                clube.name = name
+                clube.name = colorizedName
                 clube.cleanName = name.stripColorCode()
             }
 
