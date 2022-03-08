@@ -16,6 +16,9 @@ import org.bukkit.event.player.*
 class PlayerListener(val m: DreamTorreDaMorte) : Listener {
     @EventHandler
     fun onDamage(event: EntityDamageByEntityEvent) {
+        if (event.entity.location.world.name != "TorreDaMorte")
+            return
+
         val entity = event.entity
         val damager = event.damager
 

@@ -2,17 +2,24 @@ package net.perfectdreams.dreamtorredamorte.utils
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
+import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
 import net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import org.bukkit.util.Vector
 import java.util.*
 
 class TorreDaMorte(val m: DreamTorreDaMorte) {
@@ -39,6 +46,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
     val lastHits = mutableMapOf<Player, Player>()
     var isServerEvent = false
     var currentEventId = UUID.randomUUID()
+    var lastWinner = UUID.randomUUID()
 
     fun preStart(isServerEvent: Boolean) {
         this.isServerEvent = isServerEvent
@@ -193,6 +201,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
                 // A cada um segundo iremos verificar players inválidos que ainda estão no jogo
                 // We will also check if the player y position is above the queue spawn because, if it is, then they weren't teleported (for some reason)
                 val invalidPlayers = players.filter { !it.isValid || it.location.world.name != "TorreDaMorte" || (it.location.world.name == "TorreDaMorte" && it.location.y >= queueSpawn.y) }
+                m.logger.info { "Removing invalid players $invalidPlayers" }
                 invalidPlayers.forEach {
                     removeFromGame(it, skipFinishCheck = true)
                 }
@@ -217,7 +226,8 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             return
         }
 
-        removeFromGame(player, skipFinishCheck = false)
+        // No need to check if the event has finished for the last player
+        removeFromGame(player, skipFinishCheck = true)
 
         isStarted = false
         isPreStart = false
@@ -233,8 +243,36 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
 
             Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} §b${player.displayName}§e venceu a Torre da Morte! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
 
+            lastWinner = player.uniqueId
             player.balance += howMuchMoneyWillBeGiven
+
+            val map = ItemStack(Material.FILLED_MAP).meta<MapMeta> {
+                this.mapId = 25336
+
+                this.displayName(
+                    Component.text("Venci o evento ")
+                        .color(NamedTextColor.YELLOW)
+                        .decorate(TextDecoration.BOLD)
+                        .decoration(TextDecoration.ITALIC, false)
+                        .append(Component.text("Torre da Morte").color(NamedTextColor.DARK_RED).decorate(TextDecoration.BOLD))
+                        .append(Component.text("!"))
+                )
+            }
+
+            DreamMapWatermarker.watermarkMap(map, null)
+
+            if (player.inventory.canHoldItem(map))
+                player.inventory.addItem(map)
+
             scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                val wonAt = System.currentTimeMillis()
+
+                DreamCore.INSTANCE.dreamEventManager.addEventVictory(
+                    player,
+                    "Torre da Morte",
+                    wonAt
+                )
+
                 Cash.giveCash(player, howMuchNightmaresWillBeGiven.toLong())
             }
         } else {
@@ -243,12 +281,15 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
     }
 
     fun removeFromGame(player: Player, skipFinishCheck: Boolean) {
+        m.logger.info { "Removing ${player.name} from the game. Skip finish check? $skipFinishCheck" }
         if (!players.contains(player))
             return
 
         // Você perdeu, que sad...
         players.remove(player)
 
+        // Reset player velocity to avoid them dying before teleporting (due to falling from the tower)
+        player.velocity = Vector(0, 0, 0)
         player.teleport(DreamCore.dreamConfig.getSpawn())
 
         // Restaurar o inventário do player
@@ -257,6 +298,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             player.inventory.setContents(storedInventory.filterNotNull().toTypedArray())
 
         val killer = lastHits[player]
+        m.logger.info { "${killer?.name} killed ${player.name}!" }
         if (killer != null && players.contains(killer)) {
             killer.sendMessage("${DreamTorreDaMorte.PREFIX} §aVocê matou §b${player.displayName}§a! Como recompensa, você teve a sua vida recuperada e outras coisas legais!")
             PlayerUtils.healAndFeed(killer)
@@ -279,11 +321,15 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             )
         }
 
+        // Remove the player from the last hits map
+        lastHits.remove(player)
+
         if (!skipFinishCheck && isGamePhase && players.size == 1)
             finish()
     }
 
     fun removeFromQueue(player: Player) {
+        m.logger.info { "Removing ${player.name} from the queue" }
         if (!playersInQueue.contains(player))
             return
 
@@ -292,6 +338,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
     }
 
     fun joinQueue(player: Player) {
+        m.logger.info { "Adding ${player.name} to the queue!" }
         player.teleport(queueSpawn)
         playersInQueue.add(player)
     }
