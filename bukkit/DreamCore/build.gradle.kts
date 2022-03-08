@@ -26,7 +26,7 @@ val shadowWithRuntimeDependencies by configurations.creating {
 dependencies {
     compileOnlyApi(project(":common:KotlinRuntime"))
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
-    compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.8.0-SNAPSHOT")
+    compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.8.0")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
     compileOnlyApi(files("../../libs/WorldGuard.jar"))
     compileOnlyApi("com.github.TechFortress:GriefPrevention:06cc566769") // Using commits instead of pinning a version because GP hasn't released a new version yet

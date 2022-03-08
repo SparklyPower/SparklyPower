@@ -14,7 +14,7 @@ dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(files("../../libs/mcMMO.jar"))
-    compileOnly("com.comphenix.protocol:ProtocolLib:4.6.0-SNAPSHOT")
+    compileOnly("com.comphenix.protocol:ProtocolLib:4.8.0")
 }
 
 tasks.withType<KotlinCompile> {
