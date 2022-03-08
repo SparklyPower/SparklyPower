@@ -24,8 +24,8 @@ import java.util.*
 
 class TorreDaMorte(val m: DreamTorreDaMorte) {
     var spawns = mutableListOf<Location>()
-    var players = mutableListOf<Player>()
-    var playersInQueue = mutableListOf<Player>()
+    var players = mutableSetOf<Player>()
+    var playersInQueue = mutableSetOf<Player>()
     var storedPlayerInventory = mutableMapOf<Player, Array<ItemStack?>>()
     var canAttack = false
     var isStarted = false

@@ -1,0 +1,5 @@
+name: DreamModTracker
+main: net.perfectdreams.dreammodtracker.DreamModTracker
+version: 1.0.0
+depend: ["DreamCore"]
+api-version: 1.13
