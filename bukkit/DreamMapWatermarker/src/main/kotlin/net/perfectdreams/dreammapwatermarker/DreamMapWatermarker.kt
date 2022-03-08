@@ -84,7 +84,9 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onCraft(event: CraftItemEvent) {
-		val hasCustomMap = event.inventory.matrix.filterNotNull().any {
+		val inventoryMatrix = event.inventory.matrix ?: return
+
+		val hasCustomMap = inventoryMatrix.filterNotNull().any {
 			it.getStoredMetadata("customMapOwner") != null || it.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^" || it.itemMeta?.displayName?.endsWith("Players Online!") == true || it.itemMeta?.persistentDataContainer?.has(LOCK_MAP_CRAFT_KEY, PersistentDataType.BYTE) == true
 		}
 

@@ -28,10 +28,13 @@ class InteractListener(internal val m: DreamMinaRecheada) : Listener {
             m.minaRecheada.bossBar2?.addPlayer(e.player)
 
             var hasPickaxe = false
-            for (itemStack in e.player.inventory.storageContents) {
-                if (itemStack != null && itemStack.type.name.contains("PICKAXE")) {
-                    hasPickaxe = true
-                    break
+            val storageContents = e.player.inventory.storageContents
+            if (storageContents != null) {
+                for (itemStack in storageContents) {
+                    if (itemStack != null && itemStack.type.name.contains("PICKAXE")) {
+                        hasPickaxe = true
+                        break
+                    }
                 }
             }
             if (!hasPickaxe) {

@@ -2,7 +2,7 @@ package net.perfectdreams.dreamcore.utils.tags
 
 import com.comphenix.protocol.wrappers.nbt.NbtCompound
 import com.comphenix.protocol.wrappers.nbt.NbtFactory
-import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_18_R2.inventory.CraftItemStack
 import org.bukkit.inventory.ItemStack
 
 object NbtTagsUtils {

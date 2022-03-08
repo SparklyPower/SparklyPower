@@ -22,7 +22,7 @@ import net.perfectdreams.dreamcore.utils.commands.options.*
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.PluginIdentifiableCommand
-import org.bukkit.craftbukkit.v1_18_R1.command.VanillaCommandWrapper
+import org.bukkit.craftbukkit.v1_18_R2.command.VanillaCommandWrapper
 import org.bukkit.plugin.Plugin
 
 class SparklyBukkitBrigadierCommandWrapper(

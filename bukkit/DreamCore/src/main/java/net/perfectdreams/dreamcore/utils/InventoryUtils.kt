@@ -31,12 +31,15 @@ object InventoryUtils {
 fun Inventory.canHoldItem(stack: ItemStack?): Boolean {
 	if (stack == null) { return true }
 	if (stack.type == Material.AIR) { return true }
-	for (invItem in this.storageContents) {
-		if (invItem == null) return true // Slot vazio!
-		if (invItem.isSimilar(stack)) { // Itens parecidos
-			if (invItem.maxStackSize >= invItem.amount + stack.amount) {
-				// Sim, dá para adicionar itens e ainda ter espaço vazio!
-				return true
+	val storageContents = this.storageContents
+	if (storageContents != null) {
+		for (invItem in storageContents) {
+			if (invItem == null) return true // Slot vazio!
+			if (invItem.isSimilar(stack)) { // Itens parecidos
+				if (invItem.maxStackSize >= invItem.amount + stack.amount) {
+					// Sim, dá para adicionar itens e ainda ter espaço vazio!
+					return true
+				}
 			}
 		}
 	}
