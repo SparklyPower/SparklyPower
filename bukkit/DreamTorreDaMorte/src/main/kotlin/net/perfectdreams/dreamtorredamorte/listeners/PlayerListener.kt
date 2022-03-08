@@ -44,7 +44,7 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
 
         if (m.torreDaMorte.isStarted) {
             m.torreDaMorte.removeFromQueue(event.entity)
-            m.torreDaMorte.removeFromGame(event.entity)
+            m.torreDaMorte.removeFromGame(event.entity, skipFinishCheck = false)
         }
     }
 
@@ -61,7 +61,7 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
 
         if (m.torreDaMorte.isStarted) {
             m.torreDaMorte.removeFromQueue(event.player)
-            m.torreDaMorte.removeFromGame(event.player)
+            m.torreDaMorte.removeFromGame(event.player, skipFinishCheck = false)
         }
     }
 
@@ -83,17 +83,18 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
             if (event.player.location.world.name != "TorreDaMorte") {
                 if (event.player in m.torreDaMorte.players) {
                     // Player está na lista de membros da torre, mas não está na torre da morte!
-                    m.torreDaMorte.removeFromGame(event.player)
+                    m.torreDaMorte.removeFromGame(event.player, skipFinishCheck = false)
                 }
                 return
             }
 
-            if (20 >= event.player.location.y)
-                m.torreDaMorte.removeFromGame(event.player)
+            if (100 >= event.player.location.y)
+                m.torreDaMorte.removeFromGame(event.player, skipFinishCheck = false)
         }
     }
 
-    @EventHandler
+    // This is very complex and in my opinion doesn't really help fixing the issue
+    /* @EventHandler
     fun onTeleport(event: PlayerTeleportEvent) {
         if (!m.torreDaMorte.isStarted)
             return
@@ -107,7 +108,7 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
                 m.torreDaMorte.removeFromGame(event.player, false)
             }
         }
-    }
+    } */
 
     @EventHandler
     fun onFoodChange(e: FoodLevelChangeEvent) {

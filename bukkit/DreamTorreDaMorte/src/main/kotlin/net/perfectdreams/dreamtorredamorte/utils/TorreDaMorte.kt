@@ -23,6 +23,8 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
     var canAttack = false
     var isStarted = false
     var isPreStart = false
+    val isGamePhase
+        get() = isStarted && !isPreStart
     val world by lazy { Bukkit.getWorld("TorreDaMorte") }
     val queueSpawn by lazy {
         Location(
@@ -127,7 +129,14 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             player.openInventory.close()
             player.inventory.clear()
 
-            player.teleport(locationToTeleportTo)
+            val successfullyTeleported = player.teleport(locationToTeleportTo)
+            if (!successfullyTeleported) {
+                // uuh... that's not good
+                // we will skip the finish check because what if it was the first user that caused this issue?
+                removeFromGame(player, skipFinishCheck = true)
+                return@forEachIndexed
+            }
+
             player.inventory.addItem(
                 ItemStack(Material.STICK)
                     .rename("§c§lO Poder do Vieirinha")
@@ -139,35 +148,34 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
         }
 
         // Iniciar minigame... daqui a pouquitcho, yay!
-
         scheduler().schedule(m) {
             players.forEach {
-                it.sendTitle("§c5", "", 0, 20, 0)
+                it.sendTitle("§c5", "§f", 0, 20, 0)
                 it.playSound(it.location, Sound.UI_BUTTON_CLICK, 1f, 0.2f)
             }
             waitFor(20)
             players.forEach {
-                it.sendTitle("§c4", "", 0, 20, 0)
+                it.sendTitle("§c4", "§f", 0, 20, 0)
                 it.playSound(it.location, Sound.UI_BUTTON_CLICK, 1f, 0.4f)
             }
             waitFor(20)
             players.forEach {
-                it.sendTitle("§c3", "", 0, 20, 0)
+                it.sendTitle("§c3", "§f", 0, 20, 0)
                 it.playSound(it.location, Sound.UI_BUTTON_CLICK, 1f, 0.6f)
             }
             waitFor(20)
             players.forEach {
-                it.sendTitle("§c2", "", 0, 20, 0)
+                it.sendTitle("§c2", "§f", 0, 20, 0)
                 it.playSound(it.location, Sound.UI_BUTTON_CLICK, 1f, 0.8f)
             }
             waitFor(20)
             players.forEach {
-                it.sendTitle("§c1", "", 0, 20, 0)
+                it.sendTitle("§c1", "§f", 0, 20, 0)
                 it.playSound(it.location, Sound.UI_BUTTON_CLICK, 1f, 1f)
             }
             waitFor(20)
             players.forEach {
-                it.sendTitle("§4§lLutem!", "", 0, 20, 0)
+                it.sendTitle("§4§lLutem!", "§f", 0, 20, 0)
                 it.playSound(it.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
                 it.playSound(it.location, "perfectdreams.sfx.special_stage", 1f, 1f)
             }
@@ -175,10 +183,18 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             canAttack = true
 
             while (isStarted) {
+                if (players.size == 1) {
+                    m.logger.warning { "Players remaining detected as 1 in the event in the repeating schedule! This should never happen!" }
+                    finish()
+                    continue
+                }
+
+                m.logger.info { "Remaining players: ${players.map { it.name }}" }
                 // A cada um segundo iremos verificar players inválidos que ainda estão no jogo
-                val invalidPlayers = players.filter { !it.isValid || it.location.world.name != "TorreDaMorte" }
+                // We will also check if the player y position is above the queue spawn because, if it is, then they weren't teleported (for some reason)
+                val invalidPlayers = players.filter { !it.isValid || it.location.world.name != "TorreDaMorte" || (it.location.world.name == "TorreDaMorte" && it.location.y >= queueSpawn.y) }
                 invalidPlayers.forEach {
-                    removeFromGame(it)
+                    removeFromGame(it, skipFinishCheck = true)
                 }
 
                 waitFor(20L)
@@ -187,8 +203,21 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
     }
 
     fun finish() {
-        val player = players.first()
-        removeFromGame(player)
+        val player = players.firstOrNull()
+        if (player == null) {
+            isStarted = false
+            isPreStart = false
+            storedPlayerInventory.clear()
+            lastHits.clear()
+
+            m.eventoTorreDaMorte.lastTime = System.currentTimeMillis()
+            m.eventoTorreDaMorte.running = false
+
+            Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} Parece a Torre da Morte acabou sem nenhum ganhador... isto é um bug e jamais deveria acontecer!")
+            return
+        }
+
+        removeFromGame(player, skipFinishCheck = false)
 
         isStarted = false
         isPreStart = false
@@ -213,15 +242,14 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
         }
     }
 
-    fun removeFromGame(player: Player, teleportToSpawn: Boolean = true) {
+    fun removeFromGame(player: Player, skipFinishCheck: Boolean) {
         if (!players.contains(player))
             return
 
         // Você perdeu, que sad...
         players.remove(player)
 
-        if (teleportToSpawn)
-            player.teleport(DreamCore.dreamConfig.getSpawn())
+        player.teleport(DreamCore.dreamConfig.getSpawn())
 
         // Restaurar o inventário do player
         val storedInventory = storedPlayerInventory[player]
@@ -251,7 +279,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             )
         }
 
-        if (players.size == 1)
+        if (!skipFinishCheck && isGamePhase && players.size == 1)
             finish()
     }
 

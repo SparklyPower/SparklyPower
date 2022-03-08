@@ -140,7 +140,7 @@ class DreamLoja : KotlinPlugin() {
 						.rename("§f")
 				}
 
-				slot(i + 4, 0) {
+				slot(i + 5, 0) {
 					item = ItemStack(material)
 						.rename("§f")
 				}

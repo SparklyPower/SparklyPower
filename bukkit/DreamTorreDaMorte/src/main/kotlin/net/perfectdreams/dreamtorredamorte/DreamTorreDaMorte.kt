@@ -25,7 +25,7 @@ class DreamTorreDaMorte : KotlinPlugin() {
         registerEvents(PlayerListener(this))
         registerServerEvent(eventoTorreDaMorte)
         registerCommand(TorreCommand)
-        registerCommand(TorreMinigameCommand)
+        // registerCommand(TorreMinigameCommand)
         registerCommand(DreamTorreDaMorteStartCommand)
     }
 
@@ -36,7 +36,7 @@ class DreamTorreDaMorte : KotlinPlugin() {
             if (torreDaMorte.isPreStart) {
                 torreDaMorte.playersInQueue.toList().forEach { torreDaMorte.removeFromQueue(it) }
             } else {
-                torreDaMorte.players.toList().forEach { torreDaMorte.removeFromGame(it) }
+                torreDaMorte.players.toList().forEach { torreDaMorte.removeFromGame(it, skipFinishCheck = false) }
             }
         }
     }

@@ -16,7 +16,7 @@ class EventoTorreDaMorte(val m: DreamTorreDaMorte) : ServerEvent("Torre da Morte
             if (m.torreDaMorte.isPreStart) {
                 m.torreDaMorte.playersInQueue.toList().forEach { m.torreDaMorte.removeFromQueue(it) }
             } else {
-                m.torreDaMorte.players.toList().forEach { m.torreDaMorte.removeFromGame(it) }
+                m.torreDaMorte.players.toList().forEach { m.torreDaMorte.removeFromGame(it, skipFinishCheck = false) }
             }
         }
 
