@@ -21,6 +21,7 @@ import net.perfectdreams.dreamchat.commands.declarations.TellCommand
 import net.perfectdreams.dreamchat.dao.ChatUser
 import net.perfectdreams.dreamchat.dao.DiscordAccount
 import net.perfectdreams.dreamchat.dao.EventMessage
+import net.perfectdreams.dreamchat.listeners.CharacterBlockerListener
 import net.perfectdreams.dreamchat.listeners.ChatListener
 import net.perfectdreams.dreamchat.listeners.SignListener
 import net.perfectdreams.dreamchat.tables.ChatUsers
@@ -74,6 +75,7 @@ class DreamChat : KotlinPlugin() {
 	val eventoChat = EventoChatHandler()
 
 	val replacers = mutableMapOf<Regex, String>()
+	val blockers = mutableSetOf<Regex>()
 
 	val cachedDiscordAccounts = Caffeine.newBuilder().maximumSize(1_000)
 		.expireAfterWrite(3, TimeUnit.DAYS)
@@ -120,6 +122,7 @@ class DreamChat : KotlinPlugin() {
 
 		registerEvents(ChatListener(this))
 		registerEvents(SignListener(this))
+		registerEvents(CharacterBlockerListener(this))
 		registerCommand(MuteCommand())
 		registerCommand(
 			TellCommand,
@@ -237,11 +240,17 @@ class DreamChat : KotlinPlugin() {
 	fun reload() {
 		reloadConfig()
 		replacers.clear()
+		blockers.clear()
 
 		val yamlReplacers = config.getConfigurationSection("replacers")!!.getValues(false)
 
 		yamlReplacers.forEach {
 			replacers[it.key.toRegex(RegexOption.IGNORE_CASE)] = it.value as String
+		}
+
+		val yamlBlockers = config.getStringList("blockers")
+		yamlBlockers.forEach {
+			blockers.add(it.toRegex(RegexOption.IGNORE_CASE))
 		}
 
 		// Shutdown all current active webhooks
