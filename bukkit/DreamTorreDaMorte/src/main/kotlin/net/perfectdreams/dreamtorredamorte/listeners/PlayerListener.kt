@@ -118,4 +118,10 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
         if (e.entity.world.name == "TorreDaMorte")
             e.isCancelled = true
     }
+
+    @EventHandler
+    fun onCommand(e: PlayerCommandPreprocessEvent) {
+        if (e.player in m.torreDaMorte.players)
+            e.isCancelled = true
+    }
 }

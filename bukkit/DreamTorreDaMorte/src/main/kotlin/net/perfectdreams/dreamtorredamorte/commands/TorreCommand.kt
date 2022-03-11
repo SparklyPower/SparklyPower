@@ -23,7 +23,7 @@ object TorreCommand : DSLCommandBase<DreamTorreDaMorte> {
                 player.sendMessage("${DreamTorreDaMorte.PREFIX} §cVocê já está na fila da Torre da Morte!")
                 return@executes
             }
-            
+
             if (plugin.torreDaMorte.isServerEvent) {
                 player.sendMessage("${DreamTorreDaMorte.PREFIX} §eVocê entrou no evento da Torre da Morte!")
                 plugin.torreDaMorte.joinQueue(player)

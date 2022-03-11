@@ -6,7 +6,7 @@ import net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
 class EventoTorreDaMorte(val m: DreamTorreDaMorte) : ServerEvent("Torre da Morte", "/torre") {
     init {
         this.requiredPlayers = 20
-        this.delayBetween = 15 * 60 * 1_000 // 15 minutos entre cada evento
+        this.delayBetween = 20 * 60 * 1_000 // 20 minutos entre cada evento
         this.command = "/torre"
     }
 
