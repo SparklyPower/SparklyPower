@@ -171,6 +171,9 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		val disablePassiveMobs = claimAdditions.disablePassiveMobs
 		val disableHostileMobs = claimAdditions.disableHostileMobs
 
+		if (e.entity.fromMobSpawner() && claimAdditions.allowSpawnFromMobSpawners)
+			return
+
 		if (disablePassiveMobs && e.entityType in passiveMobs)
 			e.isCancelled = true
 
@@ -294,6 +297,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		var disableSnowFormation by data::disableSnowFormation
 		var disablePlantsSpreading by data::disablePlantsSpreading
 		var disableTrapdoorAndDoorAccess by data::disableTrapdoorAndDoorAccess
+		var allowSpawnFromMobSpawners by data::allowSpawnFromMobSpawners
 
 		val temporaryTrustedPlayersMutex = Mutex()
 	}
@@ -309,7 +313,8 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		var disableHostileMobs: Boolean = false,
 		var disableSnowFormation: Boolean = false,
 		var disablePlantsSpreading: Boolean = false,
-		var disableTrapdoorAndDoorAccess: Boolean = false
+		var disableTrapdoorAndDoorAccess: Boolean = false,
+		var allowSpawnFromMobSpawners: Boolean = false
 	)
 
 	object UUIDAsStringSerializer : KSerializer<UUID> {

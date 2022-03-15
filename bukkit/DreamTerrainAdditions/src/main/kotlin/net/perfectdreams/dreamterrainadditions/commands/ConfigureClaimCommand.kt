@@ -30,7 +30,6 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                 val menu = createMenu(45, "§cConfiguração do terreno") {
 
                     slot(1, 1) {
-
                         item = ItemStack(Material.TNT)
                             .meta<ItemMeta> {
                                 this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
@@ -119,69 +118,26 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                         }
                     }
 
-                    slot(7, 1) {
-
-                        item = ItemStack(Material.PLAYER_HEAD)
-                            .meta<ItemMeta> {
-                                this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
-
-                                if (claimAdditions.disablePassiveMobs) {
-                                    setDisplayName("§c§lAtivar Spawn de Mobs Passivos no Terreno")
-                                } else {
-                                    setDisplayName("§a§lDesativar Spawn de Mobs Passivos no Terreno")
-                                }
-
-                                lore = listOf(
-                                        "§7Bloqueie que mobs passivos possam spawnar no seu terreno"
-                                )
-                            }
-                            .meta<SkullMeta> {
-                                playerProfile = Bukkit.createProfile(UUID.fromString("0c86f354-712c-4142-a3af-8ad3f53e1d96")).apply {
-                                    this.setProperty(
-                                            ProfileProperty(
-                                                    "textures",
-                                                    "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzVhOWNkNThkNGM2N2JjY2M4ZmIxZjVmNzU2YTJkMzgxYzlmZmFjMjkyNGI3ZjRjYjcxYWE5ZmExM2ZiNWMifX19"
-                                            )
-                                    )
-                                }
-                            }
-
-                        onClick {
-                            it.closeInventory()
-                            claimAdditions.disablePassiveMobs = !claimAdditions.disablePassiveMobs
-                            it.sendMessage("§aBloqueio de mobs passivos agora está ${humanizeBoolean(claimAdditions.disablePassiveMobs)} §ano seu terreno! §a" +
-                                    humanizeBoolean(claimAdditions.disablePassiveMobs,
-                                            "Mobs que não atacam irão parar de spawnar em seu terreno.",
-                                            "Mobs que não atacam, agora, irão spawnar normalmente em seu terreno."))
-
-                            plugin.saveInAsyncTask()
-                        }
-                    }
-
                     slot(2, 2) {
-
-                        item = ItemStack(Material.CREEPER_HEAD)
+                        item = ItemStack(Material.VINE)
                             .meta<ItemMeta> {
                                 this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
 
-                                if (claimAdditions.disableHostileMobs) {
-                                    setDisplayName("§c§lAtivar Spawn de Mobs Agressivos no Terreno")
+                                if (claimAdditions.disablePlantsSpreading) {
+                                    setDisplayName("§a§lPermitir o espalhamento de plantas no terreno")
                                 } else {
-                                    setDisplayName("§a§lDesativar Spawn de Mobs Agressivos no Terreno")
+                                    setDisplayName("§b§lImpedir o espalhamento de plantas no terreno")
                                 }
 
                                 lore = listOf(
-                                        "§7Bloqueie que mobs agressivos possam spawnar no seu terreno"
+                                    "§7Bloqueie o espalhamento de qualquer tipo de plantas em seu terreno, como vinhas.",
                                 )
                             }
 
                         onClick {
                             it.closeInventory()
-                            claimAdditions.disableHostileMobs = !claimAdditions.disableHostileMobs
-                            it.sendMessage("§aBloqueio de mobs agressivos agora está ${humanizeBoolean(claimAdditions.disableHostileMobs)} no seu terreno! §a" +
-                                    humanizeBoolean(claimAdditions.disableHostileMobs,
-                                            "Mobs que atacam irão parar de spawnar em seu terreno.",
-                                            "Mobs que atacam irão voltar a spawnar em seu terreno."))
+                            claimAdditions.disablePlantsSpreading = !claimAdditions.disablePlantsSpreading
+                            it.sendMessage("§aO bloqueio de crescimento de plantas está agora ${humanizeBoolean(claimAdditions.disablePlantsSpreading)} no seu terreno!")
 
                             plugin.saveInAsyncTask()
                         }
@@ -260,26 +216,98 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                             plugin.saveInAsyncTask()
                         }
                     }
-                    slot(3, 3) {
-                        item = ItemStack(Material.VINE)
+
+                    slot(8, 1) {
+                        item = ItemStack(Material.PLAYER_HEAD)
                             .meta<ItemMeta> {
                                 this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
 
-                                if (claimAdditions.disablePlantsSpreading) {
-                                    setDisplayName("§a§lPermitir o espalhamento de plantas no terreno")
+                                if (claimAdditions.disablePassiveMobs) {
+                                    setDisplayName("§c§lAtivar Spawn de Mobs Passivos no Terreno")
                                 } else {
-                                    setDisplayName("§b§lImpedir o espalhamento de plantas no terreno")
+                                    setDisplayName("§a§lDesativar Spawn de Mobs Passivos no Terreno")
                                 }
 
                                 lore = listOf(
-                                    "§7Bloqueie o espalhamento de qualquer tipo de plantas em seu terreno, como vinhas.",
+                                    "§7Bloqueie que mobs passivos possam spawnar no seu terreno"
+                                )
+                            }
+                            .meta<SkullMeta> {
+                                playerProfile = Bukkit.createProfile(UUID.fromString("0c86f354-712c-4142-a3af-8ad3f53e1d96")).apply {
+                                    this.setProperty(
+                                        ProfileProperty(
+                                            "textures",
+                                            "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYzVhOWNkNThkNGM2N2JjY2M4ZmIxZjVmNzU2YTJkMzgxYzlmZmFjMjkyNGI3ZjRjYjcxYWE5ZmExM2ZiNWMifX19"
+                                        )
+                                    )
+                                }
+                            }
+
+                        onClick {
+                            it.closeInventory()
+                            claimAdditions.disablePassiveMobs = !claimAdditions.disablePassiveMobs
+                            it.sendMessage("§aBloqueio de mobs passivos agora está ${humanizeBoolean(claimAdditions.disablePassiveMobs)} §ano seu terreno! §a" +
+                                    humanizeBoolean(claimAdditions.disablePassiveMobs,
+                                        "Mobs que não atacam irão parar de spawnar em seu terreno.",
+                                        "Mobs que não atacam, agora, irão spawnar normalmente em seu terreno."))
+
+                            plugin.saveInAsyncTask()
+                        }
+                    }
+
+                    slot(8, 2) {
+                        item = ItemStack(Material.CREEPER_HEAD)
+                            .meta<ItemMeta> {
+                                this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+
+                                if (claimAdditions.disableHostileMobs) {
+                                    setDisplayName("§c§lAtivar Spawn de Mobs Agressivos no Terreno")
+                                } else {
+                                    setDisplayName("§a§lDesativar Spawn de Mobs Agressivos no Terreno")
+                                }
+
+                                lore = listOf(
+                                    "§7Bloqueie que mobs agressivos possam spawnar no seu terreno"
                                 )
                             }
 
                         onClick {
                             it.closeInventory()
-                            claimAdditions.disablePlantsSpreading = !claimAdditions.disablePlantsSpreading
-                            it.sendMessage("§aO bloqueio de crescimento de plantas está agora ${humanizeBoolean(claimAdditions.disablePlantsSpreading)} no seu terreno!")
+                            claimAdditions.disableHostileMobs = !claimAdditions.disableHostileMobs
+                            it.sendMessage("§aBloqueio de mobs agressivos agora está ${humanizeBoolean(claimAdditions.disableHostileMobs)} no seu terreno! §a" +
+                                    humanizeBoolean(claimAdditions.disableHostileMobs,
+                                        "Mobs que atacam irão parar de spawnar em seu terreno.",
+                                        "Mobs que atacam irão voltar a spawnar em seu terreno."))
+
+                            plugin.saveInAsyncTask()
+                        }
+                    }
+
+                    slot(8, 3) {
+                        item = ItemStack(Material.SPAWNER)
+                            .meta<ItemMeta> {
+                                this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+
+                                if (claimAdditions.allowSpawnFromMobSpawners) {
+                                    setDisplayName("§c§lDesativar Spawn de Mobs via Spawners")
+                                } else {
+                                    setDisplayName("§a§lAtivar Spawn de Mobs via Spawners")
+                                }
+
+                                lore = listOf(
+                                    "§7Deixa que mobs nascidos via spawners possam nascer,",
+                                    "§7mesmo que as opções acima desativem o spawn deles no",
+                                    "§7terreno."
+                                )
+                            }
+
+                        onClick {
+                            it.closeInventory()
+                            claimAdditions.disableHostileMobs = !claimAdditions.disableHostileMobs
+                            it.sendMessage("§aBloqueio de mobs agressivos agora está ${humanizeBoolean(claimAdditions.disableHostileMobs)} no seu terreno! §a" +
+                                    humanizeBoolean(claimAdditions.disableHostileMobs,
+                                        "Mobs que atacam irão parar de spawnar em seu terreno.",
+                                        "Mobs que atacam irão voltar a spawnar em seu terreno."))
 
                             plugin.saveInAsyncTask()
                         }
