@@ -37,6 +37,12 @@ class XizumCommand(val m: DreamXizum) : AbstractCommand("xizum", listOf("x1", "1
 
 	@Subcommand(["fila"])
 	fun file(p0: Player) {
+		val alreadyInXizum = m.arenas.any { it.player1 == p0 || it.player2 == p0 }
+		if (alreadyInXizum) {
+			p0.sendMessage("${DreamXizum.PREFIX} §cVocê já está em uma partida de Xizum!")
+			return
+		}
+
 		if (m.queue.contains(p0)) {
 			m.queue.remove(p0)
 			p0.sendMessage("${DreamXizum.PREFIX} §cVocê saiu da fila do Xizum!")
@@ -57,6 +63,12 @@ class XizumCommand(val m: DreamXizum) : AbstractCommand("xizum", listOf("x1", "1
 			return
 		}
 
+		val alreadyInXizum = m.arenas.any { it.player1 == p0 || it.player2 == p0 }
+		if (alreadyInXizum) {
+			p0.sendMessage("${DreamXizum.PREFIX} §cVocê já está em uma partida de Xizum!")
+			return
+		}
+
 		m.queue.remove(xizumRequest.requester)
 		m.queue.remove(xizumRequest.requestee)
 		m.requestQueue.removeAll { it.player1 == xizumRequest.requester || it.player2 == xizumRequest.requester }
@@ -74,6 +86,12 @@ class XizumCommand(val m: DreamXizum) : AbstractCommand("xizum", listOf("x1", "1
 
 		if (sender == receiver) {
 			sender.sendMessage("${DreamXizum.PREFIX} §cVocê não pode chamar a si mesmo para o Xizum, bobinho.")
+			return
+		}
+
+		val alreadyInXizum = m.arenas.any { it.player1 == sender || it.player2 == sender }
+		if (alreadyInXizum) {
+			sender.sendMessage("${DreamXizum.PREFIX} §cVocê já está em uma partida de Xizum!")
 			return
 		}
 
