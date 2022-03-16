@@ -46,6 +46,8 @@ class DiscordCommand(val m: DreamNetworkBans) : SparklyBungeeCommand(arrayOf("di
 		}
 
 		sender.sendMessage("§aConta do Discord foi registrada com sucesso, yay!".toTextComponent())
+
+		m.discordAccountAssociationsWebhook.send("Conta **`${sender.name}`** (`${sender.uniqueId}`) foi associada a conta `${account.discordId}` (<@${account.discordId}>)")
 	}
 
 	@Subcommand(["desregistrar", "unregister"])
@@ -65,5 +67,7 @@ class DiscordCommand(val m: DreamNetworkBans) : SparklyBungeeCommand(arrayOf("di
 		}
 
 		sender.sendMessage("§aConta do Discord foi desregistrada com sucesso, yay!".toTextComponent())
+
+		m.discordAccountAssociationsWebhook.send("Conta **`${sender.name}`** (`${sender.uniqueId}`) foi desassociada da conta `${account.discordId}` (<@${account.discordId}>)")
 	}
 }

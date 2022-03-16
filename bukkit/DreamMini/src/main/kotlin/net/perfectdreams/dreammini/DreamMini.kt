@@ -150,7 +150,8 @@ class DreamMini : KotlinPlugin(), Listener {
 		}
 	}
 
-	@EventHandler
+	// Needs to be veery low to avoid users using "&rSparklyShop" to bypass the Admin Shop check
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	fun onEdit(e: SignChangeEvent) {
 		if (e.player.hasPermission("dreammini.colorize")) {
 			for (idx in 0..3) {
