@@ -23,11 +23,9 @@ import net.perfectdreams.dreamchat.dao.DiscordAccount
 import net.perfectdreams.dreamchat.dao.EventMessage
 import net.perfectdreams.dreamchat.listeners.CharacterBlockerListener
 import net.perfectdreams.dreamchat.listeners.ChatListener
+import net.perfectdreams.dreamchat.listeners.OnlineHoursTrackerListener
 import net.perfectdreams.dreamchat.listeners.SignListener
-import net.perfectdreams.dreamchat.tables.ChatUsers
-import net.perfectdreams.dreamchat.tables.PremiumUsers
-import net.perfectdreams.dreamchat.tables.DiscordAccounts
-import net.perfectdreams.dreamchat.tables.EventMessages
+import net.perfectdreams.dreamchat.tables.*
 import net.perfectdreams.dreamchat.utils.DiscordAccountInfo
 import net.perfectdreams.dreamchat.utils.bot.PantufaResponse
 import net.perfectdreams.dreamchat.utils.bot.responses.*
@@ -111,7 +109,8 @@ class DreamChat : KotlinPlugin() {
 				ChatUsers,
 				EventMessages,
 				PremiumUsers,
-				DiscordAccounts
+				DiscordAccounts,
+				TrackedOnlineHours
 			)
 		}
 
@@ -123,6 +122,7 @@ class DreamChat : KotlinPlugin() {
 		registerEvents(ChatListener(this))
 		registerEvents(SignListener(this))
 		registerEvents(CharacterBlockerListener(this))
+		registerEvents(OnlineHoursTrackerListener(this))
 		registerCommand(MuteCommand())
 		registerCommand(
 			TellCommand,

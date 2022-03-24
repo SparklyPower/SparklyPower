@@ -96,23 +96,6 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
         }
     }
 
-    // This is very complex and in my opinion doesn't really help fixing the issue
-    /* @EventHandler
-    fun onTeleport(event: PlayerTeleportEvent) {
-        if (!m.torreDaMorte.isStarted)
-            return
-
-        // Se o player teletransportar para fora da torre da morte, vamos restaurar as coisas dela
-        // Mas como é para "fora", vamos apenas ignorar qualquer teleport para o spawn e coisas assim
-        if (event.from.world.name == "TorreDaMorte" && event.to.world.name != "TorreDaMorte") {
-            if (event.player in m.torreDaMorte.players) {
-                // Então ele foi teletransportado para fora, mas está na lista de players!
-                // Então vamos fazer que ela tenha "saido" do evento, mas não iremos teletransportá-lo
-                m.torreDaMorte.removeFromGame(event.player, false)
-            }
-        }
-    } */
-
     @EventHandler
     fun onFoodChange(e: FoodLevelChangeEvent) {
         if (e.entity.world.name == "TorreDaMorte")
@@ -123,5 +106,17 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
     fun onCommand(e: PlayerCommandPreprocessEvent) {
         if (e.player in m.torreDaMorte.players)
             e.isCancelled = true
+    }
+
+    @EventHandler
+    fun onTeleport(e: PlayerTeleportEvent) {
+        if (e.player.world.name != "TorreDaMorte")
+            return
+
+        if (!(e.cause == PlayerTeleportEvent.TeleportCause.CHORUS_FRUIT || e.cause == PlayerTeleportEvent.TeleportCause.ENDER_PEARL))
+            return
+
+        // Cancel teleport if it is chorus fruit or ender pearls
+        e.isCancelled = true
     }
 }
