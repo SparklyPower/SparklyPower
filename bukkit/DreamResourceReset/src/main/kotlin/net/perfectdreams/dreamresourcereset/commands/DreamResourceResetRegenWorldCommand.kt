@@ -37,8 +37,19 @@ object DreamResourceResetRegenWorldCommand : DSLCommandBase<DreamResourceReset> 
                 // Create new world
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mvcreate Resources normal")
 
-                // Wait 20 ticks
-                delayTicks(20L)
+                var resourcesWorld: World?
+                while (true) {
+                    resourcesWorld = Bukkit.getWorld("Resources")
+                    if (resourcesWorld != null)
+                        break
+
+                    plugin.logger.info("World is not present, waiting until the world is present...")
+                    delayTicks(20L)
+                }
+
+                plugin.logger.info("World has been found! ${resourcesWorld!!} - Saving world...")
+
+                resourcesWorld.save()
 
                 // Set the world
                 // Needs to be lowercase if not "Invalid value for [] (Not a valid world: Resources), acceptable values are any world" ???
@@ -60,6 +71,9 @@ object DreamResourceResetRegenWorldCommand : DSLCommandBase<DreamResourceReset> 
 
                 // Set resources spawn
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mvsetspawn Resources 0.5 68 0.5")
+
+                // Change resources to have keep inventory
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mv gamerule keepInventory true Resources")
 
                 // Improve area around the spawn point to be accessible by players
                 val world = Bukkit.getWorld("Resources")!!
@@ -96,11 +110,15 @@ object DreamResourceResetRegenWorldCommand : DSLCommandBase<DreamResourceReset> 
                     it.check()
                 }
 
-                // Save all because WorldBorder fails if this isn't set
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "save-all")
+                Bukkit.getWorld("Resources")!!.save()
 
-                // Again wait for 100 ticks because save all takes a while
-                delayTicks(100L)
+                while (true) {
+                    if (File("Resources/region").listFiles().isNotEmpty())
+                        break
+
+                    plugin.logger.info("Region files are not present, trying again later in 20 ticks...")
+                    delayTicks(20L)
+                }
 
                 // Start generating the world
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "wb Resources fill 10000")
