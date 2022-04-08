@@ -13,6 +13,8 @@ import net.perfectdreams.dreamcustomitems.items.Microwave
 import net.perfectdreams.dreamcustomitems.items.SuperFurnace
 import net.perfectdreams.dreamcustomitems.items.TrashCan
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
+import net.perfectdreams.dreamcustomitems.utils.isMagnetApplicable
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -22,6 +24,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
@@ -99,21 +102,14 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                         }
                     }
 
+                    val drops = listOf(CustomItems.MICROWAVE.clone()) + microwaveItems
+                    clickedBlock.type = Material.AIR
                     e.isCancelled = true
 
-                    e.block.world.dropItemNaturally(
-                            e.block.location,
-                            CustomItems.MICROWAVE.clone()
-                    )
+                    if (!e.player.isMagnetApplicable(clickedBlock.type, drops))
+                        drops.forEach { with (clickedBlock) { world.dropItemNaturally(location, it) } }
 
-                    e.block.type = Material.AIR
-
-                    microwaveItems.forEach {
-                        e.block.world.dropItemNaturally(
-                            e.block.location,
-                            it
-                        )
-                    }
+                    Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, e.player, listOf()))
                 }
 
                 SUPERFURNACE != null -> {
@@ -143,32 +139,25 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                         }
                     }
 
+                    val drops = listOf(CustomItems.SUPERFURNACE.clone()) + superFurnaceItems
+                    clickedBlock.type = Material.AIR
                     e.isCancelled = true
 
-                    e.block.world.dropItemNaturally(
-                        e.block.location,
-                        CustomItems.SUPERFURNACE.clone()
-                    )
+                    if (!e.player.isMagnetApplicable(clickedBlock.type, drops))
+                        with (clickedBlock) { drops.forEach { world.dropItemNaturally(location, it) } }
 
-                    e.block.type = Material.AIR
-
-                    superFurnaceItems.forEach {
-                        e.block.world.dropItemNaturally(
-                            e.block.location,
-                            it
-                        )
-                    }
+                    Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, e.player, listOf()))
                 }
 
                 TRASHCAN != null -> {
+                    val drops = listOf(CustomItems.TRASHCAN.clone())
+                    clickedBlock.type = Material.AIR
                     e.isCancelled = true
 
-                    e.block.world.dropItemNaturally(
-                            e.block.location,
-                            CustomItems.TRASHCAN.clone()
-                    )
+                    if (!e.player.isMagnetApplicable(clickedBlock.type, drops))
+                        with (clickedBlock) { world.dropItemNaturally(location, drops.single()) }
 
-                    e.block.type = Material.AIR
+                    Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, e.player, listOf()))
                 }
 
                 else -> return

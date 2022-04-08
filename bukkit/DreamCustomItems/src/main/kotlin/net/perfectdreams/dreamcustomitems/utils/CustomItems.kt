@@ -1,11 +1,14 @@
 package net.perfectdreams.dreamcustomitems.utils
 
 import com.destroystokyo.paper.profile.ProfileProperty
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
 import net.perfectdreams.dreamcore.utils.chance
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
@@ -43,6 +46,35 @@ object CustomItems {
 
             lore = listOf(
                 "§7Cuidado para não machucar a mão!"
+            )
+        }
+
+    val MAGNET = ItemStack(Material.STONE_HOE)
+        .meta<ItemMeta> {
+            addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+            setCustomModelData(1)
+            setDisplayName("§c§lÍmã")
+
+            lore = listOf(
+                "§7Graças aos seus polos §bmagnéticos§7, esse item atrai",
+                "§7todo §cmetal§7 que você minerar para o seu inventário.",
+                "",
+                "§6Pode atrair até §f8.640 §6metais"
+            )
+        }
+
+    val MAGNET_2 = ItemStack(Material.STONE_HOE)
+        .meta<ItemMeta> {
+            addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+            setCustomModelData(2)
+            setDisplayName("§x§d§1§6§d§e§9§lÍmã grotesco")
+
+            lore = listOf(
+                "§7Ele atrai qualquer bloco que seja quebrado",
+                "§7por você, sendo um metal ou não.",
+                "§eBizarro§7, mas funciona.",
+                "",
+                "§6Pode atrair até §f18.144 §6itens"
             )
         }
 

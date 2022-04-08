@@ -1,144 +1,93 @@
 package net.perfectdreams.dreamxizum
 
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
+import kernitus.plugin.OldCombatMechanics.OCMMain
+import net.luckperms.api.LuckPerms
+import net.luckperms.api.LuckPermsProvider
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamxizum.commands.DreamXizumCommand
-import net.perfectdreams.dreamxizum.commands.XizumCommand
-import net.perfectdreams.dreamxizum.listeners.XizumListener
-import net.perfectdreams.dreamxizum.utils.ArenaXizum
-import net.perfectdreams.dreamxizum.utils.RequestQueueEntry
-import net.perfectdreams.dreamxizum.utils.WinType
-import net.perfectdreams.dreamxizum.utils.XizumRequest
-import org.bukkit.Bukkit
-import org.bukkit.entity.Player
-import org.bukkit.event.Listener
+import net.perfectdreams.dreamxizum.battle.BattleListener
+import net.perfectdreams.dreamxizum.battle.Matchmaker
+import net.perfectdreams.dreamxizum.commands.*
+import net.perfectdreams.dreamxizum.commands.declarations.AcceptTOSCommand
+import net.perfectdreams.dreamxizum.commands.declarations.DreamXizumCommand
+import net.perfectdreams.dreamxizum.commands.declarations.X1Command
+import net.perfectdreams.dreamxizum.commands.declarations.XizumCommand
+import net.perfectdreams.dreamxizum.commands.subcommands.*
+import net.perfectdreams.dreamxizum.config.XizumConfig
+import net.perfectdreams.dreamxizum.extensions.unavailablePlayers
+import net.perfectdreams.dreamxizum.lobby.CitizensNPCs
+import net.perfectdreams.dreamxizum.lobby.Holograms
+import net.perfectdreams.dreamxizum.lobby.Lobby
+import net.perfectdreams.dreamxizum.tables.Combatants
+import net.perfectdreams.dreamxizum.tables.Duelists
+import net.perfectdreams.dreamxizum.tables.Kits
+import net.perfectdreams.dreamxizum.tasks.RankedQueueTask
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 
-class DreamXizum : KotlinPlugin(), Listener {
-	companion object {
-		const val PREFIX = "§8[§4§lXiz§c§lum§8]§e"
-		const val XIZUM_DATA_KEY = "XizumData"
-	}
+class DreamXizum : KotlinPlugin() {
+    companion object {
+        var legacyAttackSpeed = 24.0
+        lateinit var INSTANCE: DreamXizum
+        lateinit var luckPerms: LuckPerms
+        const val COLOR = "§x§9§c§e§a§6§4"
+        const val PREFIX = "§8[§x§2§e§9§0§d§1§lX1§8]$COLOR"
+        fun highlight(text: String) = "§x§2§2§d§d§4§9$text$COLOR"
+    }
 
-	val arenas = mutableListOf<ArenaXizum>()
-	val requestQueue = mutableListOf<RequestQueueEntry>()
-	val requests = mutableListOf<XizumRequest>()
-	val queue = mutableListOf<Player>()
+    override fun softEnable() {
+        super.softEnable()
 
-	override fun softEnable() {
-		super.softEnable()
+        INSTANCE = this
+        luckPerms = LuckPermsProvider.get()
 
-		registerCommand(XizumCommand(this))
-		registerCommand(DreamXizumCommand(this))
+        transaction(Databases.databaseNetwork) {
+            SchemaUtils.createMissingTablesAndColumns(
+                Combatants, Duelists, Kits
+            )
+        }
 
-		registerEvents(XizumListener(this))
+        loadConfig()
+        registerCommands()
+        registerEvents(Lobby())
+        registerEvents(BattleListener())
+        Holograms.spawnHolograms()
+        Holograms.createLeaderboard()
+        CitizensNPCs.loadFile(File(dataFolder, "citizens.json"))
 
-		loadArenas()
-	}
+        RankedQueueTask.startTask()
+    }
 
-	override fun softDisable() {
-		super.softDisable()
+    override fun softDisable() {
+        with (Matchmaker) { battles.forEach { cancelBattle(it) } }
+        unavailablePlayers.forEach { it.teleportToServerSpawn() }
+    }
 
-		for (arena in arenas) {
-			val p1 = arena.player1
-			val p2 = arena.player2
+    fun loadConfig() {
+        dataFolder.mkdir()
+        File(dataFolder, "configuration.json").apply {
+            if (!exists()) saveResource(name, true)
+            XizumConfig.loadFile(this)
+            legacyAttackSpeed = getPlugin(OCMMain::class.java).config.getDouble("disable-attack-cooldown.generic-attack-speed")
+        }
+    }
 
-			if (p1 != null && p2 != null) {
-				arena.finishArena(p1, WinType.TIMEOUT)
-			}
-		}
-	}
+    private fun registerCommands() {
+        registerCommand(AcceptTOSCommand, AcceptTOSExecutor(this))
 
-	fun addToQueue(player: Player) {
-		queue.add(player)
-		checkQueue()
-	}
+        arrayOf(
+            DreamXizumReloadExecutor(this), DreamXizumCancelExecutor(), DreamXizumBanExecutor(this)
+        ).apply { registerCommand(DreamXizumCommand, *this) }
 
-	fun addToRequestQueue(player1: Player, player2: Player) {
-		requestQueue.add(RequestQueueEntry(player1, player2))
-		checkQueue()
-	}
-
-	fun checkQueue() {
-		while (queue.size >= 2) { // While there are two players in the queue...
-			val queued1 = queue[0]
-			val queued2 = queue[1]
-
-			if (!queued1.isValid || !queued1.isOnline) {
-				// Invalid, remove them from the queue
-				queue.remove(queued1)
-				continue
-			}
-
-			if (!queued2.isValid || !queued2.isOnline) {
-				// Invalid, remove them from the queue
-				queue.remove(queued2)
-				continue
-			}
-
-			// We will now add them to our request queue!
-			requestQueue.add(
-				RequestQueueEntry(
-					queued1,
-					queued2
-				)
-			)
-
-			// And remove them from our queue
-			queue.remove(queued1)
-			queue.remove(queued2)
-		}
-		while (requestQueue.isNotEmpty()) { // While there are request entries in the queue...
-			val request = requestQueue[0]
-			val queued1 = request.player1
-			val queued2 = request.player2
-
-			if (!queued1.isValid || !queued1.isOnline) {
-				requestQueue.remove(request)
-				queued2.sendMessage("§cVocê saiu da fila do Xizum pois o player que iria ir na partida com você saiu da fila...")
-				continue
-			}
-
-			if (!queued2.isValid || !queued2.isOnline) {
-				requestQueue.remove(request)
-				queued1.sendMessage("§cVocê saiu da fila do Xizum pois o player que iria ir na partida com você saiu da fila...")
-				continue
-			}
-
-			// Vamos pegar a primeira arena disponível para o nosso X1
-			// Caso retorne null, cancele a verificação de queue já que não existem mais arenas disponíveis
-			val arena = arenas.firstOrNull { it.data.isReady && it.player1 == null } ?: return
-
-			requestQueue.remove(request)
-
-			// omg todos são válidos??? yay??? não sei :X
-			arena.startArena(queued1, queued2)
-		}
-	}
-
-	fun saveArenas() {
-		val arenasFolder = File(dataFolder, "arenas")
-
-		arenasFolder.deleteRecursively()
-		arenasFolder.mkdirs()
-
-		arenas.forEach {
-			File(arenasFolder, "${it.data.name}.json").writeText(Json.encodeToString(it.data))
-		}
-	}
-
-	fun loadArenas() {
-		val arenasFolder = File(dataFolder, "arenas")
-
-		arenasFolder.listFiles().forEach {
-			arenas.add(ArenaXizum(this, Json.decodeFromString(it.readText())))
-		}
-	}
-
-	fun getArenaByName(name: String): ArenaXizum? {
-		return arenas.firstOrNull { it.data.name == name }
-	}
+        arrayOf(
+            XizumExecutor(this), XizumAcceptExecutor(this), XizumRefuseExecutor(this),
+            XizumInviteExecutor(this), XizumRemoveExecutor(this), XizumRankExecutor(this)
+        ).apply {
+            registerCommand(XizumCommand, *this)
+            registerCommand(X1Command, *this)
+        }
+    }
 }

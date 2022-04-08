@@ -15,6 +15,7 @@ import net.perfectdreams.dreamvote.listeners.TagListener
 import net.perfectdreams.dreamvote.listeners.VoteListener
 import net.perfectdreams.dreamvote.tables.Votes
 import net.perfectdreams.dreamvote.utils.VoteAward
+import net.perfectdreams.dreamxizum.extensions.available
 import org.bukkit.Bukkit
 import org.bukkit.Bukkit.getPlayerExact
 import org.bukkit.entity.Player
@@ -210,41 +211,26 @@ class DreamVote : KotlinPlugin() {
 	fun broadcastPleaseVoteMessage() {
 		schedule {
 			var sentToPlayers = 0
-			for (player in Bukkit.getOnlinePlayers()) {
+
+			server.onlinePlayers.forEach {
 				switchContext(SynchronizationContext.ASYNC)
-
-				val hasVotedToday = INSTANCE.hasVotedToday(player)
-
-				if (!hasVotedToday) {
-					sentToPlayers++
-					switchContext(SynchronizationContext.SYNC)
-					schedule {
-						player.sendTitle("§eEntão...", "§aVocê tá afim de uns §3diamantes§a? §f锃", 20, 200, 20)
-						waitFor(20 + 100 + 20)
-						player.sendTitle(
-							"§eSim, §3diamantes§e de graça!",
-							"§aE ainda poder conseguir §b§lVIP§a sem pagar §cnada§a? §f锇",
-							20,
-							200,
-							20
-						)
-						waitFor(20 + 100 + 20)
-						player.sendTitle(
-							"§eEntão §dvote no servidor§e!",
-							"§aSimples e fácil, §6/votar §f锈",
-							20,
-							200,
-							20
-						)
-						waitFor(20 + 100 + 20)
-						player.sendTitle(
-							"§eE lembre-se...",
-							"§aVotar ajuda o servidor e você pode votar todos os dias! §f镾",
-							20,
-							200,
-							20
-						)
-					}
+				if (hasVotedToday(it)) return@forEach
+				switchContext(SynchronizationContext.SYNC)
+				sentToPlayers++
+				// Player may join a Xizum battle in the middle of the voting ads, so we must be aware of this fact
+				schedule {
+					if (!it.available) return@schedule
+					it.sendTitle("§eEntão...", "§aVocê tá afim de uns §3diamantes§a? §f锃", 20, 200, 20)
+					waitFor(20 + 100 + 20)
+					if (!it.available) return@schedule
+					it.sendTitle("§eSim, §3diamantes§e de graça!", "§aE ainda poder conseguir §b§lVIP§a sem pagar §cnada§a? §f锇", 20, 200, 20)
+					waitFor(20 + 100 + 20)
+					if (!it.available) return@schedule
+					it.sendTitle("§eEntão §dvote no servidor§e!", "§aSimples e fácil, §6/votar §f锈", 20, 200, 20)
+					waitFor(20 + 100 + 20)
+					if (!it.available) return@schedule
+					it.sendTitle("§eE lembre-se...", "§aVotar ajuda o servidor e você pode votar todos os dias! §f镾", 20, 200, 20)
+					waitFor(20 + 100 + 20)
 				}
 			}
 

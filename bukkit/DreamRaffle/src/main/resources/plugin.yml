@@ -1,0 +1,5 @@
+name: DreamRaffle
+main: net.perfectdreams.dreamraffle.DreamRaffle
+version: 1.0-SNAPSHOT
+api-version: 1.13
+depend: ["DreamCore", "DreamChat", "DreamCash"]

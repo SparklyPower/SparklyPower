@@ -8,6 +8,8 @@ import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.extensions.toItemStack
+import net.perfectdreams.dreamcustomitems.utils.isMagnetApplicable
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.Sound
@@ -207,23 +209,23 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
                 e.player.sendMessage("§cSua picareta de mover spawners quebrou!")
             }
 
-            e.block.type = Material.AIR // rip
+            val drops = listOf(Material.SPAWNER.toItemStack()
+                .lore("§7Spawner de §a${type.getLocalizedName()}")
+                .storeMetadata("spawnerType", type.toString()))
 
-            // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
-            e.block.world.dropItem(
-                center,
-                ItemStack(
-                    Material.SPAWNER
-                ).lore("§7Spawner de §a${type.getLocalizedName()}")
-                    .storeMetadata("spawnerType", type.toString())
-            )
+            e.isCancelled = !e.player.isMagnetApplicable(e.block.type, drops)
+
+            if (e.isCancelled) {
+                e.block.type = Material.AIR // rip
+                // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
+                e.block.world.dropItem(center, drops.first())
+            }
 
             center.world.spawnParticle(Particle.VILLAGER_HAPPY, center, 8, 1.0, 1.0, 1.0)
             center.world.spawnParticle(Particle.FIREWORKS_SPARK, center, 8, 1.0, 1.0, 1.0)
             e.player.playSound(center, Sound.BLOCK_ANVIL_LAND, 1f, 1f)
         } else {
             e.isCancelled = true
-
             e.player.sendMessage("§cVocê está tentando quebrar um bloco normal com a picareta de mover spawners! Não faça isso, economize a durabilidade dela <3")
         }
     }

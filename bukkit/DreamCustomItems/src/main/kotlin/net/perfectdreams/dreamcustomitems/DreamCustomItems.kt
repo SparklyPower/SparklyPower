@@ -16,6 +16,7 @@ import net.perfectdreams.dreamcustomitems.items.TrashCan
 import net.perfectdreams.dreamcustomitems.listeners.*
 import net.perfectdreams.dreamcustomitems.utils.BlockPosition
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
+import net.perfectdreams.dreammini.DreamMini
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -33,6 +34,9 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		// The number of threads to use for block processing
 		private const val WORKER_THREADS = 4
 	}
+
+	val mcMMO = getPlugin(com.gmail.nossr50.mcMMO::class.java)
+	val dropsBlacklist = getPlugin(DreamMini::class.java).dropsBlacklist
 
 	private val recipes = mutableListOf<NamespacedKey>()
 
@@ -91,6 +95,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		registerEvents(RubyDropListener(this))
 		registerEvents(CustomBlocksListener(this))
 		registerEvents(EstalinhoListener(this))
+		registerEvents(MagnetListener(this))
 
 		// https://gist.github.com/aadnk/8119275
 		val protocolManager = ProtocolLibrary.getProtocolManager()
@@ -219,6 +224,35 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			it.setIngredient('C', Material.GREEN_DYE)
 			it.setIngredient('P', Material.PAPER)
 			it.setIngredient('X', Material.GUNPOWDER)
+		}
+
+		addRecipe(
+			"magnet",
+			CustomItems.MAGNET,
+			listOf(
+				"BSB",
+				"R R",
+				"I I"
+			)
+		) {
+			it.setIngredient('B', Material.IRON_BLOCK)
+			it.setIngredient('S', Material.STONE)
+			it.setIngredient('R', Material.PRISMARINE_SHARD)
+			it.setIngredient('I', Material.IRON_INGOT)
+		}
+
+		addRecipe(
+			"magnet_2",
+			CustomItems.MAGNET_2,
+			listOf(
+				"CEC",
+				"R R",
+				"R R"
+			)
+		) {
+			it.setIngredient('C', Material.CRYING_OBSIDIAN)
+			it.setIngredient('E', Material.ENDER_EYE)
+			it.setIngredient('R', Material.PRISMARINE_SHARD)
 		}
 	}
 

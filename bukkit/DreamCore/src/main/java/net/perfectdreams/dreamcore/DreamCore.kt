@@ -15,6 +15,7 @@ import net.perfectdreams.dreamcore.scriptmanager.DreamScriptManager
 import net.perfectdreams.dreamcore.tables.EventVictories
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.*
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.configuration.file.YamlConfiguration
@@ -145,5 +146,7 @@ class DreamCore : KotlinPlugin() {
 
 	override fun onDisable() {
 		dreamScriptManager.unloadScripts()
+		playerInventories.keys.forEach { it.restoreInventory() }
+		frozenPlayers.forEach { it.unfreeze() }
 	}
 }

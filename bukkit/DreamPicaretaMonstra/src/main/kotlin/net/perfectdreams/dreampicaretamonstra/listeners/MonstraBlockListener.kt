@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.utils.PlayerUtils
 import net.perfectdreams.dreamcore.utils.chance
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
+import net.perfectdreams.dreamcustomitems.utils.isMagnetApplicable
 import net.perfectdreams.dreampicaretamonstra.DreamPicaretaMonstra
 import org.bukkit.Location
 import org.bukkit.Material
@@ -37,14 +38,12 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
         val damageable = inHand.itemMeta as Damageable
         m.logger.info("Player ${e.player.name} used a Picareta Monstra at ${e.player.world.name} ${e.block.location.x}, ${e.block.location.y}, ${e.block.location.z}. Damage value: ${damageable.damage}")
 
-        if (e.block.world.name == "MinaRecheada")
-            return
+        val isInClaim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
+        val isInMinaRecheada = e.block.world.name == "MinaRecheada"
 
-        val isInClaim = GriefPrevention.instance.dataStore
-                .getClaimAt(e.block.location, false, null)
-
-        if (e.block.world.name == "world" && isInClaim == null) {
-            e.player.sendMessage("§cVocê só pode usar a picareta monstra no seu terreno! Se você quer sair quebrando tudo, proteja o terreno ou vá no mundo de recursos, §6/warp recursos")
+        if ((e.block.world.name == "world" && isInClaim == null) || isInMinaRecheada) {
+            e.player.isMagnetApplicable(e.block.type)
+            if (!isInMinaRecheada) e.player.sendMessage("§cVocê só pode usar a picareta monstra no seu terreno! Se você quer sair quebrando tudo, proteja o terreno ou vá no mundo de recursos, §6/warp recursos")
             return
         }
 
@@ -103,13 +102,9 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                             drops.add(CustomItems.RUBY.clone())
                         }
 
+                        e.isCancelled = !e.player.isMagnetApplicable(e.block.type, drops)
                         // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
-                        val dropsAsItems =  drops.map {
-                            location.world.dropItem(
-                                    location,
-                                    it
-                            )
-                        }
+                        val dropsAsItems = if (e.isCancelled) drops.map { location.world.dropItem(location, it) } else listOf()
 
                         if (isPicaretaMonstra) {
                             m.doMcMMOStuffMining(

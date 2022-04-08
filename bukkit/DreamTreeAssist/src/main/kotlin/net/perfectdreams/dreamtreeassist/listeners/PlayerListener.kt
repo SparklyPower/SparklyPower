@@ -8,6 +8,7 @@ import com.gmail.nossr50.util.BlockUtils
 import com.gmail.nossr50.util.player.UserManager
 import net.perfectdreams.dreamcore.utils.chance
 import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
+import net.perfectdreams.dreamcustomitems.utils.isMagnetApplicable
 import net.perfectdreams.dreamtreeassist.DreamTreeAssist
 import net.perfectdreams.dreamtreeassist.utils.BlockLocation
 import org.bukkit.Bukkit
@@ -116,30 +117,31 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
             clickedBlock.z
         )
 
-        if (m.placedLogs.contains(position)) // If it is a player placed block, break it normally
+        // If it is a player placed block, break it normally
+        if (m.placedLogs.contains(position)) {
+            e.player.isMagnetApplicable(clickedBlock.type)
             return
+        }
 
-        val result = processTree(e.player, heldItem, e.block)
-        e.isCancelled = result
+        val drops = processTree(e.player, heldItem, e.block)
+        if (!e.player.isMagnetApplicable(clickedBlock.type, drops)) drops.forEach {
+            with (e.block) { world.dropItemNaturally(location, it) }
+        }
     }
 
-    private fun processTree(player: Player, heldItem: ItemStack, block: Block): Boolean {
+    private fun processTree(player: Player, heldItem: ItemStack, block: Block): List<ItemStack> {
+        val allDrops = block.getDrops(heldItem).toMutableList()
         val blocksToBeDestroyed = mutableListOf<Block>()
 
         getAllBlocksFromTree(player, block, block, blocksToBeDestroyed)
 
-        if (!blocksToBeDestroyed.any { it.type in leaves })
-            return false
+        if (!blocksToBeDestroyed.any { it.type in leaves }) return listOf()
 
         val lowestLog = blocksToBeDestroyed.asSequence().filter { it.type in logs }.minByOrNull { it.y }
         val lowestLogType = lowestLog?.type
 
         for ((index, blockToBeDestroyed) in blocksToBeDestroyed.withIndex()) {
-            val drops = blockToBeDestroyed.getDrops(heldItem)
-
-            drops.forEach {
-                blockToBeDestroyed.world.dropItemNaturally(blockToBeDestroyed.location, it)
-            }
+            allDrops.addAll(blockToBeDestroyed.getDrops(heldItem))
 
             if (blockToBeDestroyed.type in logs) {
                 // Only damage if it is a log, damaging due to leaves is kinda meh
@@ -152,7 +154,7 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
 
                     if (damageable.damage > heldItem.type.maxDurability) {
                         player.inventory.removeItem(heldItem)
-                        return true
+                        return allDrops
                     }
                 }
 
@@ -170,7 +172,7 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
                 lowestLog.type = saplingType
         }
 
-        return true
+        return allDrops
     }
 
     private fun getAllBlocksFromTree(player: Player, initialBlock: Block, block: Block, list: MutableList<Block>): List<Block> {
