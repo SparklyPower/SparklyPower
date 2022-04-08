@@ -100,7 +100,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
             result = recipe.result.asQuantity(item.amount)
 
             repeat(item.amount) {
-                newAmount += smeltProcessing(item, recipe.result, UserManager.getPlayer(furnacePlayer)).amount
+                UserManager.getPlayer(furnacePlayer)?.let { newAmount += smeltProcessing(item, recipe.result, it).amount }
             }
 
             break

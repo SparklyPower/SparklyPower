@@ -25,6 +25,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scoreboard.Team
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class DreamNPC(val name: String, val location: Location, val callback: ((Player) -> Unit)?, private val signedProperty: WrappedSignedProperty?) {
     companion object {
@@ -94,7 +95,7 @@ class DreamNPC(val name: String, val location: Location, val callback: ((Player)
     private val gameProfile = WrappedGameProfile(UUID, getValidName(name))
     private val wrappedName = WrappedChatComponent.fromText(getValidName(name))
 
-    val viewers = mutablePlayerSetOf()
+    val viewers: MutableSet<Player> = Collections.newSetFromMap(ConcurrentHashMap())
     private var hologram: WrapperHologram? = null
 
     init {

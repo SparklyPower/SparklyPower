@@ -14,6 +14,7 @@ import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.serializer.UUIDAsStringSerializer
 import net.perfectdreams.dreamterrainadditions.commands.*
 import net.perfectdreams.dreamterrainadditions.commands.declarations.TempTrustCommand
 import org.bukkit.Material
@@ -316,17 +317,4 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		var disableTrapdoorAndDoorAccess: Boolean = false,
 		var allowSpawnFromMobSpawners: Boolean = false
 	)
-
-	object UUIDAsStringSerializer : KSerializer<UUID> {
-		override val descriptor: SerialDescriptor =
-			PrimitiveSerialDescriptor("UUIDAsStringSerializer", PrimitiveKind.STRING)
-
-		override fun serialize(encoder: Encoder, value: UUID) {
-			encoder.encodeString(value.toString())
-		}
-
-		override fun deserialize(decoder: Decoder): UUID {
-			return UUID.fromString(decoder.decodeString())
-		}
-	}
 }

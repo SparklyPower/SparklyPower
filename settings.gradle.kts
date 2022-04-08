@@ -87,6 +87,7 @@ include(":bukkit:DreamEmptyWorldGenerator")
 include(":bukkit:DreamCorreios")
 include(":bukkit:SparklyDreamer")
 include(":bukkit:DreamXizum")
+include(":bukkit:DreamRaffle")
 // include(":bukkit:DreamNews")
 include(":bukkit:SparklyChunkLoader")
 

@@ -265,7 +265,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (0 >= xpToBeGiven)
 			return
 
-		UserManager.getPlayer(player).beginXpGain(
+		UserManager.getPlayer(player)?.beginXpGain(
 			PrimarySkillType.HERBALISM,
 			xpToBeGiven.toFloat(),
 			XPGainReason.UNKNOWN,

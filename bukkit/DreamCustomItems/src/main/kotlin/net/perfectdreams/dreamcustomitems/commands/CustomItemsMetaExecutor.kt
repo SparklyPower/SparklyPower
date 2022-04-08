@@ -18,14 +18,13 @@ class CustomItemsMetaExecutor : SparklyCommandExecutor() {
             val str = buildString {
                 append(it.toString())
                 append(": ")
-                when {
-                    persistentDataContainer.has(it, PersistentDataType.STRING) -> {
-                        append(persistentDataContainer.get(it, PersistentDataType.STRING))
+                with (persistentDataContainer) {
+                    when {
+                        has(it, PersistentDataType.STRING) -> append(get(it, PersistentDataType.STRING))
+                        has(it, PersistentDataType.BYTE) -> append(get(it, PersistentDataType.BYTE))
+                        has(it, PersistentDataType.INTEGER) -> append(get(it, PersistentDataType.INTEGER))
+                        else -> append("§cUnknown Type")
                     }
-                    persistentDataContainer.has(it, PersistentDataType.BYTE) -> {
-                        append(persistentDataContainer.get(it, PersistentDataType.BYTE))
-                    }
-                    else -> append("§cUnknown Type")
                 }
             }
 

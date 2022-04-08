@@ -146,7 +146,6 @@ class DreamCore : KotlinPlugin() {
 
 	override fun onDisable() {
 		dreamScriptManager.unloadScripts()
-		partiallyHiddenPlayers.forEach { server.getPlayer(it)?.showPartiallyHiddenPlayer() }
 		playerInventories.keys.forEach { it.restoreInventory() }
 		frozenPlayers.forEach { it.unfreeze() }
 	}
