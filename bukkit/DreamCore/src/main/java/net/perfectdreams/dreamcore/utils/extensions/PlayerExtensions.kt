@@ -182,7 +182,7 @@ fun Player.storeInventory() {
 /**
  * Retrieves [Player]'s stored inventory.
  */
-fun Player.restoreInventory() = playerInventories[this].let { inventory.contents = it  }
+fun Player.restoreInventory() = playerInventories[this]?.let { inventory.contents = it  }
 
 /**
  * Plays [sound] and sends [message] to [Player].
