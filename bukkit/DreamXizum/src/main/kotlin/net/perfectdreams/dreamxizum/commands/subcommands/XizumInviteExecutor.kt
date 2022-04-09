@@ -101,8 +101,8 @@ class XizumInviteExecutor(private val plugin: DreamXizum) : SparklyCommandExecut
             val sonecas = battle.options.sonecas
             val cash = battle.options.cash
 
-            if (!invitee.canPay(sonecas)) context.fail("§c${invitee.name} não tem sonecas suficientes para cobrir a aposta.")
-            if (inviteeCash < cash) context.fail("§c${invitee.name} não tem pesadelos suficientes para cobrir a aposta.")
+            if (!invitee.canPay(sonecas)) return@schedule player.sendMessage("§c${invitee.name} não tem sonecas suficientes para cobrir a aposta.")
+            if (inviteeCash < cash) return@schedule player.sendMessage("§c${invitee.name} não tem pesadelos suficientes para cobrir a aposta.")
 
             battle.invite(invitee)
 

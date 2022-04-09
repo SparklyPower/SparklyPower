@@ -185,13 +185,14 @@ class Battle(val type: BattleType, val limit: Int, val author: Player? = null) {
             alivePlayers.forEach { it.player.unfreeze() }
 
             DreamXizum.INSTANCE.schedule {
+                val ignore = options.timeLimit - 1
                 with (options) {
                     while (timeLimit > 0 && stage < BattleStage.FINISHED) {
                         if (stage == BattleStage.FINISHED) return@with
                         timeLimit--
 
                         if (timeLimit == 0) finishBattle()
-                        else broadcastMessage("${highlight(timeLimit.pluralize("minuto" to "minutes"))} restante${if (timeLimit > 1) "s" else ""}.")
+                        else if (timeLimit != ignore) broadcastMessage("${highlight(timeLimit.pluralize("minuto" to "minutos"))} até o fim da partida.")
 
                         waitFor(20L * 60)
                     }
@@ -259,13 +260,16 @@ class Battle(val type: BattleType, val limit: Int, val author: Player? = null) {
                 }
 
                 playerInventories[killer]?.let {
+                    if (!options.dropHeads) return
                     val inventory = Bukkit.createInventory(null, InventoryType.PLAYER)
                     val head = Material.PLAYER_HEAD.toItemStack().meta<SkullMeta> {
                         playerProfile = player.playerProfile
                     }
 
-                    if (inventory.canHoldItem(head)) it.set(it.indexOfFirst { it.type == Material.AIR }, head)
-                    else killer.sendMessage("${DreamXizum.PREFIX} Seu inventário estava cheio, então você não pôde pegar a cabeça de ${highlight(player.name)}.")
+                    if (inventory.canHoldItem(head)) {
+                        it[it.indexOfFirst { it.type == Material.AIR }] = head
+                        killer.sendMessage("${DreamXizum.PREFIX} Você conseguiu a cabeça de ${highlight(player.name)}.")
+                    } else killer.sendMessage("${DreamXizum.PREFIX} Seu inventário estava cheio, então você não pôde pegar a cabeça de ${highlight(player.name)}.")
                 }
 
                 player.freeFromBattle()
@@ -317,7 +321,6 @@ class Battle(val type: BattleType, val limit: Int, val author: Player? = null) {
                 } else {
                     broadcastMessage("Você venceu o xizum.")
                     sendEveryoneAliveToSpawn()
-
                 }
             } else {
                 broadcastMessage("Parabéns por vencerem o xizum contra o time inimigo.")
@@ -337,7 +340,7 @@ class Battle(val type: BattleType, val limit: Int, val author: Player? = null) {
         player.teleportToServerSpawn()
 
         player.deposit(options.sonecas)
-        DreamXizum.INSTANCE.schedule(SynchronizationContext.ASYNC) { Cash.giveCash(player, options.cash) }
+        if (options.cash > 0) DreamXizum.INSTANCE.schedule(SynchronizationContext.ASYNC) { Cash.giveCash(player, options.cash) }
     }
 
     fun sendEveryoneAliveToSpawn() = alivePlayers.forEach { sendPlayerToLobby(it.player) }

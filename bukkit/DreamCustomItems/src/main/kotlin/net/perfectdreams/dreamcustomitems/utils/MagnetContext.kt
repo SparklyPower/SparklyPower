@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
 import org.jetbrains.kotlin.utils.addToStdlib.flattenTo
 
-val isMagnet: (ItemStack?) -> Boolean = { it?.type == Material.STONE_HOE && it.itemMeta?.customModelData in 1 .. 2 }
+val isMagnet: (ItemStack?) -> Boolean = { it?.type == Material.STONE_HOE && it.hasItemMeta() && it.itemMeta.customModelData in 1 .. 2 }
 val magnetKey = SparklyNamespacedKey("magnet_durability")
 val magnetContexts = mutablePlayerMapOf<MagnetContext>()
 val magnetWhitelist = setOf(
