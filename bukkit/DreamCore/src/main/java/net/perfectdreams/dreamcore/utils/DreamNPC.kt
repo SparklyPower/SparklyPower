@@ -101,7 +101,7 @@ class DreamNPC(val name: String, val location: Location, val callback: ((Player)
     init {
         val lines = splitName(name)
         if (!isValidName(name)) {
-            val hologramLocation = location.clone().apply { y += -.175 + (lines.size - 1) * .285 }
+            val hologramLocation = location.clone().apply { y += -.175 + (lines.size) * .285 }
             hologram = WrapperHologram(hologramLocation, lines.toMutableList())
         }
 
