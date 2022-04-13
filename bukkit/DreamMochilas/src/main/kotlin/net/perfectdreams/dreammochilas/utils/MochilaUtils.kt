@@ -3,21 +3,31 @@ package net.perfectdreams.dreammochilas.utils
 import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.kyori.adventure.text.Component
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.tables.Mochilas
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Color
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 object MochilaUtils {
+    private val isMagnet: (ItemStack?) -> Boolean = { it?.type == Material.STONE_HOE && it.hasItemMeta() && it.itemMeta.hasCustomModelData() && it.itemMeta.customModelData in 1 .. 2 }
+    val hasMagnetKey = SparklyNamespacedKey("has_magnet")
+    val isFullKey = SparklyNamespacedKey("is_backpack_full")
+
     val loadedMochilas = ConcurrentHashMap<Long, MochilaWrapper>()
     private val plugin = Bukkit.getPluginManager().getPlugin("DreamMochilas")!!
     private val mochilaDataLoadMutexes = Caffeine.newBuilder()
@@ -102,39 +112,46 @@ object MochilaUtils {
         // Items can only be manipulated in the main thread, if else the server doesn't like it
         // (Race conditions where the server reads the ItemMeta while another thread is changing it, causing a full server crash)
         DreamUtils.assertMainThread(true)
-        val currentLore = mochilaItem.lore
+        mochilaItem.meta<ItemMeta> {
+            if (hasLore())
+                with (lore!!) {
+                    if (size == 3) add("\n")
 
-        // Only update if the lore exists... it should always exist
-        if (currentLore?.isNotEmpty() == true) {
-            val lastLineOfTheLore = currentLore.last()
-            val newLore = currentLore.toMutableList()
+                    val usedSize = with (inventory) { count { it != null }.let { if (it == -1) size else it } }
+                    // Do a nice transition from green to red, depending on how many slots are used
+                    val totalSizeInPercentage = usedSize / inventory.size.toDouble()
+                    val color = ChatColor.of(Color(
+                        0 + (200 * totalSizeInPercentage).toInt(),
+                        255 - (255 * totalSizeInPercentage).toInt(),
+                        125 - (125 * totalSizeInPercentage).toInt()
+                    ))
 
-            if (!lastLineOfTheLore.contains("slots"))
-                newLore.add("\n")
-            else
-                newLore.removeLast()
-
-            var usedSize = inventory.count { it != null } // Count non empty slots
-            if (usedSize == -1)
-                usedSize = inventory.size
-
-            // Do a nice transition from green to red, depending on how many slots are used
-            val totalSizeInPercentage = usedSize / inventory.size.toDouble()
-            val r = 0 + (200 * totalSizeInPercentage).toInt()
-            val g = 255 - (255 * totalSizeInPercentage).toInt()
-            val b = 125 - (125 * totalSizeInPercentage).toInt()
-            val colorToBeUsed = ChatColor.of(Color(r, g, b))
-
-            newLore.add(
-                buildString {
-                    append("$colorToBeUsed$usedSize/${inventory.size} §7slots usados")
-                    if (usedSize == inventory.size) {
-                        append(" §c§lCHEIA!")
+                    val usedSlotsLine = with (inventory.size) {
+                        "$color$usedSize/$this §7slots usados${if (usedSize == this) " §c§lCHEIA!" else ""}"
                     }
-                }
-            )
 
-            mochilaItem.lore = newLore
+                    if (size == 4) add(usedSlotsLine) else set(4, usedSlotsLine)
+
+                    with (persistentDataContainer) {
+                        set(isFullKey, PersistentDataType.BYTE, if (usedSize == inventory.size) 1 else 0)
+
+                        inventory.firstOrNull(isMagnet)?.let {
+                            set(hasMagnetKey, PersistentDataType.BYTE, 1)
+                            val magnetLastLine = it.lore!!.last()
+
+                            if (size == 5) {
+                                add("\n")
+                                add("§6Mochila magnetizada")
+                                add(magnetLastLine)
+                            } else set(7, magnetLastLine)
+                        } ?: run {
+                            set(hasMagnetKey, PersistentDataType.BYTE, 0)
+                            if (size == 8) for (index in 7 downTo 5) removeAt(index)
+                        }
+                    }
+
+                    lore = this
+                }
         }
     }
 }
