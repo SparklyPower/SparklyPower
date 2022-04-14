@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.commands.GetMochilaExecutor.Companion.Options.damageValue
+import net.perfectdreams.dreammochilas.utils.MochilaUtils
 
 class GetMochilaIdExecutor : SparklyCommandExecutor() {
     companion object : SparklyCommandExecutorDeclaration(GetMochilaIdExecutor::class)
@@ -17,10 +18,10 @@ class GetMochilaIdExecutor : SparklyCommandExecutor() {
 
         val itemInMainHand = player.inventory.itemInMainHand
 
-        itemInMainHand.getStoredMetadata("isMochila")?.toBoolean() ?: run {
+        if (!MochilaUtils.isMochila(itemInMainHand))
             context.fail("§cVocê não está segurando uma mochila!")
-        }
-        val mochilaId = itemInMainHand.getStoredMetadata("mochilaId")?.toLong() ?: run {
+
+        val mochilaId = MochilaUtils.getMochilaId(itemInMainHand) ?: run {
             context.fail("§cVocê está segurando uma mochila que não possui um ID!")
         }
 

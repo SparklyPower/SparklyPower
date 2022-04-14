@@ -6,18 +6,23 @@ import kotlinx.coroutines.sync.withLock
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.tables.Mochilas
 import org.bukkit.Bukkit
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Color
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 object MochilaUtils {
+    val IS_MOCHILA_KEY = SparklyNamespacedKey("is_mochila")
+    val MOCHILA_ID_KEY = SparklyNamespacedKey("mochila_id")
+
     val loadedMochilas = ConcurrentHashMap<Long, MochilaWrapper>()
     private val plugin = Bukkit.getPluginManager().getPlugin("DreamMochilas")!!
     private val mochilaDataLoadMutexes = Caffeine.newBuilder()
@@ -26,6 +31,12 @@ object MochilaUtils {
         .asMap()
 
     val mochilaCreationMutex = Mutex()
+
+    fun isMochila(item: ItemStack) = item.hasItemMeta() && item.itemMeta.persistentDataContainer.has(IS_MOCHILA_KEY)
+    fun getMochilaId(item: ItemStack): Long? = if (isMochila(item))
+        item.itemMeta.persistentDataContainer.get(MOCHILA_ID_KEY, PersistentDataType.LONG)
+    else
+        null
 
     private fun getMutexForMochila(mochilaId: Long) = mochilaDataLoadMutexes.getOrPut(mochilaId) { Mutex() }
 

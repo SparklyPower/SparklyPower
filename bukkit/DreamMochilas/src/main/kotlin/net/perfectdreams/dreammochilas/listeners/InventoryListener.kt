@@ -6,12 +6,10 @@ import com.Acrobot.ChestShop.Events.TransactionEvent
 import com.Acrobot.ChestShop.Listeners.Player.PlayerInteract
 import com.Acrobot.ChestShop.Listeners.PreTransaction.SpamClickProtector
 import com.Acrobot.ChestShop.Signs.ChestShopSign
-import kotlinx.coroutines.*
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.sync.withLock
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcore.utils.extensions.rightClick
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.extensions.*
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreammochilas.DreamMochilas
@@ -35,6 +33,8 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
+import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.lang.reflect.InvocationTargetException
 import java.util.*
@@ -78,11 +78,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
         val clickedBlock = e.clickedBlock ?: return
         val item = e.player.inventory.itemInMainHand
 
-        val isMochila = item.getStoredMetadata("isMochila")?.toBoolean() ?: return
-        val mochilaId = item.getStoredMetadata("mochilaId")?.toLong() ?: return
-
-        if (!isMochila)
-            return
+        val mochilaId = MochilaUtils.getMochilaId(item) ?: return
 
         // Gigantic workaround
         val isSign = clickedBlock.type.name.endsWith("_SIGN")
@@ -199,18 +195,34 @@ class InventoryListener(val m: DreamMochilas) : Listener {
         val item = e.item
 
         if (item?.type == Material.CARROT_ON_A_STICK) {
-            val isMochila = item.getStoredMetadata("isMochila")?.toBoolean() ?: return
-            val mochilaId = item.getStoredMetadata("mochilaId")?.toLong()
-
-            if (!isMochila)
-                return
+            val mochilaId = MochilaUtils.getMochilaId(item)
 
             e.isCancelled = true
 
             if (mochilaId == null) { // Criar mochila, caso ainda não tenha um ID associado a ela
-                val position = e.player.inventory.first(item)
-                if (position == -1) // wait what?
-                    return
+                // Old mochila item check, we will convert them
+                if (!MochilaUtils.isMochila(item) && item.hasStoredMetadataWithKey("isMochila")) {
+                    item.meta<ItemMeta> {
+                        persistentDataContainer.set(
+                            MochilaUtils.IS_MOCHILA_KEY,
+                            PersistentDataType.BYTE,
+                            1
+                        )
+
+                        val oldMochilaId = item.getStoredMetadata("mochilaId")
+
+                        if (oldMochilaId != null) {
+                            persistentDataContainer.set(
+                                MochilaUtils.MOCHILA_ID_KEY,
+                                PersistentDataType.LONG,
+                                oldMochilaId.toLong()
+                            )
+                        }
+                    }
+
+                    // Call the open method again
+                    return onOpen(e)
+                }
 
                 m.launchAsyncThread {
                     MochilaUtils.mochilaCreationMutex.withLock {
@@ -248,15 +260,19 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                         val inventory = loadedFromDatabaseMochila.getOrCreateMochilaInventoryAndHold()
 
                         onMainThread {
-                            var item = item
+                            item.meta<ItemMeta> {
+                                lore = listOf(
+                                    "§7Mochila de §b${e.player.name}",
+                                    "§7",
+                                    "§6$funnyId"
+                                )
 
-                            item = item.lore(
-                                "§7Mochila de §b${e.player.name}",
-                                "§7",
-                                "§6$funnyId"
-                            ).storeMetadata("mochilaId", mochila.id.value.toString())
-
-                            e.player.inventory.setItem(position, item)
+                                persistentDataContainer.set(
+                                    MochilaUtils.MOCHILA_ID_KEY,
+                                    PersistentDataType.LONG,
+                                    mochila.id.value
+                                )
+                            }
 
                             e.player.openInventory(inventory)
                         }
@@ -310,7 +326,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
             for (idx in 0 until e.inventory.size) {
                 val item = e.inventory.getItem(idx) ?: continue
 
-                val mochilaId = item.getStoredMetadata("mochilaId")?.toLong()
+                val mochilaId = MochilaUtils.getMochilaId(item)
 
                 if (mochilaId == closingMochilaId) { // omg
                     m.logger.warning("Player ${e.player.name} is trying to close $mochilaId while the backpack is within itself! Giving item to player...")
@@ -325,16 +341,16 @@ class InventoryListener(val m: DreamMochilas) : Listener {
             m.launchAsyncThread {
                 val item = e.player.inventory.itemInMainHand
 
-                val isMochila = item.getStoredMetadata("isMochila")?.toBoolean()
+                if (MochilaUtils.isMochila(item))
+                    return@launchAsyncThread
 
                 mochilaAccessHolder.release("${e.player.name} closing inventory")
-                if (isMochila == true) {
-                    onMainThread {
-                        MochilaUtils.updateMochilaItemLore(
-                            e.inventory,
-                            item
-                        )
-                    }
+
+                onMainThread {
+                    MochilaUtils.updateMochilaItemLore(
+                        e.inventory,
+                        item
+                    )
                 }
             }
         }
@@ -343,7 +359,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
     @EventHandler
     fun onMove(e: InventoryClickEvent) {
         // Não deixar colocar a mochila dentro da mochila
-        val mochilaId = e.currentItem?.getStoredMetadata("mochilaId")?.toLong() ?: return
+        val mochilaId = MochilaUtils.getMochilaId(e.currentItem ?: return) ?: return
 
         val holder = e.inventory.holder
 
@@ -359,7 +375,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
     @EventHandler
     fun onMove(e: InventoryMoveItemEvent) {
         // Não deixar colocar a mochila dentro da mochila
-        val mochilaId = e.item.getStoredMetadata("mochilaId")?.toLong() ?: return
+        val mochilaId = MochilaUtils.getMochilaId(e.item) ?: return
 
         val holder = e.destination.holder
 

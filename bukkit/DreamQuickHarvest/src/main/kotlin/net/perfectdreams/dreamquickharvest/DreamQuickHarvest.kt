@@ -165,10 +165,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		val item = e.player.inventory.itemInMainHand
 
 		if (item.type == Material.CARROT_ON_A_STICK) {
-			val isMochilaItem = item.getStoredMetadata("isMochila")?.toBoolean() ?: false
-			val mochilaId = item.getStoredMetadata("mochilaId")?.toLong() ?: -1L // Impossible anyways
+			val mochilaId = MochilaUtils.getMochilaId(item)
 
-			if (isMochilaItem) {
+			if (mochilaId != null) {
 				mochila = onAsyncThread {
 					MochilaUtils.retrieveMochilaAndHold(mochilaId, triggerType)
 				}
