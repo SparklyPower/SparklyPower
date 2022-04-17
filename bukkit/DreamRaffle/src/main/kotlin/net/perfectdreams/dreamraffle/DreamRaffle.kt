@@ -1,78 +1,65 @@
 package net.perfectdreams.dreamraffle
 
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import net.perfectdreams.dreamchat.events.ApplyPlayerTagsEvent
-import net.perfectdreams.dreamchat.utils.PlayerTag
+import kotlinx.serialization.json.*
+import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.extensions.artigo
-import net.perfectdreams.dreamcore.utils.extensions.formatted
+import net.perfectdreams.dreamcore.utils.deposit
 import net.perfectdreams.dreamcore.utils.registerEvents
+import net.perfectdreams.dreamraffle.commands.DreamRaffleExecutor
 import net.perfectdreams.dreamraffle.commands.RaffleExecutor
+import net.perfectdreams.dreamraffle.commands.declarations.DreamRaffleCommand
 import net.perfectdreams.dreamraffle.commands.declarations.RaffleCommand
 import net.perfectdreams.dreamraffle.commands.subcommands.BuyRaffleExecutor
-import net.perfectdreams.dreamraffle.raffle.Raffle
-import net.perfectdreams.dreamraffle.raffle.RaffleType
-import net.perfectdreams.dreamraffle.raffle.RafflesManager
-import net.perfectdreams.dreamraffle.raffle.Winner
-import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
+import net.perfectdreams.dreamraffle.commands.subcommands.RaffleScheduleExecutor
+import net.perfectdreams.dreamraffle.listeners.ApplyTagListener
+import net.perfectdreams.dreamraffle.raffle.RaffleCurrency
+import net.perfectdreams.dreamraffle.tasks.RafflesManager
 import java.io.File
+import java.util.*
 
-class DreamRaffle : KotlinPlugin(), Listener {
-    private lateinit var unfinishedRaffle: File
-    lateinit var currentRaffle: Raffle
-    var lastWinner: Winner? = null
-
+class DreamRaffle : KotlinPlugin() {
     override fun softEnable() {
         super.softEnable()
 
-        dataFolder.mkdir()
-        unfinishedRaffle = File(dataFolder, "unfinished_raffle.json").apply {
+        // Temporary measure to finish legacy raffle
+        with (File(dataFolder, "unfinished_raffle.json")) {
             if (exists()) {
-                currentRaffle = Json.decodeFromString(readText())
+                val element = Json.parseToJsonElement(readText())
+                with(element.jsonObject) {
+                    val type = get("type")!!.jsonPrimitive.content
+                    val currency = if (type == "CASH") RaffleCurrency.CASH else RaffleCurrency.MONEY
+
+                    get("participants")?.jsonArray?.forEach {
+                        val gambler = it.jsonObject
+                        val serializedUUID = gambler["uuid"]!!.jsonPrimitive.content
+                        val tickets = gambler["tickets"]!!.jsonPrimitive.long
+
+                        val uuid = UUID.fromString(serializedUUID)
+
+                        if (currency == RaffleCurrency.CASH) {
+                            val cash = tickets * 25
+                            launchAsyncThread { Cash.giveCash(uuid, cash) }
+                        } else {
+                            val money = tickets * 250
+                            server.getOfflinePlayer(uuid).deposit(money.toDouble())
+                        }
+                    }
+                }
                 delete()
-            } else currentRaffle = Raffle(RaffleType.NORMAL)
+            }
         }
 
-        lastWinner = with (File(dataFolder, "last_winner.json")) {
-            if (exists()) Json.decodeFromString(readText())
-            else null
-        }
+        with (File(dataFolder, "last_winner.json")) { if (exists()) delete() }
 
-        registerEvents(this)
         RafflesManager.start(this)
-        registerCommand(RaffleCommand, RaffleExecutor(this), BuyRaffleExecutor(this))
+
+        registerEvents(ApplyTagListener())
+        registerCommand(DreamRaffleCommand, DreamRaffleExecutor())
+        registerCommand(RaffleCommand, RaffleExecutor(), BuyRaffleExecutor(this), RaffleScheduleExecutor())
     }
 
     override fun softDisable() {
         super.softDisable()
-        unfinishedRaffle.writeText(Json.encodeToString(currentRaffle))
-    }
-
-    @EventHandler
-    fun onApplyTag(event: ApplyPlayerTagsEvent) {
-        with (event) {
-            lastWinner?.let {
-                val color = it.type.colors.first
-                val currency = it.type.currency.displayName
-                val prize = (it.type.currency.unitaryPrice * it.raffleTickets).formatted
-
-                if (it.uuid == player.uniqueId)
-                    tags.add(
-                        PlayerTag(
-                            "${color}§lS",
-                            "${color}§lSortud${player.artigo}",
-                            listOf(
-                                "§r$color${player.name}§7 venceu a última rifa e",
-                                "recebeu $color$prize ${currency}§7."
-                            ),
-                            "/rifa",
-                            false
-                        )
-                    )
-            }
-        }
+        RafflesManager.save()
     }
 }

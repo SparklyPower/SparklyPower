@@ -9,17 +9,17 @@ import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
+import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.formatted
 import net.perfectdreams.dreamcore.utils.extensions.percentage
 import net.perfectdreams.dreamcore.utils.extensions.pluralize
 import net.perfectdreams.dreamcore.utils.withdraw
 import net.perfectdreams.dreamraffle.DreamRaffle
 import net.perfectdreams.dreamraffle.raffle.RaffleCurrency
+import net.perfectdreams.dreamraffle.raffle.RaffleType
+import net.perfectdreams.dreamraffle.tasks.RafflesManager.currentRaffle
 
 class BuyRaffleExecutor(private val plugin: DreamRaffle) : SparklyCommandExecutor() {
-    private val maxTickets = 200_000
-    private val template = "§cVocê não tem %s suficientes para comprar esses tickets."
-
     companion object : SparklyCommandExecutorDeclaration(BuyRaffleExecutor::class) {
         object Options : CommandOptions() {
             val tickets = integer("tickets").register()
@@ -28,35 +28,72 @@ class BuyRaffleExecutor(private val plugin: DreamRaffle) : SparklyCommandExecuto
         override val options = Options
     }
 
+    private val template = "§cVocê não tem %s suficientes para comprar esses tickets."
+    private val unrestrictedType = RaffleType.TURBO
+
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
-        val tickets = args[options.tickets].toLong()
-        if (tickets <= 0) context.fail("§cVocê precisa comprar pelo menos um ticket.")
+        val ticketsToBuy = args[options.tickets].toLong()
 
-        with (plugin) {
-            val currency = currentRaffle.type.currency
-            val cost = currency.unitaryPrice * tickets
+        if (ticketsToBuy <= 0) context.fail("§cVocê precisa comprar pelo menos um ticket, bobinh${player.artigo}.")
 
-            if (currentRaffle.getTickets(player) + tickets > maxTickets) context.fail("§cSe você comprar ${tickets.pluralize("ticket" to "tickets")}, " +
-                    "você ultrapassará o limite de tickets por rifa, que é de ${maxTickets.formatted}.")
+        with (currentRaffle) {
+            val colors = type.colors
+            val currency = type.currency
+            val cost = currency.unitaryPrice * ticketsToBuy
 
-            schedule {
-                if (currency == RaffleCurrency.SONECAS) {
-                    if (!player.canPay(cost.toDouble())) return@schedule player.sendMessage(template.format(currency.displayName))
+            /**
+             * Let's check if there is more than 2000 tickets in the raffle, and if there is, do not
+             * allow the player to have more than 50% of all tickets to avoid a quasi-guaranteed victory
+             */
+            val currentPlayerTickets = getTickets(player)
+            val playerTickets = currentPlayerTickets + ticketsToBuy
+            val totalOfTickets = currentPlayerTickets + tickets
+
+            if (type != unrestrictedType && totalOfTickets > 2000)
+            // Now we check if the player can REALLY buy those tickets
+                if (playerTickets.toDouble() / totalOfTickets > .5) {
+                    /**
+                     * Okay, so the player can't buy these many tickets. Let's calculate how many tickets
+                     * they can actually buy.
+                     */
+                    val ticketsPlayerCanBuy = tickets / 2 - getTickets(player)
+
+                    StringBuilder("§cSe você comprar ${ticketsToBuy.pluralize("ticket")}, você terá mais de 50% de chance de vencer, e isso acaba com a diversão da rifa.").apply {
+                        if (ticketsPlayerCanBuy > 0)
+                            append(" Se você ainda quiser comprar tickets, o máximo que você pode comprar no momento é ${ticketsPlayerCanBuy.pluralize("ticket")}.")
+
+                        append(" A única rifa sem limite de tickets é a ${unrestrictedType.displayName}.")
+                        context.fail(toString())
+                    }
+                }
+
+            plugin.schedule {
+                if (currency == RaffleCurrency.MONEY) {
+                    if (!player.canPay(cost.toDouble())) return@schedule player.sendMessage(template.format("sonecas"))
                     player.withdraw(cost.toDouble())
                 } else {
                     switchContext(SynchronizationContext.ASYNC)
                     val cash = Cash.getCash(player)
-                    if (cash < cost) return@schedule player.sendMessage(template.format(currency.displayName))
+                    if (cash < cost) return@schedule player.sendMessage(template.format("pesadelos"))
                     Cash.takeCash(player, cost)
                     switchContext(SynchronizationContext.SYNC)
                 }
 
-                currentRaffle.addTickets(player, tickets)
-                with (currentRaffle.type.colors) {
-                    player.sendMessage("$first⤖ Você comprou $second${tickets.pluralize("ticket" to "tickets")}$first " +
-                            "por $second${cost.formatted} ${currency.displayName}$first. Sua chance de vencer a rifa é de " +
-                            "$second${(currentRaffle.getTickets(player).toDouble() / currentRaffle.tickets).percentage}$first.")
+                val hadTickets = currentPlayerTickets > 0
+                addTickets(player, ticketsToBuy)
+
+                with (type.colors) {
+                    val currentTickets = getTickets(player)
+
+                    val builder = StringBuilder("$default⤖ Você comprou ${highlight(ticketsToBuy.pluralize("ticket"))}" +
+                            " por ${highlight("${cost.formatted} ${currency.displayName}")}. ")
+
+                    if (hadTickets) builder.append("Agora você tem ${highlight(currentTickets.pluralize("ticket"))} e")
+                    else builder.append("Você tem")
+
+                    builder.append(" ${highlight((currentTickets.toDouble() / tickets).percentage)} de chance de vencer a rifa.")
+                    player.sendMessage(builder.toString())
                 }
             }
         }
