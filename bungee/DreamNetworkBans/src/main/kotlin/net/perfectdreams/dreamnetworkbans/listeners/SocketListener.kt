@@ -3,6 +3,7 @@ package net.perfectdreams.dreamnetworkbans.listeners
 import com.github.salomonbrys.kotson.*
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.chat.BaseComponent
+import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.md_5.bungee.api.event.ChatEvent
 import net.md_5.bungee.api.event.PlayerDisconnectEvent
@@ -62,18 +63,26 @@ class SocketListener(val m: DreamNetworkBans) : Listener {
 				m.logger.info("Player ${player} foi marcado como logado na rede! Yay!")
 			}
 			"sendAdminChat" -> {
-				val player = e.json["player"].string
-				val message = e.json["message"].string
+				val user = e.json["player"].string
+				val message = e.json["message"].string.ifBlank { return }
+				val isLargeMessage = with (message) { length > 128 || count { it == '\n' } >= 5 }
 
-				val staff = m.proxy.players.filter { it.hasPermission("dreamnetworkbans.adminchat") }
+				val key = "/${UUID.randomUUID()}"
+				val text = "\uE23C §x§9§2§A§9§F§4$user: §x§C§8§D§3§F§4$message"
 
-				val senderName = player
+				val displayMessage = if (isLargeMessage) "\uE23C §x§9§2§A§9§F§4$user enviou uma mensagem grande de mais " +
+						"para ser vista no Minecraft. Clique aqui se ainda quiser vê-la." else text
 
-				val color = "§d"
+				val component = displayMessage.toTextComponent().apply {
+					if (isLargeMessage) {
+						ChatListener.largeMessages.put(key, text)
+						clickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, key)
+					}
+				}
 
-				val tc = "§3[$color(Discord) §l${senderName}§3] §b$message".toTextComponent()
-
-				staff.forEach { it.sendMessage(tc) }
+				m.proxy.players.forEach {
+					if (it.hasPermission("dreamnetworkbans.adminchat")) it.sendMessage(component)
+				}
 			}
 			"executeCommand" -> {
 				val player = e.json["player"].nullString

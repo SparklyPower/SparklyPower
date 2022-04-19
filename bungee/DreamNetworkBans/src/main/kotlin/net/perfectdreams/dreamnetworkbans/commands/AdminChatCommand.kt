@@ -1,73 +1,104 @@
 package net.perfectdreams.dreamnetworkbans.commands
 
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
+import com.github.salomonbrys.kotson.jsonObject
+import net.md_5.bungee.BungeeCord
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.connection.ProxiedPlayer
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.dreamcorebungee.commands.SparklyBungeeCommand
-import net.perfectdreams.dreamcorebungee.utils.discord.DiscordMessage
+import net.perfectdreams.dreamcorebungee.dao.User
+import net.perfectdreams.dreamcorebungee.network.DreamNetwork
+import net.perfectdreams.dreamcorebungee.network.socket.SocketUtils
+import net.perfectdreams.dreamcorebungee.utils.Constants
+import net.perfectdreams.dreamcorebungee.utils.Databases
 import net.perfectdreams.dreamcorebungee.utils.extensions.toBaseComponent
 import net.perfectdreams.dreamcorebungee.utils.extensions.toTextComponent
 import net.perfectdreams.dreamnetworkbans.DreamNetworkBans
+import net.perfectdreams.dreamnetworkbans.utils.StaffColors
+import net.perfectdreams.dreamnetworkbans.utils.emotes
+import org.jetbrains.exposed.sql.transactions.transaction
 
+class AdminChatCommand : SparklyBungeeCommand(arrayOf("adminchat", "a"), permission = "dreamnetworkbans.adminchat") {
+	companion object {
+		private val bungee = BungeeCord.getInstance()
+		val lockedChat = mutableSetOf<ProxiedPlayer>()
 
-class AdminChatCommand(val m: DreamNetworkBans) : SparklyBungeeCommand(arrayOf("adminchat", "a"), permission = "dreamnetworkbans.adminchat") {
-	@Subcommand
-	fun root(sender: CommandSender) {
-		sender.sendMessage("§6/adminchat blah blah blah".toTextComponent())
-	}
-	
-	@Subcommand
-	fun adminChat(sender: CommandSender, args: Array<String>) {
-		if (args.getOrNull(0) == "bypass") {
-			DreamNetworkBans.bypassPremiumCheck = !DreamNetworkBans.bypassPremiumCheck
-			sender.sendMessage("Bypass Status: ${DreamNetworkBans.bypassPremiumCheck}")
-			return
-		}
+		fun broadcastMessage(sender: CommandSender, text: String) {
+			val staff = bungee.players.filter { it.hasPermission("dreamnetworkbans.adminchat") }
 
-		val message = args.joinToString(" ")
+			val message = (sender as? ProxiedPlayer)?.let { player ->
+				val role = StaffColors.values().firstOrNull { player.hasPermission(it.permission) }
+					?: return player.sendMessage("§cEstranho, não encontrei uma cor para seu cargo. Converse com a equipe para que possamos resolver isso.")
 
-		val staff = m.proxy.players.filter { it.hasPermission("dreamnetworkbans.adminchat") }
+				val isGirl = transaction(Databases.databaseNetwork) {
+					User.findById(player.uniqueId)?.isGirl ?: false
+				}
 
-		var senderName = sender.name
-		val server = "???"
-		var mensagem = "§eServidor: §6$server"
+				val colors = role.colors
+				val prefix = with (role.prefixes) { if (isGirl && size == 2) get(1) else get(0) }
+				val emote = emotes[player.name] ?: ""
 
-		if (sender is ProxiedPlayer) {
-			senderName = sender.displayName
-			mensagem = "§eServidor: §6" + sender.server.info.name
-		}
+				var colorizedText = "${colors.chat} $text"
 
-		var color = "§7"
+				staff.forEach {
+					val regex = Regex(".*\\b${it.name}\\b.*")
+					if (!text.matches(regex)) return@forEach
 
-		if (sender.hasPermission("dreamnetworkbans.owner")) {
-			color = "§a"
-		} else if (sender.hasPermission("dreamnetworkbans.admin")) {
-			color = "§4"
-		} else if (sender.hasPermission("dreamnetworkbans.coord")) {
-			color = "§5"
-		} else if (sender.hasPermission("dreamnetworkbans.moderator")) {
-			color = "§3"
-		} else if (sender.hasPermission("dreamnetworkbans.builder")) {
-			color = "§5"
-		}
+					DreamNetwork.PERFECTDREAMS_SURVIVAL.sendAsync(
+						jsonObject(
+							"type" to "staffMention",
+							"target" to it.name,
+							"player" to player.name,
+							"highlight" to colors.chat.toString(),
+							"textColor" to colors.nick.toString()
+						)
+					)
 
-		val tc = "§3[$color§l${senderName}§3] §b$message".toTextComponent()
-		tc.hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, mensagem.toBaseComponent())
+					colorizedText = colorizedText.replace(Regex("\\b${it.name}\\b"), colors.mention(it.name))
+				}
 
-		staff.forEach { it.sendMessage(tc) }
+				"$prefix $emote ${colors.nick}${player.name}:$colorizedText".toTextComponent().apply {
+					hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "§3Servidor: §b${player.server.info.name}".toBaseComponent())
+				}
+			} ?: "\ue252 §x§a§8§a§8§a§8Mensagem do console: §x§c§6§b§f§c§3$text".toTextComponent()
 
-		if (staff.size == 1) {
-			sender.sendMessage("§cHey... Não sei se você sabe... Mas você está falando sozinho!".toTextComponent())
-		}
+			staff.forEach { it.sendMessage(message) }
 
-		m.adminChatWebhook.send(
+			DreamNetworkBans.INSTANCE.adminChatWebhook.send(
 				WebhookMessageBuilder()
-						.setUsername(sender.name)
-						.setAvatarUrl("https://sparklypower.net/api/v1/render/avatar?name=${sender.name}&scale=16")
-						.setContent(message)
-						.build()
-		)
+					.setUsername(sender.name)
+					.setAvatarUrl("https://sparklypower.net/api/v1/render/avatar?name=${sender.name}&scale=16")
+					.setContent(text)
+					.build()
+			)
+		}
 	}
+
+	@Subcommand
+	fun adminChat(sender: CommandSender, args: Array<String>) =
+		with (args) {
+			when {
+				isEmpty() -> return sender.sendMessage("§cVocê não pode enviar uma mensagem vazia.")
+
+				getOrNull(0) == "bypass" -> {
+					DreamNetworkBans.bypassPremiumCheck = !DreamNetworkBans.bypassPremiumCheck
+					return sender.sendMessage("Bypass Status: ${DreamNetworkBans.bypassPremiumCheck}")
+				}
+
+				getOrNull(0) == "lock" -> {
+					val player = sender as? ProxiedPlayer ?: return sender.sendMessage("§cSó jogadores conseguem trancar o chat.")
+
+					with (lockedChat) {
+						val isLocked = player in this
+						if (isLocked) remove(player) else add(player)
+
+						player.sendMessage("§x§8§3§9§E§F§7Seu chat foi ${if (isLocked) "des" else ""}travado com sucesso.")
+					}
+				}
+
+				else -> broadcastMessage(sender, args.joinToString(" "))
+			}
+		}
 }
