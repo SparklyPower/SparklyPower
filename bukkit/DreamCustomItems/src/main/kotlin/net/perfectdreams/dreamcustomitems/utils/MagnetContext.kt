@@ -3,8 +3,8 @@ package net.perfectdreams.dreamcustomitems.utils
 import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
 import net.perfectdreams.dreamcore.utils.collections.mutablePlayerMapOf
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreammochilas.utils.MochilaUtils.hasMagnetKey
-import net.perfectdreams.dreammochilas.utils.MochilaUtils.isFullKey
+import net.perfectdreams.dreammochilas.utils.MochilaUtils.HAS_MAGNET_KEY
+import net.perfectdreams.dreammochilas.utils.MochilaUtils.IS_FULL_KEY
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -38,8 +38,8 @@ val Player.hasMagnet get() =
 
             with (meta.persistentDataContainer) {
                 backpack.getStoredMetadata("mochilaId") != null &&
-                (has(hasMagnetKey) && get(hasMagnetKey, PersistentDataType.BYTE) == 1.toByte()) &&
-                (has(isFullKey) && get(isFullKey, PersistentDataType.BYTE) == 0.toByte())
+                (has(HAS_MAGNET_KEY) && get(HAS_MAGNET_KEY, PersistentDataType.BYTE) == 1.toByte()) &&
+                (has(IS_FULL_KEY) && get(IS_FULL_KEY, PersistentDataType.BYTE) == 0.toByte())
             }
         }.filterNotNull().associateBy { it.getStoredMetadata("mochilaId")!!.toLong() }.toList()
 

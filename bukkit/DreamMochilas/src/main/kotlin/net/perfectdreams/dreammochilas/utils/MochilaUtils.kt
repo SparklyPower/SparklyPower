@@ -3,7 +3,6 @@ package net.perfectdreams.dreammochilas.utils
 import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.kyori.adventure.text.Component
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
@@ -25,8 +24,11 @@ import java.util.concurrent.TimeUnit
 
 object MochilaUtils {
     private val isMagnet: (ItemStack?) -> Boolean = { it?.type == Material.STONE_HOE && it.hasItemMeta() && it.itemMeta.hasCustomModelData() && it.itemMeta.customModelData in 1 .. 2 }
-    val hasMagnetKey = SparklyNamespacedKey("has_magnet")
-    val isFullKey = SparklyNamespacedKey("is_backpack_full")
+    val HAS_MAGNET_KEY = SparklyNamespacedKey("has_magnet")
+    val IS_FULL_KEY = SparklyNamespacedKey("is_backpack_full")
+
+    val IS_MOCHILA_KEY = SparklyNamespacedKey("is_mochila")
+    val MOCHILA_ID_KEY = SparklyNamespacedKey("mochila_id")
 
     val loadedMochilas = ConcurrentHashMap<Long, MochilaWrapper>()
     private val plugin = Bukkit.getPluginManager().getPlugin("DreamMochilas")!!
@@ -36,6 +38,12 @@ object MochilaUtils {
         .asMap()
 
     val mochilaCreationMutex = Mutex()
+
+    fun isMochila(item: ItemStack) = item.hasItemMeta() && item.itemMeta.persistentDataContainer.has(IS_MOCHILA_KEY)
+    fun getMochilaId(item: ItemStack): Long? = if (isMochila(item))
+        item.itemMeta.persistentDataContainer.get(MOCHILA_ID_KEY, PersistentDataType.LONG)
+    else
+        null
 
     private fun getMutexForMochila(mochilaId: Long) = mochilaDataLoadMutexes.getOrPut(mochilaId) { Mutex() }
 
@@ -133,10 +141,10 @@ object MochilaUtils {
                     if (size == 4) add(usedSlotsLine) else set(4, usedSlotsLine)
 
                     with (persistentDataContainer) {
-                        set(isFullKey, PersistentDataType.BYTE, if (usedSize == inventory.size) 1 else 0)
+                        set(IS_FULL_KEY, PersistentDataType.BYTE, if (usedSize == inventory.size) 1 else 0)
 
                         inventory.firstOrNull(isMagnet)?.let {
-                            set(hasMagnetKey, PersistentDataType.BYTE, 1)
+                            set(HAS_MAGNET_KEY, PersistentDataType.BYTE, 1)
                             val magnetLastLine = it.lore!!.last()
 
                             if (size == 5) {
@@ -145,7 +153,7 @@ object MochilaUtils {
                                 add(magnetLastLine)
                             } else set(7, magnetLastLine)
                         } ?: run {
-                            set(hasMagnetKey, PersistentDataType.BYTE, 0)
+                            set(HAS_MAGNET_KEY, PersistentDataType.BYTE, 0)
                             if (size == 8) for (index in 7 downTo 5) removeAt(index)
                         }
                     }

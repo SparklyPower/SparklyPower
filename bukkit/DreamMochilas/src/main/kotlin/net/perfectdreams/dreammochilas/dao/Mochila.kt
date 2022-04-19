@@ -2,6 +2,7 @@ package net.perfectdreams.dreammochilas.dao
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamcore.utils.fromBase64Inventory
 import net.perfectdreams.dreamcore.utils.lore
@@ -16,6 +17,8 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
+import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass
@@ -32,9 +35,28 @@ class Mochila(id: EntityID<Long>) : LongEntity(id) {
     var type by Mochilas.type
 
     fun createItem(): ItemStack {
-        var item = ItemStack(Material.CARROT_ON_A_STICK)
+        val playerName = Bukkit.getOfflinePlayer(owner).name ?: "???"
+
+        val item = ItemStack(Material.CARROT_ON_A_STICK)
             .rename("§rMochila")
-            .storeMetadata("isMochila", "true")
+            .lore(
+                "§7Mochila de §b${playerName}",
+                "§7",
+                "§6${funnyId}"
+            )
+            .meta<ItemMeta> {
+                persistentDataContainer.set(
+                    MochilaUtils.IS_MOCHILA_KEY,
+                    PersistentDataType.BYTE,
+                    1
+                )
+
+                persistentDataContainer.set(
+                    MochilaUtils.MOCHILA_ID_KEY,
+                    PersistentDataType.LONG,
+                    id.value
+                )
+            }
 
         val meta = item.itemMeta
         meta as Damageable
@@ -44,14 +66,6 @@ class Mochila(id: EntityID<Long>) : LongEntity(id) {
         val meta2 = item.itemMeta
         meta2.isUnbreakable = true
         item.itemMeta = meta2
-
-        val playerName = Bukkit.getOfflinePlayer(owner)?.name ?: "???"
-
-        item = item.lore(
-            "§7Mochila de §b${playerName}",
-            "§7",
-            "§6${funnyId}"
-        ).storeMetadata("mochilaId", id.value.toString())
 
         return item
     }

@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.tables.Mochilas
+import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -35,16 +36,14 @@ class UpgradeSizeSignListener(val m: DreamMochilas) : Listener {
 
         val item = e.player.inventory.itemInHand
 
-        val isMochila = item.getStoredMetadata("isMochila")?.toBoolean() ?: false
+        val mochilaId = MochilaUtils.getMochilaId(item)
         e.isCancelled = true
 
-        if (isMochila) {
+        if (mochilaId != null) {
             if (2_000 > e.player.balance) {
                 e.player.sendMessage("§cVocê precisa ter 2000 sonecas para poder fazer um upgrade maroto na sua mochila!")
                 return
             }
-
-            val mochilaId = item.getStoredMetadata("mochilaId")?.toLong() ?: return
 
             if (savingNewMocilhaStatus.contains(mochilaId))
                 return
