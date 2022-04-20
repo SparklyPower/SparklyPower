@@ -53,9 +53,9 @@ class RaffleScheduleExecutor : SparklyCommandExecutor() {
                 .append(messages[index].invoke(context) + ".")
                 .event(HoverEvent(SHOW_TEXT, (
                         "§7Nessa rifa, aposte com $color${it.currency.displayName}§7.\n" +
-                        "§7Ela tem uma duração de $color${it.duration.toMinutes()} minutos\n" +
-                        if (index > 0) "§7e terá início às $color${dateFormat.format(System.currentTimeMillis() + displayTime)}§7."
-                        else ""
+                        "§7Ela tem uma duração de $color${it.duration.toMinutes()} minutos" +
+                        if (index > 0) "\n§7e terá início às $color${dateFormat.format(System.currentTimeMillis() + displayTime)}§7."
+                        else "§7."
                     ).toBaseComponent()
                 ))
         }

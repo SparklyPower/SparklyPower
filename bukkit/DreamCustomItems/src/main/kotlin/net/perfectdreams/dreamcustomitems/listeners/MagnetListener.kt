@@ -137,7 +137,7 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
                 lore = lore!!.apply { set(lastIndex, "§6Usos restantes: §f${currentDurability.formatted} §6/ §f${maxDurability.formatted}") }
             }
 
-            if (currentDurability < 0) player.playSoundAndSendMessage(Sound.ENTITY_ITEM_BREAK, "§cUm dos seus ímãs descarregou.")
+            if (currentDurability <= 0) player.playSoundAndSendMessage(Sound.ENTITY_ITEM_BREAK, "§cUm dos seus ímãs descarregou.")
 
             drops.removeAll(forRemoval)
         }
