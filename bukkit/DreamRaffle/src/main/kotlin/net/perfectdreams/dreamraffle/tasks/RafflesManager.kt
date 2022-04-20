@@ -10,6 +10,7 @@ import net.perfectdreams.dreamcore.utils.deposit
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.formatted
 import net.perfectdreams.dreamraffle.DreamRaffle
+import net.perfectdreams.dreamraffle.dao.Gambler
 import net.perfectdreams.dreamraffle.raffle.Raffle
 import net.perfectdreams.dreamraffle.raffle.RaffleCurrency
 import net.perfectdreams.dreamraffle.raffle.RaffleType
@@ -106,6 +107,17 @@ object RafflesManager {
             sequence.offer(if (++raffles %5 == 0L) RaffleType.SPECIAL else randomRaffleType)
 
             plugin.launchAsyncThread {
+                lastWinner?.let {
+                    val gambler = Gambler.fetch(it.uuid) ?: return@let
+                    gambler.addVictory()
+
+                    val currency = it.type.currency
+                    val prize = it.raffleTickets * currency.unitaryPrice
+
+                    if (currency == RaffleCurrency.CASH) gambler.addWonCash(prize)
+                    else gambler.addWonSonecas(prize)
+                }
+
                 with (winnerFile) {
                     lastWinner?.let { writeText(Json.encodeToString(it)) } ?: run { if (exists()) delete() }
                 }

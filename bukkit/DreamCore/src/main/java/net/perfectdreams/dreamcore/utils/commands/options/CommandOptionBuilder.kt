@@ -11,6 +11,9 @@ sealed class CommandOptionBuilder<T>(
 class WordCommandOptionBuilder(name: String, suggests: SuggestsBlock) : CommandOptionBuilder<String>(name, suggests) {
     override fun build() = WordCommandOption(name, suggests)
 }
+class OptionalWordCommandOptionBuilder(name: String, suggests: SuggestsBlock) : CommandOptionBuilder<String?>(name, suggests) {
+    override fun build() = OptionalWordCommandOption(name, suggests)
+}
 class QuotableStringCommandOptionBuilder(name: String, suggests: SuggestsBlock) : CommandOptionBuilder<String>(name, suggests) {
     override fun build() = QuotableStringCommandOption(name, suggests)
 }

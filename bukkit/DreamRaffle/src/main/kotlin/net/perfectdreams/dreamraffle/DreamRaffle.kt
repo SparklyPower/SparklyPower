@@ -2,6 +2,7 @@ package net.perfectdreams.dreamraffle
 
 import kotlinx.serialization.json.*
 import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.deposit
 import net.perfectdreams.dreamcore.utils.registerEvents
@@ -11,15 +12,23 @@ import net.perfectdreams.dreamraffle.commands.declarations.DreamRaffleCommand
 import net.perfectdreams.dreamraffle.commands.declarations.RaffleCommand
 import net.perfectdreams.dreamraffle.commands.subcommands.BuyRaffleExecutor
 import net.perfectdreams.dreamraffle.commands.subcommands.RaffleScheduleExecutor
+import net.perfectdreams.dreamraffle.commands.subcommands.RaffleStatsExecutor
 import net.perfectdreams.dreamraffle.listeners.ApplyTagListener
 import net.perfectdreams.dreamraffle.raffle.RaffleCurrency
+import net.perfectdreams.dreamraffle.tables.Gamblers
 import net.perfectdreams.dreamraffle.tasks.RafflesManager
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.util.*
 
 class DreamRaffle : KotlinPlugin() {
     override fun softEnable() {
         super.softEnable()
+
+        transaction(Databases.databaseNetwork) {
+            SchemaUtils.createMissingTablesAndColumns(Gamblers)
+        }
 
         // Temporary measure to finish legacy raffle
         with (File(dataFolder, "unfinished_raffle.json")) {
@@ -51,15 +60,22 @@ class DreamRaffle : KotlinPlugin() {
 
         with (File(dataFolder, "last_winner.json")) { if (exists()) delete() }
 
+        registerCommands()
         RafflesManager.start(this)
-
         registerEvents(ApplyTagListener())
-        registerCommand(DreamRaffleCommand, DreamRaffleExecutor())
-        registerCommand(RaffleCommand, RaffleExecutor(), BuyRaffleExecutor(this), RaffleScheduleExecutor())
     }
 
     override fun softDisable() {
         super.softDisable()
         RafflesManager.save()
+    }
+
+    private fun registerCommands() {
+        registerCommand(DreamRaffleCommand, DreamRaffleExecutor())
+        registerCommand(RaffleCommand,
+            RaffleExecutor(),
+            BuyRaffleExecutor(this),
+            RaffleScheduleExecutor(),
+            RaffleStatsExecutor(this))
     }
 }

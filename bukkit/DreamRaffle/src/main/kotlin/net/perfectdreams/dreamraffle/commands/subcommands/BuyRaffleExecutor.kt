@@ -3,6 +3,7 @@ package net.perfectdreams.dreamraffle.commands.subcommands
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.canPay
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
@@ -15,9 +16,11 @@ import net.perfectdreams.dreamcore.utils.extensions.percentage
 import net.perfectdreams.dreamcore.utils.extensions.pluralize
 import net.perfectdreams.dreamcore.utils.withdraw
 import net.perfectdreams.dreamraffle.DreamRaffle
+import net.perfectdreams.dreamraffle.dao.Gambler
 import net.perfectdreams.dreamraffle.raffle.RaffleCurrency
 import net.perfectdreams.dreamraffle.raffle.RaffleType
 import net.perfectdreams.dreamraffle.tasks.RafflesManager.currentRaffle
+import org.jetbrains.exposed.sql.transactions.transaction
 
 class BuyRaffleExecutor(private val plugin: DreamRaffle) : SparklyCommandExecutor() {
     companion object : SparklyCommandExecutorDeclaration(BuyRaffleExecutor::class) {
@@ -38,7 +41,6 @@ class BuyRaffleExecutor(private val plugin: DreamRaffle) : SparklyCommandExecuto
         if (ticketsToBuy <= 0) context.fail("§cVocê precisa comprar pelo menos um ticket, bobinh${player.artigo}.")
 
         with (currentRaffle) {
-            val colors = type.colors
             val currency = type.currency
             val cost = currency.unitaryPrice * ticketsToBuy
 
@@ -94,6 +96,13 @@ class BuyRaffleExecutor(private val plugin: DreamRaffle) : SparklyCommandExecuto
 
                     builder.append(" ${highlight((currentTickets.toDouble() / tickets).percentage)} de chance de vencer a rifa.")
                     player.sendMessage(builder.toString())
+                }
+
+                this@BuyRaffleExecutor.plugin.launchAsyncThread {
+                    val uuid = player.uniqueId
+                    val gambler = Gambler.fetch(uuid) ?: transaction(Databases.databaseNetwork) { Gambler.new(uuid) {} }
+
+                    if (currency == RaffleCurrency.CASH) gambler.addSpentCash(cost) else gambler.addSpentSonecas(cost)
                 }
             }
         }
