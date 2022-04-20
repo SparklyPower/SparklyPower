@@ -55,9 +55,9 @@ object CustomItems {
 
             lore = listOf(
                 "§7Graças aos seus polos §bmagnéticos§7, esse item atrai",
-                "§7todo §cmetal§7 que você minerar para o seu inventário.",
+                "§7todo §cminério§7 que você minerar para o seu inventário.",
                 "",
-                "§6Pode atrair até §f${magnetDurability.formatted} §6metais"
+                "§6Pode atrair até §f${magnetDurability.formatted} §6minérios"
             )
         }
 
@@ -69,7 +69,7 @@ object CustomItems {
 
             lore = listOf(
                 "§7Ele atrai qualquer bloco que seja quebrado",
-                "§7por você, sendo um metal ou não.",
+                "§7por você, sendo um minério ou não.",
                 "§eBizarro§7, mas funciona.",
                 "",
                 "§6Pode atrair até §f${weirdMagnetDurability.formatted} §6itens"

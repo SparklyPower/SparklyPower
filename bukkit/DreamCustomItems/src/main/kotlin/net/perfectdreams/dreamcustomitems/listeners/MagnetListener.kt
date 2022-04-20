@@ -35,7 +35,6 @@ import org.bukkit.event.player.PlayerItemDamageEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
-import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import kotlin.math.ceil
 
@@ -119,8 +118,10 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
             val maxDurability = if (isNormalMagnet) magnetDurability else weirdMagnetDurability
             var currentDurability = magnet.itemMeta.persistentDataContainer.get(magnetKey, PersistentDataType.INTEGER) ?: maxDurability
 
+            if (currentDurability <= 0) return@let
+
             drops.forEach {
-                val canPickup = it.type !in blacklist && if (isNormalMagnet) it.type in magnetWhitelist else true
+                val canPickup = (it.type !in blacklist && if (isNormalMagnet) it.type in magnetWhitelist else true) && currentDurability > 0
 
                 if (canHoldItem(it) && canPickup) {
                     addItem(it)
@@ -130,15 +131,13 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
                     player.sendActionBar(Component.text("§c§lO ímã não pôde puxar alguns itens pois não há espaço suficiente."))
             }
 
-            if (currentDurability <= 0) {
-                removeItem(magnet)
-                player.playSoundAndSendMessage(Sound.ENTITY_ITEM_BREAK, "§cUm dos seus ímãs quebrou.")
-            } else
-                magnet.meta<Damageable> {
-                    damage = ceil(131 - currentDurability.toFloat() / maxDurability * 131).toInt()
-                    persistentDataContainer.set(magnetKey, PersistentDataType.INTEGER, currentDurability)
-                    lore = lore!!.apply { set(lastIndex, "§6Usos restantes: §f${currentDurability.formatted} §6/ §f${maxDurability.formatted}") }
-                }
+            magnet.meta<Damageable> {
+                damage = ceil(131 - currentDurability.toFloat() / maxDurability * 131).toInt()
+                persistentDataContainer.set(magnetKey, PersistentDataType.INTEGER, currentDurability.let { if (it < 0) 0 else it })
+                lore = lore!!.apply { set(lastIndex, "§6Usos restantes: §f${currentDurability.formatted} §6/ §f${maxDurability.formatted}") }
+            }
+
+            if (currentDurability < 0) player.playSoundAndSendMessage(Sound.ENTITY_ITEM_BREAK, "§cUm dos seus ímãs descarregou.")
 
             drops.removeAll(forRemoval)
         }
