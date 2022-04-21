@@ -48,7 +48,7 @@ class InventoryListener(val m: DreamEquipCoolStuff) : Listener {
         val meta = cursor.itemMeta
         val damageable = meta as Damageable
 
-        if (damageable.damage in 1..24) {
+        if (damageable.damage in 1..24 || (meta.hasCustomModelData() && meta.customModelData in 3 .. 12)) {
             // ... then perform the switch.
             // We deny the normal result
             // NOTE: There is no need to cancel the event since that is just a proxy method for the line below.
