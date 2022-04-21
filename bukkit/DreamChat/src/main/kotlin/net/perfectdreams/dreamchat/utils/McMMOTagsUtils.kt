@@ -28,8 +28,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.ACROBATICS].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lAc",
-                    "§e§lAcrobátic${e.player.artigo}",
+                    "§x§3§f§f§8§f§f§lAc",
+                    "§x§3§f§f§8§f§f§lAcrobátic${e.player.artigo}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 de acrobacia do McMMO!"
                     ),
@@ -42,8 +42,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.ALCHEMY].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lAl",
-                    "§e§lAlquimista",
+                    "§x§d§7§3§0§c§1§lAl",
+                    "§x§d§7§3§0§c§1§lAlquimista",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 de alquimia do McMMO!"
                     ),
@@ -56,8 +56,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.ARCHERY].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lAr",
-                    "§e§lArqueir${e.player.artigo}",
+                    "§x§2§9§d§5§8§9§lAr",
+                    "§x§2§9§d§5§8§9§lArqueir${e.player.artigo}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 arqueiro do McMMO!"
                     ),
@@ -70,8 +70,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.AXES].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lV",
-                    "§e§lViking",
+                    "§x§f§b§4§f§4§f§lV",
+                    "§x§f§b§4§f§4§f§lViking",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 de machados do McMMO!"
                     ),
@@ -84,8 +84,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.EXCAVATION].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lEsc",
-                    "§e§lEscavador$nothingOrArtigo",
+                    "§x§c§f§a§b§5§7§lEsc",
+                    "§x§c§f§a§b§5§7§lEscavador$nothingOrArtigo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 escavador do McMMO!"
                     ),
@@ -98,8 +98,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.FISHING].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lP",
-                    "§e§lPescador$nothingOrArtigo",
+                    "§x§2§e§7§b§c§c§lP",
+                    "§x§2§e§7§b§c§c§lPescador$nothingOrArtigo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 pescador do McMMO!"
                     ),
@@ -112,8 +112,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.HERBALISM].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lH",
-                    "§e§lHerbalismo",
+                    "§x§3§9§a§e§2§2§lH",
+                    "§x§3§9§a§e§2§2§lHerbalismo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 de herbalismo do McMMO!"
                     ),
@@ -126,8 +126,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.MINING].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lM",
-                    "§e§lMinerador$nothingOrArtigo",
+                    "§x§8§7§8§8§8§2§lM",
+                    "§x§8§7§8§8§8§2§lMinerador$nothingOrArtigo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 minerador do McMMO!"
                     ),
@@ -140,8 +140,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.REPAIR].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lR",
-                    "§e§lReparador$nothingOrArtigo",
+                    "§x§f§2§f§f§1§6§lR",
+                    "§x§f§2§f§f§1§6§lReparador$nothingOrArtigo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 reparador do McMMO!"
                     ),
@@ -154,8 +154,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.SWORDS].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lEsp",
-                    "§e§lEspadachim",
+                    "§x§d§e§5§3§a§d§lEsp",
+                    "§x§d§e§5§3§a§d§lEspadachim",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 espadas do McMMO!"
                     ),
@@ -168,8 +168,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.TAMING].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lV",
-                    "§e§lVeterinári${e.player.artigo}",
+                    "§x§4§e§b§1§9§d§lV",
+                    "§x§4§e§b§1§9§d§lVeterinári${e.player.artigo}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 de domesticar animais do McMMO!"
                     ),
@@ -182,8 +182,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.UNARMED].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lB",
-                    "§e§lBoxeador${nothingOrArtigo}",
+                    "§x§c§2§c§d§1§4§lB",
+                    "§x§c§2§c§d§1§4§lBoxeador${nothingOrArtigo}",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 desarmado do McMMO!"
                     ),
@@ -196,8 +196,8 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.WOODCUTTING].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§e§lL",
-                    "§e§lLenhador$nothingOrArtigo",
+                    "§x§f§f§a§c§3§c§lL",
+                    "§x§f§f§a§c§3§c§lLenhador$nothingOrArtigo",
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 lenhador do McMMO!"
                     ),
