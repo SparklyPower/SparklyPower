@@ -34,9 +34,7 @@ import org.bukkit.event.inventory.PrepareAnvilEvent
 import org.bukkit.event.player.PlayerItemDamageEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.Damageable
 import org.bukkit.persistence.PersistentDataType
-import kotlin.math.ceil
 
 private typealias Drops = MutableList<ItemStack>
 private typealias Blacklist = Set<Material?>
@@ -131,12 +129,7 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
                     player.sendActionBar(Component.text("§c§lO ímã não pôde puxar alguns itens pois não há espaço suficiente."))
             }
 
-            magnet.meta<Damageable> {
-                damage = ceil(131 - currentDurability.toFloat() / maxDurability * 131).toInt()
-                persistentDataContainer.set(magnetKey, PersistentDataType.INTEGER, currentDurability.let { if (it < 0) 0 else it })
-                lore = lore!!.apply { set(lastIndex, "§6Usos restantes: §f${currentDurability.formatted} §6/ §f${maxDurability.formatted}") }
-            }
-
+            magnet.updateMagnetLore(currentDurability, maxDurability)
             if (currentDurability <= 0) player.playSoundAndSendMessage(Sound.ENTITY_ITEM_BREAK, "§cUm dos seus ímãs descarregou.")
 
             drops.removeAll(forRemoval)

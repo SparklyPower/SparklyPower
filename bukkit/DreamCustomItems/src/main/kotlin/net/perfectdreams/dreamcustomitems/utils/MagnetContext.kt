@@ -2,18 +2,22 @@ package net.perfectdreams.dreamcustomitems.utils
 
 import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
 import net.perfectdreams.dreamcore.utils.collections.mutablePlayerMapOf
+import net.perfectdreams.dreamcore.utils.extensions.formatted
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreammochilas.utils.MochilaUtils.HAS_MAGNET_KEY
 import net.perfectdreams.dreammochilas.utils.MochilaUtils.IS_FULL_KEY
 import net.perfectdreams.dreammochilas.utils.MochilaUtils.MOCHILA_ID_KEY
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.Damageable
 import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.kotlin.utils.addToStdlib.flattenTo
+import kotlin.math.ceil
 
 const val magnetDurability = 4320
-const val weirdMagnetDurability = 9072
+const val weirdMagnetDurability = magnetDurability * 2
 val isMagnet: (ItemStack?) -> Boolean = { it?.type == Material.STONE_HOE && it.hasItemMeta() && it.itemMeta.hasCustomModelData() && it.itemMeta.customModelData in 1 .. 2 }
 
 val repairMagnetKey = SparklyNamespacedKey("repair_magnet")
@@ -55,6 +59,13 @@ fun Player.isMagnetApplicable(type: Material, customDrops: List<ItemStack>? = nu
             true
         } else false
     }
+
+fun ItemStack.updateMagnetLore(currentDurability: Int, maxDurability: Int) = meta<Damageable> {
+    val durability = currentDurability.let { if (it < 0) 0 else it }
+    damage = ceil(131 - durability.toFloat() / maxDurability * 131).toInt()
+    persistentDataContainer.set(magnetKey, PersistentDataType.INTEGER, durability)
+    lore = lore!!.apply { set(lastIndex, "§6Usos restantes: §f${durability.formatted} §6/ §f${maxDurability.formatted}") }
+}
 
 private fun getAllBlocksAndOre(type: String) = setOf(type, "${type}_ORE", "DEEPSLATE_${type}_ORE", "${type}_BLOCK")
     .map { Material.getMaterial(it) ?: Material.getMaterial("${it}_INGOT") ?: Material.LAPIS_LAZULI }
