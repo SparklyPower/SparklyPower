@@ -24,6 +24,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
@@ -124,9 +125,10 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
         }
 
         val drops = processTree(e.player, heldItem, e.block)
-        if (!e.player.isMagnetApplicable(clickedBlock.type, drops)) drops.forEach {
-            with (e.block) { world.dropItemNaturally(location, it) }
-        }
+        e.isCancelled = e.player.isMagnetApplicable(clickedBlock.type, drops)
+
+        if (e.isCancelled) Bukkit.getPluginManager().callEvent(BlockDropItemEvent(e.block, e.block.state, e.player, listOf()))
+        else drops.forEach { with (e.block) { world.dropItemNaturally(location, it) } }
     }
 
     private fun processTree(player: Player, heldItem: ItemStack, block: Block): List<ItemStack> {

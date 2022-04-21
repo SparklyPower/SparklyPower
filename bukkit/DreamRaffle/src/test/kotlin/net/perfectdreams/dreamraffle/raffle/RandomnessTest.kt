@@ -15,7 +15,7 @@ class RandomnessTest {
             Gambler(UUID.randomUUID(), Random.nextLong(1, 100))
         }.associateWithTo(mutableMapOf()) { 0 }
 
-        val raffle = Raffle(RaffleType.NORMAL).apply {
+        val raffle = Raffle(RaffleType.CONVENTIONAL).apply {
             victories.keys.forEach { addTickets(it.uuid, it.tickets) }
         }
 

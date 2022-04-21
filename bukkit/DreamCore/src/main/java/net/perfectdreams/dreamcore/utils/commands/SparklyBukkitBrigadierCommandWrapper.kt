@@ -126,7 +126,7 @@ class SparklyBukkitBrigadierCommandWrapper(
                                     it.name,
                                     StringArgumentType.string()
                                 )
-                                is WordCommandOption -> RequiredArgumentBuilder.argument<CommandSourceStack, String>(
+                                is WordCommandOption, is OptionalWordCommandOption -> RequiredArgumentBuilder.argument<CommandSourceStack, String>(
                                     it.name,
                                     StringArgumentType.word()
                                 )

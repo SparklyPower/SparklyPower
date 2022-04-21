@@ -5,6 +5,7 @@ import org.bukkit.Bukkit
 import org.bukkit.WeatherType
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.weather.WeatherChangeEvent
 
 class WeatherListener(val m: DreamMini) : Listener {
@@ -22,4 +23,7 @@ class WeatherListener(val m: DreamMini) : Listener {
             }
         }
     }
+
+    @EventHandler
+    fun onJoin(e: PlayerJoinEvent) { with (e.player) { if (uniqueId in m.weatherBlacklist) setPlayerWeather(WeatherType.CLEAR) } }
 }

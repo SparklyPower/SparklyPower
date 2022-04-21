@@ -341,7 +341,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
             m.launchAsyncThread {
                 val item = e.player.inventory.itemInMainHand
 
-                if (MochilaUtils.isMochila(item))
+                if (!MochilaUtils.isMochila(item))
                     return@launchAsyncThread
 
                 mochilaAccessHolder.release("${e.player.name} closing inventory")

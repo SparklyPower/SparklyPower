@@ -21,9 +21,11 @@ import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.CraftItemEvent
+import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.Inventory
 import java.io.File
 import java.util.*
@@ -149,6 +151,20 @@ class DreamMini : KotlinPlugin(), Listener {
 			)
 		}
 	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
+	fun onTeleport(e: PlayerTeleportEvent) =
+		e.player.let {
+			if (!it.hasPermission("sparklypower.soustaff")) return@let
+			if (e.to.world == e.from.world) return@let
+			if (!it.allowFlight) return@let
+
+			schedule {
+				waitFor(10L)
+				it.allowFlight = true
+				if (!it.isOnGround) it.isFlying = true
+			}
+		}
 
 	// Needs to be veery low to avoid users using "&rSparklyShop" to bypass the Admin Shop check
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

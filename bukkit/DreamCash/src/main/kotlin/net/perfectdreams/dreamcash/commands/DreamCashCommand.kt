@@ -7,18 +7,26 @@ import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.commands.bukkit.SubcommandPermission
 import net.perfectdreams.dreamcash.DreamCash
 import net.perfectdreams.dreamcash.dao.CashInfo
+import net.perfectdreams.dreamcash.tables.Cashes
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamcore.utils.MeninaAPI
+import net.perfectdreams.dreamcore.utils.TextUtils.convertToNumeroNomeAdjetivo
+import net.perfectdreams.dreamcore.utils.extensions.formatted
 import net.perfectdreams.dreamcore.utils.scheduler
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "dreamcash", "cash")) {
+    private val highlight = "§x§F§C§E§7§9§8"
+    private val default = "§x§F§A§D§4§4§9"
+
     @Subcommand
     fun root(sender: Player) {
         scheduler().schedule(m, SynchronizationContext.ASYNC) {
@@ -48,6 +56,26 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
 
             m.logger.info { "$name possui $cash pesadelos, verificado por ${sender.name}" }
             sender.sendMessage("${DreamCash.PREFIX} §b${name}§e tem §c$cash pesadelos§e!")
+        }
+    }
+
+    @Subcommand(["top"])
+    fun cashLeaderboard(sender: CommandSender) {
+        m.schedule(SynchronizationContext.ASYNC) {
+            val leaderboard = transaction(Databases.databaseNetwork) {
+                CashInfo.all().orderBy(Cashes.cash to SortOrder.DESC).limit(10).toList()
+            }
+
+            StringBuilder("§x§F§F§C§1§4§5➠ Os jogadores com mais pesadelos no servidor são:\n ").apply {
+                leaderboard.forEachIndexed { index, it ->
+                    val uuid = it.id.value
+                    val ordinalNumber = (index + 1).convertToNumeroNomeAdjetivo()!!.dropLast(1) + MeninaAPI.getArtigo(uuid)
+                    val username = m.server.getOfflinePlayer(uuid).name ?: "???"
+
+                    append("\n$highlight➵ $default$ordinalNumber$highlight: $default$username $highlight- $default${it.cash.formatted}")
+                }
+                sender.sendMessage(toString())
+            }
         }
     }
 
