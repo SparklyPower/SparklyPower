@@ -13,6 +13,7 @@ repositories {
 dependencies {
     compileOnly(project(":bungee:DreamCoreBungee"))
     compileOnly("net.luckperms:api:5.2")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.0.6")
 }
 
 tasks.withType<KotlinCompile> {
