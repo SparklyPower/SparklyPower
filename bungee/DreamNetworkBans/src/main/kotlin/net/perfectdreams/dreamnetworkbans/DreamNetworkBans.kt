@@ -6,10 +6,7 @@ import net.md_5.bungee.config.YamlConfiguration
 import net.perfectdreams.dreamcorebungee.KotlinPlugin
 import net.perfectdreams.dreamcorebungee.utils.Databases
 import net.perfectdreams.dreamnetworkbans.commands.*
-import net.perfectdreams.dreamnetworkbans.listeners.Log4jExploitFilterListener
-import net.perfectdreams.dreamnetworkbans.listeners.LoginListener
-import net.perfectdreams.dreamnetworkbans.listeners.ServerConnectListener
-import net.perfectdreams.dreamnetworkbans.listeners.SocketListener
+import net.perfectdreams.dreamnetworkbans.listeners.*
 import net.perfectdreams.dreamnetworkbans.tables.*
 import net.perfectdreams.dreamnetworkbans.utils.ASNManager
 import net.perfectdreams.minecraftmojangapi.MinecraftMojangAPI
@@ -85,7 +82,7 @@ class DreamNetworkBans : KotlinPlugin() {
 		registerCommand(UnwarnCommand())
 		registerCommand(WarnCommand(this))
 		registerCommand(YouTuberAssistCommand(this))
-		registerCommand(AdminChatCommand(this))
+		registerCommand(AdminChatCommand())
 		registerCommand(DiscordCommand(this))
 		registerCommand(GeoIpCommand(this))
 		registerCommand(IpBanCommand(this))
@@ -97,6 +94,7 @@ class DreamNetworkBans : KotlinPlugin() {
 		this.proxy.pluginManager.registerListener(this, ServerConnectListener(this))
 		this.proxy.pluginManager.registerListener(this, SocketListener(this))
 		this.proxy.pluginManager.registerListener(this, Log4jExploitFilterListener())
+		this.proxy.pluginManager.registerListener(this, ChatListener())
 
 		if (!youtubersFile.exists()) {
 			youtubersFile.createNewFile()
