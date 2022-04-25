@@ -1,8 +1,9 @@
 package net.perfectdreams.dreamraffle.raffle
 
 import kotlinx.serialization.Serializable
-import net.perfectdreams.dreamcore.utils.extensions.pluralize
+import kotlinx.serialization.Transient
 import net.perfectdreams.dreamcore.utils.serializer.UUIDAsStringSerializer
+import net.perfectdreams.dreamraffle.utils.remainingTime
 import org.bukkit.entity.Player
 import java.util.UUID
 import kotlin.random.Random
@@ -27,20 +28,18 @@ class Raffle(val type: RaffleType) {
             last()
         }.value.random().uuid
 
-    val winner get() = Winner(winnerUUID, tickets, type)
-
-    val remainingTime get() =
-        with(end - System.currentTimeMillis()) {
-            val seconds = div(1000).toInt()
-            val minutes = seconds / 60
-
-            if (minutes > 0) minutes.pluralize("minuto" to "minutos")
-            else seconds.pluralize("segundo" to "segundos")
+    val winner get() =
+        with (winnerUUID) {
+            Winner(this, getTickets(this).toDouble() / tickets, tickets, type)
         }
 
+    val prefix = "${type.colors.default} ⤖"
+    var hasNotified = false
+    val shouldNotify get() = (end - System.currentTimeMillis() <= 60_000) && !hasNotified
+    val remainingTime get() = (end - System.currentTimeMillis()).remainingTime
     val shouldEnd get() = System.currentTimeMillis() > end
     val start = System.currentTimeMillis()
-    val end = start + type.expiresIn.toMillis()
+    val end = start + type.duration.toMillis()
     var tickets = 0L
 
     fun addTickets(player: Player, tickets: Long) = addTickets(player.uniqueId, tickets)
@@ -62,5 +61,9 @@ data class Gambler(@Serializable(with = UUIDAsStringSerializer::class) val uuid:
 }
 
 @Serializable
-data class Winner(@Serializable(with = UUIDAsStringSerializer::class) val uuid: UUID,
-                  val raffleTickets: Long, val type: RaffleType)
+data class Winner(
+    @Serializable(with = UUIDAsStringSerializer::class) val uuid: UUID,
+    @Transient var chance: Double = 0.0,
+    val raffleTickets: Long,
+    val type: RaffleType
+)
