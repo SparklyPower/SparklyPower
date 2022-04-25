@@ -11,6 +11,7 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.extensions.pluralize
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamlabirinto.DreamLabirinto
@@ -143,6 +144,16 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
         scheduler().schedule(plugin) {
             while (running) {
+                // 10 minutes
+                if (idx == 120) {
+                    running = false
+                    lastTime = System.currentTimeMillis()
+
+                    val extra = wonPlayers.size.let { if (it == 0) "ninguém conseguiu" else "só ${it.pluralize("pessoa pôde" to "pessoas puderam")}" }
+                    Bukkit.broadcastMessage("§cPoxa, vida! Se passaram 10 minutos e $extra terminar o labirinto? Sinceramente, esperava bem mais...")
+                    wonPlayers.clear()
+                }
+
                 if (idx % 3 == 0) {
                     Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} Evento Labirinto começou! §6/labirinto")
                 }

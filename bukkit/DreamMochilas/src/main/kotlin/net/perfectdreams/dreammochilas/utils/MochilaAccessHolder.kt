@@ -1,7 +1,7 @@
 package net.perfectdreams.dreammochilas.utils
 
 class MochilaAccessHolder(
-    private val wrapper: MochilaWrapper
+    val wrapper: MochilaWrapper
 ) {
     var isHolding = false
     val mochila = wrapper.mochila

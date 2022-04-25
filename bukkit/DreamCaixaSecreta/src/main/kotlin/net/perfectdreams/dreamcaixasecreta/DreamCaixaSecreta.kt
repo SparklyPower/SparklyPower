@@ -6,13 +6,16 @@ import com.xxmicloxx.NoteBlockAPI.utils.NBSDecoder
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcaixasecreta.listeners.BlockListener
+import net.perfectdreams.dreamcaixasecreta.listeners.CraftListener
 import net.perfectdreams.dreamcaixasecreta.utils.RandomItem
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.extensions.toItemStack
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.ShapelessRecipe
 import org.bukkit.inventory.meta.ItemMeta
 import java.io.File
 
@@ -21,12 +24,20 @@ class DreamCaixaSecreta : KotlinPlugin() {
 	var prizes = mutableListOf<RandomItem>()
 
 	val nitroNotifyWebhook = WebhookClient.withUrl(config.getString("nitro-notify")!!)
+	val COMBINE_BOXES_KEY = SparklyNamespacedKey("combine_secret_boxes")
 
 	override fun softEnable() {
 		super.softEnable()
 
+		server.addRecipe(
+			ShapelessRecipe(
+				COMBINE_BOXES_KEY, Material.CHEST.toItemStack()
+			).addIngredient(2, Material.CHEST)
+		)
+
 		itemReceived = NBSDecoder.parse(File(dataFolder, "item-received.nbs"))
 		registerEvents(BlockListener(this))
+		registerEvents(CraftListener(this))
 
 		registerCommand(object: SparklyCommand(arrayOf("caixasecretagen"), permission = "sparkly.anybox") {
 			@Subcommand

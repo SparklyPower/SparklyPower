@@ -4,6 +4,7 @@ import com.comphenix.protocol.ProtocolLibrary
 import com.google.common.collect.Sets
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.extensions.toItemStack
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcustomitems.blocks.BlockPacketAdapter
 import net.perfectdreams.dreamcustomitems.commands.CustomItemRecipeCommand
@@ -16,6 +17,7 @@ import net.perfectdreams.dreamcustomitems.items.TrashCan
 import net.perfectdreams.dreamcustomitems.listeners.*
 import net.perfectdreams.dreamcustomitems.utils.BlockPosition
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
+import net.perfectdreams.dreamcustomitems.utils.repairMagnetKey
 import net.perfectdreams.dreammini.DreamMini
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -26,6 +28,7 @@ import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.Recipe
 import org.bukkit.inventory.ShapedRecipe
+import org.bukkit.inventory.ShapelessRecipe
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -109,6 +112,12 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			DreamCustomItemsCommand,
 			CustomItemsGiveExecutor(),
 			CustomItemsMetaExecutor()
+		)
+
+		server.addRecipe(
+			ShapelessRecipe(
+				repairMagnetKey, Material.STONE_HOE.toItemStack()
+			).addIngredient(Material.STONE_HOE).addIngredient(Material.AMETHYST_SHARD).addIngredient(Material.COPPER_INGOT)
 		)
 
 		addRecipe(

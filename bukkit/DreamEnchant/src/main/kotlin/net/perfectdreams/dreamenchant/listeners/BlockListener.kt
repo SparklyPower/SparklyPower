@@ -2,6 +2,7 @@ package net.perfectdreams.dreamenchant.listeners
 
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
+import net.perfectdreams.dreamcustomitems.utils.isMagnet
 import net.perfectdreams.dreamenchant.DreamEnchant
 import net.perfectdreams.dreamenchant.utils.EnchantHolder
 import net.perfectdreams.dreamenchant.utils.EnchantUtils
@@ -28,6 +29,9 @@ class BlockListener(val m: DreamEnchant) : Listener {
 
 		if (!clickedBlock.location.isWithinRegion("spawn_enchantment"))
 			return
+
+		if (isMagnet.invoke(e.player.inventory.itemInMainHand))
+			return e.player.sendMessage("§cVocê não pode encantar um ímã.")
 
 		e.isCancelled = true
 		EnchantUtils.openEnchantmentInventory(e.player, 0)

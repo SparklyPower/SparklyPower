@@ -20,7 +20,7 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
                 var killedMobs = mutableMapOf<EntityType, Int>()
 
                 for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }) {
-                    player.sendMessage("Rodando o Thanos Snap...")
+                    player.sendMessage("\ue251 §x§e§6§b§2§e§8Rodando o Thanos Snap...")
                 }
 
                 for (player in Bukkit.getOnlinePlayers().filter { it.world.name == "world" }) {

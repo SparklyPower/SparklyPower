@@ -7,12 +7,12 @@ import java.util.Locale
 private val formatter = NumberFormat.getNumberInstance(Locale.GERMAN) as DecimalFormat
 
 val Int.formatted: String get() = toLong().formatted
-
 val Long.formatted: String get() = formatter.format(this)
 
-fun Int.pluralize(options: Pair<String, String>) = toLong().pluralize(options)
+fun Int.pluralize(word: String) = toLong().pluralize(word)
+fun Long.pluralize(word: String) = pluralize(word to "${word}s")
 
-fun Long.pluralize(options: Pair<String, String>) =
-    "$formatted ${if (equals(1L)) options.first else options.second}"
+fun Int.pluralize(options: Pair<String, String>) = toLong().pluralize(options)
+fun Long.pluralize(options: Pair<String, String>) = "$formatted ${if (equals(1L)) options.first else options.second}"
 
 val Double.percentage get() = "%.2f".format(times(100)) + "%"

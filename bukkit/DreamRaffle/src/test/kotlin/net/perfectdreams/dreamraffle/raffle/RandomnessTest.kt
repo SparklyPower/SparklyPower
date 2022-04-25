@@ -7,7 +7,7 @@ import kotlin.random.Random
 
 class RandomnessTest {
     private val ITERATIONS = 100_000
-    private val ACCEPTABLE_MARGIN = .1
+    private val ACCEPTABLE_MARGIN = .01
 
     @Test
     fun `Assert that randomness is within expected boundaries`() {
@@ -15,7 +15,7 @@ class RandomnessTest {
             Gambler(UUID.randomUUID(), Random.nextLong(1, 100))
         }.associateWithTo(mutableMapOf()) { 0 }
 
-        val raffle = Raffle(RaffleType.NORMAL).apply {
+        val raffle = Raffle(RaffleType.CONVENTIONAL).apply {
             victories.keys.forEach { addTickets(it.uuid, it.tickets) }
         }
 

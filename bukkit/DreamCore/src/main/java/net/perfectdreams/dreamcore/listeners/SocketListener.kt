@@ -144,6 +144,16 @@ class SocketListener : Listener {
 						)
 				)
 			}
+
+			"staffMention" -> {
+				val target = Bukkit.getPlayerExact(e.json["target"].asString) ?: return
+				val highlight = e.json["highlight"].asString
+				val color = e.json["textColor"].asString
+				val player = e.json["player"].asString
+
+				target.sendActionBar("$highlight$player$color te mencionou no chat staff!")
+				target.playSound(target.location, "perfectdreams.sfx.msn", 1F, 1F)
+			}
 		}
 	}
 

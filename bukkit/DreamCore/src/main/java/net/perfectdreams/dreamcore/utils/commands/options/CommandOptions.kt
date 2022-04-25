@@ -8,6 +8,7 @@ open class CommandOptions {
     val arguments = mutableListOf<CommandOption<*>>()
 
     fun word(name: String, suggests: SuggestsBlock = null) = WordCommandOptionBuilder(name, suggests)
+    fun optionalWord(name: String, suggests: SuggestsBlock = null) = OptionalWordCommandOptionBuilder(name, suggests)
     fun quotableString(name: String, suggests: SuggestsBlock = null) = QuotableStringCommandOptionBuilder(name, suggests)
     fun greedyString(name: String, suggests: SuggestsBlock = null) = GreedyStringCommandOptionBuilder(name, suggests)
     fun optionalGreedyString(name: String, suggests: SuggestsBlock = null) = OptionalGreedyStringCommandOptionBuilder(name, suggests)
