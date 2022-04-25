@@ -7,6 +7,7 @@ import org.bukkit.entity.Player
 typealias SuggestsBlock = ((CommandContext, SuggestionsBuilder) -> (Unit))?
 sealed class CommandOption<T>(val name: String, val optional: Boolean, val suggestsBlock: SuggestsBlock)
 class WordCommandOption(name: String, suggestsBlock: SuggestsBlock) : CommandOption<String>(name, false, suggestsBlock)
+class OptionalWordCommandOption(name: String, suggestsBlock: SuggestsBlock) : CommandOption<String?>(name, true, suggestsBlock)
 class QuotableStringCommandOption(name: String, suggestsBlock: SuggestsBlock) : CommandOption<String>(name, false, suggestsBlock)
 class GreedyStringCommandOption(name: String, suggestsBlock: SuggestsBlock) : CommandOption<String>(name, false, suggestsBlock)
 class OptionalGreedyStringCommandOption(name: String, suggestsBlock: SuggestsBlock) : CommandOption<String?>(name, true, suggestsBlock)
