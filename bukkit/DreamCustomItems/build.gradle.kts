@@ -14,6 +14,7 @@ dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamMini"))
+    compileOnly(project(":bukkit:DreamMochilas"))
     compileOnly(files("../../libs/mcMMO.jar"))
     compileOnly("com.comphenix.protocol:ProtocolLib:4.8.0")
 }

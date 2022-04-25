@@ -23,6 +23,7 @@ class CustomItemsMetaExecutor : SparklyCommandExecutor() {
                         has(it, PersistentDataType.STRING) -> append(get(it, PersistentDataType.STRING))
                         has(it, PersistentDataType.BYTE) -> append(get(it, PersistentDataType.BYTE))
                         has(it, PersistentDataType.INTEGER) -> append(get(it, PersistentDataType.INTEGER))
+                        has(it, PersistentDataType.LONG) -> append(get(it, PersistentDataType.LONG))
                         else -> append("§cUnknown Type")
                     }
                 }

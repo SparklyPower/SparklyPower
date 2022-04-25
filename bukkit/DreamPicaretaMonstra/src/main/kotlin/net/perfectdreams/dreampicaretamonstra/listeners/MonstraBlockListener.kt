@@ -6,13 +6,12 @@ import net.perfectdreams.dreamcore.utils.GeometryUtils
 import net.perfectdreams.dreamcore.utils.PlayerUtils
 import net.perfectdreams.dreamcore.utils.chance
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
+import net.perfectdreams.dreamcustomitems.listeners.canMineRubyFrom
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
+import net.perfectdreams.dreamcustomitems.utils.hasMagnet
 import net.perfectdreams.dreamcustomitems.utils.isMagnetApplicable
 import net.perfectdreams.dreampicaretamonstra.DreamPicaretaMonstra
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.Particle
-import org.bukkit.Sound
+import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ExperienceOrb
@@ -20,6 +19,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockDropItemEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
 
@@ -54,6 +55,8 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
 
         if (m.isValidForHeldItem(heldItemType, broken)) {
             e.isCancelled = true
+            val hasMagnet = e.player.hasMagnet.first
+            val allDrops = mutableListOf<ItemStack>()
 
             val blocks = GeometryUtils.sphere(e.block.location, 2, false) as Set<Location>
             var enchantmentLevel = 0
@@ -94,17 +97,14 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                             e.player.inventory.removeItem(inHand)
                         }
 
-                        val drops = location.block.getDrops(inHand)
-                                .toMutableList()
+                        val drops = location.block.getDrops(inHand).toMutableList()
                         val exp = BlockUtils.getExpCount(location.block, enchantmentLevel)
 
-                        if (!isSilky && location.block.type == Material.REDSTONE_ORE && CustomItems.checkIfRubyShouldDrop()) {
-                            drops.add(CustomItems.RUBY.clone())
-                        }
+                        if (inHand canMineRubyFrom e.block.type) drops.add(CustomItems.RUBY.clone())
+                        allDrops.addAll(drops)
 
-                        e.isCancelled = !e.player.isMagnetApplicable(e.block.type, drops)
                         // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
-                        val dropsAsItems = if (e.isCancelled) drops.map { location.world.dropItem(location, it) } else listOf()
+                        val dropsAsItems = if (!hasMagnet) drops.map { location.world.dropItem(location, it) } else listOf()
 
                         if (isPicaretaMonstra) {
                             m.doMcMMOStuffMining(
@@ -148,6 +148,9 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                     }
                 }
             }
+
+            if (e.player.isMagnetApplicable(e.block.type, allDrops))
+                Bukkit.getPluginManager().callEvent(BlockDropItemEvent(e.block, e.block.state, e.player, listOf()))
         }
     }
 }
