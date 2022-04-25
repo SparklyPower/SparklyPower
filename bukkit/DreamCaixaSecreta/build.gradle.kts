@@ -14,6 +14,7 @@ dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamCash"))
+    compileOnly(project(":bukkit:DreamCustomItems"))
     compileOnly(files("../../libs/NoteBlockAPI.jar"))
 }
 
