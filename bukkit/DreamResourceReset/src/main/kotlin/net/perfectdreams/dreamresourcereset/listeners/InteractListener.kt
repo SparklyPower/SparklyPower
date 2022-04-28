@@ -10,6 +10,7 @@ import net.perfectdreams.dreamresourcereset.DreamResourceReset
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.block.Biome
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
@@ -214,12 +215,22 @@ class InteractListener(val m: DreamResourceReset) : Listener {
 
                     val chunk = world.getChunkAt(chunkX, chunkY)
 
-                    // If there is any players in the current chunk, skip it
-                    if (!bypassChecks && chunk.entities.any { it is Player }) {
-                        m.logger.info { "Skipping Chunk ($x, $z) because there is another player in the same chunk!" }
-                        waitFor(1L)
-                        chunksChecked++
-                        continue
+                    if (!bypassChecks) {
+                        // If there is any players in the current chunk, skip it
+                        if (chunk.entities.any { it is Player }) {
+                            m.logger.info { "Skipping Chunk ($x, $z) because there is another player in the same chunk!" }
+                            waitFor(1L)
+                            chunksChecked++
+                            continue
+                        }
+
+                        val randomBlockInChunk = chunk.getBlock(0, 0, 0)
+                        if (randomBlockInChunk.biome == Biome.OCEAN || randomBlockInChunk.biome.name.endsWith("_OCEAN")) {
+                            m.logger.info { "Skipping Chunk ($x, $z) because it is an ocean!" }
+                            waitFor(1L)
+                            chunksChecked++
+                            continue
+                        }
                     }
 
                     val highestY = world.getHighestBlockYAt(x, z)
