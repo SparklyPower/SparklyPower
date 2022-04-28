@@ -3,6 +3,7 @@ package net.perfectdreams.dreamresourcereset.listeners
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.LocationUtils
+import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
 import net.perfectdreams.dreamcore.utils.extensions.*
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamresourcereset.DreamResourceReset
@@ -17,6 +18,8 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import kotlin.math.cos
@@ -25,7 +28,11 @@ import kotlin.math.sqrt
 
 class InteractListener(val m: DreamResourceReset) : Listener {
     companion object {
-        private val FIVE_MINUTES_IN_TICKS = (5 * 60) * 20
+        private const val FIVE_MINUTES_IN_TICKS = (5 * 60) * 20
+        private val QUICK_RESOURCES_TELEPORT_TORCH_KEY = SparklyNamespacedKey("is_quick_resources_teleport")
+        private val QUICK_RESOURCES_TELEPORT_PREVIOUS_WORLD_LOCATION_KEY = SparklyNamespacedKey("quick_resources_teleport_world_location")
+        private val QUICK_RESOURCES_TELEPORT_PREVIOUS_RESOURCES_LOCATION_KEY = SparklyNamespacedKey("quick_resources_teleport_resources_location")
+        private val QUICK_RESOURCES_TELEPORT_LAST_RESET_KEY = SparklyNamespacedKey("quick_resources_teleport_last_reset")
     }
 
     @EventHandler
@@ -38,9 +45,23 @@ class InteractListener(val m: DreamResourceReset) : Listener {
         if (item.type != Material.REDSTONE_TORCH)
             return
 
-        if (item.hasStoredMetadataWithKey("quickTeleport")) {
+        // TODO: Remove this hack after the "/kit noob" is updated with the new metadata key
+        if (item.hasItemMeta() && !item.itemMeta.persistentDataContainer.has(QUICK_RESOURCES_TELEPORT_TORCH_KEY, PersistentDataType.BYTE) && item.hasStoredMetadataWithKey("quickTeleport")) {
+            item.meta<ItemMeta> {
+                persistentDataContainer.set(
+                    QUICK_RESOURCES_TELEPORT_TORCH_KEY,
+                    PersistentDataType.BYTE,
+                    1
+                )
+            }
+            return onTorchInteract(e)
+        }
+
+        if (item.hasItemMeta() && item.itemMeta.persistentDataContainer.has(QUICK_RESOURCES_TELEPORT_TORCH_KEY, PersistentDataType.BYTE)) {
             e.setUseItemInHand(Event.Result.DENY)
 
+            val itemMeta = item.itemMeta
+            val persistentDataContainer = itemMeta.persistentDataContainer
             val playerLocation = e.player.location
 
             if (playerLocation.world.name != "world" && playerLocation.world.name != "Resources") {
@@ -48,59 +69,79 @@ class InteractListener(val m: DreamResourceReset) : Listener {
                 return
             }
 
-            val storeInMetaKey = if (playerLocation.world.name == "world")
-                "previousWorldLocation"
-            else "previousResourcesLocation"
-
-            val loadFromMetaKey = if (playerLocation.world.name != "world")
-                "previousWorldLocation"
-            else "previousResourcesLocation"
-
-            e.player.inventory.setItemInMainHand(
-                item.storeMetadata(
-                    storeInMetaKey,
+            if (playerLocation.world.name == "Resources") {
+                // User is in resources world
+                persistentDataContainer.set(
+                    QUICK_RESOURCES_TELEPORT_PREVIOUS_RESOURCES_LOCATION_KEY,
+                    PersistentDataType.STRING,
                     "${playerLocation.world.name};${playerLocation.x};${playerLocation.y};${playerLocation.z};${playerLocation.yaw};${playerLocation.pitch}"
                 )
-            )
 
-            val storedLocation = item.getStoredMetadata(loadFromMetaKey) ?: run {
-                if (loadFromMetaKey == "previousWorldLocation") {
-                    Bukkit.dispatchCommand(e.player, "spawn")
-                } else {
-                    Bukkit.dispatchCommand(e.player, "warp recursos")
-                }
-                return
-            }
-
-            val resourceWorldChange = item.getStoredMetadata("resourceWorldChange")?.toInt() ?: 0
-
-            if (loadFromMetaKey == "previousResourcesLocation" && resourceWorldChange != m.config.getInt(
-                    "resourceWorldChange",
-                    0
-                )) {
-                Bukkit.dispatchCommand(e.player, "warp recursos")
-                e.player.sendMessage("§cO mundo de recursos foi regenerado desde a última vez que você apareceu por lá!")
-                e.player.inventory.setItemInMainHand(
-                    item.storeMetadata(
+                persistentDataContainer.set(
+                    QUICK_RESOURCES_TELEPORT_LAST_RESET_KEY,
+                    PersistentDataType.INTEGER,
+                    m.config.getInt(
                         "resourceWorldChange",
-                        m.config.getInt("resourceWorldChange").toString()
+                        0
                     )
                 )
+
+                val previousWorldLocation = persistentDataContainer.get(QUICK_RESOURCES_TELEPORT_PREVIOUS_WORLD_LOCATION_KEY, PersistentDataType.STRING)
+                if (previousWorldLocation != null) {
+                    val split = previousWorldLocation.split(";")
+                    e.player.teleport(
+                        Location(
+                            Bukkit.getWorld(split[0])!!,
+                            split[1].toDouble(),
+                            split[2].toDouble(),
+                            split[3].toDouble(),
+                            split[4].toFloat(),
+                            split[5].toFloat()
+                        )
+                    )
+                } else {
+                    Bukkit.dispatchCommand(e.player, "spawn")
+                }
+            } else if (playerLocation.world.name == "world") {
+                // User is in Survival world
+                persistentDataContainer.set(
+                    QUICK_RESOURCES_TELEPORT_PREVIOUS_WORLD_LOCATION_KEY,
+                    PersistentDataType.STRING,
+                    "${playerLocation.world.name};${playerLocation.x};${playerLocation.y};${playerLocation.z};${playerLocation.yaw};${playerLocation.pitch}"
+                )
+
+                val previousResourcesLocation = persistentDataContainer.get(QUICK_RESOURCES_TELEPORT_PREVIOUS_RESOURCES_LOCATION_KEY, PersistentDataType.STRING)
+                val hasBeenResetSinceTheLastTimeWeWentToTheResourcesWorld = persistentDataContainer.get(QUICK_RESOURCES_TELEPORT_LAST_RESET_KEY, PersistentDataType.INTEGER) !=  m.config.getInt(
+                    "resourceWorldChange",
+                    0
+                )
+
+                if (previousResourcesLocation != null && !hasBeenResetSinceTheLastTimeWeWentToTheResourcesWorld) {
+                    val split = previousResourcesLocation.split(";")
+                    e.player.teleport(
+                        Location(
+                            Bukkit.getWorld(split[0])!!,
+                            split[1].toDouble(),
+                            split[2].toDouble(),
+                            split[3].toDouble(),
+                            split[4].toFloat(),
+                            split[5].toFloat()
+                        )
+                    )
+                } else {
+                    Bukkit.dispatchCommand(e.player, "warp recursos")
+
+                    if (hasBeenResetSinceTheLastTimeWeWentToTheResourcesWorld) {
+                        e.player.sendMessage("§cO mundo de recursos foi regenerado desde a última vez que você apareceu por lá!")
+                    }
+                }
+            } else {
+                // Unknown location
+                e.player.sendMessage("§cVocê está em um mundo onde a tocha de teletransporte rápido não funciona!")
                 return
             }
 
-            val split = storedLocation.split(";")
-
-            e.player.teleport(
-                Location(
-                    Bukkit.getWorld(split[0])!!,
-                    split[1].toDouble(),
-                    split[2].toDouble(),
-                    split[3].toDouble(),
-                    split[4].toFloat(),
-                    split[5].toFloat()
-                )
-            )
+            item.itemMeta = itemMeta
         }
     }
 
