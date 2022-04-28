@@ -15,6 +15,7 @@ import org.bukkit.block.Sign
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
@@ -35,7 +36,7 @@ class InteractListener(val m: DreamResourceReset) : Listener {
         private val QUICK_RESOURCES_TELEPORT_LAST_RESET_KEY = SparklyNamespacedKey("quick_resources_teleport_last_reset")
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
     fun onTorchInteract(e: PlayerInteractEvent) {
         if (!e.rightClick && !e.leftClick)
             return
