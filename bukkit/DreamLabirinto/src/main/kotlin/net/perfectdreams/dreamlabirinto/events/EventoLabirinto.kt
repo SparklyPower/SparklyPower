@@ -12,7 +12,6 @@ import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.pluralize
-import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamlabirinto.DreamLabirinto
 import net.perfectdreams.dreamlabirinto.utils.MazeGenerator
@@ -36,13 +35,6 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
     var startLocation: Location? = null
     var startCooldown = 15
-    val coolWallColors = listOf(
-        Material.ORANGE_CONCRETE,
-        Material.MAGENTA_CONCRETE,
-        Material.LIGHT_BLUE_CONCRETE,
-        Material.YELLOW_CONCRETE,
-        Material.LIME_CONCRETE
-    )
     val isPreStart: Boolean
         get() = startCooldown != 0
 
@@ -252,9 +244,67 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
             val world = Bukkit.getWorld("Labirinto")
 
-            val lines = this.displayToLines()
+            // Start and End plates can be in different parts of the map each time
+            val possiblePlates = mutableListOf(
+                LabirintoPlate(
+                    listOf(
+                        Location(world, 1.0, 79.0, 1.0),
+                        Location(world, 2.0, 79.0, 1.0),
+                        Location(world, 1.0, 79.0, 2.0),
+                        Location(world, 2.0, 79.0, 2.0)
+                    ),
+                    Location(world, 2.0, 80.0, 2.0, 270f, 0f)
+                ),
+                LabirintoPlate(
+                    listOf(
+                        Location(world, 56.0, 79.0, 56.0),
+                        Location(world, 55.0, 79.0, 56.0),
+                        Location(world, 56.0, 79.0, 55.0),
+                        Location(world, 55.0, 79.0, 55.0)
+                    ),
+                    Location(world, 56.0, 80.0, 56.0, 90f, 0f)
+                ),
+                LabirintoPlate(
+                    listOf(
+                        Location(world, 1.0, 79.0, 56.0),
+                        Location(world, 1.0, 79.0, 55.0),
+                        Location(world, 2.0, 79.0, 56.0),
+                        Location(world, 2.0, 79.0, 55.0)
+                    ),
+                    Location(world, 2.0, 80.0, 56.0, 180f, 0f)
+                ),
+                LabirintoPlate(
+                    listOf(
+                        Location(world, 56.0, 79.0, 2.0),
+                        Location(world, 55.0, 79.0, 2.0),
+                        Location(world, 56.0, 79.0, 1.0),
+                        Location(world, 55.0, 79.0, 1.0)
+                    ),
+                    Location(world, 56.0, 80.0, 2.0, 0f, 0f)
+                )
+            )
 
-            val endPlate1 = Location(world, 56.0, 79.0, 56.0)
+            possiblePlates.forEach {
+                it.blocks.forEach {
+                    it.block.type = Material.SEA_LANTERN
+                }
+            }
+
+            val startPlates = possiblePlates.random()
+            // After getting the start plate, we remove the start plate from the list to avoid the end plate being in the same place
+            possiblePlates.remove(startPlates)
+
+            val endPlates = possiblePlates.random()
+
+            startPlates.blocks.forEach {
+                it.block.type = Material.DIAMOND_BLOCK
+            }
+
+            endPlates.blocks.forEach {
+                it.block.type = Material.EMERALD_BLOCK
+            }
+
+            val lines = this.displayToLines()
 
             val randomTextsForSigns = listOf(
                 listOf(
@@ -362,23 +412,29 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
             lines.forEachIndexed { y, line ->
                 // Choose the type for each line
-                val wallType = coolWallColors.random()
-
                 line.forEachIndexed { x, char ->
                     val blockLocation = Location(world, x.toDouble(), 80.0, currentBlockY.toDouble())
 
-                    val distance = blockLocation.distanceSquared(endPlate1)
+                    val distance = blockLocation.distanceSquared(endPlates.startingPosition)
 
-                    val type = when {
-                        // 256 >= distance -> Material.GREEN_STAINED_GLASS
-                        // 676 >= distance -> Material.YELLOW_STAINED_GLASS
-                        // 1296 >= distance -> Material.ORANGE_STAINED_GLASS
-                        // 2116 >= distance -> Material.GRAY_STAINED_GLASS
+                    val floorType = when {
+                        256 >= distance -> Material.GREEN_STAINED_GLASS
+                        676 >= distance -> Material.YELLOW_STAINED_GLASS
+                        1296 >= distance -> Material.ORANGE_STAINED_GLASS
+                        2116 >= distance -> Material.GRAY_STAINED_GLASS
                         else -> Material.BLACK_STAINED_GLASS
                     }
 
-                    Location(world, x.toDouble(), 79.0, currentBlockY.toDouble()).block.type = type
-                    Location(world, x.toDouble(), 83.0, currentBlockY.toDouble()).block.type = type
+                    val wallType = when {
+                        256 >= distance -> Material.GREEN_CONCRETE
+                        676 >= distance -> Material.YELLOW_CONCRETE
+                        1296 >= distance -> Material.ORANGE_CONCRETE
+                        2116 >= distance -> Material.GRAY_CONCRETE
+                        else -> Material.BLACK_CONCRETE
+                    }
+
+                    Location(world, x.toDouble(), 79.0, currentBlockY.toDouble()).block.type = floorType
+                    Location(world, x.toDouble(), 83.0, currentBlockY.toDouble()).block.type = floorType
 
                     repeat(5) {
                         val blockLocation = Location(world, x.toDouble(), 79.0 + it, currentBlockY.toDouble())
@@ -399,72 +455,12 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                                     }
                                 }
                             } else {
-                                blockLocation.block.type = if (it == 0 || it == 4) type else Material.AIR
+                                blockLocation.block.type = if (it == 0 || it == 4) floorType else Material.AIR
                             }
                         }
                     }
                 }
                 currentBlockY++
-            }
-
-            // Start and End plates can be in different parts of the map each time
-            val possiblePlates = mutableListOf(
-                LabirintoPlate(
-                    listOf(
-                        Location(world, 1.0, 79.0, 1.0),
-                        Location(world, 2.0, 79.0, 1.0),
-                        Location(world, 1.0, 79.0, 2.0),
-                        Location(world, 2.0, 79.0, 2.0)
-                    ),
-                    Location(world, 2.0, 80.0, 2.0, 270f, 0f)
-                ),
-                LabirintoPlate(
-                    listOf(
-                        Location(world, 56.0, 79.0, 56.0),
-                        Location(world, 55.0, 79.0, 56.0),
-                        Location(world, 56.0, 79.0, 55.0),
-                        Location(world, 55.0, 79.0, 55.0)
-                    ),
-                    Location(world, 56.0, 80.0, 56.0, 90f, 0f)
-                ),
-                LabirintoPlate(
-                    listOf(
-                        Location(world, 1.0, 79.0, 56.0),
-                        Location(world, 1.0, 79.0, 55.0),
-                        Location(world, 2.0, 79.0, 56.0),
-                        Location(world, 2.0, 79.0, 55.0)
-                    ),
-                    Location(world, 2.0, 80.0, 56.0, 180f, 0f)
-                ),
-                LabirintoPlate(
-                    listOf(
-                        Location(world, 56.0, 79.0, 2.0),
-                        Location(world, 55.0, 79.0, 2.0),
-                        Location(world, 56.0, 79.0, 1.0),
-                        Location(world, 55.0, 79.0, 1.0)
-                    ),
-                    Location(world, 56.0, 80.0, 2.0, 0f, 0f)
-                )
-            )
-
-            possiblePlates.forEach {
-                it.blocks.forEach {
-                    it.block.type = Material.SEA_LANTERN
-                }
-            }
-
-            val startPlates = possiblePlates.random()
-            // After getting the start plate, we remove the start plate from the list to avoid the end plate being in the same place
-            possiblePlates.remove(startPlates)
-
-            val endPlates = possiblePlates.random()
-
-            startPlates.blocks.forEach {
-                it.block.type = Material.DIAMOND_BLOCK
-            }
-
-            endPlates.blocks.forEach {
-                it.block.type = Material.EMERALD_BLOCK
             }
 
             startLocation = startPlates.startingPosition
