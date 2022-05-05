@@ -34,7 +34,12 @@ class BlockListener(val m: DreamEnchant) : Listener {
 			return e.player.sendMessage("§cVocê não pode encantar um ímã.")
 
 		e.isCancelled = true
-		EnchantUtils.openEnchantmentInventory(e.player, 0)
+
+		EnchantUtils.openEnchantmentInventory(
+			e.player,
+			clickedBlock,
+			0
+		)
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -57,12 +62,12 @@ class BlockListener(val m: DreamEnchant) : Listener {
 		if (inventoryAction == "close") {
 			player.closeInventory()
 		} else if (inventoryAction == "old") {
-			player.openEnchanting(Location(Bukkit.getWorld("world"), 494.0,63.0, 176.0), false)
+			player.openEnchanting(holder.enchantmentTableBlock.location, false)
 		} else if (inventoryAction == "go") {
 			val newPage = item.getStoredMetadata("newPage")!!.toInt()
 
 			player.closeInventory()
-			EnchantUtils.openEnchantmentInventory(player, newPage)
+			EnchantUtils.openEnchantmentInventory(player, holder.enchantmentTableBlock, newPage)
 		} else {
 			val enchantWith = item.getStoredMetadata("enchantWith")
 			val itemInHandHash = item.getStoredMetadata("itemInHandHash")
