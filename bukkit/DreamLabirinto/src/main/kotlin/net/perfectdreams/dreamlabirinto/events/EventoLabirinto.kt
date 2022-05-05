@@ -292,25 +292,11 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                 )
             )
 
-            possiblePlates.forEach {
-                it.blocks.forEach {
-                    it.block.type = Material.SEA_LANTERN
-                }
-            }
-
             val startPlates = possiblePlates.random()
             // After getting the start plate, we remove the start plate from the list to avoid the end plate being in the same place
             possiblePlates.remove(startPlates)
 
             val endPlates = possiblePlates.random()
-
-            startPlates.blocks.forEach {
-                it.block.type = Material.DIAMOND_BLOCK
-            }
-
-            endPlates.blocks.forEach {
-                it.block.type = Material.EMERALD_BLOCK
-            }
 
             val lines = this.displayToLines()
 
@@ -472,6 +458,22 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
             }
 
             startLocation = startPlates.startingPosition
+
+            // Replace start plates floor with the proper block
+
+            possiblePlates.forEach {
+                it.blocks.forEach {
+                    it.block.type = Material.SEA_LANTERN
+                }
+            }
+
+            startPlates.blocks.forEach {
+                it.block.type = Material.DIAMOND_BLOCK
+            }
+
+            endPlates.blocks.forEach {
+                it.block.type = Material.EMERALD_BLOCK
+            }
         }
     }
 
