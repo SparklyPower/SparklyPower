@@ -138,11 +138,19 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
             while (running) {
                 // 10 minutes
                 if (idx == 120) {
-                    running = false
-                    lastTime = System.currentTimeMillis()
-
                     val extra = wonPlayers.size.let { if (it == 0) "ninguém conseguiu" else "só ${it.pluralize("pessoa pôde" to "pessoas puderam")}" }
                     Bukkit.broadcastMessage("§cPoxa, vida! Se passaram 10 minutos e $extra terminar o labirinto? Sinceramente, esperava bem mais...")
+
+                    world.players.forEach {
+                        it.fallDistance = 0.0f
+                        it.fireTicks = 0
+                        PlayerUtils.healAndFeed(it)
+
+                        it.teleportToServerSpawn()
+                    }
+
+                    running = false
+                    lastTime = System.currentTimeMillis()
                     wonPlayers.clear()
                     return@schedule
                 }
@@ -191,7 +199,6 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
         broadcastFakeArmor(player, world)
     }
-
 
     fun broadcastFakeArmor(player: Player, world: World) {
         // Now we are going to fake send packets to everyone to remove all armor
