@@ -144,6 +144,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                     val extra = wonPlayers.size.let { if (it == 0) "ninguém conseguiu" else "só ${it.pluralize("pessoa pôde" to "pessoas puderam")}" }
                     Bukkit.broadcastMessage("§cPoxa, vida! Se passaram 10 minutos e $extra terminar o labirinto? Sinceramente, esperava bem mais...")
                     wonPlayers.clear()
+                    return
                 }
 
                 if (idx % 3 == 0) {
