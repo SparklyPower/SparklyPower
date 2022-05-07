@@ -6,7 +6,7 @@ import net.perfectdreams.dreamterrainadditions.commands.TempTrustExecutor
 import net.perfectdreams.dreamterrainadditions.commands.TempTrustListExecutor
 
 object TempTrustCommand: SparklyCommandDeclarationWrapper {
-    override fun declaration() = sparklyCommand(listOf("temptrust")) {
+    override fun declaration() = sparklyCommand(listOf("temptrust", "trusttemp")) {
         executor = TempTrustExecutor
         subcommand(listOf("list")) {
             executor = TempTrustListExecutor

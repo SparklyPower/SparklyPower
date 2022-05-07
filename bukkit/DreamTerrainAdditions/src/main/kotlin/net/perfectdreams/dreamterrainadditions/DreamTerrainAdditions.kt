@@ -3,17 +3,15 @@ package net.perfectdreams.dreamterrainadditions
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.sync.Mutex
-import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
-import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent
-import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.registerEvents
+import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcore.utils.serializer.UUIDAsStringSerializer
 import net.perfectdreams.dreamterrainadditions.commands.*
 import net.perfectdreams.dreamterrainadditions.commands.declarations.TempTrustCommand
@@ -210,7 +208,6 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 	fun onBlockGrowth(e: BlockGrowEvent) {
 		val entityClaim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null) ?: return
 		val cropsGrowthDisabled = getClaimAdditionsById(entityClaim.id)?.disableCropGrowth ?: return
-
 		if (cropsGrowthDisabled) {
 			e.isCancelled = true
 		}
@@ -218,7 +215,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onBlockSpread(event: BlockSpreadEvent) {
-		if (event.source.type == Material.BROWN_MUSHROOM|| event.block.type == Material.RED_MUSHROOM || event.block.type == Material.VINE) {
+		if (event.source.type == Material.BROWN_MUSHROOM || event.source.type == Material.RED_MUSHROOM || event.source.type == Material.VINE) {
 			val entityClaim = GriefPrevention.instance.dataStore.getClaimAt(event.block.location, false, null) ?: return
 			val plantsSpreadingDisabled = getClaimAdditionsById(entityClaim.id)?.disablePlantsSpreading ?: return
 			if (plantsSpreadingDisabled) {
@@ -266,18 +263,6 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 			if (disableTrapdoorAndDoorAccess)
 				e.isCancelled = true
 
-		}
-	}
-
-	@EventHandler
-	fun onTrustChange(event: TrustChangedEvent) {
-		for (claim in event.claims) {
-			val claimAdditions = getClaimAdditionsById(claim.id) ?: return
-
-			val userUniqueId = DreamUtils.retrieveUserUniqueId(event.identifier)
-			if (claimAdditions.temporaryTrustedPlayers.containsKey(userUniqueId) && !event.isGiven) {
-				claimAdditions.temporaryTrustedPlayers.remove(userUniqueId)
-			}
 		}
 	}
 
