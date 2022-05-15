@@ -9,6 +9,7 @@ import org.bukkit.entity.EntityType
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntitySpawnEvent
+import org.bukkit.event.vehicle.VehicleCreateEvent
 
 class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
     fun start() {
@@ -110,7 +111,9 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
         EntityType.TURTLE,
         EntityType.COW,
         EntityType.BLAZE,
-        EntityType.STRIDER
+        EntityType.STRIDER,
+        EntityType.EGG,
+        EntityType.SNOWBALL
     )
 
     val maximumAround = mapOf(
@@ -137,11 +140,13 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
         EntityType.SHEEP to 15,
         EntityType.PIG to 15,
         EntityType.COW to 15,
-        EntityType.STRIDER to 15
+        EntityType.STRIDER to 15,
+        EntityType.SNOWBALL to 30,
+        EntityType.EGG to 30
     )
 
     @EventHandler
-    fun onSpawn(e: org.bukkit.event.vehicle.VehicleCreateEvent) {
+    fun onSpawn(e: VehicleCreateEvent) {
         if (e.vehicle.type == EntityType.MINECART_HOPPER) {
             val nearby = e.vehicle.getNearbyEntities(0.001, 0.001, 0.001)
                 .filter { it.type == e.vehicle.type }
