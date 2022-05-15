@@ -51,7 +51,7 @@ class TempTrustExecutor(val plugin: DreamTerrainAdditions): SparklyCommandExecut
             val differenceBetweenTargetAndCurrentTime = wrappedTimeInMillis - System.currentTimeMillis()
 
             if (differenceBetweenTargetAndCurrentTime <= 0 || differenceBetweenTargetAndCurrentTime > MAXIMUM_TRUST_TIME_LIMIT)
-                return@launchAsyncThread player.sendMessage("")
+                return@launchAsyncThread player.sendMessage("§cO tempo especificado é inválido. Lembre-se que o tempo não pode ser maior que 6 meses, nem estar no passado!")
 
             val claimAdditions = plugin.getOrCreateClaimAdditionsWithId(claim.id)
 
