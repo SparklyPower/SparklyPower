@@ -461,50 +461,42 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (distance > 2304)
 			return
 
-		for (x in block.x - 15..block.x + 15) {
-			for (y in block.y - 15..block.y + 15) {
-				for (z in block.z - 15..block.z + 15) {
-					val cocoaBlock = block.world.getBlockAt(x, y.coerceIn(block.world.minHeight, block.world.maxHeight), z)
+		val itemStack = ItemStack(Material.COCOA_BEANS, DreamUtils.random.nextInt(2, 4))
 
-					if (cocoaBlock.type != Material.COCOA)
-						continue
-
-					if (!player.canBreakAt(cocoaBlock.location, cocoaBlock.type))
-						continue
-
-					val itemStack = ItemStack(Material.COCOA_BEANS, DreamUtils.random.nextInt(2, 4))
-
-					if (!inventory.canHoldItem(itemStack)) {
-						sendInventoryFullTitle(player)
-						return
-					}
-
-					inventory.addItem(itemStack)
-
-					val rotation = cocoaBlock.data and 3
-
-					val stage = cocoaBlock.data and 12
-
-					if (stage != 8.toByte()) // CocoaPlant.class
-						continue
-
-					val blockage = cocoaBlock.blockData as Ageable
-					blockage.age = 0
-					cocoaBlock.blockData = blockage
-
-					player.world.spawnParticle(
-						Particle.VILLAGER_HAPPY,
-						cocoaBlock.location.add(0.5, 0.5, 0.5),
-						3,
-						0.5,
-						0.5,
-						0.5
-					)
-
-					addMcMMOHerbalismXP(player, cocoaBlock, mcMMOXp = mcMMOXp) // mcMMO EXP
-				}
-			}
+		if (!inventory.canHoldItem(itemStack)) {
+			sendInventoryFullTitle(player)
+			return
 		}
+
+		inventory.addItem(itemStack)
+
+		val rotation = block.data and 3
+
+		val stage = block.data and 12
+
+		if (stage != 8.toByte()) // CocoaPlant.class
+			return
+
+		val blockage = block.blockData as Ageable
+		blockage.age = 0
+		block.blockData = blockage
+
+		player.world.spawnParticle(Particle.VILLAGER_HAPPY, block.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
+
+		delay(100)
+
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH), inventory, mcMMOXp)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH), inventory, mcMMOXp)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.EAST), inventory, mcMMOXp)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.WEST), inventory, mcMMOXp)
+		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH_EAST), inventory)
+		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.NORTH_WEST), inventory)
+		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH_EAST), inventory)
+		// doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.SOUTH_WEST), inventory)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.UP), inventory, mcMMOXp)
+		doQuickHarvestOnCocoa(e, player, block.getRelative(BlockFace.DOWN), inventory, mcMMOXp)
+
+		addMcMMOHerbalismXP(player, block, mcMMOXp = mcMMOXp) // mcMMO EXP
 	}
 
 	suspend fun doQuickHarvestOnSugarCane(
