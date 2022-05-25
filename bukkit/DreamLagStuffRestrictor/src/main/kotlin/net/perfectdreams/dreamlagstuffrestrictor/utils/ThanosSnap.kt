@@ -184,8 +184,13 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
                         hasName = true
                     }
 
-                    if (!hasName && it is org.bukkit.entity.Damageable) {
-                        it.damage(100000.0)
+                    if (!hasName) {
+                        if (it is org.bukkit.entity.Damageable) {
+                            it.damage(100000.0)
+                        } else {
+                            it.remove()
+                        }
+
                         Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }.forEach { player ->
                             // player.sendMessage("§6${it.type}§c foi morto em §9(${it.location.x}, ${it.location.y}, ${it.location.z})§c por ter muitos mobs no chunk (mais que 7)")
                         }
