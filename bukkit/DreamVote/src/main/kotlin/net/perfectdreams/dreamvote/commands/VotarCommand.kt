@@ -5,8 +5,6 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
-import net.perfectdreams.dreamcore.utils.DreamUtils
-import net.perfectdreams.dreamcore.utils.canHoldItem
 import net.perfectdreams.dreamvote.DreamVote
 import org.bukkit.entity.Player
 import org.bukkit.command.CommandSender
@@ -14,8 +12,7 @@ import org.bukkit.inventory.ItemStack
 import java.io.File
 import net.perfectdreams.commands.bukkit.SubcommandPermission
 import net.perfectdreams.dreamcash.utils.Cash
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamvote.dao.Vote
 import net.perfectdreams.dreamvote.tables.Votes
 import org.jetbrains.exposed.sql.SortOrder
@@ -127,7 +124,7 @@ class VotarCommand(val m: DreamVote) : SparklyCommand(arrayOf("votar", "vote")) 
 					sender.sendMessage("$idx/${topVoterUsers.size} já receberam os pesadelos...")
 				}
 
-				Cash.giveCash(it[Votes.player], (it[userIdCount] * 15).toLong())
+				Cash.giveCash(it[Votes.player], (it[userIdCount] * 15), TransactionContext(type = TransactionType.VOTE_REWARDS))
 
 				idx++
 			}

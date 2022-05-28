@@ -2,10 +2,7 @@ package net.perfectdreams.dreamraffle
 
 import kotlinx.serialization.json.*
 import net.perfectdreams.dreamcash.utils.Cash
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.deposit
-import net.perfectdreams.dreamcore.utils.registerEvents
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamraffle.commands.DreamRaffleExecutor
 import net.perfectdreams.dreamraffle.commands.RaffleExecutor
 import net.perfectdreams.dreamraffle.commands.declarations.DreamRaffleCommand
@@ -29,36 +26,6 @@ class DreamRaffle : KotlinPlugin() {
         transaction(Databases.databaseNetwork) {
             SchemaUtils.createMissingTablesAndColumns(Gamblers)
         }
-
-        // Temporary measure to finish legacy raffle
-        with (File(dataFolder, "unfinished_raffle.json")) {
-            if (exists()) {
-                val element = Json.parseToJsonElement(readText())
-                with(element.jsonObject) {
-                    val type = get("type")!!.jsonPrimitive.content
-                    val currency = if (type == "CASH") RaffleCurrency.CASH else RaffleCurrency.MONEY
-
-                    get("participants")?.jsonArray?.forEach {
-                        val gambler = it.jsonObject
-                        val serializedUUID = gambler["uuid"]!!.jsonPrimitive.content
-                        val tickets = gambler["tickets"]!!.jsonPrimitive.long
-
-                        val uuid = UUID.fromString(serializedUUID)
-
-                        if (currency == RaffleCurrency.CASH) {
-                            val cash = tickets * 25
-                            launchAsyncThread { Cash.giveCash(uuid, cash) }
-                        } else {
-                            val money = tickets * 250
-                            server.getOfflinePlayer(uuid).deposit(money.toDouble())
-                        }
-                    }
-                }
-                delete()
-            }
-        }
-
-        with (File(dataFolder, "last_winner.json")) { if (exists()) delete() }
 
         registerCommands()
         RafflesManager.start(this)

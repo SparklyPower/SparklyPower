@@ -21,7 +21,6 @@ import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.CraftItemEvent
-import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -301,7 +300,7 @@ class DreamMini : KotlinPlugin(), Listener {
 
 									// TODO: Prêmios
 									if (chance == 100) {
-										player.balance += 1750
+										player.deposit(1750.00, TransactionContext(extra = "razões misteriosas"))
 										player.sendMessage("§aHoje é o seu dia de sorte!")
 										rewarded = true
 									}

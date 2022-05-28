@@ -132,7 +132,7 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 					damager.sendMessage("§cVocê precisa ter §2+${spawner.price - damager.balance} Sonecas§c para poder matar este pobre animal!")
 					return
 				} else {
-					damager.balance -= spawner.price
+					damager.withdraw(spawner.price, TransactionContext(extra = "matar um mob no `/warp spawner`"))
 					damager.sendMessage("§7Você pagou §2${spawner.price} Sonecas§7 para matar este pobre animal!")
 				}
 			}

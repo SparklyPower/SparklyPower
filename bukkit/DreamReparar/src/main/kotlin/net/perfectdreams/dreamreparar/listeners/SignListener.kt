@@ -1,7 +1,9 @@
 package net.perfectdreams.dreamreparar.listeners
 
+import net.perfectdreams.dreamcore.utils.TransactionContext
 import net.perfectdreams.dreamcore.utils.balance
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
+import net.perfectdreams.dreamcore.utils.withdraw
 import net.perfectdreams.dreamreparar.DreamReparar
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -56,7 +58,7 @@ class SignListener(val m: DreamReparar) : Listener {
 
                         val preco = m.calculatePrice(itemReparar, p)
                         if (preco <= p.balance) {
-                            p.balance -= preco.toDouble()
+                            p.withdraw(preco.toDouble(), TransactionContext(extra = "reparar um item numa placa de reparação"))
 
                             meta.damage = 0
                             itemReparar.itemMeta = meta

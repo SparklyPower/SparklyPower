@@ -3,8 +3,7 @@ package net.perfectdreams.dreamraffle.commands.subcommands
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.canPay
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
@@ -14,7 +13,6 @@ import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.formatted
 import net.perfectdreams.dreamcore.utils.extensions.percentage
 import net.perfectdreams.dreamcore.utils.extensions.pluralize
-import net.perfectdreams.dreamcore.utils.withdraw
 import net.perfectdreams.dreamraffle.DreamRaffle
 import net.perfectdreams.dreamraffle.dao.Gambler
 import net.perfectdreams.dreamraffle.raffle.RaffleCurrency
@@ -73,12 +71,12 @@ class BuyRaffleExecutor(private val plugin: DreamRaffle) : SparklyCommandExecuto
             plugin.schedule {
                 if (currency == RaffleCurrency.MONEY) {
                     if (!player.canPay(cost.toDouble())) return@schedule player.sendMessage(template.format("sonecas"))
-                    player.withdraw(cost.toDouble())
+                    player.withdraw(cost.toDouble(), TransactionContext(type = TransactionType.BETTING, extra = "em uma rifa `${type.displayName}`"))
                 } else {
                     switchContext(SynchronizationContext.ASYNC)
                     val cash = Cash.getCash(player)
                     if (cash < cost) return@schedule player.sendMessage(template.format("pesadelos"))
-                    Cash.takeCash(player, cost)
+                    Cash.takeCash(player, cost, TransactionContext(type = TransactionType.BETTING, extra = "em uma rifa `${type.displayName}`"))
                     switchContext(SynchronizationContext.SYNC)
                 }
 

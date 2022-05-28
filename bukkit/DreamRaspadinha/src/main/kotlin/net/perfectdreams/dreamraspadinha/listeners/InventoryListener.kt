@@ -186,7 +186,7 @@ class InventoryListener(val m: DreamRaspadinha) : Listener {
                 if (prize == 0) {
                     player.sendMessage("${DreamRaspadinha.PREFIX} §cQue pena, você não ganhou nada...")
                 } else {
-                    player.balance += prize
+                    player.deposit(prize.toDouble(), TransactionContext(type = TransactionType.BETTING, extra = "em uma raspadinha"))
                     player.sendMessage("${DreamRaspadinha.PREFIX} §aParabéns, você ganhou $prize sonecas!")
                 }
             }

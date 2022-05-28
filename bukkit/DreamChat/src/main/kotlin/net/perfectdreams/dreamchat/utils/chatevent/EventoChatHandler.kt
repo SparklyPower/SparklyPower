@@ -6,11 +6,9 @@ import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
-import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.getTranslatedDisplayName
-import net.perfectdreams.dreamcore.utils.getRandom
-import net.perfectdreams.dreamcore.utils.scheduler
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -112,7 +110,7 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 				"Chat"
 			)
 			if (willGiveOutPesadelos)
-				Cash.giveCash(player, 1L)
+				Cash.giveCash(player, 1L, TransactionContext(type = TransactionType.EVENTS, extra = "Chat"))
 			DreamChat.INSTANCE.userData.save(DreamChat.INSTANCE.dataYaml)
 			event.postEndAsync(player, diff)
 		}

@@ -6,9 +6,8 @@ import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
-import net.perfectdreams.dreamcore.utils.balance
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
-import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamquiz.DreamQuiz
 import net.perfectdreams.dreamquiz.utils.QuizQuestion
 import net.perfectdreams.dreamquiz.utils.prettyBoolean
@@ -122,8 +121,7 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
                         val balance = (index + 1) * 268
 
                         it.sendMessage("${DreamQuiz.PREFIX} Yay! Você acertou! Parabéns! §a+$balance sonecas")
-
-                        it.balance += balance
+                        it.deposit(balance.toDouble(), TransactionContext(type = TransactionType.EVENTS, extra = "Quiz"))
 
                         it.playSound(it.location, "perfectdreams.sfx.mizeravi", 10.0f, 1.0f)
                     } else if (isWrong) {
@@ -203,7 +201,7 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
                         wonAt
                     )
 
-                    Cash.giveCash(it, 1)
+                    Cash.giveCash(it, 1, TransactionContext(type = TransactionType.EVENTS, extra = "Quiz"))
                 }
             }
         }

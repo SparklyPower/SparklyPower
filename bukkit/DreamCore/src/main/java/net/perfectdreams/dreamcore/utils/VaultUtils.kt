@@ -4,6 +4,7 @@ import net.milkbowl.vault.chat.Chat
 import net.milkbowl.vault.economy.Economy
 import net.milkbowl.vault.economy.EconomyResponse
 import net.milkbowl.vault.permission.Permission
+import net.perfectdreams.dreamcore.DreamCore
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 
@@ -42,26 +43,32 @@ object VaultUtils {
  *
  * @return a quantidade de dinheiro do usuário
  */
-var OfflinePlayer.balance: Double
+val OfflinePlayer.balance: Double
 	get() = VaultUtils.econ.getBalance(this)
-	set(value) {
-		this.withdraw(this.balance)
-		this.deposit(value)
-	}
 
 /**
  * Retira uma quantidade de dinheiro do usuário
  */
-fun OfflinePlayer.withdraw(quantity: Double): EconomyResponse {
-	return VaultUtils.econ.withdrawPlayer(this, quantity)
-}
+fun OfflinePlayer.withdraw(quantity: Double, transactionContext: TransactionContext): EconomyResponse =
+	VaultUtils.econ.withdrawPlayer(this, quantity).also {
+		if (it.type == EconomyResponse.ResponseType.SUCCESS)
+			transactionContext.apply {
+				amount = quantity
+				payer = uniqueId
+			}.saveToDatabase()
+	}
 
 /**
  * Deposita uma quantidade de dinheiro no usuário
  */
-fun OfflinePlayer.deposit(quantity: Double): EconomyResponse {
-	return VaultUtils.econ.depositPlayer(this, quantity)
-}
+fun OfflinePlayer.deposit(quantity: Double, transactionContext: TransactionContext): EconomyResponse =
+	VaultUtils.econ.depositPlayer(this, quantity).also {
+		if (it.type == EconomyResponse.ResponseType.SUCCESS)
+			transactionContext.apply {
+				amount = quantity
+				receiver = uniqueId
+			}.saveToDatabase()
+	}
 
 /**
  * Verifica se um usuário consegue pagar uma quantidade de dinheiro específica

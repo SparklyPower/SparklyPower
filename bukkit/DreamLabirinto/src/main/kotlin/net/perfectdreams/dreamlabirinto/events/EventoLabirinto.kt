@@ -65,7 +65,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         val howMuchMoneyWillBeGiven = 15_000 / wonPlayers.size
         val howMuchNightmaresWillBeGiven = if (wonPlayers.size == 1) 1 else 0
 
-        winner.balance += howMuchMoneyWillBeGiven
+        winner.deposit(howMuchMoneyWillBeGiven.toDouble(), TransactionContext(type = TransactionType.EVENTS, extra = "Labirinto"))
         scheduler().schedule(plugin, SynchronizationContext.ASYNC) {
             if (wonPlayers.size == 1)
                 DreamCore.INSTANCE.dreamEventManager.addEventVictory(
@@ -74,7 +74,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                 )
 
             if (howMuchNightmaresWillBeGiven == 1)
-                Cash.giveCash(winner, howMuchNightmaresWillBeGiven.toLong())
+                Cash.giveCash(winner, howMuchNightmaresWillBeGiven.toLong(), TransactionContext(type = TransactionType.EVENTS, extra = "Labirinto"))
         }
 
         winner.fallDistance = 0.0f

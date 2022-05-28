@@ -430,7 +430,7 @@ class FightArena(var m: DreamFight) {
                 m.server.broadcastMessage(
                     DreamFight.prefix + "§eNós encontramos o noss${winner.artigo} §4§lLutador" + (if (winner.girl) "a" else "") + "§e! §l" + winner.displayName + "§e §lvenceu o Evento Fight§e! §a+§l" + winnerPrize + "$§a e §cum pesadelo§a!"
                 )
-                winner.balance += winnerPrize
+                winner.deposit(winnerPrize.toDouble(), TransactionContext(type = TransactionType.EVENTS, extra = "Fight"))
 
                 scheduler().schedule(m, SynchronizationContext.ASYNC) {
                     DreamCore.INSTANCE.dreamEventManager.addEventVictory(
@@ -438,7 +438,7 @@ class FightArena(var m: DreamFight) {
                         "Fight"
                     )
 
-                    Cash.giveCash(winner, 1)
+                    Cash.giveCash(winner, 1, TransactionContext(type = TransactionType.EVENTS, extra = "Fight"))
                 }
                 // VaultUtils.econ.depositPlayer(winner, winnerPrize);
                 DreamFight.lastWinner = winner.name
@@ -480,12 +480,12 @@ class FightArena(var m: DreamFight) {
         val finalPrize = prize * multiplier
         if (wr == WinReason.DEATH) {
             sendToFightArena("§e§l" + winner.displayName.toString() + "§e ganhou o PvP! §a+§l" + finalPrize.toString() + "$§a!")
-            winner.balance += finalPrize
+            winner.deposit(finalPrize.toDouble(), TransactionContext(type = TransactionType.EVENTS, extra = "Fight"))
             // VaultUtils.econ.depositPlayer(winner, finalPrize);
         }
         if (wr == WinReason.DISCONNECT) {
             sendToFightArena("§e§l" + loser.displayName.toString() + "§e arregou o PvP! §a+§l" + finalPrize.toString() + "$§a!")
-            winner.balance += finalPrize
+            winner.deposit(finalPrize.toDouble(), TransactionContext(type = TransactionType.EVENTS, extra = "Fight"))
             // VaultUtils.econ.depositPlayer(winner, finalPrize);
         }
         multiplier += 1

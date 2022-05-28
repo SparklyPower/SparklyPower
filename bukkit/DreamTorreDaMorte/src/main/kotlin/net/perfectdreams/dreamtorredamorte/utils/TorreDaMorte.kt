@@ -244,7 +244,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} §b${player.displayName}§e venceu a Torre da Morte! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
 
             lastWinner = player.uniqueId
-            player.balance += howMuchMoneyWillBeGiven
+            player.deposit(howMuchMoneyWillBeGiven.toDouble(), TransactionContext(type = TransactionType.EVENTS, extra = "Torre da Morte"))
 
             val map = ItemStack(Material.FILLED_MAP).meta<MapMeta> {
                 this.mapId = 25336
@@ -273,7 +273,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
                     wonAt
                 )
 
-                Cash.giveCash(player, howMuchNightmaresWillBeGiven.toLong())
+                Cash.giveCash(player, howMuchNightmaresWillBeGiven.toLong(), TransactionContext(type = TransactionType.EVENTS, extra = "Torre da Morte"))
             }
         } else {
             Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} §b${player.displayName}§e venceu o Minigame da Torre da Morte! Parabéns!")
