@@ -341,10 +341,10 @@ class InventoryListener(val m: DreamMochilas) : Listener {
             m.launchAsyncThread {
                 val item = e.player.inventory.itemInMainHand
 
+                mochilaAccessHolder.release("${e.player.name} closing inventory")
+
                 if (!MochilaUtils.isMochila(item))
                     return@launchAsyncThread
-
-                mochilaAccessHolder.release("${e.player.name} closing inventory")
 
                 onMainThread {
                     MochilaUtils.updateMochilaItemLore(

@@ -24,6 +24,7 @@ import net.perfectdreams.dreamcore.pojo.PlayerInfo
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.codecs.LocationCodec
 import net.perfectdreams.dreamcore.utils.extensions.getCompoundTag
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import org.bson.codecs.configuration.CodecRegistries
 import org.bson.codecs.configuration.CodecRegistries.fromProviders
@@ -43,8 +44,10 @@ import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
+import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.MapMeta
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.PluginManager
 import org.bukkit.scheduler.BukkitScheduler
@@ -65,9 +68,9 @@ object DreamUtils {
 	@JvmStatic
 	private val mongoClientOptions by lazy {
 		MongoClientOptions.Builder()
-				.addServerMonitorListener(MongoServerMonitor())
-				.codecRegistry(pojoCodecRegistry)
-				.build()
+			.addServerMonitorListener(MongoServerMonitor())
+			.codecRegistry(pojoCodecRegistry)
+			.build()
 	}
 	@JvmStatic
 	val mongoClient by lazy {
@@ -82,14 +85,14 @@ object DreamUtils {
 	val jsonParser = JsonParser()
 	val pojoCodecProvider by lazy {
 		PojoCodecProvider.builder()
-				.automatic(true)
-				.build()
+			.automatic(true)
+			.build()
 	}
 	val pojoCodecRegistry by lazy {
 		fromRegistries(
-				CodecRegistries.fromCodecs(LocationCodec()),
-				MongoClient.getDefaultCodecRegistry(),
-				fromProviders(pojoCodecProvider)
+			CodecRegistries.fromCodecs(LocationCodec()),
+			MongoClient.getDefaultCodecRegistry(),
+			fromProviders(pojoCodecProvider)
 		)
 	}
 
@@ -106,143 +109,205 @@ object DreamUtils {
 
 	init {
 		val gsonBuilder = GsonBuilder()
-				.registerTypeAdapter<Location> {
-					serialize {
-						val jsonObject = JsonObject()
-						jsonObject["x"] = it.src.x
-						jsonObject["y"] = it.src.y
-						jsonObject["z"] = it.src.z
-						jsonObject["yaw"] = it.src.yaw
-						jsonObject["pitch"] = it.src.pitch
-						jsonObject["world"] = it.src.world.name
-						return@serialize jsonObject
-					}
-
-					deserialize {
-						val x = it.json["x"].double
-						val y = it.json["y"].double
-						val z = it.json["z"].double
-						val yaw = it.json["yaw"].float
-						val pitch = it.json["pitch"].float
-						val worldName = it.json["world"].string
-
-						Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch)
-					}
+			.registerTypeAdapter<Location> {
+				serialize {
+					val jsonObject = JsonObject()
+					jsonObject["x"] = it.src.x
+					jsonObject["y"] = it.src.y
+					jsonObject["z"] = it.src.z
+					jsonObject["yaw"] = it.src.yaw
+					jsonObject["pitch"] = it.src.pitch
+					jsonObject["world"] = it.src.world.name
+					return@serialize jsonObject
 				}
-				.registerTypeAdapter<ItemStack> {
-					serialize {
-						val jsonObject = JsonObject()
-						jsonObject["type"] = it.src.type.name
-						jsonObject["amount"] = it.src.amount
 
-						val enchantmentMap = JsonObject()
-						for ((enchantment, level) in it.src.enchantments) {
-							enchantmentMap[enchantment.name] = level
-						}
-						jsonObject["enchantments"] = enchantmentMap
+				deserialize {
+					val x = it.json["x"].double
+					val y = it.json["y"].double
+					val z = it.json["z"].double
+					val yaw = it.json["yaw"].float
+					val pitch = it.json["pitch"].float
+					val worldName = it.json["world"].string
 
-						if (it.src.hasItemMeta()) {
-							val jsonMeta = JsonObject()
-							val meta = it.src.itemMeta
-							jsonMeta["displayName"] = meta.displayName
-							jsonMeta["lore"] = it.context.serialize(meta.lore)
+					Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch)
+				}
+			}
+			.registerTypeAdapter<ItemStack> {
+				serialize {
+					val jsonObject = JsonObject()
+					jsonObject["type"] = it.src.type.name
+					jsonObject["amount"] = it.src.amount
 
-							jsonMeta["isUnbreakable"] = meta.isUnbreakable
-							jsonMeta["itemFlags"] = it.context.serialize(meta.itemFlags)
+					val enchantmentMap = JsonObject()
+					for ((enchantment, level) in it.src.enchantments) {
+						enchantmentMap[enchantment.name] = level
+					}
+					jsonObject["enchantments"] = enchantmentMap
 
-							if (meta is Damageable) {
-								jsonMeta["damage"] = meta.damage
-							}
+					if (it.src.hasItemMeta()) {
+						val jsonMeta = JsonObject()
+						val meta = it.src.itemMeta
+						jsonMeta["displayName"] = meta.displayName
+						jsonMeta["lore"] = it.context.serialize(meta.lore)
 
-							if (meta is MapMeta) {
-								val mapMeta = JsonObject()
-								mapMeta["mapId"] = meta.mapId
-								jsonMeta["map"] = mapMeta
-							}
+						jsonMeta["isUnbreakable"] = meta.isUnbreakable
+						jsonMeta["itemFlags"] = it.context.serialize(meta.itemFlags)
 
-							if (meta is LeatherArmorMeta) {
-								val leatherMeta = JsonObject()
-								leatherMeta["r"] = meta.color.red
-								leatherMeta["g"] = meta.color.green
-								leatherMeta["b"] = meta.color.blue
-
-								jsonMeta["color"] = leatherMeta
-							}
-
-							jsonObject["itemMeta"] = jsonMeta
+						if (meta is Damageable) {
+							jsonMeta["damage"] = meta.damage
 						}
 
-						return@serialize jsonObject
+						if (meta is MapMeta) {
+							val mapMeta = JsonObject()
+							mapMeta["mapId"] = meta.mapId
+							jsonMeta["map"] = mapMeta
+						}
+
+						if (meta is LeatherArmorMeta) {
+							val leatherMeta = JsonObject()
+							leatherMeta["r"] = meta.color.red
+							leatherMeta["g"] = meta.color.green
+							leatherMeta["b"] = meta.color.blue
+
+							jsonMeta["color"] = leatherMeta
+						}
+
+						jsonObject["itemMeta"] = jsonMeta
 					}
 
-					deserialize {
-						val jsonObject = it.json.obj
-						val type = Material.valueOf(jsonObject["type"].string)
-						val amount = jsonObject["amount"].nullInt ?: 0
-						val enchantments = jsonObject["enchantments"].nullObj
-						val jsonMeta = jsonObject["itemMeta"].nullObj
-						val attributes = jsonObject["attributes"].nullObj
+					return@serialize jsonObject
+				}
 
-						var itemStack = ItemStack(type, amount)
+				deserialize {
+					val jsonObject = it.json.obj
+					val type = Material.valueOf(jsonObject["type"].string)
+					val amount = jsonObject["amount"].nullInt ?: 0
+					val enchantments = jsonObject["enchantments"].nullObj
+					val jsonMeta = jsonObject["itemMeta"].nullObj
+					val attributes = jsonObject["attributes"].nullObj
+					val persistentDataContainer = jsonObject["persistentDataContainer"].nullObj
 
-						if (enchantments != null) {
-							for ((enchantmentName, level) in it.context.deserialize<Map<String, Int>>(enchantments)) {
-								itemStack.addUnsafeEnchantment(Enchantment.getByName(enchantmentName)!!, level)
+					var itemStack = ItemStack(type, amount)
+
+					if (enchantments != null) {
+						for ((enchantmentName, level) in it.context.deserialize<Map<String, Int>>(enchantments)) {
+							itemStack.addUnsafeEnchantment(Enchantment.getByName(enchantmentName)!!, level)
+						}
+					}
+
+					if (jsonMeta != null) {
+						val meta = itemStack.itemMeta
+						val displayName = jsonMeta["displayName"].nullString
+						if (displayName != null)
+							meta.setDisplayName(displayName)
+
+						val damage = jsonObject["damage"].nullInt
+
+						if (damage != null) {
+							meta as Damageable
+							meta.damage = damage
+						}
+
+						if (jsonMeta.has("lore")) {
+							meta.lore = it.context.deserialize<List<String>>(jsonMeta["lore"])
+						}
+
+						meta.isUnbreakable = jsonMeta["isUnbreakable"].nullBool ?: false
+
+						if (jsonMeta.has("itemFlags")) {
+							for (itemFlagName in it.context.deserialize<List<String>>(jsonMeta["itemFlags"])) {
+								meta.addItemFlags(ItemFlag.valueOf(itemFlagName))
 							}
 						}
 
-						if (jsonMeta != null) {
-							val meta = itemStack.itemMeta
-							val displayName = jsonMeta["displayName"].nullString
-							if (displayName != null)
-								meta.setDisplayName(displayName)
+						if (jsonMeta.has("color")) {
+							val leatherMeta = jsonMeta["color"].obj
 
-							val damage = jsonObject["damage"].nullInt
+							meta as LeatherArmorMeta
+							meta.setColor(Color.fromRGB(leatherMeta["r"].int, leatherMeta["g"].int, leatherMeta["b"].int))
+						}
 
-							if (damage != null) {
-								meta as Damageable
-								meta.damage = damage
-							}
+						if (jsonMeta.has("map")) {
+							val mapMeta = jsonMeta["map"].obj
 
-							if (jsonMeta.has("lore")) {
-								meta.lore = it.context.deserialize<List<String>>(jsonMeta["lore"])
-							}
+							meta as MapMeta
+							val mapId = mapMeta["mapId"].nullInt
+							if (mapId != null)
+								meta.mapId = mapId
+						}
 
-							meta.isUnbreakable = jsonMeta["isUnbreakable"].nullBool ?: false
+						itemStack.itemMeta = meta
+					}
 
-							if (jsonMeta.has("itemFlags")) {
-								for (itemFlagName in it.context.deserialize<List<String>>(jsonMeta["itemFlags"])) {
-									meta.addItemFlags(ItemFlag.valueOf(itemFlagName))
+					if (attributes != null) {
+						for ((key, element) in attributes.entrySet()) {
+							itemStack = itemStack.storeMetadata(key, element.string)
+						}
+					}
+
+					if (persistentDataContainer != null) {
+						itemStack.meta<ItemMeta> {
+							for ((key, element) in persistentDataContainer.entrySet()) {
+								val dataTypeAsString = element["type"].string
+
+								when (dataTypeAsString) {
+									"BYTE" -> {
+										this.persistentDataContainer.set(
+											SparklyNamespacedKey(key),
+											PersistentDataType.BYTE,
+											element["value"].byte
+										)
+									}
+									"STRING" -> {
+										this.persistentDataContainer.set(
+											SparklyNamespacedKey(key),
+											PersistentDataType.STRING,
+											element["value"].string
+										)
+									}
+									"INTEGER" -> {
+										this.persistentDataContainer.set(
+											SparklyNamespacedKey(key),
+											PersistentDataType.INTEGER,
+											element["value"].int
+										)
+									}
+									"LONG" -> {
+										this.persistentDataContainer.set(
+											SparklyNamespacedKey(key),
+											PersistentDataType.LONG,
+											element["value"].long
+										)
+									}
+									"SHORT" -> {
+										this.persistentDataContainer.set(
+											SparklyNamespacedKey(key),
+											PersistentDataType.SHORT,
+											element["value"].short
+										)
+									}
+									"DOUBLE" -> {
+										this.persistentDataContainer.set(
+											SparklyNamespacedKey(key),
+											PersistentDataType.DOUBLE,
+											element["value"].double
+										)
+									}
+									"FLOAT" -> {
+										this.persistentDataContainer.set(
+											SparklyNamespacedKey(key),
+											PersistentDataType.FLOAT,
+											element["value"].float
+										)
+									}
+									else -> throw IllegalArgumentException("Unsupported conversion from $dataTypeAsString to PersistentDataType")
 								}
 							}
-
-							if (jsonMeta.has("color")) {
-								val leatherMeta = jsonMeta["color"].obj
-
-								meta as LeatherArmorMeta
-								meta.setColor(Color.fromRGB(leatherMeta["r"].int, leatherMeta["g"].int, leatherMeta["b"].int))
-							}
-
-							if (jsonMeta.has("map")) {
-								val mapMeta = jsonMeta["map"].obj
-
-								meta as MapMeta
-								val mapId = mapMeta["mapId"].nullInt
-								if (mapId != null)
-									meta.mapId = mapId
-							}
-
-							itemStack.itemMeta = meta
 						}
-
-						if (attributes != null) {
-							for ((key, element) in attributes.entrySet()) {
-								itemStack = itemStack.storeMetadata(key, element.string)
-							}
-						}
-						return@deserialize itemStack
 					}
+					return@deserialize itemStack
 				}
+			}
 		gson = gsonBuilder.create()
 	}
 
@@ -442,14 +507,14 @@ fun generateCommandInfo(command: String, arguments: Map<String, String> = mapOf(
 fun <T> MongoCollection<T>.save(obj: T, filters: Bson) {
 	val replaceOptions = ReplaceOptions().upsert(true)
 	this.replaceOne(
-			filters,
-			obj,
-			replaceOptions
+		filters,
+		obj,
+		replaceOptions
 	)
 }
 
 fun <T> MongoCollection<T>.save(obj: T) {
 	this.insertOne(
-			obj
+		obj
 	)
 }

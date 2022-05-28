@@ -18,9 +18,14 @@ class RenameCommand(val m: DreamMini) : SparklyCommand(arrayOf("rename", "renome
 
 		if(type != Material.AIR){
 			val meta = item.itemMeta
-
+			if (meta.hasCustomModelData())
+				sender.sendMessage("CustomModelData: ${meta.customModelData}")
 			meta.setDisplayName(name)
+			if (meta.hasCustomModelData())
+				sender.sendMessage("CustomModelData: ${meta.customModelData}")
 			item.itemMeta = meta
+			if (meta.hasCustomModelData())
+				sender.sendMessage("CustomModelData: ${item.itemMeta.customModelData}")
 
 			sender.sendMessage("§aAgora o nome do item é §r${name}§a!")
 		}else {

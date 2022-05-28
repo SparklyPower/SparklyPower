@@ -31,7 +31,7 @@ class TagListener(val m: DreamVote) : Listener {
 		}
 
 		val epochMillisAtTheBeginningOfTheMonth = ZonedDateTime
-			.now(ZoneId.of("America/Sao_Paulo"))
+			.now(ZoneId.of("America/New_York")) // Minecraft-MP uses EST
 			.withDayOfMonth(1)
 			.withHour(0)
 			.withMinute(0)

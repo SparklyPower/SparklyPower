@@ -3,6 +3,7 @@ package net.perfectdreams.dreamnetworkbans.commands
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.github.salomonbrys.kotson.jsonObject
 import net.md_5.bungee.BungeeCord
+import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.connection.ProxiedPlayer
@@ -29,8 +30,8 @@ class AdminChatCommand : SparklyBungeeCommand(arrayOf("adminchat", "a"), permiss
 			val staff = bungee.players.filter { it.hasPermission("dreamnetworkbans.adminchat") }
 
 			val message = (sender as? ProxiedPlayer)?.let { player ->
-				val role = StaffColors.values().firstOrNull { player.hasPermission(it.permission) }
-					?: return player.sendMessage("§cEstranho, não encontrei uma cor para seu cargo. Converse com a equipe para que possamos resolver isso.")
+				// The last color is a fallback, it checks for "group.default", so everyone should, hopefully, have that permission
+				val role = StaffColors.values().first { player.hasPermission(it.permission) }
 
 				val isGirl = transaction(Databases.databaseNetwork) {
 					User.findById(player.uniqueId)?.isGirl ?: false

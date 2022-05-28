@@ -9,7 +9,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 
 class BlockLaggyBlocksListener : Listener {
     val maxTypesPerBlockInChunk = mapOf(
-        Material.SPAWNER to 8,
+        Material.SPAWNER to 4,
         Material.OBSERVER to 64,
         Material.PISTON to 32,
         Material.STICKY_PISTON to 32

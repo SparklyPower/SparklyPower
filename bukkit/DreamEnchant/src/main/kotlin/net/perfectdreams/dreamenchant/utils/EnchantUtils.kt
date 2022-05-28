@@ -4,6 +4,7 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.block.Block
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -21,10 +22,10 @@ object EnchantUtils {
         }
     }
 
-    fun openEnchantmentInventory(player: Player, page: Int) {
+    fun openEnchantmentInventory(player: Player, clickedBlock: Block, page: Int) {
         val heldItem = player.inventory.itemInMainHand
 
-        if (heldItem == null) {
+        if (heldItem.type == Material.AIR) {
             player.sendMessage("§cSegue o item que você deseja encantar!")
             return
         }
@@ -37,7 +38,7 @@ object EnchantUtils {
             return
         }
 
-        val inventory = Bukkit.createInventory(EnchantHolder(), 54, "§a§lEscolha o Encantamento!")
+        val inventory = Bukkit.createInventory(EnchantHolder(clickedBlock), 54, "§a§lEscolha o Encantamento!")
 
         inventory.setItem(
             53,
