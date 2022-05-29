@@ -2,15 +2,18 @@ package net.perfectdreams.dreamcash.utils
 
 import net.perfectdreams.dreamcash.dao.CashInfo
 import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.TransactionContext
+import net.perfectdreams.dreamcore.utils.TransactionCurrency
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.lang.IllegalArgumentException
 import java.util.*
 
 object Cash {
-    fun giveCash(player: Player, quantity: Long) = giveCash(player.uniqueId, quantity)
+    fun giveCash(player: Player, quantity: Long, transactionContext: TransactionContext) =
+        giveCash(player.uniqueId, quantity, transactionContext)
 
-    fun giveCash(uniqueId: UUID, quantity: Long) {
+    fun giveCash(uniqueId: UUID, quantity: Long, transactionContext: TransactionContext) {
         if (0 >= quantity)
             throw IllegalArgumentException("Quantity is less or equal to zero! quantity = $quantity")
 
@@ -22,12 +25,19 @@ object Cash {
             }
 
             cashInfo.cash += quantity
+
+            transactionContext.apply {
+                receiver = uniqueId
+                currency = TransactionCurrency.CASH
+                amount = quantity.toDouble()
+            }.saveToDatabase()
         }
     }
 
-    fun takeCash(player: Player, quantity: Long) = takeCash(player.uniqueId, quantity)
+    fun takeCash(player: Player, quantity: Long, transactionContext: TransactionContext) =
+        takeCash(player.uniqueId, quantity, transactionContext)
 
-    fun takeCash(uniqueId: UUID, quantity: Long) {
+    fun takeCash(uniqueId: UUID, quantity: Long, transactionContext: TransactionContext) {
         transaction(Databases.databaseNetwork) {
             val cashInfo = transaction(Databases.databaseNetwork) {
                 CashInfo.findById(uniqueId) ?: CashInfo.new(uniqueId) {
@@ -39,6 +49,12 @@ object Cash {
                 throw IllegalArgumentException("Quantity is more than player has! quantity = $quantity cashInfo.cash = ${cashInfo.cash}")
 
             cashInfo.cash -= quantity
+
+            transactionContext.apply {
+                payer = uniqueId
+                currency = TransactionCurrency.CASH
+                amount = quantity.toDouble()
+            }.saveToDatabase()
         }
     }
 

@@ -4,14 +4,11 @@ import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
-import net.perfectdreams.dreamcore.utils.balance
-import net.perfectdreams.dreamcore.utils.canHoldItem
-import net.perfectdreams.dreamcore.utils.colorize
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreamvipstuff.DreamVIPStuff
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -57,7 +54,7 @@ object RenomearCommand : DSLCommandBase<DreamVIPStuff> {
                     } else {
                         player.inventory.setItemInMainHand(itemInMainHand.rename(args.joinToString(" ").colorize()).storeMetadata("renamedBySeuZe", "true"))
                         player.sendMessage("§aTá feito meu chapa! Cobrei $totalPrice sonecas de você para deixar o nome do seu item chaveeeexxx")
-                        player.balance -= totalPrice
+                        player.withdraw(totalPrice.toDouble(), TransactionContext(extra = "renomear um item com o comando `/renomear`"))
                     }
                 }
             }

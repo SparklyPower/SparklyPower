@@ -62,7 +62,9 @@ class DreamVote : KotlinPlugin() {
 			while (true) {
 				val lastVoter = lastVoter
 				if (lastVoter != null) {
-					VaultUtils.econ.depositPlayer(lastVoter, 15.0)
+					Bukkit.getOfflinePlayer(lastVoter).run {
+						deposit(15.0, TransactionContext(type = TransactionType.VOTE_REWARDS))
+					}
 					earnedMoney += 15.0
 					if (earnedMoney % 180.0 == 165.0) {
 						Bukkit.broadcastMessage("§b$lastVoter§d já ganhou §2$earnedMoney sonecas§d apenas mantendo a tag de §c§lÚltimo Votador§d, roube a tag votando! §6/votar")
@@ -180,7 +182,7 @@ class DreamVote : KotlinPlugin() {
 			val offlinePlayer = Bukkit.getOfflinePlayer(uniqueId)
 
 			// Depositar a grana
-			VaultUtils.econ.depositPlayer(offlinePlayer, money)
+			offlinePlayer.deposit(money, TransactionContext(type = TransactionType.VOTE_REWARDS))
 
 			if (broadcast) {
 				val lastVoter = offlinePlayer.name
@@ -200,7 +202,7 @@ class DreamVote : KotlinPlugin() {
 
 			switchContext(SynchronizationContext.ASYNC)
 
-			Cash.giveCash(uniqueId, 7)
+			Cash.giveCash(uniqueId, 7, TransactionContext(type = TransactionType.VOTE_REWARDS))
 
 			Webhooks.PANTUFA_INFO?.send(DiscordMessage(
 					content = "**$lastVoter** votou, agora **$lastVoter** possui ${voteCount + 1} votos. *Prêmios recebidos:* ${giveAwards.joinToString(", ", transform = { "`${it.name}`" })}"

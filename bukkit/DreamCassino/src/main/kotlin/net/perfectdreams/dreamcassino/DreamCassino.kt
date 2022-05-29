@@ -86,7 +86,7 @@ class DreamCassino : KotlinPlugin(), Listener {
 		}
 
 		e.player.sendMessage("${PREFIX} §aVocê apostou §250 Sonecas§a!")
-		e.player.balance -= 50
+		e.player.withdraw(250.00, TransactionContext(type = TransactionType.BETTING, extra = "no `cassino`"))
 
 		val randomNumber1 = DreamUtils.random.nextInt(0, 20)
 		val randomNumber2 = DreamUtils.random.nextInt(0, 20)
@@ -158,7 +158,7 @@ class DreamCassino : KotlinPlugin(), Listener {
 			for ((icon, payout) in prizes) {
 				if (icon == value1 && icon == value2 && icon == value3) {
 					player.sendMessage("${PREFIX} §aSortudo! Você conseguiu §2${payout} Sonecas§a! Que tal ir novamente? ʕ•ᴥ•ʔ")
-					player.balance += payout
+					player.deposit(payout.toDouble(), TransactionContext(type = TransactionType.BETTING, extra = "no `cassino`"))
 					player.world.spawnParticle(Particle.VILLAGER_HAPPY, position, 25, 0.5, 0.5, 0.5)
 					return@schedule
 				}

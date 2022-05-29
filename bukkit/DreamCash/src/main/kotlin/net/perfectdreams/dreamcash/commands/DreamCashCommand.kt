@@ -9,9 +9,7 @@ import net.perfectdreams.dreamcash.DreamCash
 import net.perfectdreams.dreamcash.dao.CashInfo
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.tables.Users
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.DreamUtils
-import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreamcore.utils.*
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -109,6 +107,14 @@ class DreamCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("pesadelos", "
                 yourCashInfo.cash -= howMuch
                 receiverCashInfo.cash += howMuch
             }
+
+            TransactionContext(
+                currency = TransactionCurrency.CASH,
+                type = TransactionType.PAYMENT,
+                payer = sender.uniqueId,
+                receiver = receiverInfo.id.value,
+                amount = howMuch.toDouble()
+            ).saveToDatabase()
 
             switchContext(SynchronizationContext.SYNC)
 

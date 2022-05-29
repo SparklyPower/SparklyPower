@@ -30,6 +30,7 @@ dependencies {
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
     compileOnlyApi(files("../../libs/WorldGuard.jar"))
     compileOnlyApi("com.github.TechFortress:GriefPrevention:06cc566769") // Using commits instead of pinning a version because GP hasn't released a new version yet
+    implementation("com.github.ChestShop-authors:ChestShop-3:3.12")
     api("net.perfectdreams.commands:command-framework-core:0.0.8")
     api("com.github.SparklyPower:PacketWrapper:88ddd591d8")
     compileOnlyApi("net.milkbowl.vault:VaultAPI:1.6") {

@@ -4,11 +4,9 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
-import net.perfectdreams.dreamcore.utils.PlayerUtils
-import net.perfectdreams.dreamcore.utils.balance
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
-import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcorrida.DreamCorrida
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
@@ -117,10 +115,21 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                         val howMuchMoneyWillBeGiven = 15_000 / eventoCorrida.wonPlayers.size
                         val howMuchNightmaresWillBeGiven = if (eventoCorrida.wonPlayers.size == 1) 1 else 0
 
-                        e.player.balance += howMuchMoneyWillBeGiven
+                        e.player.deposit(howMuchMoneyWillBeGiven.toDouble(),
+                            TransactionContext(
+                                type = TransactionType.EVENTS,
+                                extra = "Corrida"
+                            )
+                        )
+
                         if (howMuchNightmaresWillBeGiven == 1)
                             scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                                Cash.giveCash(e.player, howMuchNightmaresWillBeGiven.toLong())
+                                Cash.giveCash(e.player, howMuchNightmaresWillBeGiven.toLong(),
+                                    TransactionContext(
+                                        type = TransactionType.EVENTS,
+                                        extra = "Corrida"
+                                    )
+                                )
                             }
 
                         e.player.fallDistance = 0.0f

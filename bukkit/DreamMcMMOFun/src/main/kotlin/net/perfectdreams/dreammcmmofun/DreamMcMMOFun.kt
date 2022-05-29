@@ -9,6 +9,7 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.TransactionContext
 import net.perfectdreams.dreamcore.utils.registerEvents
 import org.bukkit.Bukkit
 import org.bukkit.Statistic
@@ -120,7 +121,7 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 
 						for ((skill, playerName) in matchingSkill) {
 							switchContext(SynchronizationContext.ASYNC)
-							Cash.giveCash(it, 1)
+							Cash.giveCash(it, 1, TransactionContext(extra = "`ser top skill em ${skill}`"))
 							logger.info("Giving 1 pesadelo to ${it.name} because they are top ${skill}!")
 							it.sendMessage("§aVocê ganhou um pesadelo por ser top skill em ${skill}!")
 							switchContext(SynchronizationContext.SYNC)

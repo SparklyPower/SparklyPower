@@ -3,6 +3,7 @@ package net.perfectdreams.dreamxizum.battle
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamcore.utils.TransactionContext
 import net.perfectdreams.dreamcore.utils.deposit
 import net.perfectdreams.dreamcore.utils.extensions.allowAllCommands
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
@@ -49,8 +50,8 @@ object Matchmaker {
                     freeFromBattle()
                     if (equals(battle.author) && sendAuthorToSpawn) teleportToServerSpawn()
                     else if (!equals(battle.author)) teleportToServerSpawn()
-                    if (battle.options.sonecas > 0) it.player.deposit(battle.options.sonecas)
-                    if (battle.options.cash > 0) DreamXizum.INSTANCE.schedule(SynchronizationContext.ASYNC) { Cash.giveCash(it.player, battle.options.cash) }
+                    if (battle.options.sonecas > 0) it.player.deposit(battle.options.sonecas, TransactionContext())
+                    if (battle.options.cash > 0) DreamXizum.INSTANCE.schedule(SynchronizationContext.ASYNC) { Cash.giveCash(it.player, battle.options.cash, TransactionContext()) }
                 }
             }
         }

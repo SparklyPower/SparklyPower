@@ -235,7 +235,7 @@ class ClubesCommand(val m: DreamClubes) : SparklyCommand(arrayOf("clube", "clube
             }
             // Clube criado, yay!
             toSync()
-            player.balance -= 150_000
+            player.withdraw(150_000.00, TransactionContext(extra = "criar um clube"))
 
             Bukkit.broadcastMessage("${DreamClubes.PREFIX} §eClube $coloredTag§e/§b$coloredName§e de ${player.displayName}§e foi criado!")
         }

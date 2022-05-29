@@ -45,7 +45,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                                         transaction(Databases.databaseNetwork) {
                                             try {
-                                                Cash.takeCash(sender, quantity)
+                                                Cash.takeCash(sender, quantity, TransactionContext(extra = "comprar `$name` no `/lojacash`"))
                                             } catch (e: IllegalArgumentException) {
                                                 sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
                                                 return@transaction
@@ -125,37 +125,37 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
             // Money
             generateItemAt(0, 2, Material.EMERALD, "§a130000 Sonecas", 250) {
-                sender.balance += 130000
+                sender.deposit(130000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
             generateItemAt(1, 2, Material.EMERALD, "§a260000 Sonecas", 500) {
-                sender.balance += 260000
+                sender.deposit(260000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
             generateItemAt(2, 2, Material.EMERALD, "§a500000 Sonecas", 950) {
-                sender.balance += 500000
+                sender.deposit(500000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
             generateItemAt(3, 2, Material.EMERALD, "§a1000000 Sonecas", 1_900) {
-                sender.balance += 1000000
+                sender.deposit(1000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
             generateItemAt(4, 2, Material.EMERALD, "§a2000000 Sonecas", 3_800) {
-                sender.balance += 2000000
+                sender.deposit(2000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
             generateItemAt(5, 2, Material.EMERALD, "§a5000000 Sonecas", 9_500) {
-                sender.balance += 5000000
+                sender.deposit(5000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
             generateItemAt(6, 2, Material.EMERALD, "§a10000000 Sonecas", 19_000) {
-                sender.balance += 10000000
+                sender.deposit(10000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
@@ -200,7 +200,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                                 transaction(Databases.databaseNetwork) {
                                     try {
-                                        Cash.takeCash(sender, 50)
+                                        Cash.takeCash(sender, 50, TransactionContext(extra = "comprar `slots adicionais para o clube` no `/lojacash`"))
                                         clube.maxMembers++
                                     } catch (e: IllegalArgumentException) {
                                         sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")

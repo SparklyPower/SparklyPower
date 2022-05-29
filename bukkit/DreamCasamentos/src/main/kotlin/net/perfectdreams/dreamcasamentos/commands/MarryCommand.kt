@@ -8,7 +8,6 @@ import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcasamentos.DreamCasamentos
 import net.perfectdreams.dreamcasamentos.DreamCasamentos.Companion.PREFIX
 import net.perfectdreams.dreamcasamentos.LocationWrapper
-import net.perfectdreams.dreamcasamentos.dao.Adoption
 import net.perfectdreams.dreamcasamentos.dao.Marriage
 import net.perfectdreams.dreamcasamentos.dao.Request
 import net.perfectdreams.dreamcasamentos.tables.Adoptions
@@ -134,8 +133,8 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
 
             switchContext(SynchronizationContext.SYNC)
 
-            sender.balance -= 7500
-            requestSender.balance -= 7500
+            sender.withdraw(7500.00, TransactionContext(extra = "ao se casar com `${requestSender.name}`"))
+            requestSender.withdraw(7500.00, TransactionContext(extra = "ao se casar com `${sender.name}`"))
 
             sender.sendMessage("$PREFIX Você aceitou o pedido de casamento de §b${requestSender.name}§e! Felicidades ao casal §b$shipName§e!")
             requestSender.sendMessage("$PREFIX §b${sender.name}§e aceitou o seu pedido de casamento! Felicidades ao casal §b$shipName§e!")

@@ -53,8 +53,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 				val sonecas = DreamUtils.random.nextInt(25_000, 50_001)
 
 				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §2§l$sonecas sonecas§a pela caixa secreta! Parabéns!!")
-
-				e.player.balance += sonecas
+				e.player.deposit(sonecas.toDouble(), TransactionContext(type = TransactionType.SECRET_BOXES))
 
 				try {
 					m.nitroNotifyWebhook.send("`${e.player.name}` conseguiu `$sonecas` sonecas pela caixa secreta!")
@@ -68,7 +67,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu §c§l$pesadelos Pesadelos§a pela caixa secreta! Parabéns!!")
 
 				scheduler().schedule(m, SynchronizationContext.ASYNC) {
-					Cash.giveCash(e.player, pesadelos.toLong())
+					Cash.giveCash(e.player, pesadelos.toLong(), TransactionContext(type = TransactionType.SECRET_BOXES))
 				}
 
 				try {

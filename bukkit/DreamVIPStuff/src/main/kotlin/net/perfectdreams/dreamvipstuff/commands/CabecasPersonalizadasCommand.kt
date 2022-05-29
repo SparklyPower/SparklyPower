@@ -3,10 +3,12 @@ package net.perfectdreams.dreamvipstuff.commands
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.perfectdreams.dreamcore.utils.TransactionContext
 import net.perfectdreams.dreamcore.utils.balance
 import net.perfectdreams.dreamcore.utils.canHoldItem
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.withdraw
 import net.perfectdreams.dreamvipstuff.DreamVIPStuff
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -101,7 +103,7 @@ object CabecasPersonalizadasCommand : DSLCommandBase<DreamVIPStuff> {
                         totalGiven += 1
                     }
 
-                    player.balance -= totalGiven * 10_000
+                    player.withdraw(totalGiven * 10_000.00, TransactionContext(extra = "comprar cabeças customizadas com o comando `/vipcabecas`"))
 
                     player.sendMessage("§aProntinho! Divirta-se com as suas novas $totalGiven cabeças personalizadas ^-^")
                 }

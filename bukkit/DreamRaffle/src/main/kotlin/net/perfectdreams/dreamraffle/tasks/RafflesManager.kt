@@ -6,6 +6,8 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.utils.MeninaAPI
+import net.perfectdreams.dreamcore.utils.TransactionContext
+import net.perfectdreams.dreamcore.utils.TransactionType
 import net.perfectdreams.dreamcore.utils.deposit
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.formatted
@@ -91,9 +93,10 @@ object RafflesManager {
                 val player = Bukkit.getOfflinePlayer(lastWinner!!.uuid)
                 val prize = tickets * type.currency.unitaryPrice
                 val isGirl = MeninaAPI.isGirl(lastWinner!!.uuid)
+                val transactionMessage = "em uma rifa `${type.displayName}`"
 
-                if (type.currency == RaffleCurrency.MONEY) player.deposit(prize.toDouble())
-                else plugin.launchAsyncThread { Cash.giveCash(lastWinner!!.uuid, prize) }
+                if (type.currency == RaffleCurrency.MONEY) player.deposit(prize.toDouble(), TransactionContext(type = TransactionType.BETTING, extra = transactionMessage))
+                else plugin.launchAsyncThread { Cash.giveCash(lastWinner!!.uuid, prize, TransactionContext(type = TransactionType.BETTING, extra = transactionMessage)) }
 
                 broadcast {
                     "$prefix ${colors.highlight(player.name.toString())} foi ${if (isGirl) "a" else "o"} vencedor${if (isGirl) "a" else ""} " +

@@ -14,6 +14,7 @@ dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
     implementation("com.github.ChestShop-authors:ChestShop-3:3.12")
+    implementation(files("../../libs/craftconomy3.jar"))
 }
 
 tasks.withType<KotlinCompile> {

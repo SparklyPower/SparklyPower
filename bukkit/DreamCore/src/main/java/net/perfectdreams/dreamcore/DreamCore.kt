@@ -13,6 +13,7 @@ import net.perfectdreams.dreamcore.listeners.SocketListener
 import net.perfectdreams.dreamcore.network.socket.SocketServer
 import net.perfectdreams.dreamcore.scriptmanager.DreamScriptManager
 import net.perfectdreams.dreamcore.tables.EventVictories
+import net.perfectdreams.dreamcore.tables.Transactions
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.*
@@ -64,7 +65,8 @@ class DreamCore : KotlinPlugin() {
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
 				Users,
-				EventVictories
+				EventVictories,
+				Transactions
 			)
 		}
 

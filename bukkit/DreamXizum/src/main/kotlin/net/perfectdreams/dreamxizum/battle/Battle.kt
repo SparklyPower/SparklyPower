@@ -126,9 +126,9 @@ class Battle(val type: BattleType, val limit: Int, val author: Player? = null) {
         }
 
         DreamXizum.INSTANCE.schedule(SynchronizationContext.ASYNC) {
-            Cash.takeCash(player, options.cash)
+            Cash.takeCash(player, options.cash, TransactionContext())
             switchContext(SynchronizationContext.SYNC)
-            player.withdraw(options.sonecas)
+            player.withdraw(options.sonecas, TransactionContext())
         }
 
         players.forEach {
@@ -247,11 +247,11 @@ class Battle(val type: BattleType, val limit: Int, val author: Player? = null) {
                     var message = "Você recebeu "
 
                     if (sonecas > 0) {
-                        killer.deposit(sonecas)
+                        killer.deposit(sonecas, TransactionContext())
                         message += "${highlight(sonecas.toLong().formatted)} sonecas"
                     }
                     if (cash > 0) {
-                        DreamXizum.INSTANCE.schedule(SynchronizationContext.ASYNC) { Cash.giveCash(killer, cash) }
+                        DreamXizum.INSTANCE.schedule(SynchronizationContext.ASYNC) { Cash.giveCash(killer, cash, TransactionContext()) }
                         if (sonecas > 0) message += " e "
                         message += "${highlight(cash.formatted)} pesadelos"
                     }
@@ -339,8 +339,8 @@ class Battle(val type: BattleType, val limit: Int, val author: Player? = null) {
         player.battle = null
         player.teleportToServerSpawn()
 
-        player.deposit(options.sonecas)
-        if (options.cash > 0) DreamXizum.INSTANCE.schedule(SynchronizationContext.ASYNC) { Cash.giveCash(player, options.cash) }
+        player.deposit(options.sonecas, TransactionContext())
+        if (options.cash > 0) DreamXizum.INSTANCE.schedule(SynchronizationContext.ASYNC) { Cash.giveCash(player, options.cash, TransactionContext()) }
     }
 
     fun sendEveryoneAliveToSpawn() = alivePlayers.forEach { sendPlayerToLobby(it.player) }

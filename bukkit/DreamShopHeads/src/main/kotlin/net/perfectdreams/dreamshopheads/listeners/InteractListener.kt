@@ -1,10 +1,12 @@
 package net.perfectdreams.dreamshopheads.listeners
 
+import net.perfectdreams.dreamcore.utils.TransactionContext
 import net.perfectdreams.dreamcore.utils.balance
 import net.perfectdreams.dreamcore.utils.canHoldItem
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
+import net.perfectdreams.dreamcore.utils.withdraw
 import org.bukkit.Material
 import org.bukkit.block.Skull
 import org.bukkit.event.EventHandler
@@ -51,7 +53,7 @@ class InteractListener : Listener {
             return
         }
 
-        e.player.balance -= 500
+        e.player.withdraw(500.00, TransactionContext(extra = "comprar uma cabeça no `/warp decoracoes`"))
         e.player.inventory.addItem(playerHead)
 
         e.player.sendMessage("§8[§9§lLoja§8] §aVocê comprou §9a cabeça§a por §2500 sonecas§a!")

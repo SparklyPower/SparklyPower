@@ -7,10 +7,7 @@ import net.perfectdreams.dreamclubes.dao.Clube
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamcore.tables.EventVictories
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamscoreboard.commands.*
 import net.perfectdreams.dreamscoreboard.listeners.TagListener
 import net.perfectdreams.dreamscoreboard.utils.PlayerScoreboard
@@ -225,21 +222,21 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 					.forEach {
 						if (top1 != null && top1[EventVictories.user] == it.uniqueId) {
 							switchContext(SynchronizationContext.ASYNC)
-							Cash.giveCash(it, 4)
+							Cash.giveCash(it, 4, TransactionContext(type = TransactionType.EVENTS, extra = "por ser top 1 em `vitórias de eventos`"))
 							logger.info("Giving 4 pesadelos to ${it.name} because they are top 1 in event victories!")
 							it.sendMessage("§aVocê ganhou quatro pesadelos por ser top 1 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
 							switchContext(SynchronizationContext.SYNC)
 						}
 						if (top2 != null && top2[EventVictories.user] == it.uniqueId) {
 							switchContext(SynchronizationContext.ASYNC)
-							Cash.giveCash(it, 2)
+							Cash.giveCash(it, 2, TransactionContext(type = TransactionType.EVENTS, extra = "por ser top 2 em `vitórias de eventos`"))
 							logger.info("Giving 2 pesadelos to ${it.name} because they are top 2 in event victories!")
 							it.sendMessage("§aVocê ganhou dois pesadelos por ser top 2 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
 							switchContext(SynchronizationContext.SYNC)
 						}
 						if (top3 != null && top3[EventVictories.user] == it.uniqueId) {
 							switchContext(SynchronizationContext.ASYNC)
-							Cash.giveCash(it, 1)
+							Cash.giveCash(it, 1, TransactionContext(type = TransactionType.EVENTS, extra = "por ser top 3 em `vitórias de eventos`"))
 							logger.info("Giving 1 pesadelos to ${it.name} because they are top 3 in event victories!")
 							it.sendMessage("§aVocê ganhou um pesadelo por ser top 3 em vitórias de eventos! Parabéns! §eʕ•ᴥ•ʔ")
 							switchContext(SynchronizationContext.SYNC)

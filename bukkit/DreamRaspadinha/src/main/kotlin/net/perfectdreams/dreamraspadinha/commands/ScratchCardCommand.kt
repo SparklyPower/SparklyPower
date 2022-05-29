@@ -4,14 +4,11 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamraspadinha.DreamRaspadinha
-import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils.random
-import net.perfectdreams.dreamcore.utils.balance
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import net.perfectdreams.dreamcore.utils.rename
-import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamraspadinha.tables.Raspadinhas
 import net.perfectdreams.dreamraspadinha.utils.RaspadinhaHolder
 import org.bukkit.Bukkit
@@ -57,7 +54,7 @@ class ScratchCardCommand(val m: DreamRaspadinha) : SparklyCommand(arrayOf("raspa
             return
         }
 
-        player.balance -= 375
+        player.withdraw(375.00, TransactionContext(type = TransactionType.BETTING, extra = "em uma raspadinha"))
 
         val array = Array(3) { Array<Char>(3, init = { 'Z' }) }
 

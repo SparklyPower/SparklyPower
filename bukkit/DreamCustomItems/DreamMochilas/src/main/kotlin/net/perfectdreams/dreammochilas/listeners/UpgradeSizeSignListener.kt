@@ -1,11 +1,11 @@
 package net.perfectdreams.dreammochilas.listeners
 
-import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.TransactionContext
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.balance
+import net.perfectdreams.dreamcore.utils.withdraw
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
-import net.perfectdreams.dreamcore.utils.withdraw
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.tables.Mochilas
@@ -68,7 +68,7 @@ class UpgradeSizeSignListener(val m: DreamMochilas) : Listener {
 
                 if (success) {
                     onMainThread {
-                        e.player.withdraw(2000.00, TransactionContext(extra = "ao atualizar o tamanho de uma mochila"))
+                        e.player.withdraw(2000.00, TransactionContext(extra = "aumentar os slots de uma mochila"))
                         e.player.sendMessage("§aProntinho!")
                         savingNewMocilhaStatus.remove(mochilaId)
                     }

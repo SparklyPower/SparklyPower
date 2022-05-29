@@ -3,25 +3,31 @@ package net.perfectdreams.dreamdiscordcommandrelayer
 import club.minnced.discord.webhook.WebhookClient
 import club.minnced.discord.webhook.send.AllowedMentions
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
-import com.okkero.skedule.SynchronizationContext
-import com.okkero.skedule.schedule
 import kotlinx.coroutines.delay
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
+import net.perfectdreams.dreamdiscordcommandrelayer.dao.Command
+import net.perfectdreams.dreamdiscordcommandrelayer.tables.Commands
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.text.DecimalFormat
-import java.util.*
-import java.util.concurrent.BlockingQueue
 import java.util.concurrent.ConcurrentLinkedQueue
 
 class DreamDiscordCommandRelayer : KotlinPlugin(), Listener {
+	val nf = DecimalFormat("##.##")
 	val commandWebhook = WebhookClient.withUrl(config.getString("command-webhook")!!)
 	val queue = ConcurrentLinkedQueue<String>()
 
 	override fun softEnable() {
 		super.softEnable()
+
+		transaction(Databases.databaseNetwork) {
+			SchemaUtils.createMissingTablesAndColumns(Commands)
+		}
 
 		registerEvents(this)
 
@@ -72,8 +78,24 @@ class DreamDiscordCommandRelayer : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onCommand(e: PlayerCommandPreprocessEvent) {
-		val nf = DecimalFormat("##.##")
-
 		queue.add("[`${e.player.location.world.name}` » `${nf.format(e.player.location.x)}`, `${nf.format(e.player.location.y)}`, `${nf.format(e.player.location.z)}`] **${e.player.name}**: `${e.message}`")
+
+		launchAsyncThread {
+			val message = e.message.split(' ')
+			val command = message.first().drop(1).lowercase()
+
+			transaction(Databases.databaseNetwork) {
+				Command.new {
+					player = e.player.name
+					world = e.player.location.world.name
+					alias = command
+					args = message.drop(1).joinToString().ifBlank { null }
+					time = System.currentTimeMillis()
+					x = e.player.location.x
+					y = e.player.location.y
+					z = e.player.location.z
+				}
+			}
+		}
 	}
 }
