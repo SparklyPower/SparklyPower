@@ -1,5 +1,5 @@
 name: DreamVote
 main: net.perfectdreams.dreamvote.DreamVote
 version: 1.0.0
-depend: ["DreamCore", "DreamChat", "DreamXizum", "Votifier"]
+depend: ["DreamCore", "DreamChat", "Votifier"]
 api-version: 1.13

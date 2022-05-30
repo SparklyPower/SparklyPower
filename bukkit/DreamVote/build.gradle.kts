@@ -15,7 +15,6 @@ dependencies {
     compileOnly(project(":bukkit:DreamChat"))
     compileOnly(project(":bukkit:DreamCash"))
     compileOnly(project(":bukkit:DreamCorreios"))
-    compileOnly(project(":bukkit:DreamXizum"))
     compileOnly("com.github.NuVotifier.NuVotifier:nuvotifier-api:2.7.2")
     compileOnly("com.github.NuVotifier.NuVotifier:nuvotifier-bukkit:2.7.2")
 }
