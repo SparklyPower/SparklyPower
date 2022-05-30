@@ -561,6 +561,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (distance > 2304)
 			return
 
+		val blockage = block.blockData as Ageable
+
+		if (blockage.age != blockage.maximumAge)
+			return
+
 		val itemStack = ItemStack(Material.COCOA_BEANS, DreamUtils.random.nextInt(2, 4))
 
 		if (!inventory.canHoldItem(itemStack)) {
@@ -569,17 +574,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			return
 		}
 
-		inventory.addItem(itemStack)
-
-		val blockage = block.blockData as Ageable
-
-		if (blockage.age != blockage.maximumAge)
-			return
-
 		if (info.activeBlocks == 0) {
 			player.sendMessage(NO_HARVEST_BLOCKS_LEFT)
 			return
 		}
+
+		inventory.addItem(itemStack)
 
 		addMcMMOHerbalismXP(player, block, mcMMOXp = mcMMOXp) // mcMMO EXP
 
@@ -645,14 +645,14 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		var bottom = top
 
 		while (bottom.type == Material.SUGAR_CANE && bottom.getRelative(BlockFace.DOWN).type == Material.SUGAR_CANE) {
-			val itemStack = ItemStack(
-				Material.SUGAR_CANE, 1
-			)
-
 			if (info.activeBlocks == 0) {
 				player.sendMessage(NO_HARVEST_BLOCKS_LEFT)
 				return
 			}
+
+			val itemStack = ItemStack(
+				Material.SUGAR_CANE, 1
+			)
 
 			if (!inventory.canHoldItem(itemStack)) {
 				if (e.block == bottom)
