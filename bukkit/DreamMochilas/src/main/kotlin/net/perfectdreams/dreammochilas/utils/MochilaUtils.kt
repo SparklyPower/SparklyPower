@@ -15,6 +15,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -39,7 +40,8 @@ object MochilaUtils {
 
     val mochilaCreationMutex = Mutex()
 
-    fun isMochila(item: ItemStack) = item.hasItemMeta() && item.itemMeta.persistentDataContainer.has(IS_MOCHILA_KEY)
+    fun isMochila(item: ItemStack) = item.hasItemMeta() && (item.itemMeta as? Damageable)?.damage !in 25..39 && item.itemMeta.persistentDataContainer.has(IS_MOCHILA_KEY)
+
     fun getMochilaId(item: ItemStack): Long? = if (isMochila(item))
         item.itemMeta.persistentDataContainer.get(MOCHILA_ID_KEY, PersistentDataType.LONG)
     else
