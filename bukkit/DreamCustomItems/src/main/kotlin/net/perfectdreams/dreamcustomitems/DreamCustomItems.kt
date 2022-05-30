@@ -41,8 +41,6 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 	val mcMMO = getPlugin(com.gmail.nossr50.mcMMO::class.java)
 	val dropsBlacklist = getPlugin(DreamMini::class.java).dropsBlacklist
 
-	private val recipes = mutableListOf<NamespacedKey>()
-
 	val microwaves = mutableMapOf<Location, Microwave>()
     val superfurnaces = mutableMapOf<Location, SuperFurnace>()
 
@@ -269,10 +267,6 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		super.softDisable()
 
 		saveAllCustomBlocks()
-
-		recipes.forEach {
-			Bukkit.removeRecipe(it)
-		}
 	}
 
 	private fun loadAllCustomBlocks() {
@@ -315,28 +309,6 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			yamlConfiguration.set("blocks", list)
 			yamlConfiguration.save(File(customBlocksFolder, it.key + ".yml"))
 		}
-	}
-
-	fun addRecipe(name: String, item: ItemStack, shape: List<String>, ingredients: (ShapedRecipe) -> (Unit)) {
-		// create a NamespacedKey for your recipe
-		val key = NamespacedKey(this, name)
-
-		// Create our custom recipe variable
-		val recipe = ShapedRecipe(key, item)
-
-		// Here we will set the places. E and S can represent anything, and the letters can be anything. Beware; this is case sensitive.
-		recipe.shape(*shape.toTypedArray())
-
-		// Set what the letters represent.
-		// E = Emerald, S = Stick
-		ingredients.invoke(recipe)
-
-		addRecipe(key, recipe)
-	}
-
-	fun addRecipe(key: NamespacedKey, recipe: Recipe) {
-		recipes += key
-		Bukkit.addRecipe(recipe)
 	}
 
 	fun writeDataFile(file: File) {
