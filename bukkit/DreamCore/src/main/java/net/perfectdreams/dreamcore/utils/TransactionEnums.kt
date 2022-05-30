@@ -49,7 +49,7 @@ data class TransactionContext(
                 this.currency = this@TransactionContext.currency
                 this.amount = this@TransactionContext.amount
                 this.type = this@TransactionContext.type
-                this.time = System.currentTimeMillis()
+                this.time = this@TransactionContext.time
                 this.extra = this@TransactionContext.extra
             }
         }
