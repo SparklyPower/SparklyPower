@@ -3,6 +3,7 @@ package net.perfectdreams.dreamquickharvest
 import com.gmail.nossr50.datatypes.experience.XPGainReason
 import com.gmail.nossr50.datatypes.experience.XPGainSource
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
+import com.gmail.nossr50.datatypes.skills.SubSkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.player.UserManager
 import kotlinx.coroutines.delay
@@ -39,6 +40,7 @@ import kotlin.experimental.and
 import kotlinx.serialization.Serializable
 import net.perfectdreams.dreamcore.utils.*
 import org.bukkit.Sound
+import org.bukkit.block.BlockState
 
 class DreamQuickHarvest : KotlinPlugin(), Listener {
 	companion object {
@@ -439,14 +441,18 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				Material.BEETROOTS -> Material.BEETROOT
 				else -> type
 			},
-			when (type) {
-				Material.WHEAT -> 1
-				Material.NETHER_WART -> DreamUtils.random.nextInt(2, 5 + fortuneLevel)
-				Material.CARROTS -> DreamUtils.random.nextInt(1, 5)
-				Material.POTATOES -> DreamUtils.random.nextInt(1, 5)
-				Material.BEETROOTS -> 1
-				else -> 1
-			}
+			getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
+				player,
+				block.state,
+				when (type) {
+					Material.WHEAT -> 1
+					Material.NETHER_WART -> DreamUtils.random.nextInt(2, 5 + fortuneLevel)
+					Material.CARROTS -> DreamUtils.random.nextInt(1, 5)
+					Material.POTATOES -> DreamUtils.random.nextInt(1, 5)
+					Material.BEETROOTS -> 1
+					else -> 1
+				}
+			)
 		)
 
 		if (!inventory.canHoldItem(itemStack)) {
@@ -463,7 +469,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		inventory.addItem(itemStack)
 
 		if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
-			val seed = DreamUtils.random.nextInt(0, 4)
+			val seed = getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
+				player,
+				block.state,
+				DreamUtils.random.nextInt(0, 4)
+			)
+
 			if (seed != 0) {
 				val seedItemStack = ItemStack(Material.WHEAT_SEEDS, seed)
 
@@ -566,7 +577,14 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (blockage.age != blockage.maximumAge)
 			return
 
-		val itemStack = ItemStack(Material.COCOA_BEANS, DreamUtils.random.nextInt(2, 4))
+		val itemStack = ItemStack(
+			Material.COCOA_BEANS,
+			getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
+				player,
+				block.state,
+				DreamUtils.random.nextInt(2, 4)
+			)
+		)
 
 		if (!inventory.canHoldItem(itemStack)) {
 			if (e.block == block)
@@ -651,7 +669,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			}
 
 			val itemStack = ItemStack(
-				Material.SUGAR_CANE, 1
+				Material.SUGAR_CANE,
+				getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
+					player,
+					block.state,
+					1
+				)
 			)
 
 			if (!inventory.canHoldItem(itemStack)) {
@@ -699,6 +722,15 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			60,
 			10
 		)
+	}
+
+	private fun getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(player: Player, blockState: BlockState, stackCount: Int): Int {
+		val hasDoubleDrops = com.gmail.nossr50.util.BlockUtils.checkDoubleDrops(player, blockState, PrimarySkillType.HERBALISM, SubSkillType.HERBALISM_DOUBLE_DROPS)
+		return if (hasDoubleDrops) {
+			stackCount * 2
+		} else {
+			stackCount
+		}
 	}
 
 	class PlayerQuickHarvestInfo(
