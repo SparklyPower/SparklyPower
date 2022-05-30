@@ -450,13 +450,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		)
 
 		if (!inventory.canHoldItem(itemStack)) {
-			player.sendTitle(
-				"§f",
-				"§cVocê está com o inventário cheio!",
-				0,
-				60,
-				10
-			)
+			if (startingBlock == block)
+				sendInventoryFullTitle(player)
 			return
 		}
 
@@ -569,7 +564,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		val itemStack = ItemStack(Material.COCOA_BEANS, DreamUtils.random.nextInt(2, 4))
 
 		if (!inventory.canHoldItem(itemStack)) {
-			sendInventoryFullTitle(player)
+			if (e.block == block)
+				sendInventoryFullTitle(player)
 			return
 		}
 
@@ -659,7 +655,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			}
 
 			if (!inventory.canHoldItem(itemStack)) {
-				sendInventoryFullTitle(player)
+				if (e.block == bottom)
+					sendInventoryFullTitle(player)
 				return
 			}
 
