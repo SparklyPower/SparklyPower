@@ -33,7 +33,8 @@ data class TransactionContext(
     private val extra: String? = null,
     var payer: UUID? = null,
     var receiver: UUID? = null,
-    var amount: Double = 0.0
+    var amount: Double = 0.0,
+    private val time: Long = System.currentTimeMillis()
 ) {
     fun saveToDatabase() {
         if (payer == null && receiver == null)
