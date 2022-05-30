@@ -33,24 +33,23 @@ data class TransactionContext(
     private val extra: String? = null,
     var payer: UUID? = null,
     var receiver: UUID? = null,
-    var amount: Double = 0.0
+    var amount: Double = 0.0,
+    private val time: Long = System.currentTimeMillis()
 ) {
-    init {
+    fun saveToDatabase() = transaction(Databases.databaseNetwork) {
         if (payer == null && receiver == null)
             throw IllegalArgumentException("At least one of these fields [Payer, Receiver] must not be null.")
 
         if (amount <= 0.0)
             throw IllegalArgumentException("Amount of money must be a positive number.")
-    }
 
-    fun saveToDatabase() = transaction(Databases.databaseNetwork) {
         Transaction.new {
             this.payer = this@TransactionContext.payer
             this.receiver = this@TransactionContext.receiver
             this.currency = this@TransactionContext.currency
             this.amount = this@TransactionContext.amount
             this.type = this@TransactionContext.type
-            this.time = System.currentTimeMillis()
+            this.time = this@TransactionContext.time
             this.extra = this@TransactionContext.extra
         }
     }
