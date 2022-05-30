@@ -36,21 +36,23 @@ data class TransactionContext(
     var amount: Double = 0.0,
     private val time: Long = System.currentTimeMillis()
 ) {
-    fun saveToDatabase() = transaction(Databases.databaseNetwork) {
+    fun saveToDatabase() {
         if (payer == null && receiver == null)
             throw IllegalArgumentException("At least one of these fields [Payer, Receiver] must not be null.")
 
         if (amount <= 0.0)
             throw IllegalArgumentException("Amount of money must be a positive number.")
 
-        Transaction.new {
-            this.payer = this@TransactionContext.payer
-            this.receiver = this@TransactionContext.receiver
-            this.currency = this@TransactionContext.currency
-            this.amount = this@TransactionContext.amount
-            this.type = this@TransactionContext.type
-            this.time = this@TransactionContext.time
-            this.extra = this@TransactionContext.extra
+        transaction(Databases.databaseNetwork) {
+            Transaction.new {
+                this.payer = this@TransactionContext.payer
+                this.receiver = this@TransactionContext.receiver
+                this.currency = this@TransactionContext.currency
+                this.amount = this@TransactionContext.amount
+                this.type = this@TransactionContext.type
+                this.time = this@TransactionContext.time
+                this.extra = this@TransactionContext.extra
+            }
         }
     }
 }

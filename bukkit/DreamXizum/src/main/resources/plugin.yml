@@ -1,5 +1,5 @@
 name: DreamXizum
 main: net.perfectdreams.dreamxizum.DreamXizum
 version: 1.0.0
-softdepend: ["DreamCore", "DreamCash", "DreamChat", "DreamVanish", "Citizens", "HolographicDisplays", "LuckPerms", "mcMMO", "OldCombatMechanics"]
+softdepend: ["DreamCore"]
 api-version: 1.13

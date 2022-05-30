@@ -7,22 +7,12 @@ plugins {
 }
 
 repositories {
-    mavenCentral()
     maven("https://jitpack.io")
 }
 
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
-    compileOnly(project(":bukkit:DreamCash"))
-    compileOnly(project(":bukkit:DreamChat"))
-    compileOnly(project(":bukkit:DreamVanish"))
-    compileOnly(files("../../libs/mcMMO.jar"))
-    compileOnly(files("../../libs/OldCombatMechanics.jar"))
-    compileOnly("net.luckperms:api:5.4")
-    api("com.google.code.gson:gson:2.8.8")
-    implementation("net.citizensnpcs:citizens:2.0.29-SNAPSHOT")
-    implementation("com.gmail.filoghost.holographicdisplays:holographicdisplays-api:2.4.9")
 }
 
 tasks.withType<KotlinCompile> {
