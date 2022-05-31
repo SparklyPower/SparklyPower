@@ -40,7 +40,7 @@ class DreamVote : KotlinPlugin() {
 
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
-					Votes
+				Votes
 			)
 		}
 
@@ -180,7 +180,8 @@ class DreamVote : KotlinPlugin() {
 			val offlinePlayer = Bukkit.getOfflinePlayer(uniqueId)
 
 			// Depositar a grana
-			offlinePlayer.deposit(money, TransactionContext(type = TransactionType.VOTE_REWARDS))
+			if (money != 0.0)
+				offlinePlayer.deposit(money, TransactionContext(type = TransactionType.VOTE_REWARDS))
 
 			if (broadcast) {
 				val lastVoter = offlinePlayer.name
@@ -203,7 +204,7 @@ class DreamVote : KotlinPlugin() {
 			Cash.giveCash(uniqueId, 7, TransactionContext(type = TransactionType.VOTE_REWARDS))
 
 			Webhooks.PANTUFA_INFO?.send(DiscordMessage(
-					content = "**$lastVoter** votou, agora **$lastVoter** possui ${voteCount + 1} votos. *Prêmios recebidos:* ${giveAwards.joinToString(", ", transform = { "`${it.name}`" })}"
+				content = "**$lastVoter** votou, agora **$lastVoter** possui ${voteCount + 1} votos. *Prêmios recebidos:* ${giveAwards.joinToString(", ", transform = { "`${it.name}`" })}"
 			))
 		}
 	}
