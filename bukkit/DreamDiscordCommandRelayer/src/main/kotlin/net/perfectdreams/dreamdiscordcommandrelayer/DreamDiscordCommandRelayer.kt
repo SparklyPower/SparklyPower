@@ -89,7 +89,7 @@ class DreamDiscordCommandRelayer : KotlinPlugin(), Listener {
 					player = e.player.name
 					world = e.player.location.world.name
 					alias = command
-					args = message.drop(1).joinToString().ifBlank { null }
+					args = message.drop(1).joinToString(" ").ifBlank { null }
 					time = System.currentTimeMillis()
 					x = e.player.location.x
 					y = e.player.location.y

@@ -3,6 +3,7 @@ package net.perfectdreams.dreamchestshopstuff.listeners
 import com.Acrobot.ChestShop.Events.TransactionEvent
 import com.greatmancode.craftconomy3.events.MoneyTransferEvent
 import net.perfectdreams.dreamchestshopstuff.DreamChestShopStuff
+import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.TransactionContext
 import net.perfectdreams.dreamcore.utils.TransactionType
 import net.perfectdreams.dreamcore.utils.getLocalizedName
@@ -35,8 +36,8 @@ class EconomyTransactionsListener(private val plugin: DreamChestShopStuff) : Lis
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onMoneyTransfer(event: MoneyTransferEvent) = plugin.launchAsyncThread {
         TransactionContext(
-            payer = event.payer.uniqueId,
-            receiver = event.receiver.uniqueId,
+            payer = DreamUtils.retrieveUserUniqueId(event.payer),
+            receiver = DreamUtils.retrieveUserUniqueId(event.receiver),
             type = TransactionType.PAYMENT,
             amount = event.amount
         ).saveToDatabase()
