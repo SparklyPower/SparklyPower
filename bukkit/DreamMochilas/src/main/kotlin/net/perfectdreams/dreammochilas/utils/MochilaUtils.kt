@@ -40,7 +40,8 @@ object MochilaUtils {
 
     val mochilaCreationMutex = Mutex()
 
-    fun isMochila(item: ItemStack) = item.hasItemMeta() && (item.itemMeta as? Damageable)?.damage !in 25..39 && item.itemMeta.persistentDataContainer.has(IS_MOCHILA_KEY)
+    fun isMochilaItem(item: ItemStack) = item.type == Material.CARROT_ON_A_STICK && item.hasItemMeta() && (item.itemMeta as? Damageable)?.damage !in 25..39
+    fun isMochila(item: ItemStack) = isMochilaItem(item) && item.itemMeta.persistentDataContainer.has(IS_MOCHILA_KEY)
 
     fun getMochilaId(item: ItemStack): Long? = if (isMochila(item))
         item.itemMeta.persistentDataContainer.get(MOCHILA_ID_KEY, PersistentDataType.LONG)

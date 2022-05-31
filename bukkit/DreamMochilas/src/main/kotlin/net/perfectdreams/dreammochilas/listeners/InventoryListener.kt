@@ -21,6 +21,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -183,7 +184,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
     }
 
     @InternalCoroutinesApi
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     fun onOpen(e: PlayerInteractEvent) {
         if (!e.rightClick)
             return
@@ -192,9 +193,17 @@ class InventoryListener(val m: DreamMochilas) : Listener {
         if (e.clickedBlock?.type?.name?.contains("SIGN") == true)
             return
 
-        val item = e.item
+        val item = e.item ?: return
 
-        if (item?.type == Material.CARROT_ON_A_STICK) {
+        // Avoids a bug where harvesting items with the mochila while using Geyser causes the mochila to open
+        // The event order when harvesting is
+        // First Event: RIGHT_CLICK_BLOCK; useItemInHand: DEFAULT; useInteractedBlock: DENY;
+        // Second Event: RIGHT_CLICK_BLOCK; useItemInHand: DEFAULT; useInteractedBlock: DENY;
+        // Third Event: LEFT_CLICK_BLOCK; useItemInHand: DEFAULT; useInteractedBlock: ALLOW;
+        if (e.action == Action.RIGHT_CLICK_BLOCK && e.useInteractedBlock() == Event.Result.DENY)
+            return
+
+        if (MochilaUtils.isMochilaItem(item)) {
             val mochilaId = MochilaUtils.getMochilaId(item)
 
             e.isCancelled = true
