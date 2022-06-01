@@ -19,6 +19,7 @@ import net.perfectdreams.dreammochilas.utils.MochilaInventoryHolder
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.SoundCategory
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
@@ -283,6 +284,8 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                                 )
                             }
 
+                            e.player.playSound(e.player.location, "sparklypower.sfx.backpack.open", SoundCategory.BLOCKS, 1f, DreamUtils.random.nextFloat(0.8f, 1.2f))
+
                             e.player.openInventory(inventory)
                         }
                     }
@@ -309,7 +312,16 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                     m.logger.info { "Player ${e.player.name} opened a backpack. Backpack ID: ${mochilaAccessHolder.mochila.id.value}" }
 
-                    val inventory = mochilaAccessHolder.getOrCreateMochilaInventoryAndHold()
+                    val itemDisplayName = item.itemMeta?.displayName()
+                    val inventoryTitle = if (itemDisplayName != null && itemDisplayName != MochilaUtils.DEFAULT_MOCHILA_TITLE_NAME)
+                        itemDisplayName
+                    else
+                        MochilaUtils.DEFAULT_MOCHILA_TITLE_NAME
+
+                    val inventory = mochilaAccessHolder.getOrCreateMochilaInventoryAndHold(inventoryTitle)
+
+                    e.player.playSound(e.player.location, "sparklypower.sfx.backpack.open", SoundCategory.BLOCKS, 1f, DreamUtils.random.nextFloat(0.6f, 1.0f))
+
                     e.player.openInventory(inventory)
                 }
             }
@@ -346,6 +358,8 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                     e.inventory.clear(idx)
                 }
             }
+
+            (e.player as? Player)?.playSound(e.player.location, "sparklypower.sfx.backpack.close", SoundCategory.BLOCKS, 1f, DreamUtils.random.nextFloat(1.0f, 1.4f))
 
             m.launchAsyncThread {
                 val item = e.player.inventory.itemInMainHand

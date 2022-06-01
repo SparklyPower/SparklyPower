@@ -1,5 +1,5 @@
 name: DreamScoreboard
 main: net.perfectdreams.dreamscoreboard.DreamScoreboard
 version: 1.0.0
-depend: ["DreamCore", "DreamClubes", "DreamChat", "DreamVanish"]
+depend: ["DreamCore", "DreamClubes", "DreamChat", "DreamVanish", "DreamBedrockIntegrations"]
 api-version: 1.13

@@ -1,6 +1,9 @@
 package net.perfectdreams.dreammochilas
 
 import kotlinx.coroutines.delay
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import net.perfectdreams.dreambedrockintegrations.DreamBedrockIntegrations
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.extensions.meta
@@ -14,6 +17,7 @@ import net.perfectdreams.dreammochilas.listeners.InventoryListener
 import net.perfectdreams.dreammochilas.listeners.UpgradeSizeSignListener
 import net.perfectdreams.dreammochilas.tables.Mochilas
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.event.Listener
@@ -51,6 +55,13 @@ class DreamMochilas : KotlinPlugin(), Listener {
 
 			return item
 		}
+
+		private val mochilaWindowCharacters = setOf(
+			'\uE256',
+			'\uE257',
+			'\uE258',
+			'\uE255'
+		)
 	}
 
 	override fun softEnable() {
@@ -81,6 +92,19 @@ class DreamMochilas : KotlinPlugin(), Listener {
 			MochilasMemoryExecutor(this),
 			FakeInteractAndOpenExecutor(this),
 			FakeInteractAutoClickExecutor(this)
+		)
+
+		val bedrockIntegrations = Bukkit.getPluginManager().getPlugin("DreamBedrockIntegrations") as DreamBedrockIntegrations
+		bedrockIntegrations.registerInventoryTitleTransformer(
+			this,
+			{
+				PlainTextComponentSerializer.plainText().serialize(it)
+					.any { it in mochilaWindowCharacters }
+			},
+			{
+				// The last children *should* be the mochila's name, if it is not present, just fallback to the current title
+				it.children().lastOrNull() ?: it
+			}
 		)
 
 		launchAsyncThread {

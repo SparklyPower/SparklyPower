@@ -3,6 +3,7 @@ package net.perfectdreams.dreamjetpack
 import com.okkero.skedule.schedule
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
+import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.extensions.hasStoredMetadataWithKey
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
@@ -139,7 +140,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 					}
 
 					if (!bossBars.contains(player)) {
-						val bossBar = Bukkit.createBossBar("...", BarColor.GREEN, BarStyle.SOLID)
+						val bossBar = Bukkit.createBossBar("...", BarColor.GREEN, BarStyle.SEGMENTED_20)
 						bossBars[player] = bossBar
 						bossBar.addPlayer(player)
 					}
@@ -163,13 +164,23 @@ class DreamJetpack : KotlinPlugin(), Listener {
 						val minutes = timeRemaining / 60
 						val seconds = timeRemaining % 60
 
-						bossBar.setTitle(
-							if (applyDamage == 0) {
-								"§dWoosh! §aVocê pode voar por mais §e∞§a!"
-							} else {
-								"§dWoosh! §aVocê pode voar por mais §e$minutes minutos e $seconds segundos§a!"
-							}
-						)
+						if (player.isBedrockClient) {
+							bossBar.setTitle(
+								if (applyDamage == 0) {
+									"§dWoosh! §aVocê pode voar por mais §e∞§a!"
+								} else {
+									"§dWoosh! §aVocê pode voar por mais §e$minutes minutos e $seconds segundos§a!"
+								}
+							)
+						} else {
+							bossBar.setTitle(
+								if (applyDamage == 0) {
+									"\ue259陇陇陇§dWoosh! §aVocê pode voar por mais §e∞§a!"
+								} else {
+									"§dWoosh! §aVocê pode voar por mais §e$minutes minutos e $seconds segundos§a!"
+								}
+							)
+						}
 					}
 
 					player.world.spawnParticle(Particle.SMOKE_NORMAL, player.location, 20, 1.0, 1.0, 1.0)

@@ -1,0 +1,5 @@
+name: DreamBedrockIntegrations
+main: net.perfectdreams.dreambedrockintegrations.DreamBedrockIntegrations
+version: 1.0.0
+depend: ["DreamCore", "NoCheatPlus"]
+api-version: 1.13

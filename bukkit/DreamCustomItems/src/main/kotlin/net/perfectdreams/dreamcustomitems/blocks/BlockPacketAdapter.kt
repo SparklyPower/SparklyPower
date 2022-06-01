@@ -30,8 +30,6 @@ class BlockPacketAdapter(val m: DreamCustomItems) : PacketAdapter(
         PacketType.Play.Server.BLOCK_CHANGE,
         PacketType.Play.Server.MULTI_BLOCK_CHANGE,
     ),
-    // Reading chunk packets uses a lot of CPU, so let's parse everything in a async thread!
-    // It *should* be fine since we don't call the Bukkit API (except to get the player's world)
     ListenerOptions.ASYNC
 ) {
     companion object {

@@ -13,6 +13,7 @@ repositories {
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
+    compileOnly(project(":bukkit:DreamBedrockIntegrations"))
     compileOnly(files("../../libs/ChestShop.jar"))
 }
 

@@ -3,6 +3,9 @@ package net.perfectdreams.dreammochilas.utils
 import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
@@ -24,6 +27,10 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 object MochilaUtils {
+    val DEFAULT_MOCHILA_TITLE_NAME = Component.text("Mochila")
+        .color(NamedTextColor.BLACK)
+        .decoration(TextDecoration.ITALIC, false)
+
     private val isMagnet: (ItemStack?) -> Boolean = { it?.type == Material.STONE_HOE && it.hasItemMeta() && it.itemMeta.hasCustomModelData() && it.itemMeta.customModelData in 1 .. 2 }
     val HAS_MAGNET_KEY = SparklyNamespacedKey("has_magnet")
     val IS_FULL_KEY = SparklyNamespacedKey("is_backpack_full")

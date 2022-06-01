@@ -1,5 +1,5 @@
 name: DreamEnchant
 main: net.perfectdreams.dreamenchant.DreamEnchant
 version: 1.0.0
-depend: ["DreamCore", "DreamCustomItems"]
+depend: ["DreamCore", "DreamCustomItems", "DreamCash", "DreamBedrockIntegrations"]
 api-version: 1.13

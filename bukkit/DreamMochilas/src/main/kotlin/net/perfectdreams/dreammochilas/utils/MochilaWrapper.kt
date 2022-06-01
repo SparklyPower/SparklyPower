@@ -2,6 +2,8 @@ package net.perfectdreams.dreammochilas.utils
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.fromBase64Inventory
@@ -45,14 +47,32 @@ class MochilaWrapper(
     private val mochilaInventoryCreationLock = Mutex()
     private var cachedInventory: Inventory? = null
 
-    suspend fun getOrCreateMochilaInventory(): Inventory {
+    suspend fun getOrCreateMochilaInventory(title: Component = MochilaUtils.DEFAULT_MOCHILA_TITLE_NAME): Inventory {
         // We need to lock to avoid two threads loading the inventory at the same time, causing issues
         mochilaInventoryCreationLock.withLock {
             return cachedInventory ?: run {
                 val blahInventory = mochila.content.fromBase64Inventory() // Vamos pegar o inventário original
 
+                val mochilaSize = 54.coerceAtMost(mochila.size)
+                val guiTexture = when (mochilaSize) {
+                    27 -> "\uE256"
+                    36 -> "\uE257"
+                    45 -> "\uE258"
+                    else -> "\uE255"
+                }
+
                 // E criar ele com o nosso holder personalizado
-                val inventory = Bukkit.createInventory(MochilaInventoryHolder(), 54.coerceAtMost(mochila.size), "§d§lMochila")
+                val inventory = Bukkit.createInventory(
+                    MochilaInventoryHolder(),
+                    mochilaSize,
+                    Component.text("ꈉ${guiTexture}陇")
+                        .color(NamedTextColor.WHITE)
+                        .append(
+                            Component.empty()
+                                .color(NamedTextColor.BLACK)
+                                .append(title)
+                        )
+                )
 
                 val blahInventoryContents = blahInventory.contents
                 if (blahInventoryContents != null) {
