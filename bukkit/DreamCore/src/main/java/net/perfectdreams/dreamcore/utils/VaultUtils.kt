@@ -51,11 +51,13 @@ val OfflinePlayer.balance: Double
  */
 fun OfflinePlayer.withdraw(quantity: Double, transactionContext: TransactionContext): EconomyResponse =
 	VaultUtils.econ.withdrawPlayer(this, quantity).also {
-		if (it.type == EconomyResponse.ResponseType.SUCCESS)
-			transactionContext.apply {
-				amount = quantity
-				payer = uniqueId
-			}.saveToDatabase()
+		if (it.type == EconomyResponse.ResponseType.SUCCESS && quantity > 0)
+			DreamCore.INSTANCE.launchAsyncThread {
+				transactionContext.apply {
+					amount = quantity
+					payer = uniqueId
+				}.saveToDatabase()
+			}
 	}
 
 /**
@@ -63,11 +65,13 @@ fun OfflinePlayer.withdraw(quantity: Double, transactionContext: TransactionCont
  */
 fun OfflinePlayer.deposit(quantity: Double, transactionContext: TransactionContext): EconomyResponse =
 	VaultUtils.econ.depositPlayer(this, quantity).also {
-		if (it.type == EconomyResponse.ResponseType.SUCCESS)
-			transactionContext.apply {
-				amount = quantity
-				receiver = uniqueId
-			}.saveToDatabase()
+		if (it.type == EconomyResponse.ResponseType.SUCCESS && quantity > 0)
+			DreamCore.INSTANCE.launchAsyncThread {
+				transactionContext.apply {
+					amount = quantity
+					receiver = uniqueId
+				}.saveToDatabase()
+			}
 	}
 
 /**

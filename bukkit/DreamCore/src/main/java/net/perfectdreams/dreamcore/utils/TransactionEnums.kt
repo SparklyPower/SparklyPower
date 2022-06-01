@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcore.utils
 
+import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.dao.Transaction
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.UUID
@@ -17,6 +18,7 @@ enum class TransactionType {
     BETTING,
     EVENTS,
     SECRET_BOXES,
+    LSX,
     UNSPECIFIED
 }
 
@@ -43,15 +45,17 @@ data class TransactionContext(
         if (amount <= 0.0)
             throw IllegalArgumentException("Amount of money must be a positive number.")
 
-        transaction(Databases.databaseNetwork) {
-            Transaction.new {
-                this.payer = this@TransactionContext.payer
-                this.receiver = this@TransactionContext.receiver
-                this.currency = this@TransactionContext.currency
-                this.amount = this@TransactionContext.amount
-                this.type = this@TransactionContext.type
-                this.time = this@TransactionContext.time
-                this.extra = this@TransactionContext.extra
+        DreamCore.INSTANCE.launchAsyncThread {
+            transaction(Databases.databaseNetwork) {
+                Transaction.new {
+                    this.payer = this@TransactionContext.payer
+                    this.receiver = this@TransactionContext.receiver
+                    this.currency = this@TransactionContext.currency
+                    this.amount = this@TransactionContext.amount
+                    this.type = this@TransactionContext.type
+                    this.time = this@TransactionContext.time
+                    this.extra = this@TransactionContext.extra
+                }
             }
         }
     }

@@ -300,7 +300,7 @@ class DreamMini : KotlinPlugin(), Listener {
 
 									// TODO: Prêmios
 									if (chance == 100) {
-										player.deposit(1750.00, TransactionContext(extra = "razões misteriosas"))
+										player.deposit(1750.00, TransactionContext(extra = "ser sortudo"))
 										player.sendMessage("§aHoje é o seu dia de sorte!")
 										rewarded = true
 									}
