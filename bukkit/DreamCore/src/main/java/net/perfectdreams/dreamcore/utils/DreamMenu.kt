@@ -7,6 +7,7 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryMoveItemEvent
 import org.bukkit.inventory.Inventory
@@ -71,12 +72,16 @@ class DreamMenuSlotBuilder(val index: Int) {
 class DreamMenuListener : Listener {
 	@EventHandler
 	fun onMove(e: InventoryClickEvent) {
-		val holder = e.clickedInventory?.holder
+		if (e.click == ClickType.SHIFT_LEFT && e.inventory.holder is DreamMenu.DreamMenuHolder) {
+			e.isCancelled = true
+			return
+		}
 
-		if (holder !is DreamMenu.DreamMenuHolder)
+		val clickedInventoryHolder = e.clickedInventory?.holder
+		if (clickedInventoryHolder !is DreamMenu.DreamMenuHolder)
 			return
 
-		val dreamMenu = holder.menu
+		val dreamMenu = clickedInventoryHolder.menu
 
 		if (dreamMenu.cancelItemMovement)
 			e.isCancelled = true
@@ -106,6 +111,8 @@ class DreamMenuListener : Listener {
 		else if (sourceHolder is DreamMenu.DreamMenuHolder)
 			dreamMenuHolder = sourceHolder
 		else return
+
+		println("DreamMenuHolder: $dreamMenuHolder")
 
 		// The item click is already handled by InventoryClickEvent so we don't need to care about this
 		val dreamMenu = dreamMenuHolder.menu
