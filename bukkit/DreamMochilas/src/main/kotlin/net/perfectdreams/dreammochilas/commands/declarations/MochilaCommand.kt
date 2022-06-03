@@ -13,6 +13,11 @@ object MochilaCommand : SparklyCommandDeclarationWrapper {
             executor = GetMochilaExecutor
         }
 
+        subcommand(listOf("get_old")) {
+            permissions = listOf("sparklymochilas.setup")
+            executor = GetMochilaOldDamageSystemExecutor
+        }
+
         subcommand(listOf("id")) {
             permissions = listOf("sparklymochilas.setup")
             executor = GetMochilaIdExecutor

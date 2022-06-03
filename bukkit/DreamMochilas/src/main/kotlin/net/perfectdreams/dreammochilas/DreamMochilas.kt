@@ -1,13 +1,11 @@
 package net.perfectdreams.dreammochilas
 
 import kotlinx.coroutines.delay
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.perfectdreams.dreambedrockintegrations.DreamBedrockIntegrations
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreammochilas.commands.*
@@ -16,6 +14,7 @@ import net.perfectdreams.dreammochilas.listeners.ChestShopListener
 import net.perfectdreams.dreammochilas.listeners.InventoryListener
 import net.perfectdreams.dreammochilas.listeners.UpgradeSizeSignListener
 import net.perfectdreams.dreammochilas.tables.Mochilas
+import net.perfectdreams.dreammochilas.utils.MochilaData
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -33,7 +32,23 @@ class DreamMochilas : KotlinPlugin(), Listener {
 	companion object {
 		lateinit var INSTANCE: DreamMochilas
 
-		fun createMochila(damageValue: Int): ItemStack {
+		fun createMochila(mochilaData: MochilaData): ItemStack {
+			val item = ItemStack(Material.PAPER)
+				.rename("§rMochila")
+				.meta<ItemMeta> {
+					setCustomModelData(mochilaData.customModelData)
+
+					persistentDataContainer.set(
+						MochilaUtils.IS_MOCHILA_KEY,
+						PersistentDataType.BYTE,
+						1
+					)
+				}
+
+			return item
+		}
+
+		fun createMochilaOldSystem(damageValue: Int): ItemStack {
 			val item = ItemStack(Material.CARROT_ON_A_STICK)
 				.rename("§rMochila")
 				.meta<ItemMeta> {
@@ -87,6 +102,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 		registerCommand(
 			MochilaCommand,
 			GetMochilaExecutor(),
+			GetMochilaOldDamageSystemExecutor(),
 			GetMochilaIdExecutor(),
 			GetPlayerMochilasExecutor(),
 			MochilasMemoryExecutor(this),
@@ -120,6 +136,19 @@ class DreamMochilas : KotlinPlugin(), Listener {
 
 				delay(60_000)
 			}
+		}
+
+		addRecipe(
+			"rainbow_mochila",
+			createMochila(MochilaData.Rainbow),
+			listOf(
+				" R ",
+				"RMR",
+				" R "
+			)
+		) {
+			it.setIngredient('R', Material.WHITE_WOOL)
+			it.setIngredient('M', Material.PAPER)
 		}
 	}
 

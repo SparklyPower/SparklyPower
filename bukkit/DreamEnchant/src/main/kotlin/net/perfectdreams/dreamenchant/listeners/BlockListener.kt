@@ -1,28 +1,18 @@
 package net.perfectdreams.dreamenchant.listeners
 
-import kotlinx.coroutines.delay
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
-import net.perfectdreams.dreamcustomitems.utils.isMagnet
 import net.perfectdreams.dreamenchant.DreamEnchant
-import net.perfectdreams.dreamenchant.utils.EnchantHolder
 import net.perfectdreams.dreamenchant.utils.PlayerEnchantmentTable
 import org.bukkit.Keyed
 import org.bukkit.Material
-import org.bukkit.Particle
-import org.bukkit.Sound
 import org.bukkit.block.EnchantingTable
-import org.bukkit.enchantments.Enchantment
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
-import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.inventory.CraftItemEvent
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.persistence.PersistentDataType
 
@@ -31,11 +21,7 @@ class BlockListener(val m: DreamEnchant) : Listener {
 	fun onCraft(e: CraftItemEvent) {
 		val recipe = e.recipe
 		if (recipe is Keyed) {
-			val recipeKey = when(recipe.key.key) {
-				"microwave" -> true
-				"superfurnace" -> true
-				else -> false
-			}
+			val recipeKey = recipe.key.key == "super_enchanting_table"
 
 			if (recipeKey && e.inventory.any { it.type == Material.PRISMARINE_SHARD && (!it.itemMeta.hasCustomModelData() || it.itemMeta.customModelData != 1) })
 				e.isCancelled = true

@@ -18,7 +18,9 @@ import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.utils.MochilaInventoryHolder
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import org.bukkit.Bukkit
+import org.bukkit.Keyed
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.SoundCategory
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
@@ -27,10 +29,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.inventory.InventoryCloseEvent
-import org.bukkit.event.inventory.InventoryMoveItemEvent
-import org.bukkit.event.inventory.InventoryType
+import org.bukkit.event.inventory.*
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
@@ -72,6 +71,46 @@ class InventoryListener(val m: DreamMochilas) : Listener {
     @EventHandler
     fun onQuit(e: PlayerQuitEvent) {
         mochilasCooldown.remove(e.player)
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onCraft(e: CraftItemEvent) {
+        val recipe = e.recipe
+        if (recipe is Keyed) {
+            val recipeKey = recipe.key.key == "rainbow_mochila"
+
+            if (recipeKey) {
+                val nonNullItemsFromInventory = e.inventory.filterNotNull()
+                val areAllMochilasValid = nonNullItemsFromInventory.filter { it.type == Material.PAPER }.all { MochilaUtils.isMochila(it) }
+                val areAllRainbowWoolsValid = nonNullItemsFromInventory.filter { it.type == Material.WHITE_WOOL }.all { it.itemMeta?.hasCustomModelData() == true && it.itemMeta?.customModelData == 1 }
+
+
+                if (!areAllMochilasValid || !areAllRainbowWoolsValid)
+                    e.isCancelled = true
+                else {
+                    println("Crafting Matrix:")
+                    val oldMochilaItem = e.inventory.matrix?.get(4) ?: return
+                    val oldMeta = oldMochilaItem.itemMeta
+
+                    e.currentItem?.meta<ItemMeta> {
+                        displayName(oldMeta.displayName())
+                        lore(oldMeta.lore())
+
+                        fun <T, Z> copyAttributeIfPresent(namespace: NamespacedKey, type: PersistentDataType<T, Z>) {
+                            val oldData = oldMeta.persistentDataContainer.get(namespace, type)
+
+                            if (oldData != null)
+                                persistentDataContainer.set(namespace, type, oldData)
+                        }
+
+                        copyAttributeIfPresent(MochilaUtils.IS_MOCHILA_KEY, PersistentDataType.BYTE)
+                        copyAttributeIfPresent(MochilaUtils.MOCHILA_ID_KEY, PersistentDataType.LONG)
+                        copyAttributeIfPresent(MochilaUtils.IS_FULL_KEY, PersistentDataType.BYTE)
+                        copyAttributeIfPresent(MochilaUtils.HAS_MAGNET_KEY, PersistentDataType.BYTE)
+                    }
+                }
+            }
+        }
     }
 
     @InternalCoroutinesApi
@@ -129,7 +168,12 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                     try {
                         m.logger.info { "Preparing Pre Transaction Event for ${e.player.name}... Is thread async? ${!isPrimaryThread}; Backpack ID: $mochilaId" }
 
-                        val r = preparePreTransactionEventMethod.invoke(null as Any?, sign, e.player, e.action) as PreTransactionEvent
+                        val r = preparePreTransactionEventMethod.invoke(
+                            null as Any?,
+                            sign,
+                            e.player,
+                            e.action
+                        ) as PreTransactionEvent
 
                         r.clientInventory = inventory
 
@@ -204,10 +248,78 @@ class InventoryListener(val m: DreamMochilas) : Listener {
         if (e.action == Action.RIGHT_CLICK_BLOCK && e.useInteractedBlock() == Event.Result.DENY)
             return
 
+        if (item.type == Material.CARROT_ON_A_STICK && item.hasItemMeta() && (item.itemMeta as? Damageable)?.damage !in 25..39) {
+            // Convert to new system
+            val damage = (item.itemMeta as Damageable).damage
+
+            item.type = Material.PAPER
+
+            val itemMeta = item.itemMeta
+
+            itemMeta.setCustomModelData(
+                when (damage) {
+                    // item/custom/backpacks/backpack_normal -> sparklypower:item/backpack/backpack_brown
+                    1 -> 14
+                    // item/custom/backpacks/backpack_blue -> sparklypower:item/backpack/backpack_blue
+                    2 -> 11
+                    // item/custom/backpacks/backpack_orange -> sparklypower:item/backpack/backpack_orange
+                    3 -> 36
+                    // item/custom/backpacks/backpack_red -> sparklypower:item/backpack/backpack_red
+                    4 -> 43
+                    // item/custom/backpacks/backpack_purple -> sparklypower:item/backpack/backpack_purple
+                    5 -> 42
+                    // item/custom/backpacks/backpack_yellow -> sparklypower:item/backpack/backpack_yellow
+                    6 -> 45
+                    // item/custom/backpacks/backpack_golden -> sparklypower:item/backpack/backpack_golden
+                    7 -> 25
+                    // item/custom/backpacks/backpack_grey -> sparklypower:item/backpack/backpack_grey
+                    8 -> 27
+                    // item/custom/backpacks/backpack_green -> sparklypower:item/backpack/backpack_green
+                    9 -> 26
+                    // item/custom/backpacks/backpack_moon -> sparklypower:item/backpack/backpack_moon
+                    10 -> 35
+                    // item/custom/backpacks/backpack_crown -> sparklypower:item/backpack/backpack_crown
+                    11 -> 18
+                    // item/custom/backpacks/backpack_heart -> sparklypower:item/backpack/backpack_heart
+                    12 -> 28
+                    // item/custom/backpacks/backpack_pillow -> sparklypower:item/backpack/backpack_pillow
+                    13 -> 38
+                    // item/custom/backpacks/backpack_dragon -> sparklypower:item/backpack/backpack_dragon
+                    14 -> 20
+                    // item/custom/backpacks/backpack_beach -> sparklypower:item/backpack/backpack_beach
+                    15 -> 10
+                    // item/custom/backpacks/backpack_deepling -> sparklypower:item/backpack/backpack_deepling
+                    16 -> 19
+                    // item/custom/backpacks/backpack_fur -> sparklypower:item/backpack/backpack_fur
+                    17 -> 23
+                    // item/custom/backpacks/backpack_energetic -> sparklypower:item/backpack/backpack_energetic
+                    18 -> 21
+                    // item/custom/backpacks/backpack_pirate -> sparklypower:item/backpack/backpack_pirate
+                    19 -> 39
+                    // item/custom/backpacks/backpack_santa -> sparklypower:item/backpack/backpack_santa
+                    20 -> 44
+                    // item/custom/backpacks/backpack_expedition -> sparklypower:item/backpack/backpack_expedition
+                    21 -> 22
+                    // item/custom/backpacks/backpack_camouflage -> sparklypower:item/backpack/backpack_camouflage
+                    22 -> 17
+                    // item/custom/backpacks/backpack_cake -> sparklypower:item/backpack/backpack_cake
+                    23 -> 16
+                    // item/custom/backpacks/backpack_buggy -> sparklypower:item/backpack/backpack_buggy
+                    24 -> 15
+                    else -> error("Unknown Mochila!")
+                }
+            )
+
+            item.itemMeta = itemMeta
+        }
+
         if (MochilaUtils.isMochilaItem(item)) {
             val mochilaId = MochilaUtils.getMochilaId(item)
 
             e.isCancelled = true
+
+            if (item.amount != 1)
+                return
 
             if (mochilaId == null) { // Criar mochila, caso ainda não tenha um ID associado a ela
                 // Old mochila item check, we will convert them
@@ -265,7 +377,8 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
                         // Handle just like a normal mochila would
                         // Should NEVER be null
-                        val loadedFromDatabaseMochila = MochilaUtils.retrieveMochilaAndHold(mochila.id.value, "${e.player.name} mochila creation")!!
+                        val loadedFromDatabaseMochila =
+                            MochilaUtils.retrieveMochilaAndHold(mochila.id.value, "${e.player.name} mochila creation")!!
 
                         val inventory = loadedFromDatabaseMochila.getOrCreateMochilaInventoryAndHold()
 
@@ -284,7 +397,13 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                                 )
                             }
 
-                            e.player.playSound(e.player.location, "sparklypower.sfx.backpack.open", SoundCategory.BLOCKS, 1f, DreamUtils.random.nextFloat(0.8f, 1.2f))
+                            e.player.playSound(
+                                e.player.location,
+                                "sparklypower.sfx.backpack.open",
+                                SoundCategory.BLOCKS,
+                                1f,
+                                DreamUtils.random.nextFloat(0.8f, 1.2f)
+                            )
 
                             e.player.openInventory(inventory)
                         }
@@ -294,7 +413,8 @@ class InventoryListener(val m: DreamMochilas) : Listener {
             }
 
             m.launchAsyncThread {
-                val mochilaAccessHolder = MochilaUtils.retrieveMochilaAndHold(mochilaId, "${e.player.name} mochila opening")
+                val mochilaAccessHolder =
+                    MochilaUtils.retrieveMochilaAndHold(mochilaId, "${e.player.name} mochila opening")
 
                 onMainThread {
                     if (mochilaAccessHolder == null) {
@@ -313,14 +433,21 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                     m.logger.info { "Player ${e.player.name} opened a backpack. Backpack ID: ${mochilaAccessHolder.mochila.id.value}" }
 
                     val itemDisplayName = item.itemMeta?.displayName()
-                    val inventoryTitle = if (itemDisplayName != null && itemDisplayName != MochilaUtils.DEFAULT_MOCHILA_TITLE_NAME)
-                        itemDisplayName
-                    else
-                        MochilaUtils.DEFAULT_MOCHILA_TITLE_NAME
+                    val inventoryTitle =
+                        if (itemDisplayName != null && itemDisplayName != MochilaUtils.DEFAULT_MOCHILA_TITLE_NAME)
+                            itemDisplayName
+                        else
+                            MochilaUtils.DEFAULT_MOCHILA_TITLE_NAME
 
                     val inventory = mochilaAccessHolder.getOrCreateMochilaInventoryAndHold(inventoryTitle)
 
-                    e.player.playSound(e.player.location, "sparklypower.sfx.backpack.open", SoundCategory.BLOCKS, 1f, DreamUtils.random.nextFloat(0.6f, 1.0f))
+                    e.player.playSound(
+                        e.player.location,
+                        "sparklypower.sfx.backpack.open",
+                        SoundCategory.BLOCKS,
+                        1f,
+                        DreamUtils.random.nextFloat(0.6f, 1.0f)
+                    )
 
                     e.player.openInventory(inventory)
                 }
@@ -359,7 +486,13 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 }
             }
 
-            (e.player as? Player)?.playSound(e.player.location, "sparklypower.sfx.backpack.close", SoundCategory.BLOCKS, 1f, DreamUtils.random.nextFloat(1.0f, 1.4f))
+            (e.player as? Player)?.playSound(
+                e.player.location,
+                "sparklypower.sfx.backpack.close",
+                SoundCategory.BLOCKS,
+                1f,
+                DreamUtils.random.nextFloat(1.0f, 1.4f)
+            )
 
             m.launchAsyncThread {
                 val item = e.player.inventory.itemInMainHand

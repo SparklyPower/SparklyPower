@@ -4,10 +4,6 @@ import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
-import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreammochilas.DreamMochilas
-import net.perfectdreams.dreammochilas.commands.GetMochilaExecutor.Companion.Options.damageValue
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
 
 class GetMochilaIdExecutor : SparklyCommandExecutor() {
