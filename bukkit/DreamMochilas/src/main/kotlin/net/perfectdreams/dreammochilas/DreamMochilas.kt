@@ -33,7 +33,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 		lateinit var INSTANCE: DreamMochilas
 
 		fun createMochila(mochilaData: MochilaData): ItemStack {
-			val item = ItemStack(Material.CHEST_MINECART)
+			val item = ItemStack(Material.PAPER)
 				.rename("§rMochila")
 				.meta<ItemMeta> {
 					setCustomModelData(mochilaData.customModelData)
@@ -105,6 +105,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 			GetMochilaOldDamageSystemExecutor(),
 			GetMochilaIdExecutor(),
 			GetPlayerMochilasExecutor(),
+			GetMochilaByIdExecutor(this),
 			MochilasMemoryExecutor(this),
 			FakeInteractAndOpenExecutor(this),
 			FakeInteractAutoClickExecutor(this)

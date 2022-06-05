@@ -16,7 +16,7 @@ import org.bukkit.persistence.PersistentDataType
 class PlayerListener(val m: DreamResourceReset) : Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onDeath(e: PlayerDeathEvent) {
-        val attributes = m.worldAttributesMap[e.player.world] ?: return
+        val attributes = m.worldAttributesMap[e.player.world.name] ?: return
         val canYouLoseItems = attributes.canYouLoseItems()
 
         // Get where the chest should be placed

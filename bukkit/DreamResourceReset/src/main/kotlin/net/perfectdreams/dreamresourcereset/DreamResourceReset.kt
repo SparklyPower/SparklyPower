@@ -38,7 +38,7 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 		WorldAttributesState.ResourcesWorldAttributesState(Bukkit.getServer()),
 		WorldAttributesState.NetherWorldAttributesState(Bukkit.getServer()),
 		WorldAttributesState.TheEndWorldAttributesState(Bukkit.getServer())
-	).filter { it._world != null }.associateBy { it.world }
+	).associateBy { it.worldName }
 	private val canYouLoseItemsRightNow = worldAttributesMap.map {
 		it.key to it.value.canYouLoseItems()
 	}.toMap().toMutableMap()
@@ -57,21 +57,22 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 
 		schedule {
 			while (true) {
-				for (world in worldAttributesMap) {
-					val previousState = canYouLoseItemsRightNow[world.key] ?: false
-					val newState = world.value.canYouLoseItems()
+				for ((worldName, state) in worldAttributesMap) {
+					val world = state._world ?: continue
+					val previousState = canYouLoseItemsRightNow[worldName] ?: false
+					val newState = state.canYouLoseItems()
 					if (!previousState && newState) {
-						world.key.players.forEach {
+						world.players.forEach {
 							it.playSound(it.location, Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f)
 						}
 					}
-					canYouLoseItemsRightNow[world.key] = newState
+					canYouLoseItemsRightNow[worldName] = newState
 				}
 
 				for (player in Bukkit.getOnlinePlayers()) {
-					val worldAttributes = worldAttributesMap[player.world]
+					val worldAttributes = worldAttributesMap[player.world.name]
 
-					if (worldAttributes != null) {
+					if (worldAttributes?._world != null) {
 						val canYouLoseItems = worldAttributes.canYouLoseItems()
 
 						if (canYouLoseItems) {

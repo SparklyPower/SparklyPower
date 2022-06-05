@@ -12,4 +12,5 @@ object Mochilas : LongIdTable() {
     val content = text("content")
     val funnyId = text("funny_id").nullable()
     val type = integer("type").nullable()
+    val version = integer("version").default(0)
 }

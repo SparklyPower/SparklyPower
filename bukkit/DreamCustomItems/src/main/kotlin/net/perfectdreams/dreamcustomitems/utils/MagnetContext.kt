@@ -39,7 +39,7 @@ data class MagnetContext(
 val Player.hasMagnet get() =
     inventory.contents?.let {
         val backpacks = it.filter { backpack ->
-            if (backpack?.type != Material.CARROT_ON_A_STICK) return@filter false
+            if (backpack?.type != Material.PAPER) return@filter false
             val meta = backpack.itemMeta ?: return@filter false
 
             with (meta.persistentDataContainer) {

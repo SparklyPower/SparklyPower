@@ -112,10 +112,13 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomItemsMetaExecutor()
 		)
 
-		server.addRecipe(
+		addRecipe(
+			repairMagnetKey,
 			ShapelessRecipe(
 				repairMagnetKey, Material.STONE_HOE.toItemStack()
-			).addIngredient(Material.STONE_HOE).addIngredient(Material.AMETHYST_SHARD).addIngredient(Material.COPPER_INGOT)
+			).addIngredient(Material.STONE_HOE)
+				.addIngredient(Material.AMETHYST_SHARD)
+				.addIngredient(Material.COPPER_INGOT)
 		)
 
 		addRecipe(

@@ -37,6 +37,7 @@ import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.lang.reflect.InvocationTargetException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -84,11 +85,9 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 val areAllMochilasValid = nonNullItemsFromInventory.filter { it.type == Material.PAPER }.all { MochilaUtils.isMochila(it) }
                 val areAllRainbowWoolsValid = nonNullItemsFromInventory.filter { it.type == Material.WHITE_WOOL }.all { it.itemMeta?.hasCustomModelData() == true && it.itemMeta?.customModelData == 1 }
 
-
                 if (!areAllMochilasValid || !areAllRainbowWoolsValid)
                     e.isCancelled = true
                 else {
-                    println("Crafting Matrix:")
                     val oldMochilaItem = e.inventory.matrix?.get(4) ?: return
                     val oldMeta = oldMochilaItem.itemMeta
 
@@ -229,7 +228,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
     }
 
     @InternalCoroutinesApi
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     fun onOpen(e: PlayerInteractEvent) {
         if (!e.rightClick)
             return
@@ -245,7 +244,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
         // First Event: RIGHT_CLICK_BLOCK; useItemInHand: DEFAULT; useInteractedBlock: DENY;
         // Second Event: RIGHT_CLICK_BLOCK; useItemInHand: DEFAULT; useInteractedBlock: DENY;
         // Third Event: LEFT_CLICK_BLOCK; useItemInHand: DEFAULT; useInteractedBlock: ALLOW;
-        if (e.action == Action.RIGHT_CLICK_BLOCK && e.useInteractedBlock() == Event.Result.DENY)
+        if (e.action == Action.RIGHT_CLICK_BLOCK && e.useItemInHand() == Event.Result.DEFAULT && e.useInteractedBlock() == Event.Result.DENY)
             return
 
         if (item.type == Material.CARROT_ON_A_STICK && item.hasItemMeta() && (item.itemMeta as? Damageable)?.damage !in 25..39) {
@@ -370,8 +369,9 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                                 this.owner = e.player.uniqueId
                                 this.size = 27
                                 this.content = (newInventory.toBase64(1))
-                                this.type = (item.itemMeta as Damageable).damage
+                                this.type = item.itemMeta.customModelData
                                 this.funnyId = funnyId
+                                this.version = 1
                             }
                         }
 
@@ -413,13 +413,20 @@ class InventoryListener(val m: DreamMochilas) : Listener {
             }
 
             m.launchAsyncThread {
-                val mochilaAccessHolder =
-                    MochilaUtils.retrieveMochilaAndHold(mochilaId, "${e.player.name} mochila opening")
+                val mochilaAccessHolder = MochilaUtils.retrieveMochilaAndHold(mochilaId, "${e.player.name} mochila opening")
 
                 onMainThread {
                     if (mochilaAccessHolder == null) {
                         e.player.sendMessage("§cEssa mochila não existe!")
                         return@onMainThread
+                    }
+
+                    onAsyncThread {
+                        // Update mochila type
+                        transaction(Databases.databaseNetwork) {
+                            mochilaAccessHolder.mochila.type = item.itemMeta.customModelData
+                            mochilaAccessHolder.mochila.version = 1
+                        }
                     }
 
                     if (e.player.openInventory.topInventory.type != InventoryType.CRAFTING) {

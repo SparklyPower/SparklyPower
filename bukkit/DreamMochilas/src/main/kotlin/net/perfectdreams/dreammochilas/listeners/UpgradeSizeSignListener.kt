@@ -20,10 +20,10 @@ class UpgradeSizeSignListener(val m: DreamMochilas) : Listener {
     private val savingNewMocilhaStatus = mutableListOf<Long>()
 
     private val signs = listOf(
-        SignBlockLocation(528, 65, 257),
-        SignBlockLocation(523, 65, 257),
-        SignBlockLocation(530, 65, 257),
-        SignBlockLocation(535, 65, 257)
+        SignBlockLocation(535, 71, 257),
+        SignBlockLocation(537, 71, 257),
+        SignBlockLocation(536, 71, 242),
+        SignBlockLocation(536, 71, 272)
     )
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)

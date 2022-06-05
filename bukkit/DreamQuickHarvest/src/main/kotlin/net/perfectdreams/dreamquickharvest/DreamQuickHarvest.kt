@@ -151,7 +151,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		// If the player has 1000 herbalism level, it should recharge 250 blocks per second
 		// However it would be capped at level 1000
-		return (5 + (herbalismLevel.coerceAtMost(HERBALISM_LEVEL_CAP) * 0.1)).toInt()
+		return (5 + (herbalismLevel.coerceAtMost(HERBALISM_LEVEL_CAP) * 0.2)).toInt()
 	}
 
 	@EventHandler
@@ -362,7 +362,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		var mochila: MochilaAccessHolder? = null
 		val item = e.player.inventory.itemInMainHand
 
-		if (item.type == Material.CARROT_ON_A_STICK) {
+		if (MochilaUtils.isMochila(item)) {
 			val mochilaId = MochilaUtils.getMochilaId(item)
 
 			if (mochilaId != null) {
@@ -540,7 +540,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			return
 		}
 
-		if (doesPlayerNotHaveEnoughEnergyToHarvestTypeAndIfYesSendMessage(player, info, block.type))
+		if (removePlayerEnergyIfTheyHaveAndIfTheyDontSendMessage(player, info, block.type))
 			return
 
 		inventory.addItem(itemStack)
@@ -666,7 +666,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			return
 		}
 
-		if (doesPlayerNotHaveEnoughEnergyToHarvestTypeAndIfYesSendMessage(player, info, block.type))
+		if (removePlayerEnergyIfTheyHaveAndIfTheyDontSendMessage(player, info, block.type))
 			return
 
 		inventory.addItem(itemStack)
@@ -733,11 +733,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		var bottom = top
 
 		while (bottom.type == Material.SUGAR_CANE && bottom.getRelative(BlockFace.DOWN).type == Material.SUGAR_CANE) {
-			if (info.activeBlocks == 0) {
-				player.sendMessage(NO_HARVEST_BLOCKS_LEFT)
-				return
-			}
-
 			val itemStack = ItemStack(
 				Material.SUGAR_CANE,
 				getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
@@ -752,7 +747,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				return
 			}
 
-			if (doesPlayerNotHaveEnoughEnergyToHarvestTypeAndIfYesSendMessage(player, info, block.type))
+			if (removePlayerEnergyIfTheyHaveAndIfTheyDontSendMessage(player, info, block.type))
 				return
 
 			inventory.addItem(itemStack)
@@ -788,15 +783,16 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		val howMuchWillBeRemoved = BLOCK_ENERGY_COST[type] ?: 1
 		if (0 >= info.activeBlocks - howMuchWillBeRemoved)
 			return true
-		info.activeBlocks -= howMuchWillBeRemoved
 		return false
 	}
 
-	private fun doesPlayerNotHaveEnoughEnergyToHarvestTypeAndIfYesSendMessage(player: Player, info: PlayerQuickHarvestInfo, type: Material): Boolean {
+	private fun removePlayerEnergyIfTheyHaveAndIfTheyDontSendMessage(player: Player, info: PlayerQuickHarvestInfo, type: Material): Boolean {
+		val howMuchWillBeRemoved = BLOCK_ENERGY_COST[type] ?: 1
 		if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, type)) {
 			player.sendMessage(NO_HARVEST_BLOCKS_LEFT)
 			return true
 		}
+		info.activeBlocks -= howMuchWillBeRemoved
 		return false
 	}
 

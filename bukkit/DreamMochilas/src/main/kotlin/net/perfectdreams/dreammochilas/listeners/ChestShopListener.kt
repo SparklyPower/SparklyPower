@@ -21,7 +21,7 @@ class ChestShopListener : Listener {
         val cleanItemString = ChatColor.stripColor(e.itemString)!!
         if (cleanItemString.startsWith("Mochila ")) {
             val mochilaName = cleanItemString.substringAfter("Mochila ")
-            val mochilaData = MochilaData.list.firstOrNull { it.name.equals(mochilaName, true) }
+            val mochilaData = MochilaData.list.firstOrNull { it.name.startsWith(mochilaName, true) }
             if (mochilaData != null) {
                 e.item = DreamMochilas.createMochila(mochilaData)
             }
