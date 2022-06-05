@@ -7,6 +7,7 @@ import com.gmail.nossr50.datatypes.skills.SubSkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.player.UserManager
 import dev.forst.exposed.insertOrUpdate
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -51,6 +52,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.sum
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.awt.SystemColor.info
 
 class DreamQuickHarvest : KotlinPlugin(), Listener {
 	companion object {
@@ -71,6 +73,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	}
 
 	private val harvestingMutexes = mutableMapOf<Player, Mutex>()
+	private val energySumField = PlayerQuickHarvestUpgrades.energy.sum()
 
 	override fun softEnable() {
 		super.softEnable()
@@ -89,54 +92,60 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			ColheitaUpgradeExecutor(this)
 		)
 
-		launchMainThread {
+		launchAsyncThread {
 			while (true) {
 				val now = Clock.System.now()
 
-				for (player in Bukkit.getOnlinePlayers()) {
-					lockAndRunIfDataExists(player) { info ->
-						val maxUserBlocks = onAsyncThread {
-							val sum = PlayerQuickHarvestUpgrades.energy.sum()
+				logger.info("Creating new thread to process energy... Now: $now")
 
-							DEFAULT_BLOCKS + transaction(Databases.databaseNetwork) {
-								PlayerQuickHarvestUpgrades.slice(sum).select {
-									PlayerQuickHarvestUpgrades.playerId eq player.uniqueId and (PlayerQuickHarvestUpgrades.expiresAt greater now.toJavaInstant())
-								}.firstOrNull()?.get(sum) ?: 0 // Should NEVER be null if a row is present
-							}
-						}
+				launchAsyncThread {
+					val s = System.currentTimeMillis()
+					val jobs = Bukkit.getOnlinePlayers().map { player ->
+						launchAsyncThreadDeferred {
+							lockAndRunIfDataExists(player) { info ->
+								val maxUserBlocks = DEFAULT_BLOCKS + transaction(Databases.databaseNetwork) {
+									PlayerQuickHarvestUpgrades.slice(energySumField).select {
+										PlayerQuickHarvestUpgrades.playerId eq player.uniqueId and (PlayerQuickHarvestUpgrades.expiresAt greater now.toJavaInstant())
+									}.firstOrNull()?.get(energySumField)
+										?: 0 // Should NEVER be null if a row is present
+								}
 
-						if (info.activeBlocks != maxUserBlocks) {
-							val newBlocks = howManyQuickHarvestBlocksThePlayerShouldEarn(player)
-							info.activeBlocks += newBlocks
+								if (info.activeBlocks != maxUserBlocks) {
+									val newBlocks = howManyQuickHarvestBlocksThePlayerShouldEarn(player)
+									info.activeBlocks += newBlocks
 
-							logger.info { "Recharging ${player.name} with $newBlocks blocks, they have a max of $maxUserBlocks blocks!" }
+									logger.info { "Recharging ${player.name} with $newBlocks blocks, they have a max of $maxUserBlocks blocks!" }
 
-							if (info.activeBlocks >= maxUserBlocks) {
-								info.activeBlocks = maxUserBlocks
-								player.sendActionBar(
-									Component.empty()
-										.color(NamedTextColor.GREEN)
-										.append(Component.text("Suas energias sistema de colheita rápida foram recarregados!"))
-								)
-								player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
-							} else {
-								player.sendActionBar(
-									Component.empty()
-										.color(NamedTextColor.GREEN)
-										.append(Component.text("Recarregando Energia... "))
-										.append(
-											Component.text("${info.activeBlocks}")
-												.color(NamedTextColor.YELLOW)
+									if (info.activeBlocks >= maxUserBlocks) {
+										info.activeBlocks = maxUserBlocks
+										player.sendActionBar(
+											Component.empty()
+												.color(NamedTextColor.GREEN)
+												.append(Component.text("Suas energias sistema de colheita rápida foram recarregados!"))
 										)
-										.append(Component.text("/"))
-										.append(
-											Component.text("$maxUserBlocks")
-												.color(NamedTextColor.YELLOW)
+										player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
+									} else {
+										player.sendActionBar(
+											Component.empty()
+												.color(NamedTextColor.GREEN)
+												.append(Component.text("Recarregando Energia... "))
+												.append(
+													Component.text("${info.activeBlocks}")
+														.color(NamedTextColor.YELLOW)
+												)
+												.append(Component.text("/"))
+												.append(
+													Component.text("$maxUserBlocks")
+														.color(NamedTextColor.YELLOW)
+												)
 										)
-								)
+									}
+								}
 							}
 						}
 					}
+					jobs.awaitAll()
+					logger.info("Took ${System.currentTimeMillis() - s}ms to process energy!")
 				}
 
 				delay(1_000) // every second
@@ -807,11 +816,21 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	}
 
 	private fun getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(player: Player, blockState: BlockState, stackCount: Int): Int {
-		val hasDoubleDrops = com.gmail.nossr50.util.BlockUtils.checkDoubleDrops(player, blockState, PrimarySkillType.HERBALISM, SubSkillType.HERBALISM_DOUBLE_DROPS)
-		return if (hasDoubleDrops) {
-			stackCount * 2
+		if (mcMMO.getPlaceStore().isTrue(blockState)) {
+			// User placed the block
+			return stackCount
 		} else {
-			stackCount
+			val hasDoubleDrops = com.gmail.nossr50.util.BlockUtils.checkDoubleDrops(
+				player,
+				blockState,
+				PrimarySkillType.HERBALISM,
+				SubSkillType.HERBALISM_DOUBLE_DROPS
+			)
+			return if (hasDoubleDrops) {
+				stackCount * 2
+			} else {
+				stackCount
+			}
 		}
 	}
 

@@ -39,9 +39,7 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 		WorldAttributesState.NetherWorldAttributesState(Bukkit.getServer()),
 		WorldAttributesState.TheEndWorldAttributesState(Bukkit.getServer())
 	).associateBy { it.worldName }
-	private val canYouLoseItemsRightNow = worldAttributesMap.map {
-		it.key to it.value.canYouLoseItems()
-	}.toMap().toMutableMap()
+	private val canYouLoseItemsRightNow = mutableMapOf<String, Boolean>()
 
 	override fun softEnable() {
 		super.softEnable()

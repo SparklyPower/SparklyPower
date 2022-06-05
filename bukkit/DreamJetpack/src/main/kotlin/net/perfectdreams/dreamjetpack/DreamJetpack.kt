@@ -175,7 +175,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 						} else {
 							bossBar.setTitle(
 								if (applyDamage == 0) {
-									"\ue259陇陇陇§dWoosh! §aVocê pode voar por mais §e∞§a!"
+									"§dWoosh! §aVocê pode voar por mais §e∞§a!"
 								} else {
 									"§dWoosh! §aVocê pode voar por mais §e$minutes minutos e $seconds segundos§a!"
 								}
