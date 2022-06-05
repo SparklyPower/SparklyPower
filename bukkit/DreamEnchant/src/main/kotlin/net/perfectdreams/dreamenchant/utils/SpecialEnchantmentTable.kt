@@ -2,7 +2,6 @@ package net.perfectdreams.dreamenchant.utils
 
 import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcash.utils.Cash
-import net.perfectdreams.dreamcore.commands.TellExecutor.Companion.Options.player
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
@@ -18,7 +17,6 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import protocolsupport.api.TranslationAPI
-import java.awt.SystemColor.menu
 
 abstract class SpecialEnchantmentTable {
     val rubiesToCreditsAmount = 1
@@ -269,9 +267,9 @@ abstract class SpecialEnchantmentTable {
             }
 
             slot(5, 0) {
-                item = ItemStack(Material.PAPER)
+                item = ItemStack(Material.NETHER_STAR)
                     .meta<ItemMeta> {
-                        setCustomModelData(9)
+                        setCustomModelData(1)
                     }
                     .rename("§a$pesadelosToCreditsAmount pesadelos §6➤§a $creditsAmount créditos de encantamento")
                     .lore(

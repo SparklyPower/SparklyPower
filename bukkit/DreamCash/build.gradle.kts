@@ -14,6 +14,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly("net.luckperms:api:5.0")
     compileOnly(project(":bukkit:DreamClubes"))
+    compileOnly(project(":bukkit:DreamBedrockIntegrations"))
 }
 
 tasks.withType<KotlinCompile> {

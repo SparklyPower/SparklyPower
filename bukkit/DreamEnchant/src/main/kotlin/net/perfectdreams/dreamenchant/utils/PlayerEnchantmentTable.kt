@@ -1,24 +1,12 @@
 package net.perfectdreams.dreamenchant.utils
 
 import me.ryanhamshire.GriefPrevention.GriefPrevention
-import net.perfectdreams.dreamcash.utils.Cash
-import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
-import net.perfectdreams.dreamcustomitems.utils.CustomItems
-import net.perfectdreams.dreamcustomitems.utils.isMagnet
+import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
 import net.perfectdreams.dreamenchant.DreamEnchant
-import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.EnchantingTable
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
-import protocolsupport.api.TranslationAPI
 
 class PlayerEnchantmentTable(val m: DreamEnchant) : SpecialEnchantmentTable() {
     companion object {

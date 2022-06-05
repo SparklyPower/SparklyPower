@@ -16,6 +16,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(files("../../libs/mcMMO.jar"))
     compileOnly(project(":bukkit:DreamMochilas"))
+    compileOnly(project(":bukkit:DreamCash"))
 }
 
 tasks.withType<KotlinCompile> {

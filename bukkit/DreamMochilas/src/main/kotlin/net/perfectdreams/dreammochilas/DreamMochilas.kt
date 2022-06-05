@@ -33,7 +33,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 		lateinit var INSTANCE: DreamMochilas
 
 		fun createMochila(mochilaData: MochilaData): ItemStack {
-			val item = ItemStack(Material.PAPER)
+			val item = ItemStack(Material.CHEST_MINECART)
 				.rename("§rMochila")
 				.meta<ItemMeta> {
 					setCustomModelData(mochilaData.customModelData)

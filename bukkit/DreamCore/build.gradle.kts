@@ -41,7 +41,7 @@ dependencies {
     api("com.google.code.gson:gson:2.8.9")
     api("org.mongodb:mongo-java-driver:3.7.0-rc0")
     api("com.zaxxer:HikariCP:5.0.1")
-    api("org.postgresql:postgresql:42.3.2")
+    api("org.postgresql:postgresql:42.3.6")
     api("com.okkero.skedule:skedule:1.2.4.1-SNAPSHOT")
     api("com.github.kevinsawicki:http-request:6.0")
     api("org.ow2.asm:asm:7.0")

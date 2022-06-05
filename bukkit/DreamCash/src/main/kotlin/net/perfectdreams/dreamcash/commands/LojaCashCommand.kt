@@ -10,10 +10,12 @@ import net.perfectdreams.dreamcash.DreamCash
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "cashloja")) {
@@ -23,14 +25,17 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
     }
 
     fun showShopMenu(sender: Player) {
-        val menu = createMenu(45, "§a§lA Loja de seus §c§lPesadelos") {
-            fun generateItemAt(x: Int, y: Int, type: Material, name: String, quantity: Long, callback: () -> (Boolean)) {
+        val menu = createMenu(54, "§fꈉ\ue261") {
+            fun generateItemAt(x: Int, y: Int, type: Material, customModelData: Int? = null, name: String, quantity: Long, callback: () -> (Boolean)) {
                 slot(x, y) {
                     item = ItemStack(type)
                         .rename(name)
                         .lore(
                             "§c$quantity pesadelos"
                         )
+                        .meta<ItemMeta> {
+                            setCustomModelData(customModelData)
+                        }
 
                     onClick {
                         checkIfPlayerHasSufficientMoney(sender, quantity) {
@@ -72,7 +77,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             val hasAnyVip = isVip || isVipPlus || isVipPlusPlus
 
             // Accumulate means "add more time", this is to avoid issues when giving the VIP group ;)
-            generateItemAt(0, 0, Material.IRON_INGOT, "§b§lVIP §7(um mês • R$ 14,99)", 500) {
+            generateItemAt(0, 0, Material.IRON_INGOT, 1, "§b§lVIP §7(um mês • R$ 14,99)", 500) {
                 if (hasAnyVip && !isVip) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
                     false
@@ -84,7 +89,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                     true
                 }
             }
-            generateItemAt(1, 0, Material.GOLD_INGOT, "§b§lVIP§e+ §7(um mês • R$ 29,99)", 1000) {
+            generateItemAt(1, 0, Material.GOLD_INGOT, 1, "§b§lVIP§e+ §7(um mês • R$ 29,99)", 1000) {
                 if (hasAnyVip && !isVipPlus) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
                         false
@@ -96,7 +101,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                     true
                 }
             }
-            generateItemAt(2, 0, Material.DIAMOND, "§b§lVIP§e++ §7(um mês • R$ 44,99)", 1500) {
+            generateItemAt(2, 0, Material.DIAMOND, 1, "§b§lVIP§e++ §7(um mês • R$ 44,99)", 1500) {
                 if (hasAnyVip && !isVipPlusPlus) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
                     false
@@ -110,58 +115,57 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             }
 
             // Blocos de Proteção
-            generateItemAt(0, 1, Material.DIRT, "§e8000 blocos de proteção", 15) {
+            generateItemAt(0, 1, Material.DIRT, null, "§e8000 blocos de proteção", 15) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 8000")
                 true
             }
-            generateItemAt(1, 1, Material.MYCELIUM, "§e16000 blocos de proteção", 30) {
+            generateItemAt(1, 1, Material.MYCELIUM, null, "§e16000 blocos de proteção", 30) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 16000")
                 true
             }
-            generateItemAt(2, 1, Material.GRASS_BLOCK, "§e24000 blocos de proteção", 45) {
+            generateItemAt(2, 1, Material.GRASS_BLOCK, null, "§e24000 blocos de proteção", 45) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 24000")
                 true
             }
 
             // Money
-            generateItemAt(0, 2, Material.EMERALD, "§a130000 Sonecas", 250) {
+            generateItemAt(0, 2, Material.EMERALD, 1, "§a130000 Sonecas", 250) {
                 sender.deposit(130000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
-            generateItemAt(1, 2, Material.EMERALD, "§a260000 Sonecas", 500) {
+            generateItemAt(1, 2, Material.EMERALD, 1, "§a260000 Sonecas", 500) {
                 sender.deposit(260000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
-            generateItemAt(2, 2, Material.EMERALD, "§a500000 Sonecas", 950) {
+            generateItemAt(2, 2, Material.EMERALD, 1, "§a500000 Sonecas", 950) {
                 sender.deposit(500000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
-            generateItemAt(3, 2, Material.EMERALD, "§a1000000 Sonecas", 1_900) {
+            generateItemAt(3, 2, Material.EMERALD, 1, "§a1000000 Sonecas", 1_900) {
                 sender.deposit(1000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
-            generateItemAt(4, 2, Material.EMERALD, "§a2000000 Sonecas", 3_800) {
+            generateItemAt(4, 2, Material.EMERALD, 1, "§a2000000 Sonecas", 3_800) {
                 sender.deposit(2000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
-            generateItemAt(5, 2, Material.EMERALD, "§a5000000 Sonecas", 9_500) {
+            generateItemAt(5, 2, Material.EMERALD, 1, "§a5000000 Sonecas", 9_500) {
                 sender.deposit(5000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
-            generateItemAt(6, 2, Material.EMERALD, "§a10000000 Sonecas", 19_000) {
+            generateItemAt(6, 2, Material.EMERALD, 1, "§a10000000 Sonecas", 19_000) {
                 sender.deposit(10000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
                 true
             }
 
-            // Coisas Reais
             this.slot(0, 3) {
-                item = ItemStack(Material.OAK_BOAT)
+                item = ItemStack(Material.ARMOR_STAND)
                     .rename("§aAumentar o seu Clube em +1 slot para Membros")
                     .lore(
                         "§aPermita que o seu clube tenha mais pessoas! (Máximo: 20 membros)",
@@ -170,6 +174,9 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                         "§f",
                         "§c50 pesadelos"
                     )
+                    .meta<ItemMeta> {
+                        setCustomModelData(1)
+                    }
 
                 onClick {
                     checkIfPlayerHasSufficientMoney(sender, 50) {
@@ -220,9 +227,12 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             }
 
             // Special stuff
-            this.slot(7, 4) {
+            this.slot(7, 5) {
                 item = ItemStack(Material.NETHER_STAR)
                     .rename("§aComo conseguir pesadelos?")
+                    .meta<ItemMeta> {
+                        setCustomModelData(1)
+                    }
 
                 onClick {
                     it.closeInventory()
@@ -234,7 +244,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                 }
             }
 
-            this.slot(8, 4) {
+            this.slot(8, 5) {
                 item = ItemStack(Material.BARRIER)
                     .rename("§c§lFechar menu")
 
@@ -243,7 +253,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                 }
             }
 
-            this.slot(6,  4) {
+            this.slot(6,  5) {
                 item = ItemStack(Material.BEACON)
                     .rename("§e§lInformações sobre o meu VIP ativo")
 

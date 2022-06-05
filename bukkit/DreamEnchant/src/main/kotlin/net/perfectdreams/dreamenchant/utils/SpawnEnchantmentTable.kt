@@ -3,26 +3,12 @@ package net.perfectdreams.dreamenchant.utils
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import net.perfectdreams.dreamcash.utils.Cash
-import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
-import net.perfectdreams.dreamcustomitems.utils.CustomItems
-import net.perfectdreams.dreamcustomitems.utils.isMagnet
+import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
 import net.perfectdreams.dreamenchant.DreamEnchant
-import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.Particle
-import org.bukkit.Sound
 import org.bukkit.block.Block
 import org.bukkit.block.EnchantingTable
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
-import protocolsupport.api.TranslationAPI
 
 class SpawnEnchantmentTable(val m: DreamEnchant) : SpecialEnchantmentTable() {
     private val SPAWN_ENCHANTMENT_TABLE_CREDITS = SparklyNamespacedKey("spawn_enchantment_table_credits")

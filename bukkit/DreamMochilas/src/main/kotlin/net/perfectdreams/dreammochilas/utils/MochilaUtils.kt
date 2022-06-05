@@ -47,7 +47,7 @@ object MochilaUtils {
 
     val mochilaCreationMutex = Mutex()
 
-    fun isMochilaItem(item: ItemStack) = item.type == Material.PAPER && item.hasItemMeta() && item.itemMeta.hasCustomModelData() && item.itemMeta.customModelData in 10..46
+    fun isMochilaItem(item: ItemStack) = item.type == Material.CHEST_MINECART && item.hasItemMeta() && item.itemMeta.hasCustomModelData() && item.itemMeta.customModelData in 10..46
     fun isMochila(item: ItemStack) = isMochilaItem(item) && item.itemMeta.persistentDataContainer.has(IS_MOCHILA_KEY)
 
     fun getMochilaId(item: ItemStack): Long? = if (isMochila(item))
