@@ -18,6 +18,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamClubes"))
     compileOnly(project(":bukkit:DreamVote"))
     compileOnly(project(":bukkit:DreamVanish"))
+    compileOnly(project(":bukkit:DreamBedrockIntegrations"))
 }
 
 tasks.withType<KotlinCompile> {

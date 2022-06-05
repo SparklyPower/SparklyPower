@@ -9,7 +9,12 @@ import net.perfectdreams.dreamcore.utils.commands.*
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclarationWrapper
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import net.perfectdreams.dreamcore.utils.scheduler.BukkitDispatcher
+import org.bukkit.Bukkit
+import org.bukkit.NamespacedKey
 import org.bukkit.event.HandlerList
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.Recipe
+import org.bukkit.inventory.ShapedRecipe
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -31,6 +36,7 @@ open class KotlinPlugin : JavaPlugin() {
 	val sparklyCommandManager by lazy { SparklyCommandManager(this) }
 	val serverEvents = mutableListOf<ServerEvent>()
 	val activeJobs = ConcurrentLinkedQueue<Job>()
+	private val recipes = mutableListOf<NamespacedKey>()
 
 	override fun onEnable() {
 		softEnable()
@@ -55,6 +61,10 @@ open class KotlinPlugin : JavaPlugin() {
 		for (serverEvent in serverEvents.toList())
 			unregisterServerEvent(serverEvent)
 
+		recipes.forEach {
+			Bukkit.removeRecipe(it)
+		}
+		recipes.clear()
 		// Problema resolvido!
 	}
 
@@ -173,5 +183,31 @@ open class KotlinPlugin : JavaPlugin() {
 	fun unregisterServerEvent(event: ServerEvent) {
 		serverEvents.remove(event)
 		DreamCore.INSTANCE.dreamEventManager.events.remove(event)
+	}
+
+	fun addRecipe(name: String, item: ItemStack, shape: List<String>, ingredients: (ShapedRecipe) -> (Unit)) {
+		// create a NamespacedKey for your recipe
+		val key = NamespacedKey(this, name)
+
+		addRecipe(key, item, shape, ingredients)
+	}
+
+	fun addRecipe(key: NamespacedKey, item: ItemStack, shape: List<String>, ingredients: (ShapedRecipe) -> (Unit)) {
+		// Create our custom recipe variable
+		val recipe = ShapedRecipe(key, item)
+
+		// Here we will set the places. E and S can represent anything, and the letters can be anything. Beware; this is case sensitive.
+		recipe.shape(*shape.toTypedArray())
+
+		// Set what the letters represent.
+		// E = Emerald, S = Stick
+		ingredients.invoke(recipe)
+
+		addRecipe(key, recipe)
+	}
+
+	fun addRecipe(key: NamespacedKey, recipe: Recipe) {
+		recipes += key
+		Bukkit.addRecipe(recipe)
 	}
 }

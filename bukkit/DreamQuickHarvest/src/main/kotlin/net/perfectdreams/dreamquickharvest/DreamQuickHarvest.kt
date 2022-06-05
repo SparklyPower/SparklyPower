@@ -6,9 +6,13 @@ import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.datatypes.skills.SubSkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.player.UserManager
+import dev.forst.exposed.insertOrUpdate
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
@@ -34,28 +38,49 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.experimental.and
 import kotlinx.serialization.Serializable
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestData
+import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestUpgrades
 import org.bukkit.Sound
 import org.bukkit.block.BlockState
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.sum
+import org.jetbrains.exposed.sql.transactions.transaction
 
 class DreamQuickHarvest : KotlinPlugin(), Listener {
 	companion object {
-		private const val ALREADY_FARMING = "§cVocê já está colhendo! Espere a colheita acabar para começar outra!"
 		private const val NO_HARVEST_BLOCKS_LEFT = "§cVocê já usou todos os seus blocos de colheita rápida... Espere ela recarregar! Use §6/colheita§c para saber mais informações sobre o sistema de colheita rápida e como evoluir!"
-		const val MAX_BLOCKS = 1000
-		const val MAX_TOTAL_BLOCKS = 10_000
+		const val DEFAULT_BLOCKS = 1_000
+		const val HERBALISM_LEVEL_CAP = 10_000
+		val BLOCK_ENERGY_COST = mapOf(
+			Material.NETHER_WART to 1,
+			Material.COCOA_BEANS to 1,
+			Material.WHEAT to 2,
+			Material.POTATOES to 2,
+			Material.CARROTS to 2,
+			Material.BEETROOT to 2,
+			Material.SUGAR_CANE to 3,
+			Material.MELON to 4,
+			Material.PUMPKIN to 4
+		)
 	}
 
 	private val harvestingMutexes = mutableMapOf<Player, Mutex>()
-	// TODO: Save on the database later :)
-	private val playerHarvestBlocks = mutableMapOf<UUID, PlayerQuickHarvestInfo>()
 
 	override fun softEnable() {
 		super.softEnable()
+
+		transaction(Databases.databaseNetwork) {
+			SchemaUtils.createMissingTablesAndColumns(
+				PlayerQuickHarvestData,
+				PlayerQuickHarvestUpgrades
+			)
+		}
 
 		registerEvents(this)
 		registerCommand(
@@ -66,35 +91,46 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		launchMainThread {
 			while (true) {
+				val now = Clock.System.now()
+
 				for (player in Bukkit.getOnlinePlayers()) {
-					val info = playerHarvestBlocks[player.uniqueId] ?: continue
-					info.mutex.withLock {
-						if (info.activeBlocks != MAX_BLOCKS) {
+					lockAndRunIfDataExists(player) { info ->
+						val maxUserBlocks = onAsyncThread {
+							val sum = PlayerQuickHarvestUpgrades.energy.sum()
+
+							DEFAULT_BLOCKS + transaction(Databases.databaseNetwork) {
+								PlayerQuickHarvestUpgrades.slice(sum).select {
+									PlayerQuickHarvestUpgrades.playerId eq player.uniqueId and (PlayerQuickHarvestUpgrades.expiresAt greater now.toJavaInstant())
+								}.firstOrNull()?.get(sum) ?: 0 // Should NEVER be null if a row is present
+							}
+						}
+
+						if (info.activeBlocks != maxUserBlocks) {
 							val newBlocks = howManyQuickHarvestBlocksThePlayerShouldEarn(player)
 							info.activeBlocks += newBlocks
 
-							logger.info { "Recharging ${player.name} with ${newBlocks} blocks" }
+							logger.info { "Recharging ${player.name} with $newBlocks blocks, they have a max of $maxUserBlocks blocks!" }
 
-							if (info.activeBlocks >= MAX_BLOCKS) {
-								info.activeBlocks = MAX_BLOCKS
+							if (info.activeBlocks >= maxUserBlocks) {
+								info.activeBlocks = maxUserBlocks
 								player.sendActionBar(
 									Component.empty()
 										.color(NamedTextColor.GREEN)
-										.append(Component.text("Seus blocos do sistema de colheita rápida foram recarregados!"))
+										.append(Component.text("Suas energias sistema de colheita rápida foram recarregados!"))
 								)
 								player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
 							} else {
 								player.sendActionBar(
 									Component.empty()
 										.color(NamedTextColor.GREEN)
-										.append(Component.text("Recarregando Blocos... "))
+										.append(Component.text("Recarregando Energia... "))
 										.append(
 											Component.text("${info.activeBlocks}")
 												.color(NamedTextColor.YELLOW)
 										)
 										.append(Component.text("/"))
 										.append(
-											Component.text("$MAX_BLOCKS")
+											Component.text("$maxUserBlocks")
 												.color(NamedTextColor.YELLOW)
 										)
 								)
@@ -108,17 +144,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		}
 	}
 
-	override fun softDisable() {
-		super.softDisable()
-	}
-
-	fun getOrCreateQuickHarvestInfo(player: Player) = playerHarvestBlocks.getOrPut(player.uniqueId) {
-		PlayerQuickHarvestInfo(
-			PlayerQuickHarvestData(MAX_BLOCKS),
-			Mutex()
-		)
-	}
-
 	fun howManyQuickHarvestBlocksThePlayerShouldEarn(player: Player): Int {
 		val mcMMOPlayer = UserManager.getPlayer(player)
 
@@ -126,7 +151,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		// If the player has 1000 herbalism level, it should recharge 250 blocks per second
 		// However it would be capped at level 1000
-		return (5 + (herbalismLevel.coerceAtMost(1000) * 0.245)).toInt()
+		return (5 + (herbalismLevel.coerceAtMost(HERBALISM_LEVEL_CAP) * 0.1)).toInt()
 	}
 
 	@EventHandler
@@ -138,8 +163,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	fun onBreak(e: BlockBreakEvent) {
 		if (e.player.isSneaking)
 			return
-
-		val plugin = this
 
 		if (e.block.type == Material.WHEAT // Crops
 			|| e.block.type == Material.NETHER_WART
@@ -154,7 +177,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			launchMainThread {
-				runIfNotLocked(e.player) { info ->
+				lockAndRun(e.player) { info ->
 					val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(
 						e,
 						"${e.player.name} harvesting crops"
@@ -199,7 +222,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			launchMainThread {
-				runIfNotLocked(e.player) { info ->
+				lockAndRun(e.player) { info ->
 					val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(
 						e,
 						"${e.player.name} harvesting cocoa"
@@ -232,7 +255,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			launchMainThread {
-				runIfNotLocked(e.player) { info ->
+				lockAndRun(e.player) { info ->
 					val (inventoryTarget, mochilaItem, mochila) = getInventoryTarget(
 						e,
 						"${e.player.name} harvesting sugar cane"
@@ -262,22 +285,79 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		}
 	}
 
-	private suspend inline fun runIfNotLocked(player: Player, block: (info: PlayerQuickHarvestInfo) -> (Unit)) {
-		try {
-			harvestingMutexes.getOrPut(player) { Mutex() }.tryLock()
-
-			val info = getOrCreateQuickHarvestInfo(player)
-
-			info.mutex.withLock {
-				block.invoke(info)
+	private suspend fun lockAndRun(player: Player, block: suspend (info: PlayerQuickHarvestInfo) -> (Unit)) {
+		val mutex = harvestingMutexes.getOrPut(player) { Mutex() }
+		mutex.withLock {
+			loadAndUpdateUserEnergy(player) {
+				block.invoke(it)
 			}
-		} catch (e: IllegalStateException) {
-			// Mutex is locked, let's ignore it then...
-			player.sendMessage(ALREADY_FARMING)
 		}
 	}
 
-	suspend fun getInventoryTarget(e: BlockBreakEvent, triggerType: String): InventoryTargetResult {
+	private suspend fun lockAndRunIfDataExists(player: Player, block: suspend (info: PlayerQuickHarvestInfo) -> (Unit)) {
+		val mutex = harvestingMutexes.getOrPut(player) { Mutex() }
+		mutex.withLock {
+			loadAndUpdateUserEnergyIfExists(player) {
+				block.invoke(it)
+			}
+		}
+	}
+
+	suspend fun loadAndUpdateUserEnergy(player: Player, block: suspend (info: PlayerQuickHarvestInfo) -> (Unit)) {
+		val currentEnergy = onAsyncThread {
+			transaction(Databases.databaseNetwork) {
+				PlayerQuickHarvestData.select {
+					PlayerQuickHarvestData.id eq player.uniqueId
+				}.firstOrNull()?.get(PlayerQuickHarvestData.energy) ?: DEFAULT_BLOCKS
+			}
+		}
+
+		val info = PlayerQuickHarvestInfo(currentEnergy)
+		val newInfo = info.copy()
+
+		block.invoke(newInfo)
+
+		if (info != newInfo) {
+			// Update user data if needed
+			onAsyncThread {
+				transaction(Databases.databaseNetwork) {
+					PlayerQuickHarvestData.insertOrUpdate(PlayerQuickHarvestData.id) {
+						it[PlayerQuickHarvestData.id] = player.uniqueId
+						it[PlayerQuickHarvestData.energy] = newInfo.activeBlocks
+					}
+				}
+			}
+		}
+	}
+
+	suspend fun loadAndUpdateUserEnergyIfExists(player: Player, block: suspend (info: PlayerQuickHarvestInfo) -> (Unit)) {
+		val currentEnergy = onAsyncThread {
+			transaction(Databases.databaseNetwork) {
+				PlayerQuickHarvestData.select {
+					PlayerQuickHarvestData.id eq player.uniqueId
+				}.firstOrNull()?.get(PlayerQuickHarvestData.energy)
+			}
+		} ?: return
+
+		val info = PlayerQuickHarvestInfo(currentEnergy)
+		val newInfo = info.copy()
+
+		block.invoke(newInfo)
+
+		if (info != newInfo) {
+			// Update user data if needed
+			onAsyncThread {
+				transaction(Databases.databaseNetwork) {
+					PlayerQuickHarvestData.insertOrUpdate(PlayerQuickHarvestData.id) {
+						it[PlayerQuickHarvestData.id] = player.uniqueId
+						it[PlayerQuickHarvestData.energy] = newInfo.activeBlocks
+					}
+				}
+			}
+		}
+	}
+
+	private suspend fun getInventoryTarget(e: BlockBreakEvent, triggerType: String): InventoryTargetResult {
 		var inventoryTarget: Inventory = e.player.inventory
 		var mochila: MochilaAccessHolder? = null
 		val item = e.player.inventory.itemInMainHand
@@ -390,7 +470,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		)
 	}
 
-	suspend fun doQuickHarvestOnCrop(
+	fun doQuickHarvestOnCrop(
 		startingBlock: Block,
 		player: Player,
 		block: Block,
@@ -456,15 +536,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		)
 
 		if (!inventory.canHoldItem(itemStack)) {
-			if (startingBlock == block)
-				sendInventoryFullTitle(player)
+			sendInventoryFullTitle(player)
 			return
 		}
 
-		if (info.activeBlocks == 0) {
-			player.sendMessage(NO_HARVEST_BLOCKS_LEFT)
+		if (doesPlayerNotHaveEnoughEnergyToHarvestTypeAndIfYesSendMessage(player, info, block.type))
 			return
-		}
 
 		inventory.addItem(itemStack)
 
@@ -516,8 +593,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			0.5
 		)
 
-		info.activeBlocks -= 1
-
 		val blocksThatMustBeHarvestedLater = listOf(
 			block.getRelative(BlockFace.NORTH),
 			block.getRelative(BlockFace.SOUTH),
@@ -540,12 +615,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		blocksThatMustBeHarvestedLater.sortedBy { startingBlock.location.distanceSquared(it.location) }.forEach {
 			doQuickHarvestOnCrop(startingBlock, player, it, type, fortuneLevel, inventory, mcMMOXp, info)
-			if (info.activeBlocks == 0)
+			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, block.type))
 				return
 		}
 	}
 
-	suspend fun doQuickHarvestOnCocoa(
+	private fun doQuickHarvestOnCocoa(
 		e: BlockBreakEvent,
 		player: Player,
 		block: Block,
@@ -587,15 +662,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		)
 
 		if (!inventory.canHoldItem(itemStack)) {
-			if (e.block == block)
-				sendInventoryFullTitle(player)
+			sendInventoryFullTitle(player)
 			return
 		}
 
-		if (info.activeBlocks == 0) {
-			player.sendMessage(NO_HARVEST_BLOCKS_LEFT)
+		if (doesPlayerNotHaveEnoughEnergyToHarvestTypeAndIfYesSendMessage(player, info, block.type))
 			return
-		}
 
 		inventory.addItem(itemStack)
 
@@ -603,8 +675,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		blockage.age = 0
 		block.blockData = blockage
-
-		info.activeBlocks -= 1
 
 		player.world.spawnParticle(Particle.VILLAGER_HAPPY, block.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
 
@@ -619,12 +689,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		blocksThatMustBeHarvestedLater.sortedBy { e.block.location.distanceSquared(it.location) }.forEach {
 			doQuickHarvestOnCocoa(e, player, it, inventory, mcMMOXp, info)
-			if (info.activeBlocks == 0)
+			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, block.type))
 				return
 		}
 	}
 
-	suspend fun doQuickHarvestOnSugarCane(
+	private fun doQuickHarvestOnSugarCane(
 		e: BlockBreakEvent,
 		player: Player,
 		block: Block,
@@ -678,10 +748,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			)
 
 			if (!inventory.canHoldItem(itemStack)) {
-				if (e.block == bottom)
-					sendInventoryFullTitle(player)
+				sendInventoryFullTitle(player)
 				return
 			}
+
+			if (doesPlayerNotHaveEnoughEnergyToHarvestTypeAndIfYesSendMessage(player, info, block.type))
+				return
 
 			inventory.addItem(itemStack)
 
@@ -690,8 +762,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			bottom.type = Material.AIR
 
 			player.world.spawnParticle(Particle.VILLAGER_HAPPY, bottom.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
-
-			info.activeBlocks -= 1
 
 			bottom = bottom.getRelative(BlockFace.DOWN)
 		}
@@ -709,14 +779,30 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		blocksThatMustBeHarvestedLater.sortedBy { e.block.location.distanceSquared(it.location) }.forEach {
 			doQuickHarvestOnSugarCane(e, player, it, inventory, mcMMOXp, info)
-			if (info.activeBlocks == 0)
+			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, block.type))
 				return
 		}
 	}
 
+	private fun doesPlayerNotHaveEnoughEnergyToHarvestType(info: PlayerQuickHarvestInfo, type: Material): Boolean {
+		val howMuchWillBeRemoved = BLOCK_ENERGY_COST[type] ?: 1
+		if (0 >= info.activeBlocks - howMuchWillBeRemoved)
+			return true
+		info.activeBlocks -= howMuchWillBeRemoved
+		return false
+	}
+
+	private fun doesPlayerNotHaveEnoughEnergyToHarvestTypeAndIfYesSendMessage(player: Player, info: PlayerQuickHarvestInfo, type: Material): Boolean {
+		if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, type)) {
+			player.sendMessage(NO_HARVEST_BLOCKS_LEFT)
+			return true
+		}
+		return false
+	}
+
 	private fun sendInventoryFullTitle(player: Player) {
 		player.sendTitle(
-			"§cSabia que...",
+			"§c",
 			"§cVocê está com o inventário cheio!",
 			0,
 			60,
@@ -733,15 +819,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		}
 	}
 
-	class PlayerQuickHarvestInfo(
-		var data: PlayerQuickHarvestData,
-		var mutex: Mutex,
-	) {
-		var activeBlocks by data::activeBlocks
-	}
+	data class PlayerQuickHarvestInfo(var activeBlocks: Int)
 
 	@Serializable
-	data class PlayerQuickHarvestData(
-		var activeBlocks: Int
+	data class QuickHarvestUpgrade(
+		val energy: Int,
+		val boughtAt: Instant,
+		val expiresAt: Instant
 	)
 }

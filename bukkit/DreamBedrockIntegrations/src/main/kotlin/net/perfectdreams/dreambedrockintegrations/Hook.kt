@@ -1,11 +1,11 @@
-package net.perfectdreams.dreambedrockbypass
+package net.perfectdreams.dreambedrockintegrations
 
 import fr.neatmonster.nocheatplus.checks.CheckType
 import fr.neatmonster.nocheatplus.checks.access.IViolationInfo
 import fr.neatmonster.nocheatplus.hooks.AbstractNCPHook
 import org.bukkit.entity.Player
 
-class Hook(val m: DreamBedrockBypass) : AbstractNCPHook() {
+class Hook(val m: DreamBedrockIntegrations) : AbstractNCPHook() {
     override fun getHookVersion() = "1.0.0"
     override fun getHookName() = "BedrockBypass"
 

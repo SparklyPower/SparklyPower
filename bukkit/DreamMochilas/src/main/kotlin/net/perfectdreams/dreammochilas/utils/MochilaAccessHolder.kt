@@ -1,12 +1,14 @@
 package net.perfectdreams.dreammochilas.utils
 
+import net.kyori.adventure.text.Component
+
 class MochilaAccessHolder(
     val wrapper: MochilaWrapper
 ) {
     var isHolding = false
     val mochila = wrapper.mochila
 
-    suspend fun getOrCreateMochilaInventoryAndHold() = wrapper.getOrCreateMochilaInventory().also {
+    suspend fun getOrCreateMochilaInventoryAndHold(title: Component = MochilaUtils.DEFAULT_MOCHILA_TITLE_NAME) = wrapper.getOrCreateMochilaInventory(title).also {
         (it.holder as MochilaInventoryHolder).accessHolders.add(this)
     }
 

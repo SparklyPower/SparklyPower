@@ -1,10 +1,13 @@
 package net.perfectdreams.dreamcore.utils
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryMoveItemEvent
 import org.bukkit.inventory.Inventory
@@ -14,7 +17,7 @@ import org.bukkit.inventory.ItemStack
 /**
  * Uma classe para criar menus de uma maneira simples e fácil!
  */
-class DreamMenu(val size: Int, val title: String, val cancelItemMovement: Boolean, val slots: List<DreamMenuSlot>) {
+class DreamMenu(val size: Int, val title: Component, val cancelItemMovement: Boolean, val slots: List<DreamMenuSlot>) {
 	fun createInventory(): Inventory {
 		val inventory = Bukkit.createInventory(DreamMenuHolder(this), size, title)
 		slots.forEach {
@@ -37,21 +40,23 @@ class DreamMenu(val size: Int, val title: String, val cancelItemMovement: Boolea
 	}
 }
 
-fun createMenu(size: Int, title: String, block: DreamMenuBuilder.() -> Unit) = DreamMenuBuilder(size, title).apply(block).build()
+fun createMenu(size: Int, title: String, block: DreamMenuBuilder.() -> Unit) = DreamMenuBuilder(size, LegacyComponentSerializer.legacySection().deserialize(title)).apply(block).build()
 
-class DreamMenuBuilder(val size: Int, val title: String) {
+class DreamMenuBuilder(val size: Int, val title: Component) {
 	private val slots = mutableListOf<DreamMenu.DreamMenuSlot>()
 	var cancelItemMovement: Boolean = true
 
-	fun slot(x: Int, y: Int, block: DreamMenuSlotBuilder.() -> Unit) {
-		val slot = DreamMenuSlotBuilder(x, y).apply(block).build()
+	fun slot(x: Int, y: Int, block: DreamMenuSlotBuilder.() -> Unit) = slot(x + (y * 9), block)
+
+	fun slot(index: Int, block: DreamMenuSlotBuilder.() -> Unit) {
+		val slot = DreamMenuSlotBuilder(index).apply(block).build()
 		slots.add(slot)
 	}
 
 	fun build(): DreamMenu = DreamMenu(size, title, cancelItemMovement, slots)
 }
 
-class DreamMenuSlotBuilder(val x: Int, val y: Int) {
+class DreamMenuSlotBuilder(val index: Int) {
 	var item: ItemStack? = null
 	private var onClick: ((HumanEntity) -> Unit)? = null
 
@@ -60,19 +65,23 @@ class DreamMenuSlotBuilder(val x: Int, val y: Int) {
 	}
 
 	fun build(): DreamMenu.DreamMenuSlot {
-		return DreamMenu.DreamMenuSlot(x + (y * 9), item, onClick)
+		return DreamMenu.DreamMenuSlot(index, item, onClick)
 	}
 }
 
 class DreamMenuListener : Listener {
 	@EventHandler
 	fun onMove(e: InventoryClickEvent) {
-		val holder = e.clickedInventory?.holder
+		if (e.click == ClickType.SHIFT_LEFT && e.inventory.holder is DreamMenu.DreamMenuHolder) {
+			e.isCancelled = true
+			return
+		}
 
-		if (holder !is DreamMenu.DreamMenuHolder)
+		val clickedInventoryHolder = e.clickedInventory?.holder
+		if (clickedInventoryHolder !is DreamMenu.DreamMenuHolder)
 			return
 
-		val dreamMenu = holder.menu
+		val dreamMenu = clickedInventoryHolder.menu
 
 		if (dreamMenu.cancelItemMovement)
 			e.isCancelled = true
@@ -102,6 +111,8 @@ class DreamMenuListener : Listener {
 		else if (sourceHolder is DreamMenu.DreamMenuHolder)
 			dreamMenuHolder = sourceHolder
 		else return
+
+		println("DreamMenuHolder: $dreamMenuHolder")
 
 		// The item click is already handled by InventoryClickEvent so we don't need to care about this
 		val dreamMenu = dreamMenuHolder.menu

@@ -3,6 +3,9 @@ package net.perfectdreams.dreammochilas.utils
 import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
@@ -15,6 +18,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -23,6 +27,10 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 
 object MochilaUtils {
+    val DEFAULT_MOCHILA_TITLE_NAME = Component.text("Mochila")
+        .color(NamedTextColor.BLACK)
+        .decoration(TextDecoration.ITALIC, false)
+
     private val isMagnet: (ItemStack?) -> Boolean = { it?.type == Material.STONE_HOE && it.hasItemMeta() && it.itemMeta.hasCustomModelData() && it.itemMeta.customModelData in 1 .. 2 }
     val HAS_MAGNET_KEY = SparklyNamespacedKey("has_magnet")
     val IS_FULL_KEY = SparklyNamespacedKey("is_backpack_full")
@@ -39,7 +47,9 @@ object MochilaUtils {
 
     val mochilaCreationMutex = Mutex()
 
-    fun isMochila(item: ItemStack) = item.hasItemMeta() && item.itemMeta.persistentDataContainer.has(IS_MOCHILA_KEY)
+    fun isMochilaItem(item: ItemStack) = item.type == Material.CHEST_MINECART && item.hasItemMeta() && item.itemMeta.hasCustomModelData() && item.itemMeta.customModelData in 10..46
+    fun isMochila(item: ItemStack) = isMochilaItem(item) && item.itemMeta.persistentDataContainer.has(IS_MOCHILA_KEY)
+
     fun getMochilaId(item: ItemStack): Long? = if (isMochila(item))
         item.itemMeta.persistentDataContainer.get(MOCHILA_ID_KEY, PersistentDataType.LONG)
     else

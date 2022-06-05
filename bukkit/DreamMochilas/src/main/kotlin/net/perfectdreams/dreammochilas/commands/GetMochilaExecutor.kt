@@ -6,11 +6,12 @@ import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecut
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreammochilas.DreamMochilas
+import net.perfectdreams.dreammochilas.utils.MochilaData
 
 class GetMochilaExecutor : SparklyCommandExecutor() {
     companion object : SparklyCommandExecutorDeclaration(GetMochilaExecutor::class) {
         object Options : CommandOptions() {
-            val damageValue = integer("damage_value")
+            val mochilaName = greedyString("mochila_name")
                 .register()
         }
 
@@ -20,11 +21,14 @@ class GetMochilaExecutor : SparklyCommandExecutor() {
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
 
-        val damageValue = args[Options.damageValue]
+        val mochilaName = args[Options.mochilaName]
 
-        val item = DreamMochilas.createMochila(damageValue)
+        val mochilaData = MochilaData.list.firstOrNull { it.name.equals(mochilaName, true) }
+            ?: context.fail("§cMochila desconhecida")
+
+        val item = DreamMochilas.createMochila(mochilaData)
 
         player.inventory.addItem(item)
-        context.sendMessage("Prontinho patrão, usando meta value $damageValue")
+        context.sendMessage("Prontinho patrão, usando mochila data $mochilaData")
     }
 }

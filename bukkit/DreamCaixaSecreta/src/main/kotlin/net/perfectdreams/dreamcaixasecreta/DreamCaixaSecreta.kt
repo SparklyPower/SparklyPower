@@ -29,7 +29,8 @@ class DreamCaixaSecreta : KotlinPlugin() {
 	override fun softEnable() {
 		super.softEnable()
 
-		server.addRecipe(
+		addRecipe(
+			COMBINE_BOXES_KEY,
 			ShapelessRecipe(
 				COMBINE_BOXES_KEY, Material.CHEST.toItemStack()
 			).addIngredient(2, Material.CHEST)

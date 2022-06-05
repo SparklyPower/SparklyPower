@@ -4,6 +4,8 @@ import com.Acrobot.ChestShop.Events.ItemParseEvent
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamcore.utils.lore
 import net.perfectdreams.dreamcore.utils.rename
+import net.perfectdreams.dreammochilas.DreamMochilas
+import net.perfectdreams.dreammochilas.utils.MochilaData
 import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
@@ -18,14 +20,10 @@ class ChestShopListener : Listener {
     fun onClick(e: ItemParseEvent) {
         val cleanItemString = ChatColor.stripColor(e.itemString)!!
         if (cleanItemString.startsWith("Mochila ")) {
-            val itemId = cleanItemString.substring("Mochila ".length)
-
-            val damageValue = itemId.toIntOrNull()
-
-            if (damageValue != null) {
-                if (damageValue in 1..35) {
-                    e.item = net.perfectdreams.dreammochilas.DreamMochilas.createMochila(damageValue)
-                }
+            val mochilaName = cleanItemString.substringAfter("Mochila ")
+            val mochilaData = MochilaData.list.firstOrNull { it.name.equals(mochilaName, true) }
+            if (mochilaData != null) {
+                e.item = DreamMochilas.createMochila(mochilaData)
             }
         }
 

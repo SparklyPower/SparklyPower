@@ -2,6 +2,9 @@ package net.perfectdreams.dreamresourcereset
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.command
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
@@ -9,10 +12,12 @@ import net.perfectdreams.dreamhome.tables.Homes
 import net.perfectdreams.dreamresourcereset.commands.DreamResourceResetRegenWorldCommand
 import net.perfectdreams.dreamresourcereset.listeners.ChunkListener
 import net.perfectdreams.dreamresourcereset.listeners.InteractListener
+import net.perfectdreams.dreamresourcereset.listeners.PlayerListener
+import net.perfectdreams.dreamresourcereset.utils.WorldAttributesState
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
-import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.deleteWhere
@@ -21,9 +26,22 @@ import java.io.File
 import java.lang.RuntimeException
 
 class DreamResourceReset : KotlinPlugin(), Listener {
+	companion object {
+		val IS_DEATH_CHEST = SparklyNamespacedKey("is_death_chest")
+		val DEATH_DROPPED_XP = SparklyNamespacedKey("death_dropped_xp")
+	}
+
 	val toBeUsedWorldsFolder = File(dataFolder, "resource_worlds")
 	val oldWorldsFolder = File(dataFolder, "old_worlds")
 	val cachedInhabitedChunkTimers = mutableMapOf<Long, Long>()
+	val worldAttributesMap = listOf(
+		WorldAttributesState.ResourcesWorldAttributesState(Bukkit.getServer()),
+		WorldAttributesState.NetherWorldAttributesState(Bukkit.getServer()),
+		WorldAttributesState.TheEndWorldAttributesState(Bukkit.getServer())
+	).filter { it._world != null }.associateBy { it.world }
+	private val canYouLoseItemsRightNow = worldAttributesMap.map {
+		it.key to it.value.canYouLoseItems()
+	}.toMap().toMutableMap()
 
 	override fun softEnable() {
 		super.softEnable()
@@ -33,8 +51,48 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 
 		loadInhabitedChunkTimers()
 
+		registerEvents(PlayerListener(this))
 		registerEvents(InteractListener(this))
 		registerEvents(ChunkListener(this))
+
+		schedule {
+			while (true) {
+				for (world in worldAttributesMap) {
+					val previousState = canYouLoseItemsRightNow[world.key] ?: false
+					val newState = world.value.canYouLoseItems()
+					if (!previousState && newState) {
+						world.key.players.forEach {
+							it.playSound(it.location, Sound.ENTITY_ENDER_DRAGON_GROWL, 1f, 1f)
+						}
+					}
+					canYouLoseItemsRightNow[world.key] = newState
+				}
+
+				for (player in Bukkit.getOnlinePlayers()) {
+					val worldAttributes = worldAttributesMap[player.world]
+
+					if (worldAttributes != null) {
+						val canYouLoseItems = worldAttributes.canYouLoseItems()
+
+						if (canYouLoseItems) {
+							player.sendActionBar(
+								Component.text("Cuidado! Se você morrer, você perderá seus itens!")
+									.color(NamedTextColor.RED)
+									.decoration(TextDecoration.BOLD, true)
+							)
+						} else {
+							player.sendActionBar(
+								Component.text("Yay! Se você morrer, você não perderá seus itens!")
+									.color(NamedTextColor.GREEN)
+									.decoration(TextDecoration.BOLD, true)
+							)
+						}
+					}
+				}
+
+				waitFor(20L)
+			}
+		}
 
 		schedule {
 			while (true) {

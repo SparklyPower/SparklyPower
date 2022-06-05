@@ -1,5 +1,5 @@
 name: DreamMochilas
 main: net.perfectdreams.dreammochilas.DreamMochilas
 version: 1.0.0
-depend: ["DreamCore", "ChestShop"]
+depend: ["DreamCore", "ChestShop", "DreamBedrockIntegrations"]
 api-version: 1.13
