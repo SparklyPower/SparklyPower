@@ -15,8 +15,14 @@ import org.bukkit.Bukkit
 import java.io.File
 import java.time.*
 import java.util.*
+import kotlin.time.Duration.Companion.seconds
 
 class DreamRestarter : KotlinPlugin() {
+	companion object {
+		val RESTART_DELAY = 10.seconds
+		private val SERVER_ZONE_ID = ZoneId.of("America/Sao_Paulo")
+	}
+
 	val storedPlayerRestart = File(dataFolder, "players_before_restart")
 
 	override fun softEnable() {
@@ -28,24 +34,24 @@ class DreamRestarter : KotlinPlugin() {
 
 		scheduler().schedule(this) {
 			launchAsyncThread {
-				val now = Instant.now()
-				val today = LocalDate.now(ZoneId.of("America/Sao_Paulo"))
-				val todayAtTime = LocalDateTime.of(today, LocalTime.of(5, 0))
-				val gonnaBeScheduledAtTime =  if (now > todayAtTime.toInstant(ZoneOffset.UTC)) {
+				val now = ZonedDateTime.now()
+				val today = ZonedDateTime.now(SERVER_ZONE_ID)
+				val todayAtTime = ZonedDateTime.of(today.toLocalDate(), LocalTime.of(5, 0), SERVER_ZONE_ID)
+				val gonnaBeScheduledAtTime =  if (now > todayAtTime) {
 					// If today at time is larger than today, then it means that we need to schedule it for tomorrow
 					todayAtTime.plusDays(1)
 				} else todayAtTime
 
-				val diff = gonnaBeScheduledAtTime.toInstant(ZoneOffset.UTC).toEpochMilli() - System.currentTimeMillis()
+				val diff = gonnaBeScheduledAtTime.toInstant().toEpochMilli() - System.currentTimeMillis()
+
+				logger.info("Server will restart in ${diff}ms ($gonnaBeScheduledAtTime)")
 
 				delay(diff)
 
-				logger.info("Server will restart in ${diff}ms")
-
 				storeCurrentPlayersAndSendServerDownNotification()
 
-				// Wait 2.5s before *really* shutting down
-				delay(2_500)
+				// Wait before *really* shutting down
+				delay(RESTART_DELAY)
 
 				Bukkit.shutdown()
 			}
@@ -76,8 +82,6 @@ class DreamRestarter : KotlinPlugin() {
 						)
 					)
 				}
-
-				waitFor(10L)
 			}
 		}
 	}

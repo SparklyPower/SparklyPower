@@ -20,8 +20,8 @@ class RestartCommand(val m: DreamRestarter) : SparklyCommand(arrayOf("dreamresta
             m.launchMainThread {
                 m.storeCurrentPlayersAndSendServerDownNotification()
 
-                // Wait 2.5s before *really* shutting down
-                delay(2_500)
+                // Wait before *really* shutting down
+                delay(DreamRestarter.RESTART_DELAY)
 
                 Bukkit.shutdown()
             }

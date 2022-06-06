@@ -73,7 +73,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	}
 
 	private val harvestingMutexes = mutableMapOf<Player, Mutex>()
-	
+
 	override fun softEnable() {
 		super.softEnable()
 
