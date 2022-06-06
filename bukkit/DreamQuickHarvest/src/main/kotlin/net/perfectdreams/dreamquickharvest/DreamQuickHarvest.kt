@@ -73,8 +73,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	}
 
 	private val harvestingMutexes = mutableMapOf<Player, Mutex>()
-	private val energySumField = PlayerQuickHarvestUpgrades.energy.sum()
-
+	
 	override fun softEnable() {
 		super.softEnable()
 
@@ -84,6 +83,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				PlayerQuickHarvestUpgrades
 			)
 		}
+
+		val energySumField = PlayerQuickHarvestUpgrades.energy.sum()
 
 		registerEvents(this)
 		registerCommand(
