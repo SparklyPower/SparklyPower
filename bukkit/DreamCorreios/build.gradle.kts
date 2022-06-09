@@ -15,6 +15,7 @@ dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
     implementation("net.citizensnpcs:citizens:2.0.26-SNAPSHOT")
+    compileOnly(project(":bukkit:DreamBedrockIntegrations"))
 }
 
 tasks.withType<KotlinCompile> {

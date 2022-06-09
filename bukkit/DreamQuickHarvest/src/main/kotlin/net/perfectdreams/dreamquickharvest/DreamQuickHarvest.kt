@@ -42,7 +42,6 @@ import org.bukkit.inventory.ItemStack
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.experimental.and
 import kotlinx.serialization.Serializable
-import net.perfectdreams.dreamcore.commands.TellExecutor.Companion.Options.player
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestData
 import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestUpgrades
@@ -53,7 +52,6 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.sum
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.awt.SystemColor.info
 
 class DreamQuickHarvest : KotlinPlugin(), Listener {
 	companion object {

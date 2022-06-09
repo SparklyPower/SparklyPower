@@ -3,9 +3,12 @@ package net.perfectdreams.dreamcorreios
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import net.perfectdreams.dreambedrockintegrations.DreamBedrockIntegrations
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.adventure.append
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
@@ -83,6 +86,13 @@ class DreamCorreios : KotlinPlugin(), Listener {
 			CorreiosGiveExecutor(this),
 			CorreiosOpenExecutor(this),
 			CorreiosTransformCaixaPostalExecutor(this)
+		)
+
+		val bedrockIntegrations = Bukkit.getPluginManager().getPlugin("DreamBedrockIntegrations") as DreamBedrockIntegrations
+		bedrockIntegrations.registerInventoryTitleTransformer(
+			this,
+			{ PlainTextComponentSerializer.plainText().serialize(it).contains("\uE262") },
+			{ Component.text("Caixa Postal") }
 		)
 	}
 

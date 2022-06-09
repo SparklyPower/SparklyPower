@@ -1,5 +1,5 @@
 name: DreamCorreios
 main: net.perfectdreams.dreamcorreios.DreamCorreios
 version: 1.0.0
-depend: ["DreamCore", "Citizens"]
+depend: ["DreamCore", "Citizens", "DreamBedrockIntegrations"]
 api-version: 1.13
