@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.gson
 import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
+import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreamvote.commands.VotarCommand
 import net.perfectdreams.dreamvote.dao.Vote
 import net.perfectdreams.dreamvote.listeners.TagListener
@@ -176,7 +177,7 @@ class DreamVote : KotlinPlugin() {
 				}
 			}
 
-			// DreamCorreios.addItems(username, true, true, *items.toTypedArray())
+			DreamCorreios.getInstance().addItem(uniqueId, *items.toTypedArray())
 			val offlinePlayer = Bukkit.getOfflinePlayer(uniqueId)
 
 			// Depositar a grana

@@ -9,6 +9,7 @@ import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.getTranslatedDisplayName
+import net.perfectdreams.dreamcorreios.utils.addItemIfPossibleOrAddToPlayerMailbox
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
@@ -102,7 +103,7 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 
 		lastWinner = player.uniqueId
 		DreamChat.INSTANCE.userData.set("last-chat-winner", player.uniqueId.toString())
-		player.inventory.addItem(currentPrize)
+		player.addItemIfPossibleOrAddToPlayerMailbox(currentPrize)
 
 		scheduler().schedule(DreamChat.INSTANCE, SynchronizationContext.ASYNC) {
 			DreamCore.INSTANCE.dreamEventManager.addEventVictory(

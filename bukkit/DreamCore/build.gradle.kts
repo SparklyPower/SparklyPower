@@ -39,7 +39,6 @@ dependencies {
     compileOnlyApi("com.github.apachezy:LangUtils:3.2.2")
     api(project(":common:tables"))
     api("com.google.code.gson:gson:2.8.9")
-    api("org.mongodb:mongo-java-driver:3.7.0-rc0")
     api("com.zaxxer:HikariCP:5.0.1")
     api("org.postgresql:postgresql:42.3.6")
     api("com.okkero.skedule:skedule:1.2.4.1-SNAPSHOT")
@@ -82,10 +81,6 @@ tasks.withType<KotlinCompile> {
 tasks {
     val shadowJar = named<ShadowJar>("shadowJar") {
         archiveBaseName.set("DreamCore-shadow")
-
-        relocate("org.mongodb", "net.perfectdreams.libs.org.mongodb")
-        relocate("com.mongodb", "net.perfectdreams.libs.com.mongodb")
-        relocate("org.bson", "net.perfectdreams.libs.org.bson")
 
         exclude {
             it.file?.name?.startsWith("kotlin") == true || it.file?.name?.startsWith("patched_") == true

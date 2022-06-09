@@ -13,7 +13,9 @@ repositories {
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
-    implementation(project(":bukkit:DreamHome"))
+    compileOnly(project(":bukkit:DreamHome"))
+    compileOnly(project(":bukkit:DreamMapWatermarker"))
+    compileOnly(project(":bukkit:DreamCorreios"))
 }
 
 tasks.withType<KotlinCompile> {

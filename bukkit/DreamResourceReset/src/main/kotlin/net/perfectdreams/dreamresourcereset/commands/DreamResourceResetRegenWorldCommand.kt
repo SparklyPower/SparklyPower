@@ -1,6 +1,5 @@
 package net.perfectdreams.dreamresourcereset.commands
 
-import kotlinx.coroutines.delay
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread

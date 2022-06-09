@@ -5,32 +5,12 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import com.mongodb.MongoClient
-import com.mongodb.MongoClientOptions
-import com.mongodb.ServerAddress
-import com.mongodb.client.MongoCollection
-import com.mongodb.client.MongoDatabase
-import com.mongodb.client.model.Filters
-import com.mongodb.client.model.ReplaceOptions
-import com.mongodb.event.ServerHeartbeatFailedEvent
-import com.mongodb.event.ServerHeartbeatStartedEvent
-import com.mongodb.event.ServerHeartbeatSucceededEvent
-import com.mongodb.event.ServerMonitorListener
-import com.sk89q.worldguard.WorldGuard
 import net.md_5.bungee.api.chat.BaseComponent
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.dao.User
-import net.perfectdreams.dreamcore.pojo.PlayerInfo
 import net.perfectdreams.dreamcore.tables.Users
-import net.perfectdreams.dreamcore.utils.codecs.LocationCodec
-import net.perfectdreams.dreamcore.utils.extensions.getCompoundTag
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import org.bson.codecs.configuration.CodecRegistries
-import org.bson.codecs.configuration.CodecRegistries.fromProviders
-import org.bson.codecs.configuration.CodecRegistries.fromRegistries
-import org.bson.codecs.pojo.PojoCodecProvider
-import org.bson.conversions.Bson
 import org.bukkit.*
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarFlag
@@ -66,44 +46,9 @@ object DreamUtils {
 	@JvmStatic
 	val SLOW_RANDOM = Random()
 	@JvmStatic
-	private val mongoClientOptions by lazy {
-		MongoClientOptions.Builder()
-			.addServerMonitorListener(MongoServerMonitor())
-			.codecRegistry(pojoCodecRegistry)
-			.build()
-	}
-	@JvmStatic
-	val mongoClient by lazy {
-		val legacyMongo = DreamCore.dreamConfig.legacyMongoDB
-		if (legacyMongo == null)
-			throw RuntimeException("MongoDB is not configured!")
-		MongoClient(ServerAddress(legacyMongo.ip, 27017), mongoClientOptions)
-	}
-	@JvmStatic
 	val gson: Gson
 	@JvmStatic
 	val jsonParser = JsonParser()
-	val pojoCodecProvider by lazy {
-		PojoCodecProvider.builder()
-			.automatic(true)
-			.build()
-	}
-	val pojoCodecRegistry by lazy {
-		fromRegistries(
-			CodecRegistries.fromCodecs(LocationCodec()),
-			MongoClient.getDefaultCodecRegistry(),
-			fromProviders(pojoCodecProvider)
-		)
-	}
-
-	val database: MongoDatabase by lazy {
-		val legacyMongo = DreamCore.dreamConfig.legacyMongoDB
-		if (legacyMongo == null)
-			throw RuntimeException("MongoDB is not configured!")
-		getMongoDatabase(legacyMongo.serverDatabaseName) }
-	val usersCollection by lazy { database.getCollection("users")
-	}
-	val usersCollectionPlayerInfo by lazy { usersCollection.withDocumentClass(PlayerInfo::class.java) }
 	val nmsVersion: String by lazy { Bukkit.getServer()::class.java.getPackage().name.split("\\.")[3] }
 	const val HEADER_LINE = "§f §3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-";
 
@@ -311,24 +256,6 @@ object DreamUtils {
 		gson = gsonBuilder.create()
 	}
 
-	fun getMongoDatabase(name: String): MongoDatabase {
-		val database = mongoClient.getDatabase(name)
-		return database.withCodecRegistry(pojoCodecRegistry)
-	}
-
-	class MongoServerMonitor : ServerMonitorListener {
-		override fun serverHeartbeatFailed(p0: ServerHeartbeatFailedEvent) {
-			Bukkit.getPluginManager().getPlugin("DreamCore")?.logger?.log(Level.SEVERE, "Lost MongoDB connection! Shutting down...")
-			Bukkit.shutdown()
-		}
-
-		override fun serverHeartbeatSucceeded(p0: ServerHeartbeatSucceededEvent) {
-		}
-
-		override fun serverHearbeatStarted(p0: ServerHeartbeatStartedEvent) {
-		}
-	}
-
 	/**
 	 * Retrieves the user info for the specified [uuid]
 	 *
@@ -502,19 +429,4 @@ fun generateCommandInfo(command: String, arguments: Map<String, String> = mapOf(
 		}
 	}
 	return base
-}
-
-fun <T> MongoCollection<T>.save(obj: T, filters: Bson) {
-	val replaceOptions = ReplaceOptions().upsert(true)
-	this.replaceOne(
-		filters,
-		obj,
-		replaceOptions
-	)
-}
-
-fun <T> MongoCollection<T>.save(obj: T) {
-	this.insertOne(
-		obj
-	)
 }

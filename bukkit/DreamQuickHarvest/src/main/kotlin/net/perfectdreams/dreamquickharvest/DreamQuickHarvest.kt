@@ -42,6 +42,7 @@ import org.bukkit.inventory.ItemStack
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.experimental.and
 import kotlinx.serialization.Serializable
+import net.perfectdreams.dreamcore.commands.TellExecutor.Companion.Options.player
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestData
 import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestUpgrades
@@ -341,6 +342,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	}
 
 	suspend fun loadAndUpdateUserEnergyIfExists(player: Player, block: suspend (info: PlayerQuickHarvestInfo) -> (Unit)) {
+		val ce = System.currentTimeMillis()
+
 		val currentEnergy = onAsyncThread {
 			transaction(Databases.databaseNetwork) {
 				PlayerQuickHarvestData.select {

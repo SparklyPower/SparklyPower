@@ -5,6 +5,7 @@ import net.perfectdreams.dreamfight.utils.FightModifier
 import net.perfectdreams.dreamfight.utils.WinReason
 import net.perfectdreams.dreamcore.utils.extensions.healAndFeed
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
+import net.perfectdreams.dreamcorreios.events.CorreiosItemReceivingEvent
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -15,6 +16,12 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
 class FightListener(val m: DreamFight) : Listener {
+    @EventHandler
+    fun onCorreiosItemReceive(event: CorreiosItemReceivingEvent) {
+        if (event.player in m.fight.players)
+            event.result = CorreiosItemReceivingEvent.PlayerInEventResult
+    }
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     fun onDamage(e: EntityDamageEvent) {
         if (e.entity.world.name == "EventoFight")

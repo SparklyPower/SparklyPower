@@ -3,7 +3,6 @@ package net.perfectdreams.dreamquickharvest.commands
 import kotlinx.datetime.*
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.DreamUtils.database
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
@@ -15,8 +14,6 @@ import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.minutes
 
 class ColheitaUpgradeExecutor(val m: DreamQuickHarvest) : SparklyCommandExecutor() {
     companion object : SparklyCommandExecutorDeclaration(ColheitaUpgradeExecutor::class)

@@ -17,6 +17,8 @@ import org.bukkit.inventory.Recipe
 import org.bukkit.inventory.ShapedRecipe
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.logging.Level
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Classe que permite "reload" sem explodir o servidor
@@ -35,11 +37,20 @@ open class KotlinPlugin : JavaPlugin() {
 	val dreamCommandManager by lazy { DreamCommandManager(this) }
 	val sparklyCommandManager by lazy { SparklyCommandManager(this) }
 	val serverEvents = mutableListOf<ServerEvent>()
-	val activeJobs = ConcurrentLinkedQueue<Job>()
+	private val activeJobs = ConcurrentLinkedQueue<Job>()
 	private val recipes = mutableListOf<NamespacedKey>()
+	private val pendingTasks = ConcurrentLinkedQueue<Job>()
 
 	override fun onEnable() {
 		softEnable()
+
+		Bukkit.getScheduler().runTask(
+			this,
+			Runnable {
+				pendingTasks.forEach { it.start() }
+				pendingTasks.clear()
+			}
+		)
 	}
 
 	override fun onDisable() {
@@ -65,6 +76,11 @@ open class KotlinPlugin : JavaPlugin() {
 			Bukkit.removeRecipe(it)
 		}
 		recipes.clear()
+
+		activeJobs.forEach {
+			it.cancel()
+		}
+		activeJobs.clear()
 		// Problema resolvido!
 	}
 
@@ -81,22 +97,7 @@ open class KotlinPlugin : JavaPlugin() {
 			BukkitDispatcher(this, false) + PLUGIN_TASK_THREAD_LOCAL.asContextElement(value = this@KotlinPlugin),
 			block = block
 		)
-		// Yes, the order matters, since sometimes the invokeOnCompletion would be invoked before the job was
-		// added to the list, causing leaks.
-		// invokeOnCompletion is also invoked even if the job was already completed at that point, so no worries!
-		activeJobs.add(job)
-		job.invokeOnCompletion {
-			activeJobs.remove(job)
-		}
 
-		return job
-	}
-
-	fun launchAsyncThread(block: suspend CoroutineScope.() -> Unit): Job {
-		val job = GlobalScope.launch(
-			BukkitDispatcher(this, true) + PLUGIN_TASK_THREAD_LOCAL.asContextElement(value = this@KotlinPlugin),
-			block = block
-		)
 		// Yes, the order matters, since sometimes the invokeOnCompletion would be invoked before the job was
 		// added to the list, causing leaks.
 		// invokeOnCompletion is also invoked even if the job was already completed at that point, so no worries!
@@ -123,12 +124,24 @@ open class KotlinPlugin : JavaPlugin() {
 
 		return job
 	}
+	
+	// We don't use Bukkit's "runTaskAsync" because it queues the task to be executed one tick later, because Bukkit's scheduler only runs every 50ms (one tick)
+	fun launchAsyncThread(block: suspend CoroutineScope.() -> Unit): Job = launchCoroutineOnContext(Dispatchers.IO, block)
+		.also {
+			it.invokeOnCompletion { cause ->
+				if (cause is Throwable && cause !is CancellationException)
+					logger.log(Level.WARNING, cause) { "Something went wrong while executing async job!" }
+			}
+		}
 
-	fun <T> launchAsyncThreadDeferred(block: suspend CoroutineScope.() -> T): Deferred<T> {
+	fun <T> launchAsyncThreadDeferred(block: suspend CoroutineScope.() -> T) = launchCoroutineOnContext(Dispatchers.IO, block)
+
+	private fun <T> launchCoroutineOnContext(context: CoroutineContext, block: suspend CoroutineScope.() -> T): Deferred<T> {
 		val job = GlobalScope.async(
-			BukkitDispatcher(this, false) + PLUGIN_TASK_THREAD_LOCAL.asContextElement(value = this@KotlinPlugin),
+			context + PLUGIN_TASK_THREAD_LOCAL.asContextElement(value = this@KotlinPlugin),
 			block = block
 		)
+
 		// Yes, the order matters, since sometimes the invokeOnCompletion would be invoked before the job was
 		// added to the list, causing leaks.
 		// invokeOnCompletion is also invoked even if the job was already completed at that point, so no worries!

@@ -1,5 +1,5 @@
 name: DreamResourceReset
 main: net.perfectdreams.dreamresourcereset.DreamResourceReset
 version: 1.0.0
-depend: ["DreamCore", "WorldGuard"]
+depend: ["DreamCore", "WorldGuard", "DreamHome", "DreamMapWatermarker", "DreamCorreios"]
 api-version: 1.13

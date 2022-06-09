@@ -7,12 +7,10 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitTask
 import kotlin.coroutines.CoroutineContext
 
-// From Skedule: https://raw.githubusercontent.com/okkero/Skedule/master/src/main/kotlin/com/okkero/skedule/BukkitDispatcher.kt
-private val bukkitScheduler
-    get() = Bukkit.getScheduler()
-
 @OptIn(InternalCoroutinesApi::class)
 class BukkitDispatcher(val plugin: JavaPlugin, val async: Boolean = false) : CoroutineDispatcher(), Delay {
+    private val bukkitScheduler = Bukkit.getScheduler()
+
     private val runTaskLater: (Plugin, Runnable, Long) -> BukkitTask =
         if (async)
             bukkitScheduler::runTaskLaterAsynchronously
@@ -45,7 +43,4 @@ class BukkitDispatcher(val plugin: JavaPlugin, val async: Boolean = false) : Cor
             runTask(plugin, block)
         }
     }
-
 }
-
-fun JavaPlugin.dispatcher(async: Boolean = false) = BukkitDispatcher(this, async)

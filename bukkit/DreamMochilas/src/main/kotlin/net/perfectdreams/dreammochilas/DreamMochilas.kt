@@ -128,6 +128,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 			while (true) {
 				// Save all backpacks
 				logger.info { "Saving all mochilas to the database... (Periodic Save)" }
+
 				for (loadedMochila in MochilaUtils.loadedMochilas.values) {
 					loadedMochila.saveMochila(
 						"Periodic Save",
@@ -139,7 +140,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 			}
 		}
 
-		addRecipe(
+		/* addRecipe(
 			"rainbow_mochila",
 			createMochila(MochilaData.Rainbow),
 			listOf(
@@ -150,7 +151,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 		) {
 			it.setIngredient('R', Material.WHITE_WOOL)
 			it.setIngredient('M', Material.PAPER)
-		}
+		} */
 	}
 
 	override fun softDisable() {

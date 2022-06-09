@@ -3,4 +3,4 @@ main: net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
 version: 1.0-SNAPSHOT
 author: MrPowerGamerBR
 api-version: 1.13
-depend: ["DreamCore", "DreamCash", "DreamChat", "DreamMapWatermarker"]
+depend: ["DreamCore", "DreamCash", "DreamChat", "DreamMapWatermarker", "DreamCorreios"]

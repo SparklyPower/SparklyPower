@@ -16,6 +16,7 @@ import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
@@ -26,7 +27,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 		val MAP_CUSTOM_OWNER_KEY = SparklyNamespacedKey("map_custom_owner")
 
 		fun watermarkMap(itemStack: ItemStack, customOwner: UUID?) {
-			itemStack.meta<ItemMeta> {
+			itemStack.meta<MapMeta> {
 				persistentDataContainer.set(LOCK_MAP_CRAFT_KEY, PersistentDataType.BYTE, 1)
 				if (customOwner != null)
 					persistentDataContainer.set(MAP_CUSTOM_OWNER_KEY, PersistentDataType.STRING, customOwner.toString())

@@ -3,6 +3,7 @@ package net.perfectdreams.dreamtorredamorte.listeners
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcorreios.events.CorreiosItemReceivingEvent
 import net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -14,6 +15,12 @@ import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.*
 
 class PlayerListener(val m: DreamTorreDaMorte) : Listener {
+    @EventHandler
+    fun onCorreiosItemReceive(event: CorreiosItemReceivingEvent) {
+        if (event.player in m.torreDaMorte.players)
+            event.result = CorreiosItemReceivingEvent.PlayerInEventResult
+    }
+
     @EventHandler
     fun onDamage(event: EntityDamageByEntityEvent) {
         if (event.entity.location.world.name != "TorreDaMorte")

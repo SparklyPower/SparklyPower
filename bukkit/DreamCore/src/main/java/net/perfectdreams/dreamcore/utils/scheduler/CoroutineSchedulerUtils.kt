@@ -1,8 +1,10 @@
 package net.perfectdreams.dreamcore.utils.scheduler
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
@@ -23,6 +25,8 @@ suspend fun delayTicks(ticks: Long) = delayTicks(KotlinPlugin.PLUGIN_TASK_THREAD
  * @param ticks  how many ticks the task should wait
  */
 suspend fun delayTicks(plugin: Plugin, ticks: Long) {
+    DreamUtils.assertMainThread(true)
+
     suspendCancellableCoroutine<Unit> { cont ->
         Bukkit.getScheduler().runTaskLater(plugin, Runnable { cont.resume(Unit) }, ticks)
     }
@@ -48,7 +52,7 @@ suspend fun <T> onAsyncThread(block: suspend CoroutineScope.() -> T) = onAsyncTh
  * @param plugin the current plugin
  * @param block  what should be executed
  */
-suspend fun <T> onMainThread(plugin: JavaPlugin, block: suspend CoroutineScope.() -> T): T {
+suspend fun <T> onMainThread(plugin: KotlinPlugin, block: suspend CoroutineScope.() -> T): T {
     return withContext(BukkitDispatcher(plugin, false)) {
         block.invoke(this)
     }
@@ -60,8 +64,8 @@ suspend fun <T> onMainThread(plugin: JavaPlugin, block: suspend CoroutineScope.(
  * @param plugin the current plugin
  * @param block  what should be executed
  */
-suspend fun <T> onAsyncThread(plugin: JavaPlugin, block: suspend CoroutineScope.() -> T): T {
-    return withContext(BukkitDispatcher(plugin, true)) {
+suspend fun <T> onAsyncThread(plugin: KotlinPlugin, block: suspend CoroutineScope.() -> T): T {
+    return withContext(Dispatchers.IO) {
         block.invoke(this)
     }
 }

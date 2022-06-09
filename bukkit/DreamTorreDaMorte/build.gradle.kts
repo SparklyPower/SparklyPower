@@ -15,6 +15,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamChat"))
     compileOnly(project(":bukkit:DreamCash"))
     compileOnly(project(":bukkit:DreamMapWatermarker"))
+    compileOnly(project(":bukkit:DreamCorreios"))
 }
 
 tasks.withType<KotlinCompile> {

@@ -10,6 +10,7 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
+import net.perfectdreams.dreamcorreios.utils.addItemIfPossibleOrAddToPlayerMailbox
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
 import net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
 import org.bukkit.*
@@ -260,9 +261,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             }
 
             DreamMapWatermarker.watermarkMap(map, null)
-
-            if (player.inventory.canHoldItem(map))
-                player.inventory.addItem(map)
+            player.addItemIfPossibleOrAddToPlayerMailbox(map)
 
             scheduler().schedule(m, SynchronizationContext.ASYNC) {
                 val wonAt = System.currentTimeMillis()

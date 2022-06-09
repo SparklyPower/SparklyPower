@@ -25,9 +25,9 @@ object ChatUtils {
 		var message = str
 
 		for (player in Bukkit.getOnlinePlayers().filterNot { DreamVanishAPI.isQueroTrabalhar(it) }) {
-			val regex = Regex(".*\\b${player.name}\\b.*")
+			val regex = Regex(".*\\b${Regex.escape(player.name)}\\b.*")
 			if (message.matches(regex)) {
-				message = message.replace(Regex("\\b${player.name}\\b", RegexOption.IGNORE_CASE), "§3${player.displayName}§f")
+				message = message.replace(Regex("\\b${Regex.escape(player.name)}\\b", RegexOption.IGNORE_CASE), "§3${player.displayName}§f")
 				player.playSound(player.location, "perfectdreams.sfx.msn", 1F, 1F)
 				player.sendActionBar("§3${sender.displayName}§a te mencionou no chat!")
 			}
