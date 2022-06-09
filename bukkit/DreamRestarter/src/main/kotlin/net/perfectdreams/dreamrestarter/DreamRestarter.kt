@@ -19,7 +19,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class DreamRestarter : KotlinPlugin() {
 	companion object {
-		val RESTART_DELAY = 10.seconds
+		val RESTART_DELAY = 2.seconds
 		private val SERVER_ZONE_ID = ZoneId.of("America/Sao_Paulo")
 	}
 
@@ -78,7 +78,7 @@ class DreamRestarter : KotlinPlugin() {
 						jsonObject(
 							"type" to "transferPlayersByUUID",
 							"bungeeServer" to DreamCore.dreamConfig.bungeeName,
-							"players" to listOf(uniqueId.toString()).toJsonArray()
+							"players" to uniqueIds.map { it.toString() }.toJsonArray()
 						)
 					)
 				}
@@ -87,15 +87,26 @@ class DreamRestarter : KotlinPlugin() {
 	}
 
 	fun storeCurrentPlayersAndSendServerDownNotification() {
+		val onlinePlayersUniqueIds = Bukkit.getOnlinePlayers()
+			.map { it.uniqueId }
+
 		storedPlayerRestart
 			.writeText(
-				Bukkit.getOnlinePlayers().joinToString("\n") { it.uniqueId.toString() }
+				onlinePlayersUniqueIds.joinToString("\n") { it.toString() }
 			)
 
 		DreamNetwork.PERFECTDREAMS_LOBBY.send(
 			jsonObject(
 				"type" to "serverDown",
 				"serverName" to DreamCore.dreamConfig.bungeeName
+			)
+		)
+
+		DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(
+			jsonObject(
+				"type" to "transferPlayersByUUID",
+				"bungeeServer" to DreamCore.dreamConfig.bungeeName,
+				"players" to onlinePlayersUniqueIds.map { it.toString() }.toJsonArray()
 			)
 		)
 	}
