@@ -73,15 +73,13 @@ class DreamRestarter : KotlinPlugin() {
 
 				storedPlayerRestart.delete()
 
-				for (uniqueId in uniqueIds) {
-					DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(
-						jsonObject(
-							"type" to "transferPlayersByUUID",
-							"bungeeServer" to DreamCore.dreamConfig.bungeeName,
-							"players" to uniqueIds.map { it.toString() }.toJsonArray()
-						)
+				DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(
+					jsonObject(
+						"type" to "transferPlayersByUUID",
+						"bungeeServer" to DreamCore.dreamConfig.bungeeName,
+						"players" to uniqueIds.map { it.toString() }.toJsonArray()
 					)
-				}
+				)
 			}
 		}
 	}
