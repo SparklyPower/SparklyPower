@@ -7,7 +7,7 @@ class CaixaPostalAccessHolder(
 ) {
     val items by m::items
 
-    fun addItems(vararg itemStacks: ItemStack) = m.addItems(*itemStacks)
+    fun addItem(vararg itemStacks: ItemStack) = m.addItem(*itemStacks)
 
     suspend fun release() = m.releaseAccess(this)
 }

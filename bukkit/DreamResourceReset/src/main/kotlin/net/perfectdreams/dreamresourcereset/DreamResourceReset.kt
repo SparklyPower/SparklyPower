@@ -218,11 +218,6 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 			} ?: return@launchAsyncThread // Nope!
 
 			onMainThread {
-				// Remove all renders
-				// mapView.renderers.forEach {
-				// 	mapView.removeRenderer(it)
-				// }
-
 				updateDeathChestMapItems()
 
 				if (info[DeathChestsInformation.found]) {

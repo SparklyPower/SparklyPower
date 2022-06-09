@@ -6,6 +6,7 @@ import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcorreios.DreamCorreios
+import net.perfectdreams.dreamcorreios.utils.addItemIfPossibleOrAddToPlayerMailbox
 import net.perfectdreams.dreamkits.commands.KitCommand
 import net.perfectdreams.dreamkits.tables.Kits
 import net.perfectdreams.dreamkits.utils.Kit
@@ -53,7 +54,8 @@ class DreamKits : KotlinPlugin(), Listener {
 
 	fun giveKit(player: Player, kit: Kit) {
 		// We need to clone because DreamCorreios is dumb sometimes
-		DreamCorreios.addItems(player.name, true, false, *kit.items.map { it.clone() }.toTypedArray())
+		// TODO: Do we really need to clone?
+		player.addItemIfPossibleOrAddToPlayerMailbox(*kit.items.map { it.clone() }.toTypedArray())
 	}
 
 	fun loadKits() {

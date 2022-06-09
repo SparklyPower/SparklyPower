@@ -31,7 +31,7 @@ class CaixaPostal(
         saveIfNotLocked()
     }
 
-    fun addItems(vararg itemStacks: ItemStack) {
+    fun addItem(vararg itemStacks: ItemStack) {
         // To avoid replacing added items, we will only add the items when it is time to save the inventory
         // This way we avoid bugs that may arise by "omg I kept the mailbox open while I received a item and now it disappeared!"
         // TODO: Merge items?

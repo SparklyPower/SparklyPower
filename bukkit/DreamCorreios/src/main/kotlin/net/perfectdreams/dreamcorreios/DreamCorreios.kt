@@ -253,7 +253,7 @@ class DreamCorreios : KotlinPlugin(), Listener {
 		// Oh no... we need to add things to the caixa postal... We need to do this on an async thread!
 		launchAsyncThread {
 			val accessHolder = retrieveCaixaPostalOfPlayerAndHold(playerId)
-			accessHolder.addItems(*itemsThatMustBeAddedToTheCaixaPostal.toTypedArray())
+			accessHolder.addItem(*itemsThatMustBeAddedToTheCaixaPostal.toTypedArray())
 			accessHolder.release()
 
 			onMainThread {
