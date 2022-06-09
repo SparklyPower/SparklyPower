@@ -9,11 +9,13 @@ import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.exceptions.CommandSyntaxException
+import com.mojang.brigadier.suggestion.Suggestions
 import net.minecraft.ChatFormatting
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.selector.EntitySelector
 import net.minecraft.network.chat.*
+import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclaration
@@ -23,12 +25,13 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.PluginIdentifiableCommand
 import org.bukkit.craftbukkit.v1_18_R2.command.VanillaCommandWrapper
-import org.bukkit.plugin.Plugin
+import java.util.concurrent.CompletableFuture
+import kotlin.concurrent.thread
 
 class SparklyBukkitBrigadierCommandWrapper(
     labels: List<String>,
     val declaration: SparklyCommandDeclaration,
-    private val plugin: Plugin,
+    private val plugin: KotlinPlugin,
     private val sparklyCommandManager: SparklyCommandManager,
 ) : Command(labels[0], "", "/${labels[0]}", labels.drop(1)), PluginIdentifiableCommand {
     override fun execute(sender: CommandSender, commandLabel: String, args: Array<out String>): Boolean {
@@ -45,8 +48,7 @@ class SparklyBukkitBrigadierCommandWrapper(
         val commandWithArguments = listOf(label, *args)
         val commandListenerWrapper = VanillaCommandWrapper.getListener(sender)
         try {
-            val r =
-                dispatcher.execute((commandWithArguments.joinToString(" ")), commandListenerWrapper)
+            val r = dispatcher.execute((commandWithArguments.joinToString(" ")), commandListenerWrapper)
         } catch (commandSyntaxException: CommandSyntaxException) {
             // From Minecraft's Commands#performCommand function
             commandListenerWrapper.sendFailure(ComponentUtils.fromMessage(commandSyntaxException.rawMessage))
@@ -186,9 +188,16 @@ class SparklyBukkitBrigadierCommandWrapper(
                                 if (it.suggestsBlock != null)
                                     this.suggests { commandContext, suggestionsBuilder ->
                                         val context = CommandContext(commandContext)
-                                        // context.sendMessage("asked for suggestions owo")
-                                        it.suggestsBlock.invoke(context, suggestionsBuilder)
-                                        suggestionsBuilder.buildFuture()
+
+                                        val completableFuture = CompletableFuture<Suggestions>()
+
+                                        plugin.launchAsyncThread {
+                                            it.suggestsBlock.invoke(context, suggestionsBuilder)
+
+                                            completableFuture.complete(suggestionsBuilder.build())
+                                        }
+
+                                        return@suggests completableFuture
                                     }
                             }
                         }

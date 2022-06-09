@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcore.utils.commands
 
+import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclaration
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclarationWrapper
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
@@ -7,7 +8,7 @@ import net.perfectdreams.dreamcore.utils.registerEvents
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
 
-class SparklyCommandManager(val plugin: Plugin) {
+class SparklyCommandManager(val plugin: KotlinPlugin) {
     val declarations = mutableListOf<SparklyCommandDeclaration>()
     val executors = mutableListOf<SparklyCommandExecutor>()
     var hasCommandListenerRegistered = false

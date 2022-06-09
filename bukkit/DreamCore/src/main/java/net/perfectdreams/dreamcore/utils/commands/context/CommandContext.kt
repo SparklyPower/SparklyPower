@@ -1,9 +1,12 @@
 package net.perfectdreams.dreamcore.utils.commands.context
 
 import com.mojang.brigadier.context.CommandContext
+import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.TextColor
 import net.minecraft.commands.CommandSourceStack
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.commands.exceptions.CommandException
 import org.bukkit.command.ConsoleCommandSender
 import org.bukkit.entity.Player
@@ -22,10 +25,10 @@ class CommandContext(val nmsContext: CommandContext<CommandSourceStack>) {
 
     fun sendMessage(message: String) = sender.sendMessage(message)
     fun sendMessage(component: Component) = sender.sendMessage(component)
-    fun sendMessage(componentBuilder: () -> Component) = sender.sendMessage(componentBuilder)
+    fun sendMessage(block: TextComponent.Builder.() -> (Unit) = {}) = sendMessage(textComponent(block))
 
     /**
-     * Requires that the [sender] is a Player. If it isn't, the command will [fail]~.
+     * Requires that the [sender] is a Player. If it isn't, the command will [fail].
      */
     fun requirePlayer(): Player {
         val s = sender

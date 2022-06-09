@@ -2,11 +2,16 @@ package net.perfectdreams.dreamloja
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamloja.commands.DelLojaCommand
-import net.perfectdreams.dreamloja.commands.LojaCommand
-import net.perfectdreams.dreamloja.commands.SetLojaCommand
-import net.perfectdreams.dreamloja.commands.SetLojaIconCommand
+import net.perfectdreams.dreamcore.utils.adventure.append
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
+import net.perfectdreams.dreamloja.commands.DeleteLojaExecutor
+import net.perfectdreams.dreamloja.commands.LojaExecutor
+import net.perfectdreams.dreamloja.commands.SetLojaExecutor
+import net.perfectdreams.dreamloja.commands.SetLojaIconExecutor
+import net.perfectdreams.dreamloja.commands.declarations.LojaCommand
 import net.perfectdreams.dreamloja.dao.UserShopVote
 import net.perfectdreams.dreamloja.listeners.SignListener
 import net.perfectdreams.dreamloja.listeners.TagListener
@@ -24,11 +29,23 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 import java.time.ZoneId
 import java.util.*
-import java.util.concurrent.BlockingQueue
 
 class DreamLoja : KotlinPlugin() {
 	companion object {
-		const val PREFIX = "§8[§a§lLoja§8]§e"
+		val PREFIX = textComponent {
+			append("[") {
+				color(NamedTextColor.DARK_GRAY)
+			}
+
+			append("Loja") {
+				color(NamedTextColor.GREEN)
+				decorate(TextDecoration.BOLD)
+			}
+
+            append("]") {
+                color(NamedTextColor.DARK_GRAY)
+            }
+		}
 	}
 
 	var dreamMenu: Inventory? = null
@@ -45,10 +62,13 @@ class DreamLoja : KotlinPlugin() {
 			)
 		}
 
-		registerCommand(LojaCommand(this))
-		registerCommand(SetLojaCommand(this))
-		registerCommand(DelLojaCommand(this))
-		registerCommand(SetLojaIconCommand(this))
+		registerCommand(
+			LojaCommand,
+			LojaExecutor(this),
+			SetLojaExecutor(this),
+			SetLojaIconExecutor(this),
+			DeleteLojaExecutor(this)
+		)
 
 		registerEvents(SignListener(this))
 		registerEvents(TagListener())

@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcore.utils.adventure
 
+import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.event.ClickEvent
@@ -56,3 +57,5 @@ fun TextComponent.Builder.appendCommand(command: String) = append(
         }
     }
 )
+
+fun Audience.sendTextComponent(block: TextComponent.Builder.() -> (Unit) = {}) = sendMessage(textComponent(block))

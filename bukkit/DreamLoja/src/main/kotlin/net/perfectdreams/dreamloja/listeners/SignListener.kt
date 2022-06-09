@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamloja.listeners
 
+import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent
 import com.okkero.skedule.BukkitSchedulerController
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
@@ -14,7 +15,6 @@ import net.perfectdreams.dreamloja.tables.VoteSigns
 import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.FireworkEffect
-import org.bukkit.Material
 import org.bukkit.block.Sign
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
