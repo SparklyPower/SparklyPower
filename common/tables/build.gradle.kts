@@ -13,6 +13,7 @@ dependencies {
     api("org.jetbrains.exposed:exposed-dao:0.38.2")
     api("org.jetbrains.exposed:exposed-jdbc:0.38.2")
     api("net.perfectdreams.exposedpowerutils:postgres-java-time:1.0.0")
+    api("net.perfectdreams.exposedpowerutils:postgres-power-utils:1.0.0")
     api("dev.forst:exposed-upsert:1.2.0")
 }
 
