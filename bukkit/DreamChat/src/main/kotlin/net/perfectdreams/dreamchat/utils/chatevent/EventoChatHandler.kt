@@ -103,7 +103,10 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 
 		lastWinner = player.uniqueId
 		DreamChat.INSTANCE.userData.set("last-chat-winner", player.uniqueId.toString())
-		player.addItemIfPossibleOrAddToPlayerMailbox(currentPrize)
+		// This "finish" method is called in a async event, so we need to synchronize to avoid issues
+		DreamChat.INSTANCE.launchMainThread {
+			player.addItemIfPossibleOrAddToPlayerMailbox(currentPrize)
+		}
 
 		scheduler().schedule(DreamChat.INSTANCE, SynchronizationContext.ASYNC) {
 			DreamCore.INSTANCE.dreamEventManager.addEventVictory(

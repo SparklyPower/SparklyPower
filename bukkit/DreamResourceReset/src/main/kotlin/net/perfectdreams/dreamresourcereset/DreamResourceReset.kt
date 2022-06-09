@@ -297,6 +297,7 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 				val itemMeta = it.itemMeta as MapMeta
 				itemMeta.mapView?.id ?: return@mapNotNull null
 			}
+			logger.info { "Querying information about Death Chest Maps $mapIdsToBeQueried" }
 
 			val (infos, playerNames) = onAsyncThread {
 				transaction(Databases.databaseNetwork) {
@@ -317,6 +318,8 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 			for (item in deathChestMaps) {
 				val itemMeta = item.itemMeta as MapMeta
 				val mapId = itemMeta.mapView?.id ?: continue
+
+				logger.info { "Updating Death Chest Map $item if needed..." }
 
 				val info = infos.firstOrNull { it[DeathChestMaps.id].value == mapId } ?: return
 
