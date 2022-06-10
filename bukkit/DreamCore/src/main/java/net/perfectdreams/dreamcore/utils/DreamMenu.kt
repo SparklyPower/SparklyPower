@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.inventory.InventoryMoveItemEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
@@ -72,6 +73,8 @@ class DreamMenuSlotBuilder(val index: Int) {
 class DreamMenuListener : Listener {
 	@EventHandler
 	fun onMove(e: InventoryClickEvent) {
+		println("${e.click} - ${e.inventory.holder} - ${e.clickedInventory?.holder} - ${e.action}")
+
 		if (e.click == ClickType.SHIFT_LEFT && e.inventory.holder is DreamMenu.DreamMenuHolder) {
 			e.isCancelled = true
 			return
@@ -92,6 +95,19 @@ class DreamMenuListener : Listener {
 		if (slot != null) {
 			slot.onClick?.invoke(e.whoClicked)
 		}
+	}
+
+	@EventHandler
+	fun onMove(e: InventoryDragEvent) {
+		val clickedInventoryHolder = e.inventory.holder
+
+		if (clickedInventoryHolder !is DreamMenu.DreamMenuHolder)
+			return
+
+		val dreamMenu = clickedInventoryHolder.menu
+
+		if (dreamMenu.cancelItemMovement)
+			e.isCancelled = true
 	}
 
 	@EventHandler
