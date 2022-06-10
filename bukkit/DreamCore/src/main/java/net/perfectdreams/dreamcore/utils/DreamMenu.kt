@@ -2,7 +2,9 @@ package net.perfectdreams.dreamcore.utils
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -14,6 +16,7 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 
 /**
  * Uma classe para criar menus de uma maneira simples e fácil!
@@ -25,6 +28,20 @@ class DreamMenu(val size: Int, val title: Component, val cancelItemMovement: Boo
 			if (it.item != null)
 				inventory.setItem(it.position, it.item)
 		}
+		repeat(size) {
+			val item = inventory.getItem(it)
+			if (item == null) {
+				inventory.setItem(
+					it,
+					ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+						.meta<ItemMeta> {
+							displayName(Component.empty())
+							setCustomModelData(2)
+						}
+				)
+			}
+		}
+
 		return inventory
 	}
 
