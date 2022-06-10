@@ -169,14 +169,6 @@ class DreamVote : KotlinPlugin() {
 
 			val player = Bukkit.getPlayer(uniqueId)
 
-			if (player != null) {
-				// Dar itens para o player
-				// gambiarra temporária
-				items.forEach {
-					player.inventory.addItem(it)
-				}
-			}
-
 			DreamCorreios.getInstance().addItem(uniqueId, *items.toTypedArray())
 			val offlinePlayer = Bukkit.getOfflinePlayer(uniqueId)
 
