@@ -73,8 +73,6 @@ class DreamMenuSlotBuilder(val index: Int) {
 class DreamMenuListener : Listener {
 	@EventHandler
 	fun onMove(e: InventoryClickEvent) {
-		println("${e.click} - ${e.inventory.holder} - ${e.clickedInventory?.holder} - ${e.action}")
-
 		if (e.click == ClickType.SHIFT_LEFT && e.inventory.holder is DreamMenu.DreamMenuHolder) {
 			e.isCancelled = true
 			return
