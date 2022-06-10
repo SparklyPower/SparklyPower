@@ -17,6 +17,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamCasamentos"))
     compileOnly(project(":bukkit:DreamClubes"))
     compileOnly(project(":bukkit:DreamVanish"))
+    compileOnly(project(":bukkit:DreamBedrockIntegrations"))
     compileOnly(files("../../libs/mcMMO.jar"))
     compileOnly("net.luckperms:api:5.0")
 }

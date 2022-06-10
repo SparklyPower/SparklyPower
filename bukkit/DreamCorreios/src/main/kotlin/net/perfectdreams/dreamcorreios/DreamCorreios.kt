@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamcorreios
 
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.kyori.adventure.text.Component
@@ -94,6 +95,13 @@ class DreamCorreios : KotlinPlugin(), Listener {
 			{ PlainTextComponentSerializer.plainText().serialize(it).contains("\uE262") },
 			{ Component.text("Caixa Postal") }
 		)
+
+		launchAsyncThread {
+			while (true) {
+				logger.info { "Loaded Caixa Postais: ${loadedCaixaPostais.size} ${loadedCaixaPostais.keys}" }
+				delay(60_000)
+			}
+		}
 	}
 
 	fun createCaixaPostalInventoryOfPlayer(player: Player, caixaPostalAccessHolder: CaixaPostalAccessHolder, pageTarget: Int): Inventory {

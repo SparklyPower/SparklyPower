@@ -303,11 +303,11 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
 
                         onClick {
                             it.closeInventory()
-                            claimAdditions.disableHostileMobs = !claimAdditions.disableHostileMobs
-                            it.sendMessage("§aBloqueio de mobs agressivos agora está ${humanizeBoolean(claimAdditions.disableHostileMobs)} no seu terreno! §a" +
-                                    humanizeBoolean(claimAdditions.disableHostileMobs,
-                                        "Mobs que atacam irão parar de spawnar em seu terreno.",
-                                        "Mobs que atacam irão voltar a spawnar em seu terreno."))
+                            claimAdditions.allowSpawnFromMobSpawners = !claimAdditions.allowSpawnFromMobSpawners
+                            it.sendMessage("§aDeixar que spawn de mobs via mob spawners burlem as restrições de mobs no terreno está ${humanizeBoolean(claimAdditions.allowSpawnFromMobSpawners)} no seu terreno! §a" +
+                                    humanizeBoolean(claimAdditions.allowSpawnFromMobSpawners,
+                                        "Mobs spawnados via mob spawners vão spawnar no seu terreno, mesmo se você bloquear o tipo de mob no terreno.",
+                                        "Mobs spawnados via mob spawners não irão spawnar no seu terreno se você bloqueou o tipo de mob no terreno."))
 
                             plugin.saveInAsyncTask()
                         }

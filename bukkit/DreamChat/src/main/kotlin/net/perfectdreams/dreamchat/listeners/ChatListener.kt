@@ -12,6 +12,7 @@ import net.luckperms.api.LuckPermsProvider
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
+import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcasamentos.DreamCasamentos
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamchat.dao.ChatUser
@@ -559,6 +560,12 @@ class ChatListener(val m: DreamChat) : Listener {
 				"§c✗"
 			}
 
+			val mcBedrockEditionStatus = if (e.player.isBedrockClient) {
+				"§a✔"
+			} else {
+				"§c✗"
+			}
+
 			val aboutLines = mutableListOf(
 				"§6✪ §a§lSobre ${player.artigo} §r§b${toDisplay}§r §6✪",
 				"",
@@ -567,7 +574,8 @@ class ChatListener(val m: DreamChat) : Listener {
 				"§eKDR: §6PvP é para os fracos, 2bj :3",
 				"§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!",
 				"§eUsando a Resource Pack? $rpStatus",
-				"§eMinecraft Original? $mcPremiumStatus"
+				"§eMinecraft Original? $mcPremiumStatus",
+				"§eMinecraft: Bedrock Edition? $mcBedrockEditionStatus"
 			)
 
 			val discordAccount = transaction(Databases.databaseNetwork) {
