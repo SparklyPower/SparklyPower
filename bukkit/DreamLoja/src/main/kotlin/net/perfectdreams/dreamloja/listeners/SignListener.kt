@@ -5,7 +5,10 @@ import com.okkero.skedule.BukkitSchedulerController
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.InternalCoroutinesApi
+import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.adventure.append
+import net.perfectdreams.dreamcore.utils.adventure.sendTextComponent
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreamloja.DreamLoja
 import net.perfectdreams.dreamloja.dao.UserShopVote
@@ -125,7 +128,12 @@ class SignListener(val m: DreamLoja) : Listener {
 
             switchContext(SynchronizationContext.SYNC)
 
-            e.player.sendMessage("${DreamLoja.PREFIX} §aPlaca de votação criada com sucesso!")
+            e.player.sendTextComponent {
+                color(NamedTextColor.GREEN)
+                append(DreamLoja.PREFIX)
+                append(" ")
+                append("Placa de votação criada com sucesso!")
+            }
         }
     }
 
@@ -151,7 +159,12 @@ class SignListener(val m: DreamLoja) : Listener {
             switchContext(SynchronizationContext.SYNC)
 
             if (hasVoteSign)
-                e.player.sendMessage("${DreamLoja.PREFIX} §cA placa de votação foi quebrada! Mas não se preocupe, os votos ainda estão firmes e fortes!")
+                e.player.sendTextComponent {
+                    color(NamedTextColor.RED)
+                    append(DreamLoja.PREFIX)
+                    append(" ")
+                    append("A placa de votação foi quebrada! Mas não se preocupe, os votos ainda estão firmes e fortes!")
+                }
         }
     }
 
@@ -181,7 +194,12 @@ class SignListener(val m: DreamLoja) : Listener {
             } ?: return@schedule // Não é uma placa de votação
 
             if (e.player.uniqueId == voteSign.owner) {
-                e.player.sendMessage("${DreamLoja.PREFIX} §cVocê vê a sua placa de votação atentamente, e pensa... \"Um dia, eu serei um empreendedor incrível!\" e, como você respeita as regras dos comerciantes da LorittaLand, você sabe que não pode votar na sua própria loja.")
+                e.player.sendTextComponent {
+                    color(NamedTextColor.RED)
+                    append(DreamLoja.PREFIX)
+                    append(" ")
+                    append("Você vê a sua placa de votação atentamente, e pensa... \"Um dia, eu serei um empreendedor incrível!\" e, como você respeita as regras dos comerciantes da LorittaLand, você sabe que não pode votar na sua própria loja.")
+                }
                 return@schedule
             }
 
@@ -193,7 +211,12 @@ class SignListener(val m: DreamLoja) : Listener {
                 val diff = System.currentTimeMillis() - shopVote.receivedAt
 
                 if (300_000 > diff) {
-                    e.player.sendMessage("${DreamLoja.PREFIX} §cVocê tem que esperar ${DateUtils.formatDateDiff(shopVote.receivedAt + 300_000L)} antes de tirar o seu voto! Que tal conversar com o proprietário da loja para ver se vocês resolvem as suas diferenças?")
+                    e.player.sendTextComponent {
+                        color(NamedTextColor.RED)
+                        append(DreamLoja.PREFIX)
+                        append(" ")
+                        append("Você tem que esperar ${DateUtils.formatDateDiff(shopVote.receivedAt + 300_000L)} antes de tirar o seu voto! Que tal conversar com o proprietário da loja para ver se vocês resolvem as suas diferenças?")
+                    }
                     return@schedule
                 }
 
@@ -205,8 +228,23 @@ class SignListener(val m: DreamLoja) : Listener {
 
                 switchContext(SynchronizationContext.SYNC)
 
-                e.player.sendMessage("${DreamLoja.PREFIX} §aVocê removeu o voto da loja d${MeninaAPI.getArtigo(voteSign.owner)} §b${Bukkit.getOfflinePlayer(voteSign.owner)?.name ?: "???"}§a...");
-                e.player.sendMessage("${DreamLoja.PREFIX} §7Lembre-se, votos é algo que ajuda os donos das lojas, não seja vacilão para votar e depois tirar só para ser v1d4 l0k4.");
+                e.player.sendTextComponent {
+                    color(NamedTextColor.GREEN)
+                    append(DreamLoja.PREFIX)
+                    append(" ")
+                    append("Você removeu o voto da loja d${MeninaAPI.getArtigo(voteSign.owner)} ")
+                    append(Bukkit.getOfflinePlayer(voteSign.owner).name ?: "???") {
+                        color(NamedTextColor.AQUA)
+                    }
+                    append("...")
+                }
+
+                e.player.sendTextComponent {
+                    color(NamedTextColor.GRAY)
+                    append(DreamLoja.PREFIX)
+                    append(" ")
+                    append("Lembre-se, votos ajudam donos das lojas, não seja vacilão para votar e depois tirar só para ser v1d4 l0ka.")
+                }
                 return@schedule
             }
 
@@ -222,7 +260,16 @@ class SignListener(val m: DreamLoja) : Listener {
 
             switchContext(SynchronizationContext.SYNC)
 
-            e.player.sendMessage("${DreamLoja.PREFIX} §aVocê votou na loja do §b${Bukkit.getOfflinePlayer(voteSign.owner)?.name ?: "???"}§a!")
+            e.player.sendTextComponent {
+                color(NamedTextColor.GREEN)
+                append(DreamLoja.PREFIX)
+                append(" ")
+                append("Você votou na loja d${MeninaAPI.getArtigo(voteSign.owner)} ")
+                append(Bukkit.getOfflinePlayer(voteSign.owner).name ?: "???") {
+                    color(NamedTextColor.AQUA)
+                }
+                append("!")
+            }
 
             InstantFirework.spawn(block.location.add(0.0, 0.5, 0.0), FireworkEffect.builder()
                     .with(FireworkEffect.Type.BALL)

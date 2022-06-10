@@ -21,7 +21,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
     companion object : SparklyCommandExecutorDeclaration(SetLojaExecutor::class) {
         object Options : CommandOptions() {
-            val shopName = optionalWord("shop_name")
+            // Needs to be a greedy string because Minecraft doesn't allow special characters on a optionalWord
+            val shopName = optionalGreedyString("shop_name")
                 .register()
         }
 
@@ -31,7 +32,7 @@ class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
 
-        val shopName = args[Options.shopName]?.lowercase() ?: "loja"
+        val shopName = m.parseLojaName(args[Options.shopName])
 
         val location = player.location
         if (location.isUnsafe) {
@@ -61,12 +62,11 @@ class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
 
                 if (isNew) {
                     if (shopCount + 1 > shopCountForPlayer) {
-                        context.sendMessage {
-                            append(DreamLoja.PREFIX)
+                        context.sendLojaMessage {
                             color(NamedTextColor.RED)
 
                             append("Você já tem muitas lojas! Delete algumas usando ")
-                            appendCommand("/loja delete")
+                            appendCommand("/loja manage delete")
                             append("!")
                         }
 
@@ -117,7 +117,6 @@ class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
                         }
                     } else {
                         context.sendLojaMessage {
-                            append(DreamLoja.PREFIX)
                             color(NamedTextColor.GREEN)
 
                             append("Sua loja foi atualizada com sucesso! Outros jogadores podem ir até ela utilizando ")
@@ -129,13 +128,12 @@ class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
 
                 if (shopCountForPlayer != 1) {
                     context.sendLojaMessage {
-                        append(DreamLoja.PREFIX)
                         color(NamedTextColor.YELLOW)
 
                         append("Sabia que é possível alterar o ícone da sua loja na ")
                         appendCommand("/loja ${player.name}")
                         append("? Use ")
-                        appendCommand("/loja icon $shopName")
+                        appendCommand("/loja manage icon $shopName")
                         append(" com o item na mão!")
                     }
                 }

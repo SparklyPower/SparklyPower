@@ -46,7 +46,7 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
             }
                 .register()
 
-            val shopName = optionalWord("shop_name")
+            val shopName = optionalGreedyString("shop_name")
                 .register()
         }
 
@@ -57,7 +57,7 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
         val player = context.requirePlayer()
 
         val ownerName = args[Options.playerName]
-        val shopName = args[Options.shopName]
+        val shopName = m.parseLojaNameOrNull(args[Options.shopName])
 
         if (ownerName != null) {
             m.launchAsyncThread {
@@ -81,7 +81,7 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
 
                 if (playerShops.size > 1 && shopName == null) {
                     onMainThread {
-                        val menu = createMenu(9, "§a§lLojas de ${ownerName}") {
+                        val menu = createMenu(9, "§a§lLojas de $ownerName") {
                             for ((index, shop) in playerShops.withIndex()) {
                                 slot(index, 0) {
                                     item = shop.iconItemStack?.fromBase64Item() ?: ItemStack(Material.DIAMOND_BLOCK)

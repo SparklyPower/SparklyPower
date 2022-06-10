@@ -26,7 +26,7 @@ class DeleteLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
 
-        val shopName = args[Options.shopName]?.lowercase() ?: "loja"
+        val shopName = m.parseLojaName(args[Options.shopName])
 
         m.launchAsyncThread {
             transaction(Databases.databaseNetwork) {

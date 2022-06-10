@@ -28,14 +28,14 @@ class SetLojaIconExecutor(m: DreamLoja) : LojaExecutorBase(m) {
 
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
-        val shopName = args[Options.shopName]?.lowercase() ?: "loja"
+        val shopName = m.parseLojaName(args[Options.shopName])
 
         val itemInHand = player.inventory.itemInMainHand
         if (itemInHand.type.isAir) {
             context.sendLojaMessage {
                 color(NamedTextColor.RED)
 
-                append("Segure o item que você deseja que fique no ícone da sua")
+                append("Segure o item que você deseja que fique no ícone da sua ")
                 appendCommand("/loja")
                 append("!")
             }

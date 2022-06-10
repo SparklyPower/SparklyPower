@@ -6,11 +6,11 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.adventure.append
+import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
+import net.perfectdreams.dreamcore.utils.adventure.lore
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
-import net.perfectdreams.dreamloja.commands.DeleteLojaExecutor
-import net.perfectdreams.dreamloja.commands.LojaExecutor
-import net.perfectdreams.dreamloja.commands.SetLojaExecutor
-import net.perfectdreams.dreamloja.commands.SetLojaIconExecutor
+import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamloja.commands.*
 import net.perfectdreams.dreamloja.commands.declarations.LojaCommand
 import net.perfectdreams.dreamloja.dao.UserShopVote
 import net.perfectdreams.dreamloja.listeners.SignListener
@@ -23,6 +23,7 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -65,9 +66,10 @@ class DreamLoja : KotlinPlugin() {
 		registerCommand(
 			LojaCommand,
 			LojaExecutor(this),
+			LojaManageExecutor(this),
 			SetLojaExecutor(this),
 			SetLojaIconExecutor(this),
-			DeleteLojaExecutor(this)
+			DeleteLojaExecutor(this),
 		)
 
 		registerEvents(SignListener(this))
@@ -101,6 +103,31 @@ class DreamLoja : KotlinPlugin() {
 
 	override fun softDisable() {
 		super.softDisable()
+	}
+
+	fun parseLojaName(name: String?): String {
+		if (name == null)
+			return "loja"
+
+		val split = name.split(" ")
+			.first()
+			.lowercase()
+
+		return if (split.isEmpty())
+			"loja"
+		else
+			split
+	}
+
+	fun parseLojaNameOrNull(name: String?): String? {
+		if (name == null)
+			return null
+
+		val split = name.split(" ")
+			.first()
+			.lowercase()
+
+		return split.ifEmpty { null }
 	}
 
 	fun openMenu(player: Player) {
@@ -167,11 +194,20 @@ class DreamLoja : KotlinPlugin() {
 			}
 
 			slot(4, 0) {
-				item = ItemStack(Material.NETHER_STAR)
-					.rename("§a§lLoja Oficial do SparklyPower")
-					.lore(
-						"§7A loja oficial do SparklyPower!"
-					)
+				item = ItemStack(Material.EMERALD)
+					.meta<ItemMeta> {
+						setCustomModelData(1)
+
+						displayNameWithoutDecorations("Loja Oficial do SparklyPower") {
+							color(NamedTextColor.GREEN)
+							decorate(TextDecoration.BOLD)
+						}
+						lore {
+							textWithoutDecorations("A loja oficial do SparklyPower!") {
+								color(NamedTextColor.GRAY)
+							}
+						}
+					}
 
 				onClick { clicker ->
 					clicker as Player
@@ -181,11 +217,20 @@ class DreamLoja : KotlinPlugin() {
 			}
 
 			slot(4, 5) {
-				item = ItemStack(Material.EMERALD)
-					.rename("§c§lLoja de Pesadelos do SparklyPower")
-					.lore(
-						"§7O lugar de VIPs, Sonecas, Blocos de Proteção e muito mais!"
-					)
+				item = ItemStack(Material.NETHER_STAR)
+					.meta<ItemMeta> {
+						setCustomModelData(1)
+
+						displayNameWithoutDecorations("Loja de Pesadelos do SparklyPower") {
+							color(NamedTextColor.RED)
+							decorate(TextDecoration.BOLD)
+						}
+						lore {
+							textWithoutDecorations("O lugar de VIPs, Sonecas, Blocos de Proteção e muito mais!") {
+								color(NamedTextColor.GRAY)
+							}
+						}
+					}
 
 				onClick { clicker ->
 					clicker as Player
