@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 class DeleteLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
     companion object : SparklyCommandExecutorDeclaration(DeleteLojaExecutor::class) {
         object Options : CommandOptions() {
-            val shopName = optionalWord("shop_name")
+            val shopName = optionalGreedyString("shop_name")
                 .register()
         }
 

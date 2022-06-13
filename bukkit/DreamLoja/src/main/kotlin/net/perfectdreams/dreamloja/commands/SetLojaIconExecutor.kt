@@ -19,7 +19,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 class SetLojaIconExecutor(m: DreamLoja) : LojaExecutorBase(m) {
     companion object : SparklyCommandExecutorDeclaration(SetLojaIconExecutor::class) {
         object Options : CommandOptions() {
-            val shopName = optionalWord("shop_name")
+            val shopName = optionalGreedyString("shop_name")
                 .register()
         }
 
