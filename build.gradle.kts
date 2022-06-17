@@ -23,7 +23,6 @@ allprojects {
         maven("https://papermc.io/repo/repository/maven-public/")
         maven("https://repo.dmulloy2.net/repository/public/")
         maven("https://nexus.wesjd.net/repository/thirdparty/")
-        maven("https://maven.sk89q.com/repo/")
         maven("https://repo.aikar.co/content/groups/aikar/")
         maven("https://repo.codemc.io/repository/maven-public/")
         maven("https://repo.codemc.io/repository/maven-snapshots/") // ChangeSkin

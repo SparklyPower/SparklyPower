@@ -14,7 +14,10 @@ import net.minecraft.ChatFormatting
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.selector.EntitySelector
-import net.minecraft.network.chat.*
+import net.minecraft.network.chat.ClickEvent
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.ComponentUtils
+import net.minecraft.network.chat.Style
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
@@ -24,9 +27,8 @@ import net.perfectdreams.dreamcore.utils.commands.options.*
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.PluginIdentifiableCommand
-import org.bukkit.craftbukkit.v1_18_R2.command.VanillaCommandWrapper
+import org.bukkit.craftbukkit.v1_19_R1.command.VanillaCommandWrapper
 import java.util.concurrent.CompletableFuture
-import kotlin.concurrent.thread
 
 class SparklyBukkitBrigadierCommandWrapper(
     labels: List<String>,
@@ -54,7 +56,7 @@ class SparklyBukkitBrigadierCommandWrapper(
             commandListenerWrapper.sendFailure(ComponentUtils.fromMessage(commandSyntaxException.rawMessage))
             if (commandSyntaxException.input != null && commandSyntaxException.cursor >= 0) {
                 val j: Int = Math.min(commandSyntaxException.input.length, commandSyntaxException.cursor)
-                val ichatmutablecomponent = TextComponent("").withStyle(ChatFormatting.GRAY).withStyle { chatmodifier: Style ->
+                val ichatmutablecomponent = Component.literal("").withStyle(ChatFormatting.GRAY).withStyle { chatmodifier: Style ->
                         chatmodifier.withClickEvent(
                             ClickEvent(
                                 ClickEvent.Action.SUGGEST_COMMAND,
@@ -67,12 +69,12 @@ class SparklyBukkitBrigadierCommandWrapper(
                 }
                 ichatmutablecomponent.append(commandSyntaxException.getInput().substring(Math.max(0, j - 10), j))
                 if (j < commandSyntaxException.getInput().length) {
-                    val ichatmutablecomponent1 = TextComponent(commandSyntaxException.getInput().substring(j))
+                    val ichatmutablecomponent1 = Component.literal(commandSyntaxException.getInput().substring(j))
                         .withStyle(ChatFormatting.RED, ChatFormatting.UNDERLINE)
                     ichatmutablecomponent.append(ichatmutablecomponent1 as Component)
                 }
                 ichatmutablecomponent.append(
-                    TranslatableComponent("command.context.here")
+                    Component.translatable("command.context.here")
                         .withStyle(ChatFormatting.RED, ChatFormatting.ITALIC) as Component
                 )
                 commandListenerWrapper.sendFailure(ichatmutablecomponent)

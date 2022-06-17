@@ -15,10 +15,10 @@ import org.bukkit.EntityEffect
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Skull
-import org.bukkit.craftbukkit.v1_18_R2.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_18_R2.scoreboard.CraftScoreboard
-import org.bukkit.craftbukkit.v1_18_R2.scoreboard.CraftScoreboardManager
-import org.bukkit.craftbukkit.v1_18_R2.util.WeakCollection
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_19_R1.scoreboard.CraftScoreboard
+import org.bukkit.craftbukkit.v1_19_R1.scoreboard.CraftScoreboardManager
+import org.bukkit.craftbukkit.v1_19_R1.util.WeakCollection
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType

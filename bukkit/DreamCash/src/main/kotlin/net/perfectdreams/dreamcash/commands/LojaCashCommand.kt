@@ -89,7 +89,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                     true
                 }
             }
-            generateItemAt(1, 0, Material.GOLD_INGOT, 1, "§b§lVIP§e+ §7(um mês • R$ 29,99)", 1000) {
+            generateItemAt(1, 0, Material.GOLD_INGOT, 1, "§b§lVIP§e+ §7(um mês • R$ 29,99)", 1_000) {
                 if (hasAnyVip && !isVipPlus) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
                         false
@@ -101,7 +101,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                     true
                 }
             }
-            generateItemAt(2, 0, Material.DIAMOND, 1, "§b§lVIP§e++ §7(um mês • R$ 44,99)", 1500) {
+            generateItemAt(2, 0, Material.DIAMOND, 1, "§b§lVIP§e++ §7(um mês • R$ 44,99)", 1_500) {
                 if (hasAnyVip && !isVipPlusPlus) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
                     false
@@ -115,15 +115,15 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             }
 
             // Blocos de Proteção
-            generateItemAt(0, 1, Material.DIRT, null, "§e8000 blocos de proteção", 15) {
+            generateItemAt(0, 1, Material.DIRT, null, "§e8000 blocos de proteção", 50) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 8000")
                 true
             }
-            generateItemAt(1, 1, Material.MYCELIUM, null, "§e16000 blocos de proteção", 30) {
+            generateItemAt(1, 1, Material.MYCELIUM, null, "§e16000 blocos de proteção", 100) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 16000")
                 true
             }
-            generateItemAt(2, 1, Material.GRASS_BLOCK, null, "§e24000 blocos de proteção", 45) {
+            generateItemAt(2, 1, Material.GRASS_BLOCK, null, "§e24000 blocos de proteção", 150) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 24000")
                 true
             }
@@ -207,7 +207,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                                 transaction(Databases.databaseNetwork) {
                                     try {
-                                        Cash.takeCash(sender, 50, TransactionContext(extra = "comprar `slots adicionais para o clube` no `/lojacash`"))
+                                        Cash.takeCash(sender, 100, TransactionContext(extra = "comprar `slots adicionais para o clube` no `/lojacash`"))
                                         clube.maxMembers++
                                     } catch (e: IllegalArgumentException) {
                                         sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")

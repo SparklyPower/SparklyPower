@@ -194,7 +194,7 @@ class DreamVote : KotlinPlugin() {
 
 			switchContext(SynchronizationContext.ASYNC)
 
-			Cash.giveCash(uniqueId, 7, TransactionContext(type = TransactionType.VOTE_REWARDS))
+			// Cash.giveCash(uniqueId, 1, TransactionContext(type = TransactionType.VOTE_REWARDS))
 
 			Webhooks.PANTUFA_INFO?.send(DiscordMessage(
 				content = "**$lastVoter** votou, agora **$lastVoter** possui ${voteCount + 1} votos. *Prêmios recebidos:* ${giveAwards.joinToString(", ", transform = { "`${it.name}`" })}"
