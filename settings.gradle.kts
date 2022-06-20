@@ -90,6 +90,7 @@ include(":bukkit:DreamXizum")
 include(":bukkit:DreamRaffle")
 // include(":bukkit:DreamNews")
 include(":bukkit:SparklyChunkLoader")
+include(":bukkit:DreamTNTRun")
 
 // ===[ BUNGEE ]===
 include(":bungee:DreamCoreBungee")
