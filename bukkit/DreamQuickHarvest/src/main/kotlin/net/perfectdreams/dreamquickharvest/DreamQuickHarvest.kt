@@ -758,7 +758,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				return
 			}
 
-			if (removePlayerEnergyIfTheyHaveAndIfTheyDontSendMessage(player, info, block.type))
+			if (removePlayerEnergyIfTheyHaveAndIfTheyDontSendMessage(player, info, bottom.type))
 				return
 
 			inventory.addItem(itemStack)
