@@ -39,7 +39,8 @@ object MochilaUtils {
     val MOCHILA_ID_KEY = SparklyNamespacedKey("mochila_id")
 
     val loadedMochilas = ConcurrentHashMap<Long, MochilaWrapper>()
-    private val plugin = Bukkit.getPluginManager().getPlugin("DreamMochilas")!!
+    private val plugin: DreamMochilas
+        get() = Bukkit.getPluginManager().getPlugin("DreamMochilas")!! as DreamMochilas
     private val mochilaDataLoadMutexes = Caffeine.newBuilder()
         .expireAfterAccess(1, TimeUnit.MINUTES)
         .build<Long, Mutex>()

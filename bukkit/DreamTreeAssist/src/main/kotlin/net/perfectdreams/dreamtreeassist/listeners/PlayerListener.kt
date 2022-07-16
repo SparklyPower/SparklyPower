@@ -37,7 +37,10 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
         Material.DARK_OAK_LOG,
         Material.JUNGLE_LOG,
         Material.OAK_LOG,
-        Material.SPRUCE_LOG
+        Material.SPRUCE_LOG,
+        Material.MANGROVE_LOG,
+        Material.MANGROVE_ROOTS,
+        Material.MUDDY_MANGROVE_ROOTS
     )
 
     private val leaves = setOf(
@@ -46,7 +49,8 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
         Material.DARK_OAK_LEAVES,
         Material.JUNGLE_LEAVES,
         Material.OAK_LEAVES,
-        Material.SPRUCE_LEAVES
+        Material.SPRUCE_LEAVES,
+        Material.MANGROVE_LEAVES
     )
 
     private val axes = setOf(

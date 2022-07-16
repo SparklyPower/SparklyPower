@@ -151,7 +151,7 @@ class DreamElevador : KotlinPlugin(), Listener {
     fun handleDown(player: Player, sign: Sign) {
         updateStoryTrack(sign)
         val world = sign.world
-        for (y in world.maxHeight downTo 0) {
+        for (y in world.maxHeight downTo world.minHeight) {
             val block = world.getBlockAt(sign.x, y, sign.z)
             val material = block.type
 

@@ -626,7 +626,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		blocksThatMustBeHarvestedLater.sortedBy { startingBlock.location.distanceSquared(it.location) }.forEach {
 			doQuickHarvestOnCrop(startingBlock, player, it, type, fortuneLevel, inventory, mcMMOXp, info)
-			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, it.type))
+			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, type))
 				return
 		}
 	}
@@ -700,7 +700,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		blocksThatMustBeHarvestedLater.sortedBy { e.block.location.distanceSquared(it.location) }.forEach {
 			doQuickHarvestOnCocoa(e, player, it, inventory, mcMMOXp, info)
-			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, it.type))
+			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, Material.COCOA))
 				return
 		}
 	}
@@ -758,7 +758,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				return
 			}
 
-			if (removePlayerEnergyIfTheyHaveAndIfTheyDontSendMessage(player, info, block.type))
+			if (removePlayerEnergyIfTheyHaveAndIfTheyDontSendMessage(player, info, bottom.type))
 				return
 
 			inventory.addItem(itemStack)
@@ -785,7 +785,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		blocksThatMustBeHarvestedLater.sortedBy { e.block.location.distanceSquared(it.location) }.forEach {
 			doQuickHarvestOnSugarCane(e, player, it, inventory, mcMMOXp, info)
-			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, it.type))
+			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, Material.SUGAR_CANE))
 				return
 		}
 	}

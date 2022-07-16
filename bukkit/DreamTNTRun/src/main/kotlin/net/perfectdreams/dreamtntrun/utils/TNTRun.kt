@@ -170,6 +170,7 @@ class TNTRun(val m: DreamTNTRun) {
                 it.sendTitle("§4§lSobreviva!", "§f", 0, 20, 0)
                 it.playSound(it.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
                 it.playSound(it.location, "perfectdreams.sfx.special_stage", 100f, 1f)
+                it.gameMode = GameMode.ADVENTURE // Avoid issues with users being able to place "lag blocks" to not fall
             }
 
             canDestroyBlocks = true
@@ -273,6 +274,7 @@ class TNTRun(val m: DreamTNTRun) {
         // Reset player velocity to avoid them dying before teleporting (due to falling from the tower)
         player.velocity = Vector(0, 0, 0)
         player.teleport(DreamCore.dreamConfig.getSpawn())
+        player.gameMode = GameMode.SURVIVAL
 
         if (!skipFinishCheck && isGamePhase && players.size == 1)
             finish()
