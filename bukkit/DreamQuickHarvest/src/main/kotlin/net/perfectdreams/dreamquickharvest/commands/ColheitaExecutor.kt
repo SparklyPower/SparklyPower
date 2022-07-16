@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamquickharvest.commands
 
 import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.DateUtils
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
@@ -42,7 +43,7 @@ class ColheitaExecutor(val m: DreamQuickHarvest) : SparklyCommandExecutor() {
 
                     onMainThread {
                         for (upgrade in upgrades) {
-                            context.sendMessage("§6+§e${upgrade[PlayerQuickHarvestUpgrades.energy]} energias")
+                            context.sendMessage("§6+§e${upgrade[PlayerQuickHarvestUpgrades.energy]} energias §8(§7${DateUtils.formatDateDiff(upgrade[PlayerQuickHarvestUpgrades.expiresAt].toEpochMilli())}§8)")
                         }
                     }
                 }
