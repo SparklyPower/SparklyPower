@@ -56,13 +56,13 @@ class PlayerListener(val m: DreamTNTRun) : Listener {
 
     @EventHandler
     fun onElytra(e: EntityToggleGlideEvent) {
-        if (event.player.location.world.name != TNTRun.WORLD_NAME)
+        if (e.entity.location.world.name != TNTRun.WORLD_NAME)
             return
 
         if (!m.TNTRun.isStarted)
             return
 
-        event.isCancelled = true
+        e.isCancelled = true
     }
 
     @EventHandler
