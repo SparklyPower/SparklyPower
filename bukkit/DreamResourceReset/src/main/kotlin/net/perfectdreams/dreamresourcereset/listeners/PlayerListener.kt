@@ -26,11 +26,13 @@ import org.bukkit.Sound
 import org.bukkit.World
 import org.bukkit.block.Block
 import org.bukkit.block.Chest
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.server.MapInitializeEvent
@@ -46,10 +48,21 @@ import org.jetbrains.exposed.sql.update
 import java.time.Instant
 import java.util.*
 
+
 class PlayerListener(val m: DreamResourceReset) : Listener {
     @EventHandler
     fun onMapInit(e: MapInitializeEvent) {
         m.initializeDeathChestMap(e.map)
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    fun onCreeperExplode(e: EntityExplodeEvent) {
+        if (e.entity.type == EntityType.CREEPER) {
+            e.blockList().removeIf {
+                // Remove any chest that has the IS_DEATH_CHEST metadata
+                it.type == Material.CHEST && (it.state as? Chest)?.persistentDataContainer?.get(DreamResourceReset.IS_DEATH_CHEST, PersistentDataType.BYTE) == 1.toByte()
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
