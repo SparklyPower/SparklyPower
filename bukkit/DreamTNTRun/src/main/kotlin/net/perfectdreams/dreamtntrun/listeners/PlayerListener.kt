@@ -11,8 +11,10 @@ import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.block.BlockFace
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityToggleGlideEvent
 import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.player.*
 
@@ -28,10 +30,11 @@ class PlayerListener(val m: DreamTNTRun) : Listener {
         if (event.player.location.world.name != TNTRun.WORLD_NAME)
             return
 
-        if (m.TNTRun.isStarted) {
+        if (!m.TNTRun.isStarted)
+            return
+
             m.TNTRun.removeFromQueue(event.player)
             m.TNTRun.removeFromGame(event.player, skipFinishCheck = false)
-        }
     }
 
     @EventHandler
@@ -45,9 +48,21 @@ class PlayerListener(val m: DreamTNTRun) : Listener {
         if (event.player.location.world.name != TNTRun.WORLD_NAME)
             return
 
-        if (m.TNTRun.isStarted) {
-            event.isCancelled = true
-        }
+        if (!m.TNTRun.isStarted)
+            return
+
+        event.isCancelled = true
+    }
+
+    @EventHandler
+    fun onElytra(e: EntityToggleGlideEvent) {
+        if (event.player.location.world.name != TNTRun.WORLD_NAME)
+            return
+
+        if (!m.TNTRun.isStarted)
+            return
+
+        event.isCancelled = true
     }
 
     @EventHandler
