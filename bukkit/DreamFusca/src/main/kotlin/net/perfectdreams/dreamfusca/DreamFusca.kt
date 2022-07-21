@@ -7,6 +7,7 @@ import com.okkero.skedule.schedule
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.*
+import net.perfectdreams.dreamcore.utils.extensions.canPlaceAt
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamfusca.utils.CarHandlerPacketAdapter
@@ -113,7 +114,7 @@ class DreamFusca : KotlinPlugin(), Listener {
 		file.writeText(DreamUtils.gson.toJson(cars))
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	fun onMount(e: VehicleEnterEvent) {
 		if (e.vehicle.type != EntityType.MINECART)
 			return
@@ -134,7 +135,7 @@ class DreamFusca : KotlinPlugin(), Listener {
 		e.entered.sendMessage("§aVocê entrou no seu carro, não se esqueça de colocar o cinto de segurança e, é claro, se beber não dirija!")
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	fun onExit(e: VehicleExitEvent) {
 		if (e.vehicle.type != EntityType.MINECART)
 			return
@@ -142,10 +143,9 @@ class DreamFusca : KotlinPlugin(), Listener {
 		if (!cars.containsKey(e.vehicle.uniqueId))
 			return
 
+		// If inside a protected claim, kill the minecart and drop it
 		GriefPrevention.instance.dataStore.getClaimAt(e.vehicle.location, false, null)
 			?: return
-
-		// If inside a protected claim, kill the minecart and drop it
 
 		val carInfo = cars[e.vehicle.uniqueId]!!
 
@@ -160,17 +160,16 @@ class DreamFusca : KotlinPlugin(), Listener {
 		e.vehicle.remove()
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	fun onDestroy(e: VehicleDestroyEvent) {
 		val attacker = e.attacker ?: return
 
 		if (e.vehicle.type != EntityType.MINECART)
 			return
 
-		if (!cars.containsKey(e.vehicle.uniqueId))
-			return
+		val carInfo = cars[e.vehicle.uniqueId] ?: return
 
-		val carInfo = cars[e.vehicle.uniqueId]!!
+		e.isCancelled = true
 
 		if (carInfo.owner == attacker.uniqueId) {
 			e.isCancelled = true
@@ -185,16 +184,29 @@ class DreamFusca : KotlinPlugin(), Listener {
 			attacker.world.dropItemNaturally(e.vehicle.location, itemStack)
 			cars.remove(e.vehicle.uniqueId)
 		} else {
-			if (!attacker.hasPermission("dreamfusca.overridecarbreak")) {
-				e.isCancelled = true
-				attacker.sendMessage("§cVocê não pode quebrar o carro de §b${carInfo.owner}§c!")
-			} else {
+			// The player permission check is kinda "iffy", I'm not sure if this is the best place to do this
+			val canBreak = attacker.hasPermission("dreamfusca.overridecarbreak") || (attacker as? Player)?.canPlaceAt(e.vehicle.location, Material.MINECART) == true
+
+			if (canBreak) {
 				attacker.sendMessage("§7Você quebrou o carro de §b${carInfo.owner}§7!")
+				e.vehicle.remove()
+
+				val itemStack = ItemStack(Material.MINECART)
+					.rename("§3§lFusca")
+					.lore("§7Fusca de §b${carInfo.playerName}")
+					.storeMetadata(CAR_INFO_KEY, DreamUtils.gson.toJson(carInfo))
+					.storeMetadata(FUSCA_CHECK_KEY, "true")
+
+				attacker.world.dropItemNaturally(e.vehicle.location, itemStack)
+				cars.remove(e.vehicle.uniqueId)
+				return
 			}
+
+			attacker.sendMessage("§cVocê não pode quebrar o carro de §b${carInfo.owner}§c!")
 		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	fun onInteract(e: PlayerInteractEvent) {
 		val item = e.item ?: return
 		val clickedBlock = e.clickedBlock ?: return
@@ -233,7 +245,6 @@ class DreamFusca : KotlinPlugin(), Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
 	fun onClick(e: com.Acrobot.ChestShop.Events.ItemParseEvent) {
 		val cleanItemString = org.bukkit.ChatColor.stripColor(e.itemString)!!
-
 
 		if (cleanItemString == "Fusca") {
 			val itemStack = ItemStack(Material.MINECART)
