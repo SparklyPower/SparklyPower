@@ -52,6 +52,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.sum
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.concurrent.atomic.AtomicBoolean
 
 class DreamQuickHarvest : KotlinPlugin(), Listener {
 	companion object {
@@ -202,7 +203,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						e.player.inventory.itemInMainHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS),
 						inventoryTarget,
 						mcMMOXp,
-						info
+						info,
+						AtomicBoolean(false)
 					)
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest normal crops!" }
@@ -239,7 +241,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 					val ttl = System.currentTimeMillis()
 					val mcMMOXp = AtomicInteger()
-					doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget, mcMMOXp, info)
+					doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false))
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest cocoa!" }
 
@@ -272,7 +274,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 					val ttl = System.currentTimeMillis()
 					val mcMMOXp = AtomicInteger()
-					doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget, mcMMOXp, info)
+					doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false))
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest sugar canes!" }
 
@@ -489,7 +491,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		fortuneLevel: Int,
 		inventory: Inventory,
 		mcMMOXp: AtomicInteger,
-		info: PlayerQuickHarvestInfo
+		info: PlayerQuickHarvestInfo,
+		playerHasBeenWarned: AtomicBoolean,
 	) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
@@ -625,9 +628,15 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		)
 
 		blocksThatMustBeHarvestedLater.sortedBy { startingBlock.location.distanceSquared(it.location) }.forEach {
-			doQuickHarvestOnCrop(startingBlock, player, it, type, fortuneLevel, inventory, mcMMOXp, info)
-			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, type))
+			if (playerHasBeenWarned.get())
 				return
+
+			if (doesPlayerNotHaveEnoughEnergyToHarvestIfTheyDontSendMessage(player, info, type)) {
+				playerHasBeenWarned.set(true)
+				return
+			}
+
+			doQuickHarvestOnCrop(startingBlock, player, it, type, fortuneLevel, inventory, mcMMOXp, info, playerHasBeenWarned)
 		}
 	}
 
@@ -637,7 +646,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		block: Block,
 		inventory: Inventory,
 		mcMMOXp: AtomicInteger,
-		info: PlayerQuickHarvestInfo
+		info: PlayerQuickHarvestInfo,
+		playerHasBeenWarned: AtomicBoolean
 	) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
@@ -699,9 +709,15 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		)
 
 		blocksThatMustBeHarvestedLater.sortedBy { e.block.location.distanceSquared(it.location) }.forEach {
-			doQuickHarvestOnCocoa(e, player, it, inventory, mcMMOXp, info)
-			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, Material.COCOA))
+			if (playerHasBeenWarned.get())
 				return
+
+			if (doesPlayerNotHaveEnoughEnergyToHarvestIfTheyDontSendMessage(player, info, Material.COCOA)) {
+				playerHasBeenWarned.set(true)
+				return
+			}
+
+			doQuickHarvestOnCocoa(e, player, it, inventory, mcMMOXp, info, playerHasBeenWarned)
 		}
 	}
 
@@ -711,7 +727,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		block: Block,
 		inventory: Inventory,
 		mcMMOXp: AtomicInteger,
-		info: PlayerQuickHarvestInfo
+		info: PlayerQuickHarvestInfo,
+		playerHasBeenWarned: AtomicBoolean
 	) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
@@ -784,9 +801,15 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		)
 
 		blocksThatMustBeHarvestedLater.sortedBy { e.block.location.distanceSquared(it.location) }.forEach {
-			doQuickHarvestOnSugarCane(e, player, it, inventory, mcMMOXp, info)
-			if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, Material.SUGAR_CANE))
+			if (playerHasBeenWarned.get())
 				return
+
+			if (doesPlayerNotHaveEnoughEnergyToHarvestIfTheyDontSendMessage(player, info, Material.SUGAR_CANE)) {
+				playerHasBeenWarned.set(true)
+				return
+			}
+
+			doQuickHarvestOnSugarCane(e, player, it, inventory, mcMMOXp, info, playerHasBeenWarned)
 		}
 	}
 
@@ -794,6 +817,14 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		val howMuchWillBeRemoved = BLOCK_ENERGY_COST[type] ?: 1
 		if (0 >= info.activeBlocks - howMuchWillBeRemoved)
 			return true
+		return false
+	}
+
+	private fun doesPlayerNotHaveEnoughEnergyToHarvestIfTheyDontSendMessage(player: Player, info: PlayerQuickHarvestInfo, type: Material): Boolean {
+		if (doesPlayerNotHaveEnoughEnergyToHarvestType(info, type)) {
+			player.sendMessage(NO_HARVEST_BLOCKS_LEFT)
+			return true
+		}
 		return false
 	}
 
