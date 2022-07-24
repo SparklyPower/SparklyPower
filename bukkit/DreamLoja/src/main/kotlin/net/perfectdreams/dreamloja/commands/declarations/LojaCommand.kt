@@ -19,6 +19,10 @@ object LojaCommand : SparklyCommandDeclarationWrapper {
                 executor = DeleteLojaExecutor
             }
 
+            subcommand(listOf("list")) {
+                executor = LojaListExecutor
+            }
+
             executor = LojaManageExecutor
         }
 

@@ -6,7 +6,9 @@ import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
+import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamloja.DreamLoja
+import net.perfectdreams.dreamloja.tables.Shops
 
 class LojaManageExecutor(m: DreamLoja) : LojaExecutorBase(m) {
     companion object : SparklyCommandExecutorDeclaration(LojaManageExecutor::class)
@@ -26,6 +28,11 @@ class LojaManageExecutor(m: DreamLoja) : LojaExecutorBase(m) {
             appendCommand("/loja manage delete")
             append(" - Deleta a sua loja")
         }
+        context.sendMessage {
+            appendCommand("/loja manage list")
+            append(" - Mostra todas as suas lojas")
+        }
+
         player.sendMessage("§f §3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-")
     }
 }

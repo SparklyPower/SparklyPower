@@ -70,6 +70,7 @@ class DreamLoja : KotlinPlugin() {
 			SetLojaExecutor(this),
 			SetLojaIconExecutor(this),
 			DeleteLojaExecutor(this),
+			LojaListExecutor(this)
 		)
 
 		registerEvents(SignListener(this))
@@ -113,10 +114,7 @@ class DreamLoja : KotlinPlugin() {
 			.first()
 			.lowercase()
 
-		return if (split.isEmpty())
-			"loja"
-		else
-			split
+		return split.ifBlank { "loja" }
 	}
 
 	fun parseLojaNameOrNull(name: String?): String? {
