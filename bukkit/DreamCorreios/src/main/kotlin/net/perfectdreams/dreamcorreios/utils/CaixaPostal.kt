@@ -34,7 +34,7 @@ class CaixaPostal(
     /**
      * This MUST be called within an [DreamCorreios.loadingAndUnloadingCaixaPostalMutex] lock!
      */
-    suspend fun releaseAccess(accessHolder: CaixaPostalAccessHolder) {
+    fun releaseAccess(accessHolder: CaixaPostalAccessHolder) {
         m.logger.info { "Releasing access holder on caixa postal of $playerId" }
         accessHolders.remove(accessHolder)
         saveIfNotLocked()
