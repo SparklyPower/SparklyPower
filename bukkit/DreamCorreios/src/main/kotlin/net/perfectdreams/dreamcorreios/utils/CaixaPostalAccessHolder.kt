@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcorreios.utils
 
+import kotlinx.coroutines.sync.withLock
 import org.bukkit.inventory.ItemStack
 
 class CaixaPostalAccessHolder(
@@ -9,5 +10,5 @@ class CaixaPostalAccessHolder(
 
     fun addItem(vararg itemStacks: ItemStack) = m.addItem(*itemStacks)
 
-    suspend fun release() = m.releaseAccess(this)
+    suspend fun release() = m.m.loadingAndUnloadingCaixaPostalMutex.withLock { m.releaseAccess(this) }
 }

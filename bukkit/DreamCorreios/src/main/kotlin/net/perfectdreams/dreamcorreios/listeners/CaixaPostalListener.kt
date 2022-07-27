@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcorreios.listeners
 
+import kotlinx.coroutines.delay
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreamcorreios.utils.CaixaPostalHolder
@@ -67,6 +68,10 @@ class CaixaPostalListener(val m: DreamCorreios) : Listener {
 
                 // While we DO have access to the caixa postal items, it is better to retrieve it again to ensure proper synchronization
                 if (e.slot == 8) {
+                    // Close the inventory to ensure that the changes will be persisted, to avoid issues
+                    // THIS IS NECESSARY TO AVOID A DUPLICATION ISSUE WHEN YOU TRY OPENING THE SAME PAGE WHILE THE PAGE IS OPEN
+                    e.whoClicked.closeInventory()
+
                     // Open the mailbox on the next page, if possible
                     m.launchAsyncThread {
                         val caixaPostal = m.retrieveCaixaPostalOfPlayerAndHold(player)
@@ -80,6 +85,10 @@ class CaixaPostalListener(val m: DreamCorreios) : Listener {
                 }
 
                 if (e.slot == 17) {
+                    // Close the inventory to ensure that the changes will be persisted, to avoid issues
+                    // THIS IS NECESSARY TO AVOID A DUPLICATION ISSUE WHEN YOU TRY OPENING THE SAME PAGE WHILE THE PAGE IS OPEN
+                    e.whoClicked.closeInventory()
+
                     // Open the mailbox on the next page, if possible
                     m.launchAsyncThread {
                         val caixaPostal = m.retrieveCaixaPostalOfPlayerAndHold(player)

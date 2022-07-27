@@ -188,32 +188,34 @@ class DreamCorreios : KotlinPlugin(), Listener {
 
 	suspend fun retrieveCaixaPostalOfPlayerAndHold(player: Player) = retrieveCaixaPostalOfPlayerAndHold(player.uniqueId)
 
-	suspend fun retrieveCaixaPostalOfPlayerAndHold(playerId: UUID): CaixaPostalAccessHolder = loadingAndUnloadingCaixaPostalMutex.withLock {
-		val caixaPostal = loadedCaixaPostais[playerId]
-		logger.info { "Caixa Postal $playerId is $caixaPostal" }
-		if (caixaPostal != null)
-			return caixaPostal.createAccess()
+	suspend fun retrieveCaixaPostalOfPlayerAndHold(playerId: UUID): CaixaPostalAccessHolder = loadingAndUnloadingCaixaPostalMutex
+		.also { logger.info { "Trying to retrieve caixa postal for $playerId, is the mutex locked? ${it.isLocked}"} }
+		.withLock {
+			val caixaPostal = loadedCaixaPostais[playerId]
+			logger.info { "Caixa Postal $playerId is $caixaPostal" }
+			if (caixaPostal != null)
+				return caixaPostal.createAccess()
 
-		val itemsInBase64 = onAsyncThread {
-			transaction(Databases.databaseNetwork) {
-				ContaCorreios.select {
-					ContaCorreios.id eq playerId
-				}.firstOrNull()?.get(ContaCorreios.items)
+			val itemsInBase64 = onAsyncThread {
+				transaction(Databases.databaseNetwork) {
+					ContaCorreios.select {
+						ContaCorreios.id eq playerId
+					}.firstOrNull()?.get(ContaCorreios.items)
+				}
 			}
+
+			val items = if (itemsInBase64 == null || itemsInBase64.isEmpty())
+				mutableListOf()
+			else
+				itemsInBase64.split(";")
+					.map { it.fromBase64Item() }
+					.toMutableList()
+
+			return CaixaPostal(this, playerId, items)
+				.also {
+					loadedCaixaPostais[playerId] = it
+				}.createAccess()
 		}
-
-		val items = if (itemsInBase64 == null || itemsInBase64.isEmpty())
-			mutableListOf()
-		else
-			itemsInBase64.split(";")
-				.map { it.fromBase64Item() }
-				.toMutableList()
-
-		return CaixaPostal(this, playerId, items)
-			.also {
-				loadedCaixaPostais[playerId] = it
-			}.createAccess()
-	}
 
 	/**
 	 * Adds [items] to the [player]'s inventory if...

@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamcorreios.utils
 
 import dev.forst.exposed.insertOrUpdate
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.perfectdreams.dreamcore.utils.Databases
@@ -20,13 +21,21 @@ class CaixaPostal(
     private val accessHolderMutex = Mutex()
     private val pendingAddedItems = mutableListOf<ItemStack>()
 
-    suspend fun createAccess() = accessHolderMutex.withLock {
+    /**
+     * This MUST be called within an [DreamCorreios.loadingAndUnloadingCaixaPostalMutex] lock!
+     */
+    fun createAccess(): CaixaPostalAccessHolder {
+        m.logger.info { "Creating an acess holder on caixa postal of $playerId" }
         val accessHolder = CaixaPostalAccessHolder(this)
         accessHolders.add(accessHolder)
-        return@withLock accessHolder
+        return accessHolder
     }
 
-    suspend fun releaseAccess(accessHolder: CaixaPostalAccessHolder) = accessHolderMutex.withLock {
+    /**
+     * This MUST be called within an [DreamCorreios.loadingAndUnloadingCaixaPostalMutex] lock!
+     */
+    suspend fun releaseAccess(accessHolder: CaixaPostalAccessHolder) {
+        m.logger.info { "Releasing access holder on caixa postal of $playerId" }
         accessHolders.remove(accessHolder)
         saveIfNotLocked()
     }
@@ -38,18 +47,19 @@ class CaixaPostal(
         pendingAddedItems.addAll(itemStacks)
     }
 
-    private suspend fun saveIfNotLocked() {
-        m.loadingAndUnloadingCaixaPostalMutex.withLock {
-            if (accessHolders.size != 0) {
-                m.logger.info { "Not saving caixa postal $playerId because there are still ${accessHolders.size} access holding the caixa postal!" }
-                return@withLock
-            }
-
-            m.logger.info { "Removing caixa postal $playerId from memory!" }
-            m.loadedCaixaPostais.remove(playerId, this)
-
-            save()
+    /**
+     * This MUST be called within an [DreamCorreios.loadingAndUnloadingCaixaPostalMutex] lock!
+     */
+    private fun saveIfNotLocked() {
+        if (accessHolders.size != 0) {
+            m.logger.info { "Not saving caixa postal $playerId because there are still ${accessHolders.size} access holding the caixa postal!" }
+            return
         }
+
+        m.logger.info { "Removing caixa postal $playerId from memory!" }
+        m.loadedCaixaPostais.remove(playerId, this)
+
+        save()
     }
 
     private fun save() {
