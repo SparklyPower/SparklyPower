@@ -16,6 +16,7 @@ import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
 import net.perfectdreams.dreamcore.utils.toBaseComponent
 import net.perfectdreams.dreamcore.utils.toTextComponent
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
@@ -29,7 +30,7 @@ class ConvidarSubCommand(val m: DreamClubes) : WithClubeSubCommand {
 
             val onlinePlayer = Bukkit.getPlayerExact(args[0])
 
-            if (onlinePlayer == null) {
+            if (onlinePlayer == null || DreamVanishAPI.isQueroTrabalhar(onlinePlayer)) {
                 // Player inexistente!
                 player.sendMessage("${DreamClubes.PREFIX} §cPlayer inexistente!")
                 return@async

@@ -8,6 +8,7 @@ import net.perfectdreams.dreamclubes.utils.async
 import net.perfectdreams.dreamcore.utils.TableGenerator
 import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
@@ -29,7 +30,7 @@ class CoordsSubCommand(val m: DreamClubes) : WithClubeSubCommand {
 
             for (wrapper in clube.retrieveMembers()) {
                 val pStr = Bukkit.getPlayer(wrapper.id.value)
-                if (pStr != null) {
+                if (pStr != null && !DreamVanishAPI.isQueroTrabalhar(pStr)) {
                     var dist = 0
                     var valid = true
                     try {

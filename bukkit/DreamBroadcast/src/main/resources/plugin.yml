@@ -1,5 +1,5 @@
 name: DreamBroadcast
 main: net.perfectdreams.dreambroadcast.DreamBroadcast
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "DreamVanish"]
 api-version: 1.13

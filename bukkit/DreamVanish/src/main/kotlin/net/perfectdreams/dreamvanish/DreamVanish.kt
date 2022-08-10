@@ -7,6 +7,7 @@ import net.perfectdreams.dreamvanish.commands.QueroTrabalharCommand
 import net.perfectdreams.dreamvanish.commands.VanishCommand
 import net.perfectdreams.dreamvanish.listeners.PlayerListener
 import org.bukkit.Bukkit
+import org.dynmap.DynmapAPI
 
 class DreamVanish : KotlinPlugin() {
 	companion object {
@@ -23,6 +24,8 @@ class DreamVanish : KotlinPlugin() {
 
 		registerEvents(PlayerListener(this))
 
+		val dynmap = Bukkit.getServer().pluginManager.getPlugin("dynmap") as DynmapAPI?
+
 		schedule {
 			while (true) {
 				Bukkit.getOnlinePlayers().forEach {
@@ -35,6 +38,13 @@ class DreamVanish : KotlinPlugin() {
 						it.sendActionBar("§aVocê está invisível! Vanish Poder O2~")
 					else if (isQueroTrabalhar)
 						it.sendActionBar("§aVocê está no modo quero trabalhar! Apenas trabalho, sem diversão hein grrr")
+
+					// Set player's visibility on dynmap
+					if (isVanished || isQueroTrabalhar) {
+						dynmap?.setPlayerVisiblity(it, false)
+					} else {
+						dynmap?.setPlayerVisiblity(it, true)
+					}
 				}
 
 				waitFor(20)

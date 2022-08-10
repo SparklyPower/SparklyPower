@@ -8,6 +8,7 @@ import net.md_5.bungee.api.chat.TextComponent
 import net.perfectdreams.dreamcore.network.socket.SocketReceivedEvent
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.girl
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -61,7 +62,9 @@ class DreamBroadcast : KotlinPlugin(), Listener {
 							)
 						}
 						4 -> {
-							val players = onlinePlayers().filter { it.hasPermission("perfectdreams.vip") }
+							val players = onlinePlayers()
+								.filter { it.hasPermission("perfectdreams.vip") }
+								.filter { !DreamVanishAPI.isQueroTrabalhar(it) }
 
 							if (players.isNotEmpty()) {
 								val playersName = players.joinToString("§e, §b", transform = { it.displayName })

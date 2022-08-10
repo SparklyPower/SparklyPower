@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.isBetween
 import net.perfectdreams.dreamcore.utils.withoutPermission
 import net.perfectdreams.dreamterrainadditions.DreamTerrainAdditions
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.Location
 
@@ -23,7 +24,7 @@ object RetirarCommand : DSLCommandBase<DreamTerrainAdditions> {
 
             val kick = Bukkit.getPlayer(playerName)
 
-            if (kick == null) {
+            if (kick == null || DreamVanishAPI.isQueroTrabalhar(kick)) {
                 player.sendMessage("§b$playerName§c não existe ou está offline!")
                 return@executes
             }

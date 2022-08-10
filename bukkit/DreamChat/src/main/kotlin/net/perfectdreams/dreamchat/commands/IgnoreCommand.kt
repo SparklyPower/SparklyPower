@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamcore.utils.generateCommandInfo
 import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -24,7 +25,7 @@ class IgnoreCommand(val m: DreamChat) : SparklyCommand(arrayOf("ignore", "ignora
 
 		val ignoreList = m.userData.getStringList("ignore.${p0.uniqueId}")
 
-		if (onlinePlayer != null) {
+		if (onlinePlayer != null && !DreamVanishAPI.isQueroTrabalhar(onlinePlayer)) {
 			if (onlinePlayer.hasPermission("sparklypower.soustaff")) {
 				p0.sendMessage("§cVocê não pode ignorar players que são da equipe!")
 				onlinePlayer.sendMessage("§cPlayer ${p0.name} tentou te ignorar!")

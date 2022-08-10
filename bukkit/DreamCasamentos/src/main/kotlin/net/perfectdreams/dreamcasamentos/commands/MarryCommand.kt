@@ -15,6 +15,7 @@ import net.perfectdreams.dreamcasamentos.utils.MarriageParty
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.girl
+import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -34,7 +35,7 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
     @Subcommand
     fun marry(sender: Player, playerName: String) {
         val player = Bukkit.getPlayer(playerName)
-        if (player == null) {
+        if (player == null || DreamVanishAPI.isQueroTrabalhar(player)) {
             sender.sendMessage("$PREFIX Este jogador não foi encontrado!")
             return
         }
