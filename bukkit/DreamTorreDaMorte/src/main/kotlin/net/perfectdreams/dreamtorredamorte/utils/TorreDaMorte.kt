@@ -117,6 +117,8 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
 
             isStarted = false
             isPreStart = false
+            m.eventoTorreDaMorte.lastTime = System.currentTimeMillis()
+            m.eventoTorreDaMorte.running = false
 
             playersInQueue.forEach { player ->
                 player.teleport(DreamCore.dreamConfig.getSpawn())
