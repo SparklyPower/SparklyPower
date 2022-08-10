@@ -110,7 +110,12 @@ object LocationUtils {
 		} else MaterialUtils.HOLLOW_MATERIALS.contains(world.getBlockAt(x, y - 1, z).getType())
 	}
 
-	fun isBlockUnsafe(world: World, x: Int, y: Int, z: Int) = isBlockDamaging(world, x, y, z) || isBlockAboveAir(world, x, y, z)
+	fun isBlockLocationDisallowed(world: World, x: Int, y: Int, z: Int): Boolean {
+		// TODO: Maybe don't hardcode this?
+		return world.name == "Nether" && y >= 128
+	}
+
+	fun isBlockUnsafe(world: World, x: Int, y: Int, z: Int) = isBlockDamaging(world, x, y, z) || isBlockAboveAir(world, x, y, z) || isBlockLocationDisallowed(world, x, y, z)
 
 	fun isBlockDamaging(world: World, x: Int, y: Int, z: Int): Boolean {
 		val below = world.getBlockAt(x, y - 1, z)
