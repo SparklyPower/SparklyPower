@@ -20,14 +20,15 @@ import org.bukkit.event.player.PlayerQuitEvent
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZoneId
+import java.util.*
 
 class DreamMcMMOFun : KotlinPlugin(), Listener {
 	val lastOnlineTimeCheck = mutableMapOf<Player, Int>()
 
-	private val boostTimes = listOf(
-		McMMOXPBoostTime(8, 10),
-		McMMOXPBoostTime(14, 16),
-		McMMOXPBoostTime(20, 22)
+	private val days = setOf(
+		DayOfWeek.MONDAY,
+		DayOfWeek.WEDNESDAY,
+		DayOfWeek.FRIDAY
 	)
 
 	override fun softEnable() {
@@ -39,35 +40,28 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 			while (true) {
 				switchContext(SynchronizationContext.ASYNC)
 
-				val today = Instant.now()
-					.atZone(ZoneId.of("America/Sao_Paulo"))
+				val today = Instant.now().atZone(ZoneId.of("America/Sao_Paulo"))
 
 				val currentDay = today.dayOfWeek
 				val currentHour = today.hour
 
-				val boostIndex = when (currentDay) {
-					DayOfWeek.MONDAY -> 0
-					DayOfWeek.TUESDAY -> -1
-					DayOfWeek.WEDNESDAY -> 1
-					DayOfWeek.THURSDAY -> -1
-					DayOfWeek.FRIDAY -> 2
-					DayOfWeek.SATURDAY -> -1
-					DayOfWeek.SUNDAY -> -1
-				}
+				if (currentDay in days) {
+					val random = Random((today.dayOfMonth + today.monthValue + today.year).toLong()) // Create random seed based on the current date (kind of)
+					val startsAt = random.nextInt(8, 20)
+					val endsAt = startsAt + 2
 
-				if (boostIndex != -1) {
-					val boostTime = boostTimes[boostIndex]
+					logger.info { "Today's mcMMO Boost will start at $startsAt and end at $endsAt" }
 
-					if (currentHour in boostTime.startsAt until boostTime.endsAt && !mcMMO.p.isXPEventEnabled) {
+					if (currentHour in startsAt until endsAt && !mcMMO.p.isXPEventEnabled) {
 						switchContext(SynchronizationContext.SYNC)
 						// We could use McMMO's API but it doesn't broadcast
 						Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "xprate 2 true")
 						switchContext(SynchronizationContext.ASYNC)
 
-						sendMcMMOBoostInformationToDiscord(boostTime.endsAt)
+						sendMcMMOBoostInformationToDiscord(endsAt)
 					}
 
-					if (currentHour == boostTime.endsAt && mcMMO.p.isXPEventEnabled) {
+					if (currentHour == endsAt && mcMMO.p.isXPEventEnabled) {
 						switchContext(SynchronizationContext.SYNC)
 						// We could use McMMO's API but it doesn't broadcast
 						Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "xprate reset")

@@ -46,7 +46,39 @@ class DreamRestarter : KotlinPlugin() {
 
 				logger.info("Server will restart in ${diff}ms ($gonnaBeScheduledAtTime)")
 
-				delay(diff)
+				delay(diff - 120_000)
+
+				Bukkit.broadcastMessage("§aServidor irá reiniciar em dois minutos!")
+
+				delay(60_000)
+
+				Bukkit.broadcastMessage("§aServidor irá reiniciar em um minuto!")
+
+				delay(30_000)
+
+				Bukkit.broadcastMessage("§aServidor irá reiniciar em 30s!")
+
+				delay(15_000)
+
+				Bukkit.broadcastMessage("§aServidor irá reiniciar em 15s!")
+
+				delay(10_000)
+
+				Bukkit.broadcastMessage("§aServidor irá reiniciar em 5s!")
+
+				delay(1_000)
+				Bukkit.broadcastMessage("§aServidor irá reiniciar em 4s!")
+
+				delay(1_000)
+				Bukkit.broadcastMessage("§aServidor irá reiniciar em 3s!")
+
+				delay(1_000)
+				Bukkit.broadcastMessage("§aServidor irá reiniciar em 2s!")
+
+				delay(1_000)
+				Bukkit.broadcastMessage("§aServidor irá reiniciar em 1s!")
+
+				Bukkit.broadcastMessage("§aServidor está reiniciando... bye bye, te vejo em breve! :3")
 
 				storeCurrentPlayersAndSendServerDownNotification()
 
