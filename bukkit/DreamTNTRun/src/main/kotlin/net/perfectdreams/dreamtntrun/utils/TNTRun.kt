@@ -111,6 +111,7 @@ class TNTRun(val m: DreamTNTRun) {
 
         if (1 >= playersInQueue.size) {
             m.eventoTNTRun.running = false
+            m.eventoTNTRun.lastTime = System.currentTimeMillis()
             isStarted = false
             isPreStart = false
 
