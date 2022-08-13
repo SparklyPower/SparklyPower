@@ -16,7 +16,6 @@ import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamhome.tables.Homes
-import net.perfectdreams.dreamresourcereset.commands.DreamResourceResetRegenWorldCommand
 import net.perfectdreams.dreamresourcereset.listeners.ChunkListener
 import net.perfectdreams.dreamresourcereset.listeners.InteractListener
 import net.perfectdreams.dreamresourcereset.listeners.PlayerListener
@@ -195,8 +194,6 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 				}
 			}
 		)
-
-		registerCommand(DreamResourceResetRegenWorldCommand)
 	}
 
 	override fun softDisable() {
