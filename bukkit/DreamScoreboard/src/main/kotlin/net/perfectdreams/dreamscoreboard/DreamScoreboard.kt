@@ -92,7 +92,6 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 		// registerCommand(EventosTopMeuClubeCommand)
 		registerCommand(GlowingCommand)
 		registerCommand(GlowingColorCommand)
-		registerCommand(AmenoCommand)
 
 		scheduler().schedule(this, SynchronizationContext.SYNC) {
 			while (true) {
