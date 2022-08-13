@@ -559,6 +559,21 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		inventory.addItem(itemStack)
 
+		// To avoid a duplication issue, we will change the type right now
+		// Dupe issue: Fill your inventory with wheat, keep clicking on the wheat: You will receive a wheat item but the block won't be changed because
+		// "I can't fit the seed in there!"
+		val changeTo = when (type) {
+			Material.PUMPKIN, Material.MELON -> Material.AIR
+			else -> type
+		}
+
+		block.type = changeTo
+		if (type != Material.MELON && type != Material.PUMPKIN) {
+			val ageable = block.blockData as Ageable
+			ageable.age = 0
+			block.blockData = ageable
+		}
+
 		if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
 			val seed = getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
 				player,
@@ -582,18 +597,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					return
 				}
 			}
-		}
-
-		val changeTo = when (type) {
-			Material.PUMPKIN, Material.MELON -> Material.AIR
-			else -> type
-		}
-
-		block.type = changeTo
-		if (type != Material.MELON && type != Material.PUMPKIN) {
-			val ageable = block.blockData as Ageable
-			ageable.age = 0
-			block.blockData = ageable
 		}
 
 		addMcMMOHerbalismXP(player, block, type, mcMMOXp) // mcMMO EXP

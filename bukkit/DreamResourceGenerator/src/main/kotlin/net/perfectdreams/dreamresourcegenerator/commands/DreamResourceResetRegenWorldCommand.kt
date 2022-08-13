@@ -1,17 +1,17 @@
-package net.perfectdreams.dreamresourcereset.commands
+package net.perfectdreams.dreamresourcegenerator.commands
 
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
-import net.perfectdreams.dreamresourcereset.DreamResourceReset
+import net.perfectdreams.dreamresourcegenerator.DreamResourceGenerator
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.block.BlockFace
 import java.io.File
 
-object DreamResourceResetRegenWorldCommand : DSLCommandBase<DreamResourceReset> {
-    override fun command(plugin: DreamResourceReset) = create(
+object DreamResourceResetRegenWorldCommand : DSLCommandBase<DreamResourceGenerator> {
+    override fun command(plugin: DreamResourceGenerator) = create(
         listOf("dreamrr regen")
     ) {
         permission = "dreamresourcereset.setup"
@@ -70,9 +70,6 @@ object DreamResourceResetRegenWorldCommand : DSLCommandBase<DreamResourceReset> 
 
                 // Set resources spawn
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mvsetspawn Resources 0.5 68 0.5")
-
-                // Change resources to have keep inventory
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mv gamerule keepInventory true Resources")
 
                 // Improve area around the spawn point to be accessible by players
                 val world = Bukkit.getWorld("Resources")!!

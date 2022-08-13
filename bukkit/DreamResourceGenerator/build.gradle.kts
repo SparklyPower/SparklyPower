@@ -8,14 +8,14 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
-    maven("https://repo.mikeprimm.com/")
 }
 
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
-    compileOnly("us.dynmap:DynmapCoreAPI:3.4-beta-5")
-    compileOnly("us.dynmap:dynmap-api:3.4-beta-5")
+    compileOnly(project(":bukkit:DreamHome"))
+    compileOnly(project(":bukkit:DreamMapWatermarker"))
+    compileOnly(project(":bukkit:DreamCorreios"))
 }
 
 tasks.withType<KotlinCompile> {

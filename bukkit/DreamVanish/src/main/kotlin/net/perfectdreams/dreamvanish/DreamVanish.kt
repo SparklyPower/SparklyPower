@@ -40,10 +40,15 @@ class DreamVanish : KotlinPlugin() {
 						it.sendActionBar("§aVocê está no modo quero trabalhar! Apenas trabalho, sem diversão hein grrr")
 
 					// Set player's visibility on dynmap
-					if (isVanished || isQueroTrabalhar) {
-						dynmap?.setPlayerVisiblity(it, false)
-					} else {
-						dynmap?.setPlayerVisiblity(it, true)
+					try {
+						if (isVanished || isQueroTrabalhar) {
+							dynmap?.setPlayerVisiblity(it, false)
+						} else {
+							dynmap?.setPlayerVisiblity(it, true)
+						}
+					} catch (e: NullPointerException) {
+						// If dynmap is actually disabled
+						// java.lang.NullPointerException: Cannot invoke "org.dynmap.DynmapCore.setPlayerVisiblity(String, boolean)" because "this.core" is null
 					}
 				}
 
