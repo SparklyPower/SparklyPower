@@ -19,8 +19,8 @@ dependencies {
     api(kotlin("script-util"))
     api(kotlin("compiler"))
     api(kotlin("scripting-compiler"))
-    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.0-RC")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0-RC")
     api("io.github.microutils:kotlin-logging-jvm:2.1.21")
 }
 

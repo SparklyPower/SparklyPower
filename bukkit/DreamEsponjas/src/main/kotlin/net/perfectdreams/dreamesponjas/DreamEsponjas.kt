@@ -72,6 +72,7 @@ class DreamEsponjas : KotlinPlugin(), Listener {
 					BlockFace.NORTH -> velocity.z = 4.0
 					BlockFace.EAST -> velocity.x = -4.0
 					BlockFace.WEST -> velocity.x = 4.0
+					else -> {}
 				}
 
 				e.player.velocity = velocity

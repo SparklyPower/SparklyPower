@@ -140,7 +140,7 @@ object MarriageParty {
                     player.inventory.boots = item
                 }
             }
+            else -> {}
         }
-
     }
 }
