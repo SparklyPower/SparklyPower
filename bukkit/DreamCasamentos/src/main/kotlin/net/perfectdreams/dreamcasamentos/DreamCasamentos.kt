@@ -44,7 +44,7 @@ class DreamCasamentos : KotlinPlugin() {
         MarriageParty.INSTANCE = this
         INSTANCE = this
 
-        transaction(Databases.databaseServer) {
+        transaction(Databases.databaseNetwork) {
             SchemaUtils.createMissingTablesAndColumns(
                 Marriages,
                 Adoptions
@@ -109,7 +109,7 @@ class DreamCasamentos : KotlinPlugin() {
     fun getMarriageFor(player: Player): Marriage? {
         DreamUtils.assertAsyncThread()
 
-        val marry = transaction(Databases.databaseServer) {
+        val marry = transaction(Databases.databaseNetwork) {
             Marriage.find { (Marriages.player1 eq player.uniqueId) or (Marriages.player2 eq player.uniqueId) }.firstOrNull()
         }
 
@@ -127,7 +127,7 @@ class DreamCasamentos : KotlinPlugin() {
     fun getAdoptionStatus(player: Player): Adoption? {
         DreamUtils.assertAsyncThread()
 
-        val adoption = transaction(Databases.databaseServer) {
+        val adoption = transaction(Databases.databaseNetwork) {
             Adoption.find {
                 Adoptions.player eq player.uniqueId
             }.firstOrNull()
@@ -141,7 +141,7 @@ class DreamCasamentos : KotlinPlugin() {
 
         val adoption = getAdoptionStatus(player)
 
-        return transaction(Databases.databaseServer) {
+        return transaction(Databases.databaseNetwork) {
             adoption?.adoptedBy
         }
     }

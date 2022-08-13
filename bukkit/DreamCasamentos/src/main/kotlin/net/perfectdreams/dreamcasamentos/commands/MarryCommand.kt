@@ -125,7 +125,7 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
         val shipName = m.getShipName(requestSender.name, sender.name)
 
         scheduler().schedule(m, SynchronizationContext.ASYNC) {
-            val marriage = transaction(Databases.databaseServer) {
+            val marriage = transaction(Databases.databaseNetwork) {
                 Marriage.new {
                     this.player1 = requestSender.uniqueId
                     this.player2 = sender.uniqueId
@@ -191,7 +191,7 @@ class MarryCommand(val m: DreamCasamentos) : SparklyCommand(arrayOf("marry", "ca
 
             switchContext(SynchronizationContext.ASYNC)
 
-            transaction(Databases.databaseServer) {
+            transaction(Databases.databaseNetwork) {
                 marriage.homeWorld = location.world.name
                 marriage.homeX = location.x
                 marriage.homeY = location.y

@@ -40,6 +40,7 @@ import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
+import java.time.Instant
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
@@ -81,6 +82,7 @@ class DreamChat : KotlinPlugin() {
 		.asMap()
 	var tellMessagesWebhook: WebhookClient? = null
 	val tellMessagesQueue = ConcurrentLinkedQueue<String>()
+	val loginTimeDatabaseIds = mutableMapOf<Player, Long>()
 
 	val dataYaml by lazy {
 		File(dataFolder, "data.yml")
@@ -188,6 +190,21 @@ class DreamChat : KotlinPlugin() {
 				}
 
 				waitFor(20 * 15)
+			}
+		}
+
+		launchAsyncThread {
+			while (true) {
+				// Update players online time every 1s, this way players can see their online time go up via "/online" without needing to logout, sweet!
+				val databaseIds = loginTimeDatabaseIds.values
+
+				transaction(Databases.databaseNetwork) {
+					TrackedOnlineHours.update({ TrackedOnlineHours.id inList databaseIds }) {
+						it[TrackedOnlineHours.loggedOut] = Instant.now()
+					}
+				}
+
+				delay(1_000)
 			}
 		}
 

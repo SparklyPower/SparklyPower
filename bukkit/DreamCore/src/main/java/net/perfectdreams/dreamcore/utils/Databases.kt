@@ -3,6 +3,7 @@ package net.perfectdreams.dreamcore.utils
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.util.IsolationLevel
+import net.perfectdreams.cookedsql.CookedSQL
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.tables.Users.username
 import org.jetbrains.exposed.sql.DEFAULT_REPETITION_ATTEMPTS
@@ -40,6 +41,8 @@ object Databases {
 
 	val dataSource by lazy { HikariDataSource(hikariConfig) }
 
+	val cooked = CookedSQL(dataSource)
+
 	val databaseNetwork by lazy {
 		Database.connect(
 			HikariDataSource(dataSource),
@@ -49,6 +52,4 @@ object Databases {
 			}
 		)
 	}
-	@Deprecated("Please use databaseNetwork")
-	val databaseServer = databaseNetwork
 }
