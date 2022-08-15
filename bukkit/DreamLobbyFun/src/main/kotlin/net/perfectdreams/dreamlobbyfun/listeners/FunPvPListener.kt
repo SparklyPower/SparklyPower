@@ -79,7 +79,7 @@ class FunPvPListener(val m: DreamLobbyFun) : Listener {
 			player.health = 20.0
 
 			scheduler().schedule(m, SynchronizationContext.ASYNC) {
-				val playerInfo = transaction(Databases.databaseServer) {
+				val playerInfo = transaction(Databases.databaseNetwork) {
 					PlayerSettings.findById(player.uniqueId) ?: PlayerSettings.new(player.uniqueId) {
 						playerVisibility = true
 					}

@@ -27,6 +27,7 @@ val shadowWithRuntimeDependencies by configurations.creating {
 }
 
 dependencies {
+    api(project(":common:KotlinRuntime"))
     compileOnlyApi("io.github.waterfallmc:waterfall-proxy:1.16-R0.4-SNAPSHOT")
 
     api(project(":common:tables"))
@@ -34,18 +35,10 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.1")
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
 
-    api("com.zaxxer:HikariCP:4.0.3")
-    api("org.postgresql:postgresql:42.2.20")
-    api("org.jetbrains.exposed:exposed-core:0.36.2")
-    api("org.jetbrains.exposed:exposed-dao:0.36.2")
-    api("org.jetbrains.exposed:exposed-jdbc:0.36.2")
-    api("io.ktor:ktor-client-cio:1.5.4")
-
     api(Dependencies.DISCORD_WEBHOOKS)
 
     api("com.github.salomonbrys.kotson:kotson:2.5.0")
 
-    api("org.mongodb:mongo-java-driver:3.7.0-rc0")
     api("com.github.kevinsawicki:http-request:6.0")
 
     api("net.perfectdreams.commands:command-framework-core:0.0.8")
@@ -60,13 +53,8 @@ tasks {
     val shadowJar = named<ShadowJar>("shadowJar") {
         archiveBaseName.set("DreamCoreBungee-shadow")
 
-        relocate("org.mongodb", "net.perfectdreams.libs.org.mongodb")
-        relocate("com.mongodb", "net.perfectdreams.libs.com.mongodb")
-        relocate("org.bson", "net.perfectdreams.libs.org.bson")
-
         exclude {
-            val file = it.file
-            (file?.name?.startsWith("kotlin") == true && file?.name?.contains("serialization") == false) || file?.name?.startsWith("patched_") == true
+            it?.file?.name?.startsWith("patched_") == true
         }
     }
 

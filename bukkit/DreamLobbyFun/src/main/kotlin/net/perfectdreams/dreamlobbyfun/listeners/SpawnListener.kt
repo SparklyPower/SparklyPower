@@ -99,7 +99,7 @@ class SpawnListener(val m: DreamLobbyFun) : Listener {
 		m.songPlayer?.addPlayer(player)
 
 		scheduler().schedule(m, SynchronizationContext.ASYNC) {
-			val playerInfo = transaction(Databases.databaseServer) {
+			val playerInfo = transaction(Databases.databaseNetwork) {
 				val thingy = PlayerSettings.findById(player.uniqueId)
 				thingy ?: PlayerSettings.new(player.uniqueId) {
 					playerVisibility = true
@@ -108,7 +108,7 @@ class SpawnListener(val m: DreamLobbyFun) : Listener {
 
 			val playerVisibility = playerInfo.playerVisibility
 
-			val currentJoinedPlayersInfo = transaction(Databases.databaseServer) {
+			val currentJoinedPlayersInfo = transaction(Databases.databaseNetwork) {
 				PlayerSettings.find { UserSettings.id inList Bukkit.getOnlinePlayers().map { it.uniqueId } }.toMutableList()
 			}
 

@@ -68,7 +68,7 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 	}
 
 	override fun onEnable() {
-		transaction(Databases.databaseServer) {
+		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(UserSettings)
 		}
 

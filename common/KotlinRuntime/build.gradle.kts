@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     kotlin("jvm")
@@ -26,25 +25,4 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-}
-
-tasks {
-    val shadowJar = named<ShadowJar>("shadowJar") {
-        archiveBaseName.set("KotlinRuntime-shadow")
-
-        exclude {
-            it.file?.name?.startsWith("paper_server") == true || it.file?.name?.startsWith("waterfall") == true
-        }
-    }
-
-    reobfJar {
-        // For some reason the userdev plugin is using "unspecified" as the suffix, and that's not a good name
-        // So we are going to change it to "PluginName-reobf.jar"
-        outputJar.set(layout.buildDirectory.file("libs/${project.name}-reobf.jar"))
-    }
-
-    "build" {
-        dependsOn(shadowJar)
-        dependsOn(reobfJar)
-    }
 }

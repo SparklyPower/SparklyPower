@@ -225,7 +225,7 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 			)
 
 			scheduler().schedule(m, SynchronizationContext.ASYNC) {
-				transaction(Databases.databaseServer) {
+				transaction(Databases.databaseNetwork) {
 					UserSettings.update({ UserSettings.id eq clicker.uniqueId }) {
 						it[playerVisibility] = bool
 					}

@@ -28,7 +28,7 @@ class DreamKits : KotlinPlugin(), Listener {
 	override fun softEnable() {
 		super.softEnable()
 
-		transaction(Databases.databaseServer) {
+		transaction(Databases.databaseNetwork) {
 			SchemaUtils.create(Kits)
 		}
 

@@ -4,7 +4,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     kotlin("jvm")
     `java-library`
-    id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     kotlin("plugin.serialization")
     id("io.papermc.paperweight.userdev")
 }
@@ -24,7 +24,7 @@ val shadowWithRuntimeDependencies by configurations.creating {
 }
 
 dependencies {
-    compileOnlyApi(project(":common:KotlinRuntime"))
+    api(project(":common:KotlinRuntime"))
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.8.0")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
@@ -36,6 +36,7 @@ dependencies {
     compileOnlyApi("net.milkbowl.vault:VaultAPI:1.6") {
         exclude("org.bukkit", "bukkit") // Vault includes the Bukkit 1.9 API, this breaks our project
     }
+    api("com.michael-bull.kotlin-coroutines-jdbc:kotlin-coroutines-jdbc:1.0.2")
     compileOnlyApi("com.github.apachezy:LangUtils:3.2.2")
     api(project(":common:tables"))
     api("com.google.code.gson:gson:2.8.9")
@@ -83,7 +84,7 @@ tasks {
         archiveBaseName.set("DreamCore-shadow")
 
         exclude {
-            it.file?.name?.startsWith("kotlin") == true || it.file?.name?.startsWith("patched_") == true
+            it?.file?.name?.startsWith("patched_") == true
         }
     }
 
