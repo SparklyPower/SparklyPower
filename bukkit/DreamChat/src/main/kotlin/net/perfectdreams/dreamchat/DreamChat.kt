@@ -33,6 +33,8 @@ import net.perfectdreams.dreamchat.utils.chatevent.EventoChatHandler
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.discord.DiscordWebhook
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
+import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import org.bukkit.Bukkit
 import org.bukkit.Statistic
 import org.bukkit.configuration.file.YamlConfiguration
@@ -45,6 +47,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
+import kotlin.math.log
 
 class DreamChat : KotlinPlugin() {
 	companion object {
@@ -193,14 +196,35 @@ class DreamChat : KotlinPlugin() {
 			}
 		}
 
-		launchAsyncThread {
+		launchMainThread {
 			while (true) {
 				// Update players online time every 1s, this way players can see their online time go up via "/online" without needing to logout, sweet!
-				val databaseIds = loginTimeDatabaseIds.values
 
-				transaction(Databases.databaseNetwork) {
-					TrackedOnlineHours.update({ TrackedOnlineHours.id inList databaseIds }) {
-						it[TrackedOnlineHours.loggedOut] = Instant.now()
+				// If a plugin reload happens, the loginTimeDatabaseIds map will be empty, so let's manually update it
+				for (player in Bukkit.getOnlinePlayers()) {
+					if (player !in loginTimeDatabaseIds) {
+						val dbId = onAsyncThread {
+							transaction(Databases.databaseNetwork) {
+								TrackedOnlineHours.insertAndGetId {
+									it[TrackedOnlineHours.player] = player.uniqueId
+									it[TrackedOnlineHours.loggedIn] = Instant.now()
+									it[TrackedOnlineHours.loggedOut] = Instant.now()
+								}
+							}
+						}
+
+						onMainThread {
+							loginTimeDatabaseIds[player] = dbId.value
+						}
+					}
+				}
+
+				loginTimeDatabaseIds.keys.filter { !it.isOnline }.forEach { loginTimeDatabaseIds.remove(it) }
+				onAsyncThread {
+					transaction(Databases.databaseNetwork) {
+						TrackedOnlineHours.update({ TrackedOnlineHours.id inList loginTimeDatabaseIds.values }) {
+							it[TrackedOnlineHours.loggedOut] = Instant.now()
+						}
 					}
 				}
 

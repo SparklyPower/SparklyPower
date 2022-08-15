@@ -9,6 +9,7 @@ import net.perfectdreams.dreamajuda.commands.declarations.DreamAjudaCommand
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
 import net.perfectdreams.dreamcore.utils.adventure.sendTextComponent
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.bukkit.Bukkit
@@ -22,6 +23,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.BookMeta
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
@@ -68,7 +70,7 @@ class DreamAjuda : KotlinPlugin(), Listener {
 	fun onCommand(e: PlayerCommandPreprocessEvent) {
 		if (e.player.hasPermission("sparklypower.soustaff"))
 			return
-		
+
 		if (!e.player.location.isWithinRegion("rules_island"))
 			return
 
@@ -108,7 +110,7 @@ class DreamAjuda : KotlinPlugin(), Listener {
 		e.player.persistentDataContainer.set(RULES_VERSION, config.getInt("rules-version"))
 
 		// And teleport it somewhere else!
-		e.player.teleport(Location(Bukkit.getWorld("TutorialIsland"), 1000.5, 100.0, 1000.0, 270f, 0f))
+		e.player.teleport(Location(Bukkit.getWorld("TutorialIsland"), 1011.5, 100.0, 1000.5, 90f, 0f))
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
@@ -116,11 +118,29 @@ class DreamAjuda : KotlinPlugin(), Listener {
 		if (e.player.world.name != "TutorialIsland")
 			return
 
-		e.isCancelled = true
-
 		val book = e.book ?: return
 
-		e.player.inventory.addItem(book)
+		if (book.type == Material.WRITABLE_BOOK) {
+			if (e.player.hasPermission("sparklypower.soustaff"))
+				return
+
+			e.isCancelled = true
+
+			e.player.sendMessage("§cEste livro não pode ser removido!")
+			return
+		}
+
+		e.isCancelled = true
+
+		e.player.inventory.addItem(
+			book.clone().meta<BookMeta> {
+				this.author(
+					textComponent("Pantufa, a mascote do servidor") {
+						color(NamedTextColor.GOLD)
+					}
+				)
+			}
+		)
 
 		e.player.closeInventory()
 

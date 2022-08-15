@@ -55,17 +55,15 @@ object OnlineCommand : DSLCommandBase<DreamChat> {
                     val input = player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20
 
                     sender.sendTextComponent {
-                        append("Você tem ") {
-                            color(NamedTextColor.YELLOW)
-                        }
+                        color(NamedTextColor.YELLOW)
+                        append("Você tem ")
                         append(fancyDateFormat(input.toLong()))
                         append(" online!")
                     }
 
                     sender.sendTextComponent {
-                        append("Você tem ") {
-                            color(NamedTextColor.YELLOW)
-                        }
+                        color(NamedTextColor.YELLOW)
+                        append("Você tem ")
                         append(fancyDateFormat(survivalTrackedOnlineHoursDuration.seconds))
                         append(" online nos últimos 30 dias!")
                     }
@@ -81,15 +79,15 @@ object OnlineCommand : DSLCommandBase<DreamChat> {
 
         return textComponent {
             append("$numberOfDays dias") {
-                color(NamedTextColor.YELLOW)
+                color(NamedTextColor.GOLD)
             }
             append(", ")
             append("$numberOfHours horas") {
-                color(NamedTextColor.YELLOW)
+                color(NamedTextColor.GOLD)
             }
             append(", ")
             append("$numberOfMinutes minutos") {
-                color(NamedTextColor.YELLOW)
+                color(NamedTextColor.GOLD)
             }
         }
     }
