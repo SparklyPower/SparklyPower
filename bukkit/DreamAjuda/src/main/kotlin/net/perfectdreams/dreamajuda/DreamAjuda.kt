@@ -51,6 +51,9 @@ class DreamAjuda : KotlinPlugin(), Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	fun onChat(e: AsyncPlayerChatEvent) {
+		if (e.player.hasPermission("sparklypower.soustaff"))
+			return
+
 		if (!e.player.location.isWithinRegion("rules_island"))
 			return
 
@@ -63,6 +66,9 @@ class DreamAjuda : KotlinPlugin(), Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	fun onCommand(e: PlayerCommandPreprocessEvent) {
+		if (e.player.hasPermission("sparklypower.soustaff"))
+			return
+		
 		if (!e.player.location.isWithinRegion("rules_island"))
 			return
 

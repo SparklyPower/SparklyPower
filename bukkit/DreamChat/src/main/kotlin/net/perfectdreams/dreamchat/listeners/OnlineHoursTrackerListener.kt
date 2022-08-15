@@ -20,10 +20,12 @@ class OnlineHoursTrackerListener(val m: DreamChat) : Listener {
     fun onJoin(e: PlayerJoinEvent) {
         // Player joined! Let's insert to the database
         m.launchAsyncThread {
-            val dbId = TrackedOnlineHours.insertAndGetId {
-                it[TrackedOnlineHours.player] = e.player.uniqueId
-                it[TrackedOnlineHours.loggedIn] = Instant.now()
-                it[TrackedOnlineHours.loggedOut] = Instant.now()
+            val dbId = transaction(Databases.databaseNetwork) {
+                TrackedOnlineHours.insertAndGetId {
+                    it[TrackedOnlineHours.player] = e.player.uniqueId
+                    it[TrackedOnlineHours.loggedIn] = Instant.now()
+                    it[TrackedOnlineHours.loggedOut] = Instant.now()
+                }
             }
 
             onMainThread {
