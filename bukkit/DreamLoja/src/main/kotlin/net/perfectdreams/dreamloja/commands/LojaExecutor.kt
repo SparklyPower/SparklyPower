@@ -128,7 +128,7 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
                 onMainThread {
                     val location = shop.getLocation()
                     if (location.isUnsafe || location.blacklistedTeleport) {
-                        val isOwner = shop.owner == player.uniqueId && player.hasPermission("dreamloja.bypass")
+                        val isOwner = shop.owner == player.uniqueId || player.hasPermission("dreamloja.bypass")
 
                         if (!isOwner) {
                             context.sendLojaMessage {
