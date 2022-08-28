@@ -3,13 +3,10 @@ package net.perfectdreams.dreamcore.utils
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.util.IsolationLevel
-import net.perfectdreams.cookedsql.CookedSQL
 import net.perfectdreams.dreamcore.DreamCore
-import net.perfectdreams.dreamcore.tables.Users.username
 import org.jetbrains.exposed.sql.DEFAULT_REPETITION_ATTEMPTS
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
-import java.sql.Connection
 
 object Databases {
 	private val DRIVER_CLASS_NAME = "org.postgresql.Driver"
@@ -40,8 +37,6 @@ object Databases {
 	}
 
 	val dataSource by lazy { HikariDataSource(hikariConfig) }
-
-	val cooked = CookedSQL(dataSource)
 
 	val databaseNetwork by lazy {
 		Database.connect(

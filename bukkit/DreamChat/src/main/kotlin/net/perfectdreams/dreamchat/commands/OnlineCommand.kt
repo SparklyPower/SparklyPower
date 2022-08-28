@@ -3,6 +3,7 @@ package net.perfectdreams.dreamchat.commands
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamchat.DreamChat
+import net.perfectdreams.dreamchat.tables.TrackedOnlineHours
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.adventure.append
@@ -11,6 +12,10 @@ import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import org.bukkit.Statistic
+import org.jetbrains.exposed.sql.Expression
+import org.jetbrains.exposed.sql.QueryBuilder
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Duration
 import java.time.OffsetDateTime
@@ -32,11 +37,10 @@ object OnlineCommand : DSLCommandBase<DreamChat> {
                 val timestamp = OffsetDateTime.now(ZoneId.of("America/Sao_Paulo"))
                     .minusMonths(1L)
 
-                val survivalTrackedOnlineHoursDuration = Databases.cooked.transaction {
-                    it.query("SELECT EXTRACT(epoch FROM SUM(logged_out - logged_in)) AS count FROM survival_trackedonlinehours WHERE player = ? AND logged_out >= ?") {
-                        setObject(1, player.uniqueId)
-                        setObject(2, timestamp)
-                    }.firstOrNull()?.let { Duration.ofSeconds(it.getLong("count")) }
+                val survivalTrackedOnlineHoursDuration = transaction(Databases.databaseNetwork) {
+                    TrackedOnlineHours.slice(ExtractEpoch).select {
+                        TrackedOnlineHours.player eq player.uniqueId and (TrackedOnlineHours.loggedOut greaterEq timestamp)
+                    }.firstOrNull()?.get(ExtractEpoch)?.let { Duration.ofSeconds(it) }
                 } ?: Duration.ZERO
 
                 onMainThread {
@@ -89,6 +93,12 @@ object OnlineCommand : DSLCommandBase<DreamChat> {
             append("$numberOfMinutes minutos") {
                 color(NamedTextColor.GOLD)
             }
+        }
+    }
+
+    object ExtractEpoch : Expression<Long>() {
+        override fun toQueryBuilder(queryBuilder: QueryBuilder) {
+            queryBuilder.append("EXTRACT(epoch FROM SUM(logged_out - logged_in))")
         }
     }
 }
