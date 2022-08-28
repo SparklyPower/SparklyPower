@@ -1,7 +1,7 @@
 package net.perfectdreams.dreamclubes
 
-import net.perfectdreams.dreamclubes.commands.ClubeChatCommand
-import net.perfectdreams.dreamclubes.commands.ClubesCommand
+import net.perfectdreams.dreamclubes.commands.declarations.ClubeChatCommand
+import net.perfectdreams.dreamclubes.commands.declarations.ClubesCommand
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.tables.Clubes

@@ -3,9 +3,9 @@ package net.perfectdreams.dreamclubes.dao
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.tables.Clubes
 import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
-import net.perfectdreams.dreamclubes.utils.async
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.dao.LongEntity
@@ -58,8 +58,8 @@ class Clube(id: EntityID<Long>) : LongEntity(id) {
         return clubeMember.permissionLevel.canExecute(permissionLevel)
     }
 
-    fun sendInfo(message: String) {
-        async {
+    suspend fun sendInfoOnAsyncThread(message: String) {
+        onAsyncThread {
             val members = retrieveMembers()
             val onlineMembers = members.mapNotNull { Bukkit.getPlayer(it.id.value) }
             onlineMembers.forEach { player ->

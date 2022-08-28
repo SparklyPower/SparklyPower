@@ -1,20 +1,31 @@
 package net.perfectdreams.dreamclubes.commands.subcommands
 
 import net.perfectdreams.dreamclubes.DreamClubes
-import net.perfectdreams.dreamclubes.dao.Clube
-import net.perfectdreams.dreamclubes.dao.ClubeMember
+import net.perfectdreams.dreamclubes.commands.SparklyClubesCommandExecutor
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
-import net.perfectdreams.dreamclubes.utils.async
+import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
+import net.perfectdreams.dreamclubes.utils.toSync
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.TableGenerator
+import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
+import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
+import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
+import net.perfectdreams.dreamcore.utils.stripColorCode
+import net.perfectdreams.dreamcore.utils.translateColorCodes
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.jetbrains.exposed.sql.transactions.transaction
 
-class VitalsSubCommand(val m: DreamClubes) : WithClubeSubCommand {
-    override fun execute(player: Player, clube: Clube, selfMember: ClubeMember, args: Array<String>) {
-        async {
+class VitalsClubeExecutor(m: DreamClubes) : SparklyClubesCommandExecutor(m) {
+    override fun execute(context: CommandContext, args: CommandArguments) {
+        val player = context.requirePlayer()
+
+        withPlayerClube(player) { clube, selfMember ->
+            val members = onAsyncThread { clube.retrieveMembers() }
+
             player.sendMessage("§8[ §bVitais §8]".centralizeHeader())
             player.sendMessage("§8Armas: §fM=Machado, E=Espada, A=Arco, F=Flecha".centralize())
             player.sendMessage("§8Materiais: §bdiamante§8, §eouro§8, §7pedra§8, §fferro§8, §6madeira§8".centralize())
@@ -30,7 +41,7 @@ class VitalsSubCommand(val m: DreamClubes) : WithClubeSubCommand {
             tg.addRow("§8Nome", "§8Vida§r", "§8Comida§r", "§8Armadura§r", "§8Armas")
             tg.addRow()
 
-            for (wrapper in clube.retrieveMembers()) {
+            for (wrapper in members) {
                 val pStr = Bukkit.getPlayer(wrapper.id.value)
                 if (pStr != null) {
                     var health = ""
@@ -168,7 +179,7 @@ class VitalsSubCommand(val m: DreamClubes) : WithClubeSubCommand {
                     )
                 }
             }
-            
+
             for (line in tg.generate(TableGenerator.Receiver.CLIENT, true, true)) {
                 player.sendMessage(line)
             }

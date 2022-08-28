@@ -24,14 +24,18 @@ class SparklyCommandManager(val plugin: KotlinPlugin) {
         plugin.logger.info { "Registering ${declaration.labels}..." }
         this.declarations.add(declaration)
 
-        val commandWrapper = SparklyBukkitBrigadierCommandWrapper(
-            declaration.labels,
-            declaration,
-            plugin,
-            this
-        )
+        val commandWrappers = declaration.labels.map {
+            SparklyBukkitBrigadierCommandWrapper(
+                it,
+                declaration,
+                plugin,
+                this
+            )
+        }
 
-        Bukkit.getCommandMap().register(plugin.name.lowercase(), commandWrapper)
+        commandWrappers.forEach {
+            Bukkit.getCommandMap().register(plugin.name.lowercase(), it)
+        }
     }
 
     // TODO: How to unregister brigadier commands?

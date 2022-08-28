@@ -1,20 +1,32 @@
 package net.perfectdreams.dreamclubes.commands.subcommands
 
 import net.perfectdreams.dreamclubes.DreamClubes
-import net.perfectdreams.dreamclubes.dao.Clube
-import net.perfectdreams.dreamclubes.dao.ClubeMember
+import net.perfectdreams.dreamclubes.commands.SparklyClubesCommandExecutor
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
-import net.perfectdreams.dreamclubes.utils.async
+import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
+import net.perfectdreams.dreamclubes.utils.toSync
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.TableGenerator
+import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
+import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
+import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
+import net.perfectdreams.dreamcore.utils.stripColorCode
+import net.perfectdreams.dreamcore.utils.translateColorCodes
 import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import org.jetbrains.exposed.sql.transactions.transaction
 
-class CoordsSubCommand(val m: DreamClubes) : WithClubeSubCommand {
-    override fun execute(player: Player, clube: Clube, selfMember: ClubeMember, args: Array<String>) {
-        async {
+class CoordsClubeExecutor(m: DreamClubes) : SparklyClubesCommandExecutor(m) {
+    override fun execute(context: CommandContext, args: CommandArguments) {
+        val player = context.requirePlayer()
+
+        withPlayerClube(player) { clube, selfMember ->
+            val members = onAsyncThread { clube.retrieveMembers() }
+
             player.sendMessage("§8[ §bCoordenadas §8]".centralizeHeader())
             player.sendMessage("")
             val tg = TableGenerator(
@@ -42,10 +54,10 @@ class CoordsSubCommand(val m: DreamClubes) : WithClubeSubCommand {
                     val y = pStr.location.blockY
                     val z = pStr.location.blockZ
                     tg.addRow(
-                            pStr.name,
-                            "§b" + if (valid) dist else "?",
-                            "§3 $x, $y, $z",
-                            " §f" + pStr.world.name
+                        pStr.name,
+                        "§b" + if (valid) dist else "?",
+                        "§3 $x, $y, $z",
+                        " §f" + pStr.world.name
 
                     )
                 }

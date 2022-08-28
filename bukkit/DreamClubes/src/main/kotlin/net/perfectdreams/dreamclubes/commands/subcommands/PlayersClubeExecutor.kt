@@ -1,32 +1,41 @@
 package net.perfectdreams.dreamclubes.commands.subcommands
 
 import net.perfectdreams.dreamclubes.DreamClubes
-import net.perfectdreams.dreamclubes.dao.Clube
-import net.perfectdreams.dreamclubes.dao.ClubeMember
+import net.perfectdreams.dreamclubes.commands.SparklyClubesCommandExecutor
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
-import net.perfectdreams.dreamclubes.utils.async
-import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
+import net.perfectdreams.dreamclubes.utils.toSync
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.TableGenerator
+import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
+import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
+import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
+import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
+import net.perfectdreams.dreamcore.utils.stripColorCode
+import net.perfectdreams.dreamcore.utils.translateColorCodes
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import org.jetbrains.exposed.sql.transactions.transaction
 
+class PlayersClubeExecutor(m: DreamClubes) : SparklyClubesCommandExecutor(m) {
+    override fun execute(context: CommandContext, args: CommandArguments) {
+        val player = context.requirePlayer()
 
-class PlayersSubCommand(val m: DreamClubes) : WithClubeSubCommand {
-    override fun execute(player: Player, clube: Clube, selfMember: ClubeMember, args: Array<String>) {
-        async {
-            val members = clube.retrieveMembers()
+        withPlayerClube(player) { clube, selfMember ->
+            val members = onAsyncThread { clube.retrieveMembers() }
 
             player.sendMessage("§8[ §bMembros §8]".centralizeHeader())
             player.sendMessage("§6Quantidade de Membros: §e" + members.size)
             player.sendMessage("")
             val tg = TableGenerator(
-                    TableGenerator.Alignment.CENTER,
-                    TableGenerator.Alignment.CENTER,
-                    TableGenerator.Alignment.CENTER,
-                    TableGenerator.Alignment.CENTER,
-                    TableGenerator.Alignment.CENTER,
-                    TableGenerator.Alignment.CENTER
+                TableGenerator.Alignment.CENTER,
+                TableGenerator.Alignment.CENTER,
+                TableGenerator.Alignment.CENTER,
+                TableGenerator.Alignment.CENTER,
+                TableGenerator.Alignment.CENTER,
+                TableGenerator.Alignment.CENTER
             )
             tg.addRow("§8Rank", "§8Nome§r", "§8KDR§r")
             tg.addRow()
