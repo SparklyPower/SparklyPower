@@ -7,7 +7,6 @@ import net.perfectdreams.dreamcore.utils.commands.ExecutedCommandException
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.stripColorCode
 import org.bukkit.Material
@@ -16,14 +15,11 @@ import org.bukkit.inventory.meta.BookMeta
 import java.io.File
 
 class DreamCoreReloadExecutor(val plugin: DreamCore) : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(DreamCoreReloadExecutor::class) {
-        object Options : CommandOptions() {
+    inner class Options : CommandOptions() {
             val fileName = greedyString("filename")
-                .register()
         }
 
-        override val options = Options
-    }
+        override val options = Options()
 
     override fun execute(context: CommandContext, args: CommandArguments) {
         val sender = context.sender

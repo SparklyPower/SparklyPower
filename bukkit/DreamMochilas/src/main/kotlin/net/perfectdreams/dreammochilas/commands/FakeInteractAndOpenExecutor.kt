@@ -4,7 +4,6 @@ import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreammochilas.DreamMochilas
 import org.bukkit.Bukkit
@@ -13,18 +12,15 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 
 class FakeInteractAndOpenExecutor(private val m: DreamMochilas) : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(FakeInteractAndOpenExecutor::class) {
-        object Options : CommandOptions() {
+    inner class Options : CommandOptions() {
             val delay = integer("delay")
-                .register()
         }
 
-        override val options = Options
-    }
+        override val options = Options()
 
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
-        val delay = args[Options.delay]
+        val delay = args[options.delay]
 
         player.sendMessage("Starting Fake Interact...")
 

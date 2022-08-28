@@ -99,17 +99,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 		FunnyIds.names.addAll(config.getStringList("Names"))
 		FunnyIds.adjectives.addAll(config.getStringList("Adjectives"))
 
-		registerCommand(
-			MochilaCommand,
-			GetMochilaExecutor(),
-			GetMochilaOldDamageSystemExecutor(),
-			GetMochilaIdExecutor(),
-			GetPlayerMochilasExecutor(),
-			GetMochilaByIdExecutor(this),
-			MochilasMemoryExecutor(this),
-			FakeInteractAndOpenExecutor(this),
-			FakeInteractAutoClickExecutor(this)
-		)
+		registerCommand(MochilaCommand(this))
 
 		val bedrockIntegrations = Bukkit.getPluginManager().getPlugin("DreamBedrockIntegrations") as DreamBedrockIntegrations
 		bedrockIntegrations.registerInventoryTitleTransformer(

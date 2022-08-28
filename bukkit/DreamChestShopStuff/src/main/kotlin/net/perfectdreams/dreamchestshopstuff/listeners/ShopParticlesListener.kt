@@ -2,7 +2,6 @@ package net.perfectdreams.dreamchestshopstuff.listeners
 
 import com.Acrobot.ChestShop.Events.PreTransactionEvent
 import net.perfectdreams.dreamchestshopstuff.DreamChestShopStuff
-import net.perfectdreams.dreamcore.commands.TellExecutor.Companion.Options.player
 import org.bukkit.Particle
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority

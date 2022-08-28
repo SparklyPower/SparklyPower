@@ -6,7 +6,6 @@ import net.perfectdreams.dreamcore.utils.MeninaAPI
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.extensions.formatted
 import net.perfectdreams.dreamraffle.DreamRaffle
@@ -15,13 +14,11 @@ import net.perfectdreams.dreamraffle.tasks.RafflesManager
 import org.bukkit.Bukkit
 
 class RaffleStatsExecutor(private val plugin: DreamRaffle) : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(RaffleStatsExecutor::class) {
-        object Options : CommandOptions() {
-            val target = optionalWord("jogador").register()
+    inner class Options : CommandOptions() {
+            val target = optionalWord("jogador")
         }
 
-        override val options = Options
-    }
+        override val options = Options()
 
     private val stats = listOf("Vitórias", "Sonecas apostadas", "Sonecas recebidas", "Pesadelos apostados", "Pesadelos recebidos")
 

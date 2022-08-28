@@ -1,10 +1,6 @@
 package net.perfectdreams.dreamxizum.listeners
 
-import com.okkero.skedule.schedule
-import net.perfectdreams.dreamcore.commands.TellExecutor.Companion.Options.player
-import net.perfectdreams.dreamcore.utils.SignGUIUtils
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamxizum.DreamXizum
 import net.perfectdreams.dreamxizum.utils.WinType
 import net.perfectdreams.dreamxizum.utils.XizumInventoryHolder
@@ -60,6 +56,8 @@ class XizumListener(private val m: DreamXizum) : Listener {
 
     @EventHandler
     fun onDisconnect(e: PlayerQuitEvent) {
+        val player = e.player
+
         // Vamos verificar se o tal usuário estava em uma arena
         val arena = m.arenas.firstOrNull { it.player1 == player || it.player2 == player } ?: return
 

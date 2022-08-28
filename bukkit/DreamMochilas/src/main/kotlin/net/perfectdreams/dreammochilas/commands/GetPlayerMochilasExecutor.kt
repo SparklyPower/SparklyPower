@@ -7,35 +7,26 @@ import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreammochilas.DreamMochilas
-import net.perfectdreams.dreammochilas.commands.GetPlayerMochilasExecutor.Companion.Options.playerName
-import net.perfectdreams.dreammochilas.commands.GetPlayerMochilasExecutor.Companion.Options.skip
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.tables.Mochilas
 import org.bukkit.Bukkit
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class GetPlayerMochilasExecutor : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(GetPlayerMochilasExecutor::class) {
-        object Options : CommandOptions() {
+    inner class Options : CommandOptions() {
             val playerName = quotableString("player_name")
-                .register()
-
             val skip = optionalInteger("skip")
-                .register()
         }
 
-        override val options = Options
-    }
+        override val options = Options()
 
     override fun execute(context: CommandContext, args: CommandArguments) {
-        val playerName = args[Options.playerName]
+        val playerName = args[options.playerName]
         val player = context.requirePlayer()
-        val skip = args[Options.skip]
+        val skip = args[options.skip]
 
         scheduler().schedule(DreamMochilas.INSTANCE) {
             switchContext(SynchronizationContext.ASYNC)

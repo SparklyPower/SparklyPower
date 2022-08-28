@@ -81,13 +81,7 @@ class DreamCorreios : KotlinPlugin(), Listener {
 		}
 
 		registerEvents(CaixaPostalListener(this))
-
-		registerCommand(
-			DreamCorreiosCommand,
-			CorreiosGiveExecutor(this),
-			CorreiosOpenExecutor(this),
-			CorreiosTransformCaixaPostalExecutor(this)
-		)
+		registerCommand(DreamCorreiosCommand(this))
 
 		val bedrockIntegrations = Bukkit.getPluginManager().getPlugin("DreamBedrockIntegrations") as DreamBedrockIntegrations
 		bedrockIntegrations.registerInventoryTitleTransformer(

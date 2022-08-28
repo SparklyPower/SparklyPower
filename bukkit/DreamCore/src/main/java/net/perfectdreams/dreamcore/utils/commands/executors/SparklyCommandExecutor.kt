@@ -2,12 +2,15 @@ package net.perfectdreams.dreamcore.utils.commands.executors
 
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
+import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 
 /**
  * This is the class that should be inherited if you
  * want to create an Interaction Command.
  */
 abstract class SparklyCommandExecutor {
+    open val options: CommandOptions = CommandOptions.NO_OPTIONS
+
     abstract fun execute(context: CommandContext, args: CommandArguments)
 
     /**

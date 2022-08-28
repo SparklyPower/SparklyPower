@@ -1,27 +1,19 @@
 package net.perfectdreams.dreamchat.commands
 
 import net.perfectdreams.dreamchat.DreamChat
-import net.perfectdreams.dreamchat.commands.TellExecutor.Companion.Options.receiver
-import net.perfectdreams.dreamchat.commands.TellExecutor.Companion.Options.register
-import net.perfectdreams.dreamchat.utils.ChatUtils
-import net.perfectdreams.dreamcore.utils.commands.ExecutedCommandException
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamvanish.DreamVanishAPI
 
 class TellLockExecutor(val m: DreamChat) : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(TellLockExecutor::class) {
-        object Options : CommandOptions() {
-            val receiver = player("receiver")
-                .register()
-        }
-
-        override val options = Options
+    inner class Options : CommandOptions() {
+        val receiver = player("receiver")
     }
+
+    override val options = Options()
 
     override fun execute(context: CommandContext, args: CommandArguments) {
         val sender = context.requirePlayer()

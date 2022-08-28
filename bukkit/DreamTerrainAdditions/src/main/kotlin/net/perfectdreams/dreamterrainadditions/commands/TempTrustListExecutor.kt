@@ -7,14 +7,11 @@ import net.perfectdreams.dreamcore.utils.TimeUtils
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.withoutPermission
 import net.perfectdreams.dreamterrainadditions.DreamTerrainAdditions
 import org.bukkit.entity.Player
 
 class TempTrustListExecutor(val plugin: DreamTerrainAdditions): SparklyCommandExecutor() {
-    companion object: SparklyCommandExecutorDeclaration(TempTrustListExecutor::class)
-
     override fun execute(context: CommandContext, args: CommandArguments) {
         plugin.launchAsyncThread {
             val player = context.sender as? Player

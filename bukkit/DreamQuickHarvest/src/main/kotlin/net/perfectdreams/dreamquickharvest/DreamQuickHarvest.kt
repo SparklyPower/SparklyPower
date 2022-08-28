@@ -87,11 +87,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		val energySumField = PlayerQuickHarvestUpgrades.energy.sum()
 
 		registerEvents(this)
-		registerCommand(
-			ColheitaCommand,
-			ColheitaExecutor(this),
-			ColheitaUpgradeExecutor(this)
-		)
+		registerCommand(ColheitaCommand(this))
 
 		launchAsyncThread {
 			while (true) {

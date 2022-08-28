@@ -9,25 +9,22 @@ import net.perfectdreams.dreamcore.utils.TimeUtils
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.withoutPermission
 import net.perfectdreams.dreamterrainadditions.DreamTerrainAdditions
 import org.bukkit.entity.Player
 
 class TempTrustExecutor(val plugin: DreamTerrainAdditions): SparklyCommandExecutor() {
-    companion object: SparklyCommandExecutorDeclaration(TempTrustExecutor::class) {
+    companion object {
         const val MAXIMUM_TRUST_TIME_LIMIT = 15_778_800_000L // 6 months
-
-        object Options: CommandOptions() {
-            val target = word("player")
-                .register()
-            val time = greedyString("time")
-                .register()
-
-        }
-        override val options = Options
     }
+
+    inner class Options: CommandOptions() {
+        val target = word("player")
+        val time = greedyString("time")
+    }
+
+    override val options = Options()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun execute(context: CommandContext, args: CommandArguments) {

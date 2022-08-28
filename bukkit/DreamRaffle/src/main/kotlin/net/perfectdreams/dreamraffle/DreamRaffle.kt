@@ -38,11 +38,7 @@ class DreamRaffle : KotlinPlugin() {
     }
 
     private fun registerCommands() {
-        registerCommand(DreamRaffleCommand, DreamRaffleExecutor())
-        registerCommand(RaffleCommand,
-            RaffleExecutor(),
-            BuyRaffleExecutor(this),
-            RaffleScheduleExecutor(),
-            RaffleStatsExecutor(this))
+        registerCommand(DreamRaffleCommand())
+        registerCommand(RaffleCommand(this))
     }
 }

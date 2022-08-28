@@ -10,10 +10,9 @@ import org.bukkit.plugin.Plugin
 
 class SparklyCommandManager(val plugin: KotlinPlugin) {
     val declarations = mutableListOf<SparklyCommandDeclaration>()
-    val executors = mutableListOf<SparklyCommandExecutor>()
     var hasCommandListenerRegistered = false
 
-    fun register(command: SparklyCommandDeclarationWrapper, vararg executors: SparklyCommandExecutor) {
+    fun register(command: SparklyCommandDeclarationWrapper) {
         // If we didn't register the command listener yet, then let's register it now!
         if (!hasCommandListenerRegistered) {
             plugin.logger.info { "Registering CommandListener for $plugin because it wasn't registered before..." }
@@ -24,7 +23,6 @@ class SparklyCommandManager(val plugin: KotlinPlugin) {
         val declaration = command.declaration()
         plugin.logger.info { "Registering ${declaration.labels}..." }
         this.declarations.add(declaration)
-        this.executors.addAll(executors)
 
         val commandWrapper = SparklyBukkitBrigadierCommandWrapper(
             declaration.labels,

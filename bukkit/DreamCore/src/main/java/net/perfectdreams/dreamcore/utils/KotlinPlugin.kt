@@ -178,8 +178,8 @@ open class KotlinPlugin : JavaPlugin() {
 		dreamCommandManager.registerCommand(command.command(this as Plugin))
 	}
 
-	fun registerCommand(command: SparklyCommandDeclarationWrapper, vararg executors: SparklyCommandExecutor) {
-		sparklyCommandManager.register(command, *executors)
+	fun registerCommand(command: SparklyCommandDeclarationWrapper) {
+		sparklyCommandManager.register(command)
 	}
 
 	/**

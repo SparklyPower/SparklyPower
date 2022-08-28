@@ -1,6 +1,6 @@
 package net.perfectdreams.dreamcore.utils.commands.declarations
 
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
+import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 
 fun sparklyCommand(labels: List<String>, block: SparklyCommandDeclarationBuilder.() -> (Unit)): SparklyCommandDeclaration {
     return SparklyCommandDeclarationBuilder(labels)
@@ -9,7 +9,7 @@ fun sparklyCommand(labels: List<String>, block: SparklyCommandDeclarationBuilder
 }
 
 class SparklyCommandDeclarationBuilder(val labels: List<String>) {
-    var executor: SparklyCommandExecutorDeclaration? = null
+    var executor: SparklyCommandExecutor? = null
     var permissions: List<String>? = null
     val subcommands = mutableListOf<SparklyCommandDeclaration>()
 

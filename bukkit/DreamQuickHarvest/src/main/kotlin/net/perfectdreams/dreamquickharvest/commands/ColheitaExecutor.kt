@@ -5,7 +5,6 @@ import net.perfectdreams.dreamcore.utils.DateUtils
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamquickharvest.DreamQuickHarvest
@@ -16,8 +15,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Instant
 
 class ColheitaExecutor(val m: DreamQuickHarvest) : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(ColheitaExecutor::class)
-
+    
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
 

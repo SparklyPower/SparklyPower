@@ -7,7 +7,6 @@ import net.md_5.bungee.api.chat.HoverEvent.Action.SHOW_TEXT
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.toBaseComponent
 import net.perfectdreams.dreamraffle.tasks.RafflesManager.sequence
 import net.perfectdreams.dreamraffle.tasks.RafflesManager.currentRaffle
@@ -18,8 +17,7 @@ import java.time.ZoneId
 import java.util.TimeZone
 
 class RaffleScheduleExecutor : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(RaffleScheduleExecutor::class)
-
+    
     private val dateFormat = SimpleDateFormat("HH:mm").apply {
         timeZone = TimeZone.getTimeZone(ZoneId.of("America/Sao_Paulo"))
     }

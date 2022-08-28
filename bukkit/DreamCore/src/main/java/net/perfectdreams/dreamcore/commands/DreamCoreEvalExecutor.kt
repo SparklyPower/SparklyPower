@@ -7,15 +7,13 @@ import net.perfectdreams.dreamcore.utils.commands.ExecutedCommandException
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.stripColorCode
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.BookMeta
 
 class DreamCoreEvalExecutor(val plugin: DreamCore) : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(DreamCoreEvalExecutor::class)
-
+    
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
         val heldItem = player.inventory.itemInMainHand

@@ -6,16 +6,11 @@ import com.Acrobot.ChestShop.Events.PreShopCreationEvent
 import com.Acrobot.ChestShop.Events.PreTransactionEvent
 import com.Acrobot.ChestShop.Events.TransactionEvent
 import com.Acrobot.ChestShop.Listeners.Modules.StockCounterModule
-import com.Acrobot.ChestShop.Listeners.Player.PlayerInteract
 import com.Acrobot.ChestShop.Signs.ChestShopSign
 import com.Acrobot.ChestShop.Signs.ChestShopSign.ITEM_LINE
 import com.Acrobot.ChestShop.Utils.uBlock
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamchestshopstuff.DreamChestShopStuff
-import net.perfectdreams.dreamcore.commands.TellExecutor.Companion.Options.player
-import net.perfectdreams.dreamcore.tables.EventVictories.event
-import net.perfectdreams.dreamcore.utils.DefaultFontInfo
-import net.perfectdreams.dreamcore.utils.PlayerUtils
 import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import org.bukkit.DyeColor

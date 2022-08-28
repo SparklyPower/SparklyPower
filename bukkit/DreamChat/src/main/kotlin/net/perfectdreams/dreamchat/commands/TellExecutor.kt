@@ -5,23 +5,17 @@ import net.perfectdreams.dreamchat.utils.ChatUtils
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamvanish.DreamVanishAPI
 
 class TellExecutor(val m: DreamChat) : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(TellExecutor::class) {
-        object Options : CommandOptions() {
+    inner class Options : CommandOptions() {
             val receiver = player("receiver")
-                .register()
-
             val message = greedyString("message")
-                .register()
         }
 
-        override val options = Options
-    }
+        override val options = Options()
 
     override fun execute(context: CommandContext, args: CommandArguments) {
         val sender = context.requirePlayer()

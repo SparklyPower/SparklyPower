@@ -5,7 +5,6 @@ import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.adventure.append
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamloja.DreamLoja
 import net.perfectdreams.dreamloja.tables.Shops
@@ -14,19 +13,16 @@ import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class DeleteLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
-    companion object : SparklyCommandExecutorDeclaration(DeleteLojaExecutor::class) {
-        object Options : CommandOptions() {
+    inner class Options : CommandOptions() {
             val shopName = optionalGreedyString("shop_name")
-                .register()
         }
 
-        override val options = Options
-    }
+        override val options = Options()
 
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
 
-        val shopName = m.parseLojaName(args[Options.shopName])
+        val shopName = m.parseLojaName(args[options.shopName])
 
         m.launchAsyncThread {
             transaction(Databases.databaseNetwork) {

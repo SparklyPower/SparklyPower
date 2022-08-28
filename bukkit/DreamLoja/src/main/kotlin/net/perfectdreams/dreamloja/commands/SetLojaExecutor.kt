@@ -7,7 +7,6 @@ import net.perfectdreams.dreamcore.utils.adventure.appendCommand
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.extensions.isUnsafe
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
@@ -19,20 +18,17 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
-    companion object : SparklyCommandExecutorDeclaration(SetLojaExecutor::class) {
-        object Options : CommandOptions() {
+    inner class Options : CommandOptions() {
             // Needs to be a greedy string because Minecraft doesn't allow special characters on a optionalWord
             val shopName = optionalGreedyString("shop_name")
-                .register()
         }
 
-        override val options = Options
-    }
+        override val options = Options()
 
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
 
-        val shopName = m.parseLojaName(args[Options.shopName])
+        val shopName = m.parseLojaName(args[options.shopName])
 
         val location = player.location
         if (location.isUnsafe) {

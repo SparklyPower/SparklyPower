@@ -10,12 +10,12 @@ object DreamCustomItemsCommand : SparklyCommandDeclarationWrapper {
         permissions = listOf("dreamcustomitems.setup")
 
         subcommand(listOf("give")) {
-            executor = CustomItemsGiveExecutor
+            executor = CustomItemsGiveExecutor()
             permissions = listOf("dreamcustomitems.setup")
         }
 
         subcommand(listOf("meta")) {
-            executor = CustomItemsMetaExecutor
+            executor = CustomItemsMetaExecutor()
             permissions = listOf("dreamcustomitems.setup")
         }
     }

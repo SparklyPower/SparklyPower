@@ -63,15 +63,7 @@ class DreamLoja : KotlinPlugin() {
 			)
 		}
 
-		registerCommand(
-			LojaCommand,
-			LojaExecutor(this),
-			LojaManageExecutor(this),
-			SetLojaExecutor(this),
-			SetLojaIconExecutor(this),
-			DeleteLojaExecutor(this),
-			LojaListExecutor(this)
-		)
+		registerCommand(LojaCommand(this))
 
 		registerEvents(SignListener(this))
 		registerEvents(TagListener())

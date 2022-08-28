@@ -4,7 +4,6 @@ import net.perfectdreams.dreamcore.utils.MeninaAPI
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.formatted
 import net.perfectdreams.dreamcore.utils.extensions.percentage
@@ -16,8 +15,7 @@ import kotlin.math.ceil
 import kotlin.random.Random
 
 class RaffleExecutor : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(RaffleExecutor::class)
-
+    
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
 

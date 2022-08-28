@@ -3,12 +3,10 @@ package net.perfectdreams.dreamcustomitems.commands
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import org.bukkit.persistence.PersistentDataType
 
 class CustomItemsMetaExecutor : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(CustomItemsMetaExecutor::class)
-
+    
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
 

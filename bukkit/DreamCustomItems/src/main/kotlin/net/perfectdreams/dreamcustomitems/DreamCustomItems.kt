@@ -106,11 +106,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			.start(WORKER_THREADS)
 
 		registerCommand(CustomItemRecipeCommand)
-		registerCommand(
-			DreamCustomItemsCommand,
-			CustomItemsGiveExecutor(),
-			CustomItemsMetaExecutor()
-		)
+		registerCommand(DreamCustomItemsCommand)
 
 		addRecipe(
 			repairMagnetKey,

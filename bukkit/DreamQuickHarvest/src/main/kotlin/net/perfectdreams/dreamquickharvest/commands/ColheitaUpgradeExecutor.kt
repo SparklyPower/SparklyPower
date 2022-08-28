@@ -6,7 +6,6 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamquickharvest.DreamQuickHarvest
 import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestUpgrades
@@ -16,8 +15,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ColheitaUpgradeExecutor(val m: DreamQuickHarvest) : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(ColheitaUpgradeExecutor::class)
-
+    
     private val upgrades = listOf(
         EnergyUpgrade(
             Material.COAL_BLOCK,

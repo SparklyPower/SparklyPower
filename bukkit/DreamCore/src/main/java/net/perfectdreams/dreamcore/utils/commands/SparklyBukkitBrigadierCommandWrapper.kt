@@ -97,7 +97,7 @@ class SparklyBukkitBrigadierCommandWrapper(
                 if (declaration.permissions?.isNotEmpty() == true)
                     context.requirePermissions(*declaration.permissions.toTypedArray())
 
-                val executor = sparklyCommandManager.executors.firstOrNull { it.signature() == declaration.executor?.parent } ?: error("I couldn't find a executor for ${declaration.executor?.parent}! Did you forget to register the executor?")
+                val executor = declaration.executor ?: error("I couldn't find a executor!")
                 executor.execute(context, CommandArguments(context))
             } catch (e: Throwable) {
                 if (e is CommandException)

@@ -93,17 +93,9 @@ class DreamCore : KotlinPlugin() {
 		try { VaultUtils.setupEconomy() } catch (e: NoClassDefFoundError) {}
 		try { VaultUtils.setupPermissions() } catch (e: NoClassDefFoundError) {}
 
-		sparklyCommandManager.register(
-			DreamCoreCommand,
-			DreamCoreExecutor(),
-			DreamCoreEvalExecutor(this),
-			DreamCoreReloadExecutor(this),
-			DreamCoreUnloadExecutor(this),
-			DreamCoreSetSpawnExecutor(this),
-			DreamCoreReloadConfigExecutor(this)
-		)
-		sparklyCommandManager.register(MeninoCommand, MeninoExecutor(this))
-		sparklyCommandManager.register(MeninaCommand, MeninaExecutor(this))
+		sparklyCommandManager.register(DreamCoreCommand(this))
+		sparklyCommandManager.register(MeninoCommand(this))
+		sparklyCommandManager.register(MeninaCommand(this))
 		// Test command, should not be registered!
 		// sparklyCommandManager.register(TestCommand, HelloWorldCommandExecutor(), HelloLoriCommandExecutor(), HelloCommandExecutor(), DoYouLikeCommandExecutor(), TellExecutor())
 

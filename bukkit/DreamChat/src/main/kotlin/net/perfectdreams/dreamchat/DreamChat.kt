@@ -129,12 +129,7 @@ class DreamChat : KotlinPlugin() {
 		registerEvents(CharacterBlockerListener(this))
 		registerEvents(OnlineHoursTrackerListener(this))
 		registerCommand(MuteCommand())
-		registerCommand(
-			TellCommand,
-			TellExecutor(this),
-			TellUnlockExecutor(this),
-			TellLockExecutor(this)
-		)
+		registerCommand(TellCommand(this))
 		registerCommand(QuickReplyCommand(this))
 		registerCommand(NickCommand(this))
 		registerCommand(QueroTagCommand(this))

@@ -7,7 +7,6 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutorDeclaration
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.formatted
@@ -21,13 +20,11 @@ import net.perfectdreams.dreamraffle.tasks.RafflesManager.currentRaffle
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class BuyRaffleExecutor(private val plugin: DreamRaffle) : SparklyCommandExecutor() {
-    companion object : SparklyCommandExecutorDeclaration(BuyRaffleExecutor::class) {
-        object Options : CommandOptions() {
-            val tickets = integer("tickets").register()
+    inner class Options : CommandOptions() {
+            val tickets = integer("tickets")
         }
 
-        override val options = Options
-    }
+        override val options = Options()
 
     private val template = "§cVocê não tem %s suficientes para comprar esses tickets."
     private val unrestrictedType = RaffleType.TURBO

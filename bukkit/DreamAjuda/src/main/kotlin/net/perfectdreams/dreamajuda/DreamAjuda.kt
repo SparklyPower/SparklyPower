@@ -37,14 +37,8 @@ class DreamAjuda : KotlinPlugin(), Listener {
 		super.softEnable()
 
 		registerEvents(this)
-		registerCommand(
-			AjudaCommand,
-			AjudaExecutor(this)
-		)
-		registerCommand(
-			DreamAjudaCommand,
-			TransformRulesSignExecutor(this)
-		)
+		registerCommand(AjudaCommand(this))
+		registerCommand(DreamAjudaCommand(this))
 	}
 
 	override fun softDisable() {
