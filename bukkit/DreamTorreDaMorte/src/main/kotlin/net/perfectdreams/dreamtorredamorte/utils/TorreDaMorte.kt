@@ -88,9 +88,9 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
 
                 if (announce) {
                     if (isServerEvent) {
-                        Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} O Evento Torre da Morte começará em $i segundos! Use §6/torre§e para entrar! (Guarde os itens antes de entrar, vai se dá problema)")
+                        Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} O Evento Torre da Morte começará em $i segundos! Use §6/torre§e para entrar!")
                     } else {
-                        Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} A Torre da Morte *valendo nada* começará em $i segundos! Use §6/torre minigame§e para entrar! (Guarde os itens antes de entrar, vai se dá problema)")
+                        Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} A Torre da Morte *valendo nada* começará em $i segundos! Use §6/torre minigame§e para entrar!")
                     }
                 }
 

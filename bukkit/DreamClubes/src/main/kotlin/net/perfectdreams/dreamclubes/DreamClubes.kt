@@ -2,6 +2,7 @@ package net.perfectdreams.dreamclubes
 
 import net.perfectdreams.dreamclubes.commands.declarations.ClubeChatCommand
 import net.perfectdreams.dreamclubes.commands.declarations.ClubesCommand
+import net.perfectdreams.dreamclubes.tables.ClubeHomeUpgrades
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.tables.Clubes
@@ -27,7 +28,8 @@ class DreamClubes : KotlinPlugin() {
 			SchemaUtils.createMissingTablesAndColumns(
 				Clubes,
 				ClubeMembers,
-				ClubesHomes
+				ClubesHomes,
+				ClubeHomeUpgrades
 			)
 		}
 	}

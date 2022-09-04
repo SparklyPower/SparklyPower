@@ -74,6 +74,10 @@ class ClubesCommand(val m: DreamClubes) : SparklyCommandDeclarationWrapper {
             executor = SetHomeClubeExecutor(m)
         }
 
+        subcommand(listOf("delcasa", "delhome")) {
+            executor = DeleteHomeClubeExecutor(m)
+        }
+
         // ===[ ACCEPT INVITE ]===
         subcommand(listOf("aceitar", "accept")) {
             executor = AceitarClubeExecutor(m)

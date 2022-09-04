@@ -155,6 +155,7 @@ class DreamFusca : KotlinPlugin(), Listener {
 			.storeMetadata(CAR_INFO_KEY, DreamUtils.gson.toJson(carInfo))
 			.storeMetadata(FUSCA_CHECK_KEY, "true")
 
+		// TODO: Would this cause issues?
 		e.vehicle.world.dropItemNaturally(e.vehicle.location, itemStack)
 
 		e.vehicle.remove()
@@ -172,7 +173,6 @@ class DreamFusca : KotlinPlugin(), Listener {
 		e.isCancelled = true
 
 		if (carInfo.owner == attacker.uniqueId) {
-			e.isCancelled = true
 			e.vehicle.remove()
 
 			val itemStack = ItemStack(Material.MINECART)

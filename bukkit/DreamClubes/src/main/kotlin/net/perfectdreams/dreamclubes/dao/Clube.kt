@@ -24,7 +24,6 @@ class Clube(id: EntityID<Long>) : LongEntity(id) {
     var cleanShortName by Clubes.cleanShortName
     var ownerId by Clubes.ownerId
     var createdAt by Clubes.createdAt
-    var home by ClubeHome optionalReferencedOn Clubes.home
     var maxMembers by Clubes.maxMembers
 
     fun retrieveMembers(): List<ClubeMember> {
