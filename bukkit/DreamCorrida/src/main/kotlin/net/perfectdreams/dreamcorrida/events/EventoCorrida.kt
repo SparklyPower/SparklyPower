@@ -127,11 +127,11 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
         if (isPreStart) {
             player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
         } else {
-            player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 0, false, false))
+            player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 1_200, 0, false, false))
         }
-        player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 200, 0, false, false))
-        player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 200, 0, false, false))
-        player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 200, 0, false, false))
+        player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 1_200, 0, false, false))
+        player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 1_200, 0, false, false))
+        player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 1_200, 0, false, false))
 
         broadcastFakeArmor(player, world)
         sendEmptyInventory(player)
