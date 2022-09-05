@@ -135,7 +135,8 @@ class DreamFusca : KotlinPlugin(), Listener {
 		e.entered.sendMessage("§aVocê entrou no seu carro, não se esqueça de colocar o cinto de segurança e, é claro, se beber não dirija!")
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
+	// Avoid duplicate minecarts if someone breaks a minecart while you are mounted on it
+	/* @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	fun onExit(e: VehicleExitEvent) {
 		if (e.vehicle.type != EntityType.MINECART)
 			return
@@ -159,7 +160,7 @@ class DreamFusca : KotlinPlugin(), Listener {
 		e.vehicle.world.dropItemNaturally(e.vehicle.location, itemStack)
 
 		e.vehicle.remove()
-	}
+	} */
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
 	fun onDestroy(e: VehicleDestroyEvent) {
