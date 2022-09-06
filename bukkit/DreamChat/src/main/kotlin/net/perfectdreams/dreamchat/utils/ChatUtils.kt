@@ -1,16 +1,12 @@
 package net.perfectdreams.dreamchat.utils
 
-import com.github.salomonbrys.kotson.set
-import com.google.gson.JsonObject
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
-import net.md_5.bungee.api.chat.BaseComponent
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamcore.network.DreamNetwork
-import net.perfectdreams.dreamcore.network.socket.SocketUtils
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
@@ -19,18 +15,30 @@ import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.entity.Player
 import java.util.*
+import kotlin.collections.asSequence
+import kotlin.collections.filterNot
+import kotlin.collections.forEach
+import kotlin.collections.joinToString
+import kotlin.collections.mutableListOf
+import kotlin.collections.plusAssign
+import kotlin.collections.set
 
 object ChatUtils {
 	fun beautifyMessage(sender: Player, str: String): String {
 		var message = str
 
 		for (player in Bukkit.getOnlinePlayers().filterNot { DreamVanishAPI.isQueroTrabalhar(it) }) {
-			val regex = Regex(".*\\b${Regex.escape(player.name)}\\b.*")
+			// User mention RegEx
+			val regex = Regex("\\b@?${Regex.escape(player.name)}\\b", RegexOption.IGNORE_CASE)
 			if (message.matches(regex)) {
-				message = message.replace(Regex("\\b${Regex.escape(player.name)}\\b", RegexOption.IGNORE_CASE), Regex.escapeReplacement("§3${player.displayName}§f"))
+				message = message.replace(regex, Regex.escapeReplacement("§3${player.displayName}§f"))
 				player.playSound(player.location, "perfectdreams.sfx.msn", 1F, 1F)
 				player.sendActionBar("§3${sender.displayName}§a te mencionou no chat!")
 			}
+		}
+
+		DreamChat.INSTANCE.emojis.forEach {
+			message = message.replace(it.chatFormat, it.character)
 		}
 
 		DreamChat.INSTANCE.replacers.forEach {

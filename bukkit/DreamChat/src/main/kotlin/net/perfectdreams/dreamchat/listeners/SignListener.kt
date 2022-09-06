@@ -11,6 +11,10 @@ class SignListener(val m: DreamChat) : Listener {
         for (i in 0..3) {
             var line = e.getLine(i)
 
+            m.emojis.forEach {
+                line = line?.replace(it.chatFormat, "§f" + it.character + "§0") ?: ""
+            }
+
             m.replacers.forEach {
                 if (it.value.length == 1) { // Emojis normalmente são apenas um caractere
                     line = line?.replace(it.key, "§f" + it.value + "§0") ?: ""
