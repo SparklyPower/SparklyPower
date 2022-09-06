@@ -99,6 +99,7 @@ class PlayerListener(val m: DreamResourceReset) : Listener {
                 PersistentDataType.BYTE,
                 1
             )
+            state.update()
 
             val droppedExp = e.droppedExp
             val items = e.drops.joinToString(";") { it.toBase64() }
