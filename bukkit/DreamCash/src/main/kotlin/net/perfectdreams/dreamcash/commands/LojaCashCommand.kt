@@ -8,6 +8,7 @@ import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcash.DreamCash
 import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamclubes.tables.ClubeHomeUpgrades
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
@@ -16,7 +17,10 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.Instant
 
 class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "cashloja")) {
     @Subcommand
@@ -128,42 +132,6 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                 true
             }
 
-            // Money
-            generateItemAt(0, 2, Material.EMERALD, 1, "§a130000 Sonecas", 250) {
-                sender.deposit(130000.00, TransactionContext(extra = "comprar no `/lojacash`"))
-                true
-            }
-
-            generateItemAt(1, 2, Material.EMERALD, 1, "§a260000 Sonecas", 500) {
-                sender.deposit(260000.00, TransactionContext(extra = "comprar no `/lojacash`"))
-                true
-            }
-
-            generateItemAt(2, 2, Material.EMERALD, 1, "§a500000 Sonecas", 950) {
-                sender.deposit(500000.00, TransactionContext(extra = "comprar no `/lojacash`"))
-                true
-            }
-
-            generateItemAt(3, 2, Material.EMERALD, 1, "§a1000000 Sonecas", 1_900) {
-                sender.deposit(1000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
-                true
-            }
-
-            generateItemAt(4, 2, Material.EMERALD, 1, "§a2000000 Sonecas", 3_800) {
-                sender.deposit(2000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
-                true
-            }
-
-            generateItemAt(5, 2, Material.EMERALD, 1, "§a5000000 Sonecas", 9_500) {
-                sender.deposit(5000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
-                true
-            }
-
-            generateItemAt(6, 2, Material.EMERALD, 1, "§a10000000 Sonecas", 19_000) {
-                sender.deposit(10000000.00, TransactionContext(extra = "comprar no `/lojacash`"))
-                true
-            }
-
             this.slot(0, 3) {
                 item = ItemStack(Material.ARMOR_STAND)
                     .rename("§aAumentar o seu Clube em +1 slot para Membros")
@@ -172,14 +140,14 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                         "§aLembre-se: Isto apenas afeta o seu clube atual, se você deletar",
                         "§ao seu clube, você irá perder os slots adicionais!",
                         "§f",
-                        "§c50 pesadelos"
+                        "§c100 pesadelos"
                     )
                     .meta<ItemMeta> {
                         setCustomModelData(1)
                     }
 
                 onClick {
-                    checkIfPlayerHasSufficientMoney(sender, 50) {
+                    checkIfPlayerHasSufficientMoney(sender, 100) {
                         askForConfirmation(sender) {
                             sender.closeInventory()
 
@@ -220,6 +188,77 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                                 sender.sendMessage("§aObrigado pela compra! ^-^")
 
                                 Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou §dslots adicionais para o clube§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
+                            }
+                        }
+                    }
+                }
+            }
+
+            this.slot(1, 3) {
+                item = ItemStack(Material.ARMOR_STAND)
+                    .rename("§aAumentar o seu Clube em +1 slot para Membros")
+                    .lore(
+                        "§aPermita que o seu clube tenha mais pessoas! (Máximo: 20 membros)",
+                        "§aLembre-se: Isto apenas afeta o seu clube atual, se você deletar",
+                        "§ao seu clube, você irá perder os slots adicionais!",
+                        "§f",
+                        "§c50 pesadelos"
+                    )
+                    .meta<ItemMeta> {
+                        setCustomModelData(1)
+                    }
+
+                onClick {
+                    checkIfPlayerHasSufficientMoney(sender, 100) {
+                        askForConfirmation(sender) {
+                            sender.closeInventory()
+
+                            scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                                val clube = ClubeAPI.getPlayerClube(sender)
+
+                                switchContext(SynchronizationContext.SYNC)
+
+                                if (clube == null) {
+                                    sender.sendMessage("§cVocê não possui um clube!")
+                                    return@schedule
+                                }
+
+                                if (clube.ownerId != sender.uniqueId) {
+                                    sender.sendMessage("§cApenas o dono do clube pode aumentar os slots!")
+                                    return@schedule
+                                }
+
+                                switchContext(SynchronizationContext.ASYNC)
+
+                                val totalUpgrades = transaction(Databases.databaseNetwork) {
+                                    ClubeHomeUpgrades.select {
+                                        ClubeHomeUpgrades.clube eq clube.id
+                                    }.count()
+                                }
+
+                                if (totalUpgrades == 5L) {
+                                    sender.sendMessage("§cVocê já comprou todos os upgrades disponíveis!")
+                                    return@schedule
+                                }
+
+                                transaction(Databases.databaseNetwork) {
+                                    try {
+                                        Cash.takeCash(sender, 100, TransactionContext(extra = "comprar `slots adicionais para casas do clube` no `/lojacash`"))
+                                        ClubeHomeUpgrades.insert {
+                                            it[ClubeHomeUpgrades.clube] = clube.id
+                                            it[ClubeHomeUpgrades.boughtAt] = Instant.now()
+                                        }
+                                    } catch (e: IllegalArgumentException) {
+                                        sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
+                                        return@transaction
+                                    }
+                                }
+
+                                switchContext(SynchronizationContext.SYNC)
+
+                                sender.sendMessage("§aObrigado pela compra! ^-^")
+
+                                Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou §dslots adicionais para casas do clube§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
                             }
                         }
                     }

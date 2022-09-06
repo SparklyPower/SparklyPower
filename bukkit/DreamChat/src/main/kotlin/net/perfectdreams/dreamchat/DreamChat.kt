@@ -27,6 +27,7 @@ import net.perfectdreams.dreamchat.listeners.OnlineHoursTrackerListener
 import net.perfectdreams.dreamchat.listeners.SignListener
 import net.perfectdreams.dreamchat.tables.*
 import net.perfectdreams.dreamchat.utils.DiscordAccountInfo
+import net.perfectdreams.dreamchat.utils.MinecraftEmoji
 import net.perfectdreams.dreamchat.utils.bot.PantufaResponse
 import net.perfectdreams.dreamchat.utils.bot.responses.*
 import net.perfectdreams.dreamchat.utils.chatevent.EventoChatHandler
@@ -76,6 +77,7 @@ class DreamChat : KotlinPlugin() {
 	val hideTells = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
 	val eventoChat = EventoChatHandler()
 
+	val emojis = mutableListOf<MinecraftEmoji>()
 	val replacers = mutableMapOf<Regex, String>()
 	val blockers = mutableSetOf<Regex>()
 
@@ -277,6 +279,7 @@ class DreamChat : KotlinPlugin() {
 		reloadConfig()
 		replacers.clear()
 		blockers.clear()
+		emojis.clear()
 
 		val yamlReplacers = config.getConfigurationSection("replacers")!!.getValues(false)
 
@@ -287,6 +290,16 @@ class DreamChat : KotlinPlugin() {
 		val yamlBlockers = config.getStringList("blockers")
 		yamlBlockers.forEach {
 			blockers.add(it.toRegex(RegexOption.IGNORE_CASE))
+		}
+
+		val yamlEmojis = config.getMapList("emojis")
+		yamlEmojis.forEach {
+			emojis.add(
+				MinecraftEmoji(
+					it["name"] as String,
+					it["character"] as String
+				)
+			)
 		}
 
 		// Shutdown all current active webhooks
