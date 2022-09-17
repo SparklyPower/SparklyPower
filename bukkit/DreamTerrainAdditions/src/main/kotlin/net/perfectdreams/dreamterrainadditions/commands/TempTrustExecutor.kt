@@ -59,7 +59,7 @@ class TempTrustExecutor(val plugin: DreamTerrainAdditions): SparklyCommandExecut
             claim.setPermission(targetUniqueId.toString(), ClaimPermission.Build)
             GriefPrevention.instance.dataStore.saveClaim(claim)
 
-            player.sendMessage("§aVocê concedeu permissões à §f$targetName §apara editar seu terreno temporariamente.")
+            player.sendMessage("§aVocê concedeu permissões à §f$targetName §apara editar seu terreno (${claim.id}) temporariamente.")
 
             plugin.saveInAsyncTask()
         }

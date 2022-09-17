@@ -16,10 +16,12 @@ import org.jetbrains.exposed.sql.Expression
 import org.jetbrains.exposed.sql.QueryBuilder
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.statements.jdbc.JdbcConnectionImpl
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.Duration
 import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.util.*
 
 object OnlineCommand : DSLCommandBase<DreamChat> {
     override fun command(plugin: DreamChat) = create(listOf("online")) {
@@ -37,11 +39,8 @@ object OnlineCommand : DSLCommandBase<DreamChat> {
                 val timestamp = OffsetDateTime.now(ZoneId.of("America/Sao_Paulo"))
                     .minusMonths(1L)
 
-                val survivalTrackedOnlineHoursDuration = transaction(Databases.databaseNetwork) {
-                    TrackedOnlineHours.slice(ExtractEpoch).select {
-                        TrackedOnlineHours.player eq player.uniqueId and (TrackedOnlineHours.loggedOut greaterEq timestamp)
-                    }.firstOrNull()?.get(ExtractEpoch)?.let { Duration.ofSeconds(it) }
-                } ?: Duration.ZERO
+                val survivalTrackedOnlineHoursDuration1Day = getPlayerTimeOnlineInTheLastXDays(player.uniqueId, 0)
+                val survivalTrackedOnlineHoursDuration30Days = getPlayerTimeOnlineInTheLastXDays(player.uniqueId, 30)
 
                 onMainThread {
                     plugin.oldestPlayers.forEachIndexed { index, pair ->
@@ -68,8 +67,15 @@ object OnlineCommand : DSLCommandBase<DreamChat> {
                     sender.sendTextComponent {
                         color(NamedTextColor.YELLOW)
                         append("Você tem ")
-                        append(fancyDateFormat(survivalTrackedOnlineHoursDuration.seconds))
-                        append(" online nos últimos 30 dias!")
+                        append(fancyDateFormat(survivalTrackedOnlineHoursDuration1Day.duration.seconds))
+                        append(" online hoje!")
+                    }
+
+                    sender.sendTextComponent {
+                        color(NamedTextColor.YELLOW)
+                        append("Você tem ")
+                        append(fancyDateFormat(survivalTrackedOnlineHoursDuration30Days.duration.seconds))
+                        append(" nos últimos 30 dias!")
                     }
                 }
             }
@@ -101,4 +107,44 @@ object OnlineCommand : DSLCommandBase<DreamChat> {
             queryBuilder.append("EXTRACT(epoch FROM SUM(logged_out - logged_in))")
         }
     }
+
+    /**
+     * Gets how much time [uniqueId] spent online in the last [dayOffset]
+     */
+    fun getPlayerTimeOnlineInTheLastXDays(uniqueId: UUID, dayOffset: Long): PlayerTimeOnlineResult {
+        var survivalTrackedOnlineHours = Duration.ZERO
+
+        val timestamp = OffsetDateTime.now(ZoneId.of("America/Sao_Paulo"))
+            .minusDays(dayOffset)
+            .withHour(0)
+            .withMinute(0)
+            .withSecond(0)
+            .withNano(0)
+
+        transaction(Databases.databaseNetwork) {
+            (this.connection as JdbcConnectionImpl)
+                .connection
+                .prepareStatement("select extract(epoch FROM SUM(logged_out - logged_in)) from survival_trackedonlinehours where player = ? and logged_out >= ?")
+                .apply {
+                    this.setObject(1, uniqueId)
+                    this.setObject(2, timestamp)
+                }
+                .executeQuery()
+                .also {
+                    while (it.next()) {
+                        survivalTrackedOnlineHours = Duration.ofSeconds(it.getLong(1))
+                    }
+                }
+        }
+
+        return PlayerTimeOnlineResult(
+            survivalTrackedOnlineHours,
+            timestamp
+        )
+    }
+
+    data class PlayerTimeOnlineResult(
+        val duration: Duration,
+        val since: OffsetDateTime
+    )
 }

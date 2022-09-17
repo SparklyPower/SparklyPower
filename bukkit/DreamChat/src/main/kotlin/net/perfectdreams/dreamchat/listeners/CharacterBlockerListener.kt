@@ -77,7 +77,7 @@ class CharacterBlockerListener(val m: DreamChat) : Listener {
         for (blocker in m.blockers) {
             val matches = blocker.findAll(input)
             for (match in matches) {
-                if (match.value !in emojis && m.emojis.any { match.value == it.character })
+                if (match.value !in emojis || m.emojis.any { match.value == it.character })
                     return true
             }
         }

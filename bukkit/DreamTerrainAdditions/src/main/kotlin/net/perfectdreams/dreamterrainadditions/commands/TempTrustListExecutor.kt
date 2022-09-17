@@ -29,7 +29,7 @@ class TempTrustListExecutor(val plugin: DreamTerrainAdditions): SparklyCommandEx
                 if (temporarilyTrustedPlayers.isEmpty())
                     return@launchAsyncThread player.sendMessage("§cAtualmente você não tem nenhum jogador na sua lista de jogadores temporariamente confiáveis! Que tal adicionar um? §6/trusttemp")
 
-                player.sendMessage("§9§lLista de pessoas que temporariamente possuem permissão:")
+                player.sendMessage("§9§lLista de pessoas que temporariamente possuem permissão no terreno ${claim.id}:")
                 player.sendMessage("")
                 temporarilyTrustedPlayers.forEach { (uuid, timeInMillis) ->
                     val playerName = DreamUtils.retrieveUserInfo(uuid)?.username?.uppercase() ?: uuid.toString()

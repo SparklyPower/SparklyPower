@@ -40,7 +40,7 @@ class CoordsClubeExecutor(m: DreamClubes) : SparklyClubesCommandExecutor(m) {
 
             tg.addRow("§7§oNome", "§7§oDist\u00e2ncia§r", "§7§oCoordenadas§r", "§7§oMundo§r")
 
-            for (wrapper in clube.retrieveMembers()) {
+            for (wrapper in members) {
                 val pStr = Bukkit.getPlayer(wrapper.id.value)
                 if (pStr != null && !DreamVanishAPI.isQueroTrabalhar(pStr)) {
                     var dist = 0

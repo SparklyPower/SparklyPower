@@ -2,12 +2,17 @@ package net.perfectdreams.dreamchat.utils
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.adventure.append
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -29,8 +34,9 @@ object ChatUtils {
 
 		for (player in Bukkit.getOnlinePlayers().filterNot { DreamVanishAPI.isQueroTrabalhar(it) }) {
 			// User mention RegEx
-			val regex = Regex("\\b@?${Regex.escape(player.name)}\\b", RegexOption.IGNORE_CASE)
-			if (message.matches(regex)) {
+			// We need to use (\b|@) because \b@? will never match!
+			val regex = Regex("(\\b|@)${Regex.escape(player.name)}\\b", RegexOption.IGNORE_CASE)
+			if (regex.containsMatchIn(message)) {
 				message = message.replace(regex, Regex.escapeReplacement("§3${player.displayName}§f"))
 				player.playSound(player.location, "perfectdreams.sfx.msn", 1F, 1F)
 				player.sendActionBar("§3${sender.displayName}§a te mencionou no chat!")
@@ -170,25 +176,56 @@ object ChatUtils {
 	}
 
 	fun sendTell(sender: Player, receiver: Player, message: String) {
-		val fromCanBeSeen = sender.displayName.stripColors()!!.contains(sender.name)
-		val toCanBeSeen = receiver.displayName.stripColors()!!.contains(receiver.name)
+		val fromCanBeSeen = sender.displayName.stripColors().contains(sender.name)
+		val toCanBeSeen = receiver.displayName.stripColors().contains(receiver.name)
 		val isIgnoringTheSender = DreamChat.INSTANCE.userData.getStringList("ignore.${receiver.uniqueId}").contains(sender.uniqueId.toString())
 
-		val fromName = if (!fromCanBeSeen) {
-			sender.displayName + "§d (${sender.name})"
-		} else {
-			sender.displayName
+		val fromUserMessage = textComponent {
+			color(TextColor.color(227, 75, 227))
+			append("De ")
+
+			append(
+				textComponent {
+					color(NamedTextColor.AQUA)
+					append(sender.displayName())
+				}
+			)
+
+			if (!fromCanBeSeen)
+				append(" (${sender.name})")
+
+			append(": ")
+
+			append(message) {
+				color(NamedTextColor.LIGHT_PURPLE)
+			}
 		}
 
-		val toName = if (!toCanBeSeen) {
-			receiver.displayName + "§d (${receiver.name})"
-		} else {
-			receiver.displayName
+		val toUserMessage = textComponent {
+			color(TextColor.color(227, 75, 227))
+			append("Para ")
+
+			append(
+				textComponent {
+					color(NamedTextColor.AQUA)
+					append(receiver.displayName())
+				}
+			)
+
+			if (!toCanBeSeen)
+				append(" (${receiver.name})")
+
+			append(": ")
+
+			append(message) {
+				color(NamedTextColor.LIGHT_PURPLE)
+			}
 		}
 
 		if (!isIgnoringTheSender)
-			receiver.sendMessage("§dDe §b${fromName}§r§d: §d$message")
-		sender.sendMessage("§dPara §b${toName}§r§d: §d$message")
+			receiver.sendMessage(fromUserMessage)
+
+		sender.sendMessage(toUserMessage)
 
 		DreamChat.INSTANCE.quickReply[receiver] = sender
 
@@ -215,7 +252,7 @@ object ChatUtils {
 		// bossbar
 		if (!isIgnoringTheSender) {
 			receiver.playSound(receiver.location, "perfectdreams.sfx.msn", 1F, 1F)
-			val bossBar = Bukkit.createBossBar("§b${fromName}§r§d: §d$message", BarColor.PINK, BarStyle.SOLID)
+			val bossBar = Bukkit.createBossBar("§b${sender.displayName}§r§d: §d$message", BarColor.PINK, BarStyle.SOLID)
 
 			bossBar.addPlayer(receiver)
 

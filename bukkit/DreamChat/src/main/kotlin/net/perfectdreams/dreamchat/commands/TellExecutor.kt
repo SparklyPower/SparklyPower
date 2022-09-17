@@ -30,6 +30,7 @@ class TellExecutor(val m: DreamChat) : SparklyCommandExecutor() {
         if (sender == receiver)
             context.fail("§cVocê não pode enviar uma mensagem para você mesmo, bobinh${sender.artigo}!")
 
+        // TODO: Fix this later
         if (message == null) {
             // If the message is null, then the user wants to lock a tell with someone!
             m.lockedTells[sender] = receiver.name

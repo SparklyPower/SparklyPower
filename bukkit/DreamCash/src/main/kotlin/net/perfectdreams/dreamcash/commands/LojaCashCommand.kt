@@ -132,7 +132,8 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                 true
             }
 
-            this.slot(0, 3) {
+            // ===[ CLUBES ]===
+            this.slot(0, 2) {
                 item = ItemStack(Material.ARMOR_STAND)
                     .rename("§aAumentar o seu Clube em +1 slot para Membros")
                     .lore(
@@ -194,22 +195,22 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                 }
             }
 
-            this.slot(1, 3) {
+            this.slot(1, 2) {
                 item = ItemStack(Material.ARMOR_STAND)
-                    .rename("§aAumentar o seu Clube em +1 slot para Membros")
+                    .rename("§aAumentar o seu Clube em +1 slot para Casas")
                     .lore(
-                        "§aPermita que o seu clube tenha mais pessoas! (Máximo: 20 membros)",
+                        "§aPermita que o seu clube tenha mais casas! (Máximo: 5 casas)",
                         "§aLembre-se: Isto apenas afeta o seu clube atual, se você deletar",
                         "§ao seu clube, você irá perder os slots adicionais!",
                         "§f",
-                        "§c50 pesadelos"
+                        "§c250 pesadelos"
                     )
                     .meta<ItemMeta> {
                         setCustomModelData(1)
                     }
 
                 onClick {
-                    checkIfPlayerHasSufficientMoney(sender, 100) {
+                    checkIfPlayerHasSufficientMoney(sender, 250) {
                         askForConfirmation(sender) {
                             sender.closeInventory()
 
@@ -237,13 +238,13 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                                 }
 
                                 if (totalUpgrades == 5L) {
-                                    sender.sendMessage("§cVocê já comprou todos os upgrades disponíveis!")
+                                    sender.sendMessage("§cVocê já comprou todos os upgrades de casa disponíveis!")
                                     return@schedule
                                 }
 
                                 transaction(Databases.databaseNetwork) {
                                     try {
-                                        Cash.takeCash(sender, 100, TransactionContext(extra = "comprar `slots adicionais para casas do clube` no `/lojacash`"))
+                                        Cash.takeCash(sender, 250, TransactionContext(extra = "comprar `slots adicionais para casas do clube` no `/lojacash`"))
                                         ClubeHomeUpgrades.insert {
                                             it[ClubeHomeUpgrades.clube] = clube.id
                                             it[ClubeHomeUpgrades.boughtAt] = Instant.now()

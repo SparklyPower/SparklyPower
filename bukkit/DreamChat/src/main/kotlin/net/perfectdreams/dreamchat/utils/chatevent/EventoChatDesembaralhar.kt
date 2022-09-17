@@ -1,12 +1,6 @@
 package net.perfectdreams.dreamchat.utils.chatevent
 
-import net.perfectdreams.dreamchat.dao.EventMessage
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.extensions.centralize
-import org.apache.commons.lang3.StringUtils
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import org.jetbrains.exposed.sql.transactions.transaction
 
 class EventoChatDesembaralhar : IEventoChat {
 	val words = listOf(
@@ -70,7 +64,7 @@ class EventoChatDesembaralhar : IEventoChat {
 		"ABELHA",
 		"PANDA",
 		"AFOGADO",
-		"SAUEADOR",
+		"SAQUEADOR",
 		"VEX",
 		"DEVASTADOR",
 		"PHANTOM",

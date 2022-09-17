@@ -52,13 +52,13 @@ val Player.hasMagnet get() =
         (backpacks.isNotEmpty() || it.any(isMagnet)) to backpacks
     } ?: (false to listOf())
 
-fun Player.isMagnetApplicable(type: Material, customDrops: List<ItemStack>? = null): Boolean =
-    hasMagnet.let {
-        if (it.first) {
-            magnetContexts[this] = MagnetContext(type, it.second, customDrops)
-            true
-        } else false
-    }
+fun Player.isMagnetApplicable(type: Material, customDrops: List<ItemStack>? = null): Boolean = false
+//    hasMagnet.let {
+//        if (it.first) {
+//            magnetContexts[this] = MagnetContext(type, it.second, customDrops)
+//            true
+//        } else false
+//    }
 
 fun ItemStack.updateMagnetLore(currentDurability: Int, maxDurability: Int) = meta<Damageable> {
     val durability = currentDurability.let { if (it < 0) 0 else it }

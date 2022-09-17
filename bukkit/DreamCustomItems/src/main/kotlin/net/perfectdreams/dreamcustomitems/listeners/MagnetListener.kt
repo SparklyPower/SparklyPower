@@ -6,13 +6,10 @@ import com.gmail.nossr50.events.skills.salvage.McMMOPlayerSalvageCheckEvent
 import com.gmail.nossr50.util.MetadataConstants
 import net.kyori.adventure.text.Component
 import net.perfectdreams.dreamcore.utils.canHoldItem
-import net.perfectdreams.dreamcore.utils.extensions.formatted
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.playSoundAndSendMessage
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
-import net.perfectdreams.dreamcustomitems.listeners.canMineRubyFrom
 import net.perfectdreams.dreamcustomitems.utils.CustomItems.IS_MICROWAVE_KEY
 import net.perfectdreams.dreamcustomitems.utils.CustomItems.IS_SUPERFURNACE_KEY
 import net.perfectdreams.dreamcustomitems.utils.CustomItems.IS_TRASHCAN_KEY
@@ -46,28 +43,48 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
     private val logs =  setOf(Material.ACACIA_LOG, Material.BIRCH_LOG, Material.DARK_OAK_LOG, Material.JUNGLE_LOG, Material.OAK_LOG, Material.SPRUCE_LOG)
 
     @EventHandler(priority = EventPriority.HIGH)
-    fun onDropitem(event: BlockDropItemEvent) {
+    fun onDropItem(event: BlockDropItemEvent) {
         with (event) {
+            // If the player is in the magnet context map...
+            // (The magnet contexts map is changed when the "isMagnetApplicable" call is made
             if (player in magnetContexts) {
+                // Get the users' drops blacklist
                 val blacklist = m.dropsBlacklist[player]?.contents?.mapTo(mutableSetOf()) { it?.type } ?: setOf()
 
+                // Get if the block has McMMO's bonus drops, if yes, we will get the bonus drop metadata
                 val mcMMOBonus = block.getMetadata(MetadataConstants.METADATA_KEY_BONUS_DROPS).getOrNull(0)?.let {
                     block.removeMetadata(MetadataConstants.METADATA_KEY_BONUS_DROPS, m.mcMMO)
                     (it as BonusDropMeta).asInt()
-                } ?: 0
+                } ?: 0 // If not, we will return that the mcMMOBonus is 0
 
+                // With the context, we will remove the player's magnet context from the event.player
                 with (magnetContexts.remove(player)!!) {
+                    // Get the drops, plus the items' custom drops, if they exist
                     val drops = (items.map { it.itemStack } + (customDrops ?: listOf())).toMutableList()
 
+                    // With the drops...
                     with (drops) {
+                        // We will get the first item of the list, and add the items custom mcMMO drops
                         firstOrNull()?.let { it.amount += mcMMOBonus }
+                        // If the player is a "ruby-able" block, we will add RUBY to the item drops
                         if (player.inventory.itemInMainHand canMineRubyFrom blockType) add(CustomItems.RUBY.clone())
                     }
 
+                    // Add all drops to the player inventory
                     player.inventory.addDrops(drops, blacklist, player)
 
-                    if (backpacks.isNotEmpty()) addDropsToBackpack(drops, blacklist, player, backpacks.iterator(), block)
-                    else drops.forEach { with (block) { if (it.type != Material.AIR) world.dropItemNaturally(location, it) } }
+                    // If the drops list is still not empty (so it didn't fit on the player's inventory)...
+                    if (drops.isNotEmpty()) {
+                        if (backpacks.isNotEmpty()) // If the user has backpacks, we will try adding it to their backpack
+                            addDropsToBackpack(drops, blacklist, player, backpacks.iterator(), block)
+                        else
+                            // If not, we will try dropping items naturally on the floor
+                            drops.forEach {
+                                with(block) {
+                                    if (it.type != Material.AIR) world.dropItemNaturally(location, it)
+                                }
+                            }
+                    }
 
                     if (items.isNotEmpty()) items.clear()
                 }
