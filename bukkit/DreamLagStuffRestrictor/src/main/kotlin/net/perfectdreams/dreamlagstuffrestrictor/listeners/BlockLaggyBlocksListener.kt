@@ -10,9 +10,14 @@ import org.bukkit.event.player.PlayerInteractEvent
 class BlockLaggyBlocksListener : Listener {
     val maxTypesPerBlockInChunk = mapOf(
         Material.SPAWNER to 4,
-        Material.OBSERVER to 64,
-        Material.PISTON to 32,
-        Material.STICKY_PISTON to 32
+        Material.OBSERVER to 64
+    )
+
+    val maxMultiTypesPerBlockInChunk = mapOf(
+        listOf(
+            Material.PISTON,
+            Material.STICKY_PISTON
+        ) to 64
     )
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -30,6 +35,28 @@ class BlockLaggyBlocksListener : Listener {
                             count++
 
                             if (count > (restrictCount + 1)) {
+                                e.isCancelled = true
+                                e.player.sendMessage("§cJá existem muitos tipos deste bloco neste chunk! Sim, eu sei que é chato limitar essas coisas, mas tipo... muitos blocos disso em um chunk é a receita para o desastre!")
+                                return
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        val multiRestrictCount = maxMultiTypesPerBlockInChunk.entries.firstOrNull { e.block.type in it.key }
+        if (multiRestrictCount != null) {
+            var count = 1
+
+            for (x in 0..15) {
+                for (z in 0..15) {
+                    for (y in e.block.world.minHeight until e.block.world.maxHeight) {
+                        val block = e.block.chunk.getBlock(x, y, z)
+                        if (e.block.type in multiRestrictCount.key) {
+                            count++
+
+                            if (count > (multiRestrictCount.value + 1)) {
                                 e.isCancelled = true
                                 e.player.sendMessage("§cJá existem muitos tipos deste bloco neste chunk! Sim, eu sei que é chato limitar essas coisas, mas tipo... muitos blocos disso em um chunk é a receita para o desastre!")
                                 return
