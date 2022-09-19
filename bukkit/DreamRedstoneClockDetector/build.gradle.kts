@@ -5,12 +5,6 @@ plugins {
     id("io.papermc.paperweight.userdev")
 }
 
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-    maven("https://repo.citizensnpcs.co/")
-}
-
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     implementation(kotlin("stdlib-jdk8"))

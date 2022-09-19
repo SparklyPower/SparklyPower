@@ -12,8 +12,8 @@ repositories {
 
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
-    api(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
-    api(project(":bukkit:DreamCorreios"))
+    compileOnly(project(":bukkit:DreamCore"))
+    compileOnly(project(":bukkit:DreamCorreios"))
 }
 
 tasks.withType<KotlinCompile> {

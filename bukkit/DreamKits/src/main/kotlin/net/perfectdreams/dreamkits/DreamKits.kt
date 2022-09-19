@@ -1,9 +1,13 @@
 package net.perfectdreams.dreamkits
 
 import com.github.salomonbrys.kotson.fromJson
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.adventure.append
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreamcorreios.utils.addItemIfPossibleOrAddToPlayerMailbox
@@ -20,7 +24,20 @@ import java.io.File
 
 class DreamKits : KotlinPlugin(), Listener {
 	companion object {
-		const val PREFIX = "§8[§a§lKits§8] §e"
+		val PREFIX = textComponent {
+			append("[") {
+				color(NamedTextColor.DARK_GRAY)
+			}
+
+			append("Kits") {
+				color(NamedTextColor.GREEN)
+				decorate(TextDecoration.BOLD)
+			}
+
+			append("]") {
+				color(NamedTextColor.DARK_GRAY)
+			}
+		}
 	}
 
 	var kits = mutableListOf<Kit>()

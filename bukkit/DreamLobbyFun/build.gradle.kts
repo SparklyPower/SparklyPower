@@ -5,18 +5,12 @@ plugins {
     id("io.papermc.paperweight.userdev")
 }
 
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-    maven("https://repo.citizensnpcs.co/")
-}
-
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
     compileOnly(project(":bukkit:DreamAuth"))
     compileOnly(files("../../libs/NoteBlockAPI.jar"))
-    implementation("net.citizensnpcs:citizens:2.0.26-SNAPSHOT")
+    implementation("net.citizensnpcs:citizensapi:2.0.30-SNAPSHOT")
 }
 
 tasks.withType<KotlinCompile> {

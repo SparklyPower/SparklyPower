@@ -28,7 +28,7 @@ allprojects {
         maven("https://repo.codemc.io/repository/maven-snapshots/") // ChangeSkin
         maven("https://jitpack.io")
         maven("https://papermc.io/repo/repository/maven-public/")
-        maven("https://repo.citizensnpcs.co/")
+        maven("https://maven.citizensnpcs.co/repo")
         maven("https://maven.fabricmc.net") // Required by paperweight userdev
         maven("https://repo.viaversion.com")
     }
