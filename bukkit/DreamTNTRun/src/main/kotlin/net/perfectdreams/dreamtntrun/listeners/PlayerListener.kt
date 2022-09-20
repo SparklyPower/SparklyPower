@@ -33,8 +33,8 @@ class PlayerListener(val m: DreamTNTRun) : Listener {
         if (!m.TNTRun.isStarted)
             return
 
-            m.TNTRun.removeFromQueue(event.player)
-            m.TNTRun.removeFromGame(event.player, skipFinishCheck = false)
+        m.TNTRun.removeFromQueue(event.player)
+        m.TNTRun.removeFromGame(event.player, skipFinishCheck = false)
     }
 
     @EventHandler
@@ -82,43 +82,21 @@ class PlayerListener(val m: DreamTNTRun) : Listener {
                 return
             }
 
-            if (event.player.location.world.name == TNTRun.WORLD_NAME) {
-                val blockBelowThem = event.player.location.block.getRelative(BlockFace.DOWN)
-                val blockBelowBelowThem = blockBelowThem.getRelative(BlockFace.DOWN)
+            val blockBelowThem = event.player.location.block.getRelative(BlockFace.DOWN)
+            val blockBelowBelowThem = blockBelowThem.getRelative(BlockFace.DOWN)
 
-                if (blockBelowThem.type != Material.SAND) {
-                    if (blockBelowThem.type == Material.DIAMOND_BLOCK)
-                        m.TNTRun.removeFromGame(event.player, skipFinishCheck = false)
+            if (blockBelowThem.type != Material.SAND) {
+                if (blockBelowThem.type == Material.DIAMOND_BLOCK)
+                    m.TNTRun.removeFromGame(event.player, skipFinishCheck = false)
 
-                    return
-                }
+                return
+            }
 
-                if (m.TNTRun.canDestroyBlocks && !m.TNTRun.blocksToBeRestored.containsKey(blockBelowThem.location)) {
-                    m.TNTRun.blocksToBeRestored[blockBelowThem.location] = blockBelowThem.state
-                    m.TNTRun.blocksToBeRestored[blockBelowBelowThem.location] = blockBelowBelowThem.state
-
-                    m.launchMainThread {
-                        delay(400L)
-                        if (!m.TNTRun.isStarted) // Event has already ended!
-                            return@launchMainThread
-
-                        blockBelowThem.type = Material.AIR
-                        blockBelowBelowThem.type = Material.AIR
-
-                        blockBelowThem.world.playSound(
-                            blockBelowBelowThem.location,
-                            Sound.ENTITY_CHICKEN_EGG,
-                            1f,
-                            DreamUtils.random.nextFloat(0.9f, 1.1f)
-                        )
-
-                        blockBelowThem.world.spawnParticle(
-                            Particle.SMOKE_NORMAL,
-                            blockBelowBelowThem.location,
-                            5
-                        )
-                    }
-                }
+            if (m.TNTRun.canDestroyBlocks && !m.TNTRun.blocksToBeRestored.containsKey(blockBelowThem.location)) {
+                m.TNTRun.startBlockBreak(
+                    blockBelowThem,
+                    blockBelowBelowThem
+                )
             }
         }
     }

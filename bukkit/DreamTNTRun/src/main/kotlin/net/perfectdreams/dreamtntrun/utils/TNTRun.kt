@@ -2,6 +2,7 @@ package net.perfectdreams.dreamtntrun.utils
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.delay
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -14,6 +15,8 @@ import net.perfectdreams.dreamcorreios.utils.addItemIfPossibleOrAddToPlayerMailb
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
 import net.perfectdreams.dreamtntrun.DreamTNTRun
 import org.bukkit.*
+import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Player
@@ -172,6 +175,17 @@ class TNTRun(val m: DreamTNTRun) {
                 it.playSound(it.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
                 it.playSound(it.location, "perfectdreams.sfx.special_stage", 100f, 1f)
                 it.gameMode = GameMode.ADVENTURE // Avoid issues with users being able to place "lag blocks" to not fall
+
+                // Start breaking the blocks where the player is in, to avoid users standing still just to not trigger a block break
+                val blockBelowThem = it.location.block.getRelative(BlockFace.DOWN)
+                val blockBelowBelowThem = blockBelowThem.getRelative(BlockFace.DOWN)
+
+                if (canDestroyBlocks && !blocksToBeRestored.containsKey(blockBelowThem.location)) {
+                    m.TNTRun.startBlockBreak(
+                        blockBelowThem,
+                        blockBelowBelowThem
+                    )
+                }
             }
 
             canDestroyBlocks = true
@@ -294,5 +308,32 @@ class TNTRun(val m: DreamTNTRun) {
         m.logger.info { "Adding ${player.name} to the queue!" }
         player.teleport(queueSpawn)
         playersInQueue.add(player)
+    }
+
+    fun startBlockBreak(blockBelowThem: Block, blockBelowBelowThem: Block) {
+        blocksToBeRestored[blockBelowThem.location] = blockBelowThem.state
+        blocksToBeRestored[blockBelowBelowThem.location] = blockBelowBelowThem.state
+
+        m.launchMainThread {
+            delay(400L)
+            if (!m.TNTRun.isStarted) // Event has already ended!
+                return@launchMainThread
+
+            blockBelowThem.type = Material.AIR
+            blockBelowBelowThem.type = Material.AIR
+
+            blockBelowThem.world.playSound(
+                blockBelowBelowThem.location,
+                Sound.ENTITY_CHICKEN_EGG,
+                1f,
+                DreamUtils.random.nextFloat(0.9f, 1.1f)
+            )
+
+            blockBelowThem.world.spawnParticle(
+                Particle.SMOKE_NORMAL,
+                blockBelowBelowThem.location,
+                5
+            )
+        }
     }
 }
