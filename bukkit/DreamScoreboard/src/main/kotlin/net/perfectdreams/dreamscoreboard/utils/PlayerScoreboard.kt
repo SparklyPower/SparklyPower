@@ -40,9 +40,9 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 		// Just a note: How to offset a image in the title with resource packs
 		// phoenix.setTitle("\uF809\uF822\uE23B§6✪ §r$randomEmote §4§lSparkly§b§lPower §r$randomEmote §6✪")
 		if (player.isBedrockClient) {
-			phoenix.setTitle("§6✪ §r$randomEmote §4§lSparkly§b§lPower §r$randomEmote §6✪")
+			phoenix.setTitle("§6✪ §r§f$randomEmote §4§lSparkly§b§lPower §r§f$randomEmote §6✪")
 		} else {
-			phoenix.setTitle("§6✪ §r$randomEmote §f\ue260 §r$randomEmote §6✪")
+			phoenix.setTitle("§6✪ §r§f$randomEmote §f\ue260 §r§f$randomEmote §6✪")
 		}
 
 		// This doesn't need to be here? Please test!
