@@ -321,8 +321,14 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 		// m.logger.info { "Setting up scoreboard teams for ${player}..." }
 
 		for (player in Bukkit.getOnlinePlayers()) {
+			val playerGlowColor = if (player.hasPermission("dreamscoreboard.glowing")) {
+				player.persistentDataContainer.get(DreamScoreboard.GLOW_COLOR_KEY)
+					?.let { ChatColor.valueOf(it) }
+			} else
+				null
+
 			val tabPrefixColor = when {
-				m.coloredGlow.containsKey(player.uniqueId) -> m.coloredGlow[player.uniqueId]
+				playerGlowColor != null -> playerGlowColor
 				player.hasPermission("group.dono") -> ChatColor.GREEN
 				player.hasPermission("group.admin") -> ChatColor.RED
 				player.hasPermission("group.coordenador") -> ChatColor.DARK_PURPLE
@@ -404,7 +410,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 
 			if (player.hasPermission("dreamscoreboard.glowing")) {
 				t.color = when {
-					m.coloredGlow.containsKey(player.uniqueId) -> m.coloredGlow[player.uniqueId]!!
+					playerGlowColor != null -> playerGlowColor
 					player.hasPermission("group.dono") -> ChatColor.GREEN
 					player.hasPermission("group.admin") -> ChatColor.RED
 					player.hasPermission("group.coordenador") -> ChatColor.DARK_PURPLE

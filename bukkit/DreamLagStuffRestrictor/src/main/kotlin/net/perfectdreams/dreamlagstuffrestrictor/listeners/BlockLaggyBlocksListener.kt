@@ -53,7 +53,7 @@ class BlockLaggyBlocksListener : Listener {
                 for (z in 0..15) {
                     for (y in e.block.world.minHeight until e.block.world.maxHeight) {
                         val block = e.block.chunk.getBlock(x, y, z)
-                        if (e.block.type in multiRestrictCount.key) {
+                        if (block.type in multiRestrictCount.key) {
                             count++
 
                             if (count > (multiRestrictCount.value + 1)) {

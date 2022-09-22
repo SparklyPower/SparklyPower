@@ -3,6 +3,7 @@ package net.perfectdreams.dreamscoreboard.commands
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
+import net.perfectdreams.dreamcore.utils.set
 import net.perfectdreams.dreamscoreboard.DreamScoreboard
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -30,7 +31,7 @@ object GlowingColorCommand : DSLCommandBase<DreamScoreboard> {
                         return@executes
                     }
 
-                    plugin.coloredGlow[player.uniqueId] = colorRetrieved.color
+                    player.persistentDataContainer.set(DreamScoreboard.GLOW_COLOR_KEY, colorRetrieved.color.name)
 
                     player.sendMessage("§aA sua cor foi alterada para ${colorRetrieved.localizedName}! Tá mais diva que antes amigx!")
                 }

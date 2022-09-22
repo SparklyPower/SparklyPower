@@ -23,6 +23,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.persistence.PersistentDataType
 import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.scoreboard.Team
 import org.jetbrains.exposed.sql.*
@@ -51,11 +52,11 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 			"閊"  // pepo feliz
 		)
 		val FORMATTING_REGEX = Regex("§[k-or]")
+		val GLOW_COLOR_KEY = SparklyNamespacedKeyWithType(SparklyNamespacedKey("glow_color"), PersistentDataType.STRING)
 	}
 	val lastOnlineTimeCheck = mutableMapOf<Player, Int>()
 
 	val scoreboards = ConcurrentHashMap<Player, PlayerScoreboard>()
-	val coloredGlow = ConcurrentHashMap<UUID, ChatColor>()
 	var cachedClubesPrefixes = WeakHashMap<Player, String?>()
 
 	// 13/07/2021 - YES, THIS IS NEEDED, PAPER HASN'T FIXED THIS ISSUE YET
@@ -253,8 +254,14 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 	private fun setupTabDisplayNames() {
 		for (player in Bukkit.getOnlinePlayers()) {
+			val playerGlowColor = if (player.hasPermission("dreamscoreboard.glowing")) {
+				player.persistentDataContainer.get(GLOW_COLOR_KEY)
+					?.let { ChatColor.valueOf(it) }
+			} else
+				null
+
 			val tabPrefixColor = when {
-				coloredGlow.containsKey(player.uniqueId) -> coloredGlow[player.uniqueId]
+				playerGlowColor != null -> playerGlowColor
 				player.hasPermission("group.dono") -> ChatColor.GREEN
 				player.hasPermission("group.admin") -> ChatColor.RED
 				player.hasPermission("group.moderador") -> ChatColor.DARK_AQUA
@@ -265,14 +272,27 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 				else -> ChatColor.WHITE
 			}
 
+			val rolePrefix = when {
+				player.hasPermission("group.dono") -> "§a§l"
+				player.hasPermission("group.admin") -> "§4§l"
+				player.hasPermission("group.moderador") -> "§9§l"
+				player.hasPermission("group.suporte") -> "§6§l"
+				player.hasPermission("group.vip++") -> "§b"
+				player.hasPermission("group.vip+") -> "§b"
+				player.hasPermission("group.vip") -> "§b"
+				else -> "§f"
+			}
+
+			val barrinhaColor = playerGlowColor?.toString() ?: rolePrefix
+
 			var prefix = when {
-				player.hasPermission("group.dono") -> "§a§l[Dono] "
-				player.hasPermission("group.admin") -> "§4§l[Admin] "
-				player.hasPermission("group.moderador") -> "§9§l[Moderador] "
-				player.hasPermission("group.suporte") -> "§6§l[Suporte] "
-				player.hasPermission("group.vip++") -> "§b[VIP§6++§b] "
-				player.hasPermission("group.vip+") -> "§b[VIP§6+§b] "
-				player.hasPermission("group.vip") -> "§b[VIP§b] "
+				player.hasPermission("group.dono") -> "$barrinhaColor[${rolePrefix}Dono$barrinhaColor] "
+				player.hasPermission("group.admin") -> "$barrinhaColor[${rolePrefix}Admin$barrinhaColor] "
+				player.hasPermission("group.moderador") -> "$barrinhaColor[${rolePrefix}Moderador$barrinhaColor] "
+				player.hasPermission("group.suporte") -> "$barrinhaColor[${rolePrefix}Suporte$barrinhaColor] "
+				player.hasPermission("group.vip++") -> "$barrinhaColor[${rolePrefix}VIP§6++$barrinhaColor] "
+				player.hasPermission("group.vip+") -> "$barrinhaColor[${rolePrefix}VIP§6+$barrinhaColor] "
+				player.hasPermission("group.vip") -> "$barrinhaColor[${rolePrefix}VIP$barrinhaColor] "
 				else -> "§f"
 			}
 
