@@ -7,7 +7,6 @@ import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreammini.DreamMini
 import net.perfectdreams.dreammini.utils.TpaRequest
-import org.bukkit.Bukkit
 import org.bukkit.World
 import org.bukkit.entity.Player
 
@@ -31,8 +30,8 @@ class TpaCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpa", "tpask", "cal
 			return
 		}
 
-		val currentRequest = m.tpaManager.requests.firstOrNull { it.requester == sender }
-		if (currentRequest?.requestee == requestee) {
+		val currentRequest = m.tpaManager.requests.firstOrNull { it.playerThatRequestedTheTeleport == sender }
+		if (currentRequest?.playerThatWillBeTeleported == requestee) {
 			sender.sendMessage("§cVocê já enviou um pedido para §b${requestee.displayName}§3!")
 			return
 		}
@@ -49,7 +48,7 @@ class TpaCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpa", "tpask", "cal
 			return
 		}
 
-		val currentRequestsToAnotherUser = m.tpaManager.requests.filter { it.requestee == requestee }
+		val currentRequestsToAnotherUser = m.tpaManager.requests.filter { it.playerThatWillBeTeleported == requestee }
 		m.tpaManager.requests.removeAll(currentRequestsToAnotherUser)
 
 		requestee.sendMessage("§b${sender.displayName}§3 enviou um pedido de teletransporte para você!")

@@ -12,11 +12,11 @@ class TpaAceitarCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpaceitar", 
 
 	@Subcommand
 	fun root(sender: Player) {
-		val tpaRequest = m.tpaManager.requests.firstOrNull { it.requestee == sender }
-		val tpaHereRequest = m.tpaManager.hereRequests.firstOrNull { it.requestee == sender }
+		val tpaRequest = m.tpaManager.requests.firstOrNull { it.playerThatWillBeTeleported == sender }
+		val tpaHereRequest = m.tpaManager.hereRequests.firstOrNull { it.playerThatWillBeTeleported == sender }
 
 		if (tpaRequest != null) {
-			val requester = tpaRequest.requester
+			val requester = tpaRequest.playerThatRequestedTheTeleport
 
 			if (sender.location.blacklistedTeleport) {
 				sender.sendMessage("§cNossos sistemas de localização não permitem que você deixe §b${requester.displayName}§c se teletransportar para onde você está!")
@@ -28,13 +28,14 @@ class TpaAceitarCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpaceitar", 
 				return
 			}
 
+			// Remove it first to avoid triggering the PlayerTeleportEvent listener!
+			m.tpaManager.requests.remove(tpaRequest)
+
 			requester.teleport(location)
 			requester.sendMessage("§b${sender.displayName}§a aceitou o seu pedido de teletransporte!")
 			sender.sendMessage("§aVocê aceitou o pedido de teletransporte de §b${requester.displayName}§a!")
-
-			m.tpaManager.requests.remove(tpaRequest)
 		} else if (tpaHereRequest != null) {
-			val requester = tpaHereRequest.requester
+			val requester = tpaHereRequest.playerThatRequestedTheTeleport
 
 			if (requester.location.blacklistedTeleport) {
 				sender.sendMessage("§cNossos sistemas de localização não permitem que você se teletransporte para onde §b${requester.displayName}§c está!")
@@ -46,11 +47,12 @@ class TpaAceitarCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpaceitar", 
 				return
 			}
 
+			// Remove it first to avoid triggering the PlayerTeleportEvent listener!
+			m.tpaManager.hereRequests.remove(tpaHereRequest)
+
 			requester.teleport(location)
 			requester.sendMessage("§b${sender.displayName}§a aceitou o seu pedido de teletransporte!")
 			sender.sendMessage("§aVocê aceitou o pedido de teletransporte de §b${requester.displayName}§a!")
-
-			m.tpaManager.hereRequests.remove(tpaHereRequest)
 		} else {
 			sender.sendMessage("§cVocê não tem nenhum pedido de teletransporte pendente!")
 			return

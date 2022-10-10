@@ -165,6 +165,49 @@ class DreamMini : KotlinPlugin(), Listener {
 			}
 		}
 
+	@EventHandler(ignoreCancelled = true)
+	fun onTeleportToAnywhere(e: PlayerTeleportEvent) {
+		// TPA
+		run {
+			val currentRequestRequestedByThePlayer = tpaManager.requests.firstOrNull { it.playerThatRequestedTheTeleport == e.player }
+			val currentRequestThatHasThePlayerAsTheReceiver = tpaManager.requests.firstOrNull { it.playerThatWillBeTeleported == e.player }
+
+			if (currentRequestRequestedByThePlayer != null) {
+				// If there is any pending request that was requested by the player, remove it!
+				tpaManager.requests.remove(currentRequestRequestedByThePlayer)
+				currentRequestRequestedByThePlayer.playerThatRequestedTheTeleport.sendMessage("§cSeu pedido de teletransporte foi cancelado pois você se teletransportou!")
+				currentRequestRequestedByThePlayer.playerThatWillBeTeleported.sendMessage("§cO pedido de teletransporte de §b${e.player.name}§c foi cancelado pois ele se teletransportou!")
+			}
+
+			if (currentRequestThatHasThePlayerAsTheReceiver != null) {
+				// If there is any pending request that was requested by the player, remove it!
+				tpaManager.requests.remove(currentRequestThatHasThePlayerAsTheReceiver)
+				currentRequestThatHasThePlayerAsTheReceiver.playerThatRequestedTheTeleport.sendMessage("§cO pedido de teletransporte de §b${e.player.name}§c foi cancelado pois você se teletransportou!")
+				currentRequestThatHasThePlayerAsTheReceiver.playerThatWillBeTeleported.sendMessage("§cSeu pedido de teletransporte foi cancelado pois você se teletransportou!")
+			}
+		}
+
+		// TPA Here
+		run {
+			val currentRequestRequestedByThePlayer = tpaManager.hereRequests.firstOrNull { it.playerThatRequestedTheTeleport == e.player }
+			val currentRequestThatHasThePlayerAsTheReceiver = tpaManager.hereRequests.firstOrNull { it.playerThatWillBeTeleported == e.player }
+
+			if (currentRequestRequestedByThePlayer != null) {
+				// If there is any pending request that was requested by the player, remove it!
+				tpaManager.hereRequests.remove(currentRequestRequestedByThePlayer)
+				currentRequestRequestedByThePlayer.playerThatRequestedTheTeleport.sendMessage("§cSeu pedido de teletransporte foi cancelado pois você se teletransportou!")
+				currentRequestRequestedByThePlayer.playerThatWillBeTeleported.sendMessage("§cO pedido de teletransporte de §b${e.player.name}§c foi cancelado pois ele se teletransportou!")
+			}
+
+			if (currentRequestThatHasThePlayerAsTheReceiver != null) {
+				// If there is any pending request that was requested by the player, remove it!
+				tpaManager.hereRequests.remove(currentRequestThatHasThePlayerAsTheReceiver)
+				currentRequestThatHasThePlayerAsTheReceiver.playerThatRequestedTheTeleport.sendMessage("§cO pedido de teletransporte de §b${e.player.name}§c foi cancelado pois você se teletransportou!")
+				currentRequestThatHasThePlayerAsTheReceiver.playerThatWillBeTeleported.sendMessage("§cSeu pedido de teletransporte foi cancelado pois você se teletransportou!")
+			}
+		}
+	}
+
 	// Needs to be veery low to avoid users using "&rSparklyShop" to bypass the Admin Shop check
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
 	fun onEdit(e: SignChangeEvent) {
@@ -244,7 +287,7 @@ class DreamMini : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onQuit(e: PlayerQuitEvent) {
-		tpaManager.requests = tpaManager.requests.asSequence().filter { it.requestee != e.player || it.requester != e.player }.toMutableList()
+		tpaManager.requests = tpaManager.requests.asSequence().filter { it.playerThatWillBeTeleported != e.player || it.playerThatRequestedTheTeleport != e.player }.toMutableList()
 		dropsBlacklist.remove(e.player)
 
 		if (getConfig().getBoolean("fancy-quit", true)) {

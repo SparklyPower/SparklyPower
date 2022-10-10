@@ -9,15 +9,15 @@ class TpaNegarCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpnegar", "tpa
 
 	@Subcommand
 	fun root(sender: Player) {
-		val tpaRequest = m.tpaManager.requests.firstOrNull { it.requestee == sender }
-		val tpaHereRequest = m.tpaManager.hereRequests.firstOrNull { it.requestee == sender }
+		val tpaRequest = m.tpaManager.requests.firstOrNull { it.playerThatWillBeTeleported == sender }
+		val tpaHereRequest = m.tpaManager.hereRequests.firstOrNull { it.playerThatWillBeTeleported == sender }
 
 		if (tpaRequest == null || tpaHereRequest == null) {
 			sender.sendMessage("§cVocê não tem nenhum pedido de teletransporte pendente!")
 			return
 		}
 
-		val requester = tpaRequest?.requester ?: tpaHereRequest.requester
+		val requester = tpaRequest?.playerThatRequestedTheTeleport ?: tpaHereRequest.playerThatRequestedTheTeleport
 		sender.sendMessage("§aVocê rejeitou o pedido de teletransporte de §b${requester.displayName}§a!")
 		requester.sendMessage("§b${sender.displayName}§c rejeitou o seu pedido de teletransporte!")
 		return

@@ -30,8 +30,8 @@ class TpaAquiCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpaaqui", "tpah
 			return
 		}
 
-		val currentRequest = m.tpaManager.hereRequests.firstOrNull { it.requester == sender }
-		if (currentRequest?.requestee == requestee) {
+		val currentRequest = m.tpaManager.hereRequests.firstOrNull { it.playerThatRequestedTheTeleport == sender }
+		if (currentRequest?.playerThatWillBeTeleported == requestee) {
 			sender.sendMessage("§cVocê já enviou um pedido para §b${requestee.displayName}§3!")
 			return
 		}
@@ -41,7 +41,7 @@ class TpaAquiCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpaaqui", "tpah
 			return
 		}
 
-		val currentRequestsToAnotherUser = m.tpaManager.hereRequests.filter { it.requestee == requestee }
+		val currentRequestsToAnotherUser = m.tpaManager.hereRequests.filter { it.playerThatWillBeTeleported == requestee }
 		m.tpaManager.hereRequests.removeAll(currentRequestsToAnotherUser)
 
 		requestee.sendMessage("§b${sender.displayName}§3 enviou um pedido para você se teletransportar até ele!")

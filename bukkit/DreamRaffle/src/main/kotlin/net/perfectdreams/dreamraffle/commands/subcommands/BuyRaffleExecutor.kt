@@ -21,10 +21,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class BuyRaffleExecutor(private val plugin: DreamRaffle) : SparklyCommandExecutor() {
     inner class Options : CommandOptions() {
-            val tickets = integer("tickets")
-        }
+        val tickets = integer("tickets")
+    }
 
-        override val options = Options()
+    override val options = Options()
 
     private val template = "§cVocê não tem %s suficientes para comprar esses tickets."
     private val unrestrictedType = RaffleType.TURBO
@@ -47,23 +47,24 @@ class BuyRaffleExecutor(private val plugin: DreamRaffle) : SparklyCommandExecuto
             val playerTickets = currentPlayerTickets + ticketsToBuy
             val totalOfTickets = currentPlayerTickets + tickets
 
-            if (type != unrestrictedType && totalOfTickets > 2000)
-            // Now we check if the player can REALLY buy those tickets
-                if (playerTickets.toDouble() / totalOfTickets > .5) {
-                    /**
-                     * Okay, so the player can't buy these many tickets. Let's calculate how many tickets
-                     * they can actually buy.
-                     */
-                    val ticketsPlayerCanBuy = tickets / 2 - getTickets(player)
+            if (type != unrestrictedType && playerTickets > 100_000) {
+                // Don't allow users to buy more than 100k tickets
+                val ticketsPlayerCanBuy = 100_000 - currentPlayerTickets
+                
+                StringBuilder("§cVocê chegou no limite de 100 mil tickets nesta rifa!").apply {
+                    if (ticketsPlayerCanBuy > 0)
+                        append(
+                            " Se você ainda quiser comprar tickets, o máximo que você pode comprar no momento é ${
+                                ticketsPlayerCanBuy.pluralize(
+                                    "ticket"
+                                )
+                            }."
+                        )
 
-                    StringBuilder("§cSe você comprar ${ticketsToBuy.pluralize("ticket")}, você terá mais de 50% de chance de vencer, e isso acaba com a diversão da rifa.").apply {
-                        if (ticketsPlayerCanBuy > 0)
-                            append(" Se você ainda quiser comprar tickets, o máximo que você pode comprar no momento é ${ticketsPlayerCanBuy.pluralize("ticket")}.")
-
-                        append(" A única rifa sem limite de tickets é a ${unrestrictedType.displayName}.")
-                        context.fail(toString())
-                    }
+                    append(" A única rifa sem limite de tickets é a ${unrestrictedType.displayName}.")
+                    context.fail(toString())
                 }
+            }
 
             plugin.schedule {
                 if (currency == RaffleCurrency.MONEY) {
