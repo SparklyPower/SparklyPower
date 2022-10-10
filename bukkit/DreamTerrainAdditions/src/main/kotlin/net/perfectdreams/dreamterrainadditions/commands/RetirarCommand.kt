@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamterrainadditions.commands
 
+import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.commands.CommandException
@@ -41,7 +42,7 @@ object RetirarCommand : DSLCommandBase<DreamTerrainAdditions> {
                 return@executes
             }
 
-            if (claim.ownerName == player.name || claim.managers.contains(player.name)) {
+            if (claim.ownerName == player.name || claim.checkPermission(player, ClaimPermission.Manage, null) == null) {
                 val lesser = Location(player.world, claim.lesserBoundaryCorner.x, 0.0, claim.lesserBoundaryCorner.z)
                 val greater = Location(player.world, claim.greaterBoundaryCorner.x, 255.0, claim.greaterBoundaryCorner.z)
 
