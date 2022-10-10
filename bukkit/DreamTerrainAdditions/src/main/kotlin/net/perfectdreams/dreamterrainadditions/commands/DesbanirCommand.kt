@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamterrainadditions.commands
 
+import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.commands.CommandException
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
@@ -24,7 +25,8 @@ object DesbanirCommand : DSLCommandBase<DreamTerrainAdditions> {
                 return@executes
             }
 
-            if (claim.ownerName == player.name || claim.managers.contains(player.name)) {
+            // null = the action was allowed
+            if (claim.ownerName == player.name || claim.checkPermission(player, ClaimPermission.Manage, null) == null) {
                 val claimAdditions = plugin.getOrCreateClaimAdditionsWithId(claim.id)
 
                 if (!claimAdditions.bannedPlayers.contains(playerName)) {
