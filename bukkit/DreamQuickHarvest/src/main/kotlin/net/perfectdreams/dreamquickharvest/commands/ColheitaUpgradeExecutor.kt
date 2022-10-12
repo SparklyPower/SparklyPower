@@ -41,6 +41,11 @@ class ColheitaUpgradeExecutor(val m: DreamQuickHarvest) : SparklyCommandExecutor
             Material.EMERALD_BLOCK,
             5_400,
             500
+        ),
+        EnergyUpgrade(
+            Material.NETHERITE_BLOCK,
+            6_500,
+            600
         )
     )
 
