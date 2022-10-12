@@ -78,8 +78,11 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 							)
 
 							// Change slime size to be smol
-							if (spawned is Slime)
-								spawned.size = 1
+							if (spawned is Slime) {
+								spawned.size = if (spawned.type == EntityType.MAGMA_CUBE)
+									2
+								else 1
+							}
 
 							override = false
 							spawner.spawnedMobs.add(spawned)
