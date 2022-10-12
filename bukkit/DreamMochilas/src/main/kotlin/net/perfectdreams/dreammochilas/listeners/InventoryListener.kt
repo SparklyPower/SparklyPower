@@ -69,6 +69,16 @@ class InventoryListener(val m: DreamMochilas) : Listener {
 
     val mochilasCooldown = ConcurrentHashMap<Player, Long>()
 
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    fun onTransaction(e: PreTransactionEvent) {
+        e.stock.forEach {
+            if (MochilaUtils.isMochilaItem(it) && it.amount > 1) {
+                e.setCancelled(PreTransactionEvent.TransactionOutcome.OTHER)
+                e.client.sendMessage("§cCalma lá amigue, você não pode comprar várias mochilas ao mesmo tempo!")
+            }
+        }
+    }
+
     @EventHandler
     fun onQuit(e: PlayerQuitEvent) {
         mochilasCooldown.remove(e.player)

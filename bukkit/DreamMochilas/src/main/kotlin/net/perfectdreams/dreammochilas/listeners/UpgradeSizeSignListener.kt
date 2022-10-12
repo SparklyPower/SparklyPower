@@ -17,6 +17,10 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class UpgradeSizeSignListener(val m: DreamMochilas) : Listener {
+    companion object {
+        private const val UPGRADE_PRICE = 4_000
+    }
+
     private val savingNewMocilhaStatus = mutableListOf<Long>()
 
     private val signs = listOf(
@@ -42,8 +46,8 @@ class UpgradeSizeSignListener(val m: DreamMochilas) : Listener {
         e.isCancelled = true
 
         if (mochilaId != null) {
-            if (2_000 > e.player.balance) {
-                e.player.sendMessage("§cVocê precisa ter 2000 sonecas para poder fazer um upgrade maroto na sua mochila!")
+            if (UPGRADE_PRICE > e.player.balance) {
+                e.player.sendMessage("§cVocê precisa ter $UPGRADE_PRICE sonecas para poder fazer um upgrade maroto na sua mochila!")
                 return
             }
 
@@ -68,7 +72,7 @@ class UpgradeSizeSignListener(val m: DreamMochilas) : Listener {
 
                 if (success) {
                     onMainThread {
-                        e.player.withdraw(2000.00, TransactionContext(extra = "ao atualizar o tamanho de uma mochila"))
+                        e.player.withdraw(UPGRADE_PRICE.toDouble(), TransactionContext(extra = "ao atualizar o tamanho de uma mochila"))
                         e.player.sendMessage("§aProntinho!")
                         savingNewMocilhaStatus.remove(mochilaId)
                     }
