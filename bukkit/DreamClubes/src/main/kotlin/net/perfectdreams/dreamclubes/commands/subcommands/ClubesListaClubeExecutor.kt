@@ -55,7 +55,7 @@ class ClubesListaClubeExecutor(m: DreamClubes) : SparklyClubesCommandExecutor(m)
                                     .getRatio()
                             }
 
-                        ClubeWrapper(it, members, kdr)
+                        ClubeWrapper(it, members, kdr / members.size.coerceAtLeast(1))
                     }
             }
 
