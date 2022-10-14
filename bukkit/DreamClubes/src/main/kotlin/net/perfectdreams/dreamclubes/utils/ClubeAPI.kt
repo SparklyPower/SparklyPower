@@ -1,23 +1,40 @@
 package net.perfectdreams.dreamclubes.utils
 
-import com.okkero.skedule.BukkitSchedulerController
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.Dispatchers
 import net.perfectdreams.dreamclubes.DreamClubes
 import net.perfectdreams.dreamclubes.dao.Clube
 import net.perfectdreams.dreamclubes.dao.ClubeMember
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.tables.Clubes
+import net.perfectdreams.dreamclubes.tables.PlayerDeaths
 import net.perfectdreams.dreamclubes.utils.ClubeNameCheckResult.*
 import net.perfectdreams.dreamcore.utils.*
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 object ClubeAPI {
-    fun getPlayerKD(uniqueId: UUID): KDWrapper {
-        return KDWrapper(0, 0)
+    suspend fun getPlayerKD(uniqueId: UUID): KDWrapper {
+        val (deaths, kills) = net.perfectdreams.exposedpowerutils.sql.transaction(
+            Dispatchers.IO,
+            Databases.databaseNetwork
+        ) {
+            val death = PlayerDeaths.select {
+                PlayerDeaths.killed eq uniqueId
+            }.count()
+
+            val kills = PlayerDeaths.select {
+                PlayerDeaths.killer eq uniqueId
+            }.count()
+
+            Pair(death, kills)
+        }
+
+        return KDWrapper(kills, deaths)
     }
 
     fun checkIfClubeCanUseTag(player: Player, clube: Clube?, tag: String): ClubeNameCheckResult {
@@ -126,16 +143,4 @@ object ClubeAPI {
 
 fun async(callback: suspend com.okkero.skedule.BukkitSchedulerController.() -> kotlin.Unit) {
     scheduler().schedule(Bukkit.getPluginManager().getPlugin("DreamClubes")!!, SynchronizationContext.ASYNC, callback)
-}
-
-fun sync(callback: suspend com.okkero.skedule.BukkitSchedulerController.() -> kotlin.Unit) {
-    scheduler().schedule(Bukkit.getPluginManager().getPlugin("DreamClubes")!!, SynchronizationContext.SYNC, callback)
-}
-
-suspend fun BukkitSchedulerController.toAsync() {
-    switchContext(SynchronizationContext.ASYNC)
-}
-
-suspend fun BukkitSchedulerController.toSync() {
-    switchContext(SynchronizationContext.SYNC)
 }

@@ -1,7 +1,6 @@
 package net.perfectdreams.dreamclubes.commands.declarations
 
 import net.perfectdreams.dreamclubes.DreamClubes
-import net.perfectdreams.dreamclubes.commands.ClubeChatExecutor
 import net.perfectdreams.dreamclubes.commands.ClubesExecutor
 import net.perfectdreams.dreamclubes.commands.subcommands.*
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclarationWrapper
@@ -26,8 +25,12 @@ class ClubesCommand(val m: DreamClubes) : SparklyCommandDeclarationWrapper {
             executor = NameClubeExecutor(m)
         }
 
-        subcommand(listOf("players")) {
+        subcommand(listOf("players", "membros")) {
             executor = PlayersClubeExecutor(m)
+        }
+
+        subcommand(listOf("lista", "clubes")) {
+            executor = ClubesListaClubeExecutor(m)
         }
 
         subcommand(listOf("tag")) {

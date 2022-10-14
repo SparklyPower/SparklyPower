@@ -1,7 +1,11 @@
 package net.perfectdreams.dreamclubes.utils
 
-class KDWrapper(val kills: Long, val deaths: Long) {
+data class KDWrapper(val kills: Long, val deaths: Long) {
     fun getRatio(): Double {
-        return 0.0
+        val deathsOrOne = if (deaths == 0L)
+            1
+        else deaths
+
+        return kills / deathsOrOne.toDouble()
     }
 }

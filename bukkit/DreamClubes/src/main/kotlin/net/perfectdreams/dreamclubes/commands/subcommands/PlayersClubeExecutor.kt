@@ -3,21 +3,12 @@ package net.perfectdreams.dreamclubes.commands.subcommands
 import net.perfectdreams.dreamclubes.DreamClubes
 import net.perfectdreams.dreamclubes.commands.SparklyClubesCommandExecutor
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
-import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
-import net.perfectdreams.dreamclubes.utils.toSync
-import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.TableGenerator
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
-import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
-import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.centralizeHeader
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
-import net.perfectdreams.dreamcore.utils.stripColorCode
-import net.perfectdreams.dreamcore.utils.translateColorCodes
 import org.bukkit.Bukkit
-import org.bukkit.inventory.ItemStack
-import org.jetbrains.exposed.sql.transactions.transaction
 
 class PlayersClubeExecutor(m: DreamClubes) : SparklyClubesCommandExecutor(m) {
     override fun execute(context: CommandContext, args: CommandArguments) {
@@ -43,7 +34,7 @@ class PlayersClubeExecutor(m: DreamClubes) : SparklyClubesCommandExecutor(m) {
             for (wrapper in members.sortedByDescending { it.permissionLevel.weight }) {
                 val offlinePlayer = Bukkit.getOfflinePlayer(wrapper.id.value)
                 val name = wrapper.permissionLevel.name
-                val kdr = ClubeAPI.getPlayerKD(wrapper.id.value)
+                val kdr = onAsyncThread { ClubeAPI.getPlayerKD(wrapper.id.value) }
                 tg.addRow("§6$name", "§b" + offlinePlayer.name, "§f" + kdr.getRatio())
             }
 

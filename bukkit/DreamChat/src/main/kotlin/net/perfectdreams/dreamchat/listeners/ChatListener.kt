@@ -7,6 +7,7 @@ import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.string
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.runBlocking
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
 import net.md_5.bungee.api.chat.ClickEvent
@@ -566,17 +567,27 @@ class ChatListener(val m: DreamChat) : Listener {
 				"§c✗"
 			}
 
-			val aboutLines = mutableListOf(
-				"§6✪ §a§lSobre ${player.artigo} §r§b${toDisplay}§r §6✪",
-				"",
-				"§eGênero: §d${if (!player.girl) { "§3♂" } else { "§d♀" }}",
-				"§eGrana: §6${player.balance} Sonecas",
-				"§eKDR: §6PvP é para os fracos, 2bj :3",
-				"§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!",
-				"§eUsando a Resource Pack? $rpStatus",
-				"§eMinecraft Original? $mcPremiumStatus",
-				"§eMinecraft: Bedrock Edition? $mcBedrockEditionStatus"
-			)
+			// The runBlocking is required for the getPlayerKD call
+			// Because this is called async, I don't think there is any issues in blocking
+			val aboutLines = runBlocking {
+				mutableListOf(
+					"§6✪ §a§lSobre ${player.artigo} §r§b${toDisplay}§r §6✪",
+					"",
+					"§eGênero: §d${
+						if (!player.girl) {
+							"§3♂"
+						} else {
+							"§d♀"
+						}
+					}",
+					"§eGrana: §6${player.balance} Sonecas",
+					"§eKDR: §6${ClubeAPI.getPlayerKD(e.player.uniqueId).getRatio()}",
+					"§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!",
+					"§eUsando a Resource Pack? $rpStatus",
+					"§eMinecraft Original? $mcPremiumStatus",
+					"§eMinecraft: Bedrock Edition? $mcBedrockEditionStatus"
+				)
+			}
 
 			val discordAccount = transaction(Databases.databaseNetwork) {
 				DiscordAccount.find { DiscordAccounts.minecraftId eq player.uniqueId }.firstOrNull()

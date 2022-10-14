@@ -5,13 +5,10 @@ import net.perfectdreams.dreamclubes.commands.SparklyClubesCommandExecutor
 import net.perfectdreams.dreamclubes.dao.Clube
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
-import net.perfectdreams.dreamclubes.utils.async
-import net.perfectdreams.dreamclubes.utils.toSync
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
-import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor

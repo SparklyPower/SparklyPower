@@ -2,15 +2,14 @@ package net.perfectdreams.dreamclubes
 
 import net.perfectdreams.dreamclubes.commands.declarations.ClubeChatCommand
 import net.perfectdreams.dreamclubes.commands.declarations.ClubesCommand
+import net.perfectdreams.dreamclubes.commands.declarations.KDRCommand
+import net.perfectdreams.dreamclubes.listeners.DeathListener
 import net.perfectdreams.dreamclubes.tables.*
-import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.registerEvents
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
 import java.util.*
 
 class DreamClubes : KotlinPlugin() {
@@ -24,13 +23,17 @@ class DreamClubes : KotlinPlugin() {
 
 		registerCommand(ClubesCommand(this))
 		registerCommand(ClubeChatCommand(this))
+		registerCommand(KDRCommand(this))
+
+		registerEvents(DeathListener(this))
 
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
 				Clubes,
 				ClubeMembers,
 				ClubesHomes,
-				ClubeHomeUpgrades
+				ClubeHomeUpgrades,
+				PlayerDeaths
 			)
 		}
 	}

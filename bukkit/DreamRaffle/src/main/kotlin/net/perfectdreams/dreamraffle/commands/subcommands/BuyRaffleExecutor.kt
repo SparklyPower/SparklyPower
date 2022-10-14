@@ -50,7 +50,7 @@ class BuyRaffleExecutor(private val plugin: DreamRaffle) : SparklyCommandExecuto
             if (type != unrestrictedType && playerTickets > 100_000) {
                 // Don't allow users to buy more than 100k tickets
                 val ticketsPlayerCanBuy = 100_000 - currentPlayerTickets
-                
+
                 StringBuilder("§cVocê chegou no limite de 100 mil tickets nesta rifa!").apply {
                     if (ticketsPlayerCanBuy > 0)
                         append(

@@ -2,8 +2,9 @@ package net.perfectdreams.dreamclubes.dao
 
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
+import org.jetbrains.exposed.dao.UUIDEntity
+import org.jetbrains.exposed.dao.UUIDEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
-import org.jetbrains.exposed.dao.*
 import java.util.*
 
 class ClubeMember(id: EntityID<UUID>) : UUIDEntity(id) {
