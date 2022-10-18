@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityToggleGlideEvent
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.util.*
@@ -30,7 +31,8 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 			"tell",
 			"r",
 			".",
-			"eventos"
+			"eventos",
+			"kdr"
 		)
 	}
 
@@ -133,6 +135,11 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 			0.0,
 			materialData
 		)
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	fun onElytraToggle(e: EntityToggleGlideEvent) {
+		e.isCancelled = e.entity.world.name == "RealArenasPvP"
 	}
 
 	fun createBattleModeTask(player: Player) {

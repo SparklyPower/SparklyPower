@@ -4,6 +4,7 @@ import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamlagstuffrestrictor.DreamLagStuffRestrictor
 import org.bukkit.Bukkit
+import org.bukkit.Chunk
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.event.EventHandler
@@ -25,69 +26,45 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
                 }
 
                 for (player in Bukkit.getOnlinePlayers().filter { it.world.name == "world" }) {
-                    val nearby = player.getNearbyEntities(16.0, 16.0, 16.0)
+                    val currentChunk = player.chunk
 
                     fun checkMobNearby(type: EntityType) {
-                        killedMobs[type] = killedMobs.getOrPut(type, { 0 }) + theSnap(nearby, type)
+                        killedMobs[type] = killedMobs.getOrPut(type, { 0 }) + theSnap(currentChunk, type)
                     }
 
-                    checkMobNearby(EntityType.VILLAGER)
-                    checkMobNearby(EntityType.CHICKEN)
-                    checkMobNearby(EntityType.CREEPER)
-                    checkMobNearby(EntityType.ZOMBIE)
-                    checkMobNearby(EntityType.SKELETON)
-                    checkMobNearby(EntityType.SPIDER)
-                    checkMobNearby(EntityType.CAVE_SPIDER)
-                    checkMobNearby(EntityType.BLAZE)
-                    checkMobNearby(EntityType.PIG)
-                    checkMobNearby(EntityType.SHEEP)
-                    checkMobNearby(EntityType.TURTLE)
-                    checkMobNearby(EntityType.COW)
-                    checkMobNearby(EntityType.GHAST)
-                    checkMobNearby(EntityType.PILLAGER)
-                    // checkMobNearby(EntityType.PIG_ZOMBIE)
-                    checkMobNearby(EntityType.RABBIT)
-                    checkMobNearby(EntityType.FOX)
-                    checkMobNearby(EntityType.BEE)
-                    checkMobNearby(EntityType.STRIDER)
+                    for ((type, _) in maximumInChunks) {
+                        checkMobNearby(type)
+                    }
 
-                    waitFor(10)
+                    waitFor(1)
                 }
 
                 val total = killedMobs.values.sumBy { it }
 
                 if (total != 0) {
-                    // Bukkit.broadcastMessage("§cO §dThanos Snap™§c passou e levou §4${total} mobs diferentes§c, sendo eles...")
+                    for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }) {
+                        player.sendMessage("\uE251 §cO §dThanos Snap™§c passou e levou §4${total} mobs diferentes§c, sendo eles...")
+                    }
 
-                    fun announceIfNeeded(type: EntityType, text: String) {
+                    fun announceIfNeeded(type: EntityType) {
                         val total = killedMobs[type]!!
 
                         if (total != 0) {
-                            // Bukkit.broadcastMessage("§4✝ §c$total $text...")
+                            for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }) {
+                                player.sendMessage("\uE251 §4✝ §c$total $type...")
+                            }
                         }
                     }
 
-                    announceIfNeeded(EntityType.VILLAGER, "aldeões indefesos")
-                    announceIfNeeded(EntityType.CHICKEN, "galinhas tagarelas")
-                    announceIfNeeded(EntityType.CREEPER, "creepers, aw man")
-                    announceIfNeeded(EntityType.ZOMBIE, "zumbis salafrários")
-                    announceIfNeeded(EntityType.SKELETON, "esqueletos magros")
-                    announceIfNeeded(EntityType.SPIDER, "aranhas chatas")
-                    announceIfNeeded(EntityType.CAVE_SPIDER, "aranhas de caverna chatas")
-                    announceIfNeeded(EntityType.PIG, "porcos sujos")
-                    announceIfNeeded(EntityType.SHEEP, "ovelhas marotas")
-                    announceIfNeeded(EntityType.TURTLE, "tartarugas lentas")
-                    announceIfNeeded(EntityType.COW, "vacas gordas")
-                    announceIfNeeded(EntityType.BLAZE, "blazes voadores")
-                    announceIfNeeded(EntityType.GHAST, "ghasts gigantes")
-                    announceIfNeeded(EntityType.PILLAGER, "pillagers violentos")
-                    // announceIfNeeded(EntityType.PIG_ZOMBIE, "pigmans mutantes")
-                    announceIfNeeded(EntityType.RABBIT, "coelhos saltitantes")
-                    announceIfNeeded(EntityType.FOX, "raposas travessas")
-                    announceIfNeeded(EntityType.BEE, "abelhas zum zum zum")
-                    announceIfNeeded(EntityType.STRIDER, "striders marotos")
+                    for ((type, _) in maximumInChunks) {
+                        announceIfNeeded(type)
+                    }
 
                     // Bukkit.broadcastMessage("§cTema. Tente fugir. O §dThanos Snap™§c sempre chegará... (Por favor, evite farms para evitar lag no servidor! thx!!)")
+                } else {
+                    for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }) {
+                        player.sendMessage("\uE251 §x§e§6§b§2§e§8Thanos Snap não limpou nenhum mob...")
+                    }
                 }
                 // }
 
@@ -96,39 +73,6 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
         }
     }
 
-    val limitEntities = mutableListOf(
-        EntityType.ZOMBIE,
-        EntityType.CREEPER,
-        EntityType.CAVE_SPIDER,
-        EntityType.SPIDER,
-        EntityType.SKELETON,
-        EntityType.PILLAGER,
-        EntityType.VILLAGER,
-        EntityType.FOX,
-        EntityType.PIG,
-        EntityType.SHEEP,
-        EntityType.CHICKEN,
-        EntityType.TURTLE,
-        EntityType.COW,
-        EntityType.BLAZE,
-        EntityType.STRIDER,
-        EntityType.EGG,
-        EntityType.SNOWBALL
-    )
-
-    val maximumAround = mapOf(
-        EntityType.ZOMBIE to 30,
-        EntityType.SPIDER to 30,
-        EntityType.CAVE_SPIDER to 30,
-        EntityType.CREEPER to 30,
-        EntityType.SKELETON to 30,
-        EntityType.BLAZE to 30,
-        EntityType.CHICKEN to 15,
-        EntityType.SHEEP to 15,
-        EntityType.PIG to 15,
-        EntityType.COW to 15
-    )
-
     val maximumInChunks = mapOf(
         EntityType.ZOMBIE to 30,
         EntityType.SPIDER to 30,
@@ -136,13 +80,24 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
         EntityType.CREEPER to 30,
         EntityType.SKELETON to 30,
         EntityType.BLAZE to 30,
+        EntityType.SNOWBALL to 30,
+        EntityType.EGG to 30,
         EntityType.CHICKEN to 15,
         EntityType.SHEEP to 15,
         EntityType.PIG to 15,
         EntityType.COW to 15,
+        EntityType.MUSHROOM_COW to 15,
         EntityType.STRIDER to 15,
-        EntityType.SNOWBALL to 30,
-        EntityType.EGG to 30
+        EntityType.ZOMBIFIED_PIGLIN to 15,
+        EntityType.FOX to 15,
+        EntityType.FROG to 15,
+        EntityType.TADPOLE to 15,
+        EntityType.GOAT to 15,
+        EntityType.TURTLE to 15,
+        EntityType.RABBIT to 15,
+        EntityType.BEE to 15,
+        EntityType.PILLAGER to 10,
+        EntityType.VILLAGER to 10,
     )
 
     @EventHandler
@@ -166,41 +121,19 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
         if (e.location.world.name != "world")
             return
 
-        if (e.entity.type in limitEntities) {
+        val maxInChunks = maximumInChunks[e.entity.type]
+        if (maxInChunks != null) {
             val entityTypeInChunk = e.location.chunk.entities.filter { it.type == e.entity.type }
             val entityTypeInChunkCount = entityTypeInChunk.size
-            val maxInChunks = maximumInChunks[e.entity.type] ?: 10
 
             if (entityTypeInChunkCount > maxInChunks) {
                 e.isCancelled = true
-                Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }.forEach {
-                    // it.sendMessage("§6${e.entity.type}§c foi #cancelado em §9(${e.entity.location.x}, ${e.entity.location.y}, ${e.entity.location.z})§c, tem §e$entityTypeInChunkCount §6${e.entity.type}§e no chunk")
-                }
-
-                entityTypeInChunk.drop(maxInChunks).forEach {
-                    var hasName = false
-
-                    if (it.customName != null && it.customName != "") {
-                        hasName = true
-                    }
-
-                    if (!hasName) {
-                        if (it is org.bukkit.entity.Damageable) {
-                            it.damage(100000.0)
-                        } else {
-                            it.remove()
-                        }
-
-                        Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }.forEach { player ->
-                            // player.sendMessage("§6${it.type}§c foi morto em §9(${it.location.x}, ${it.location.y}, ${it.location.z})§c por ter muitos mobs no chunk (mais que 7)")
-                        }
-                    }
-                }
             }
         }
     }
 
-    fun theSnap(entities: List<Entity>, whoWillBeKilled: EntityType): Int {
+    fun theSnap(chunk: Chunk, whoWillBeKilled: EntityType): Int {
+        val entities = chunk.entities
         val entitiesNearby = entities.filter { it.type == whoWillBeKilled }
 
         var idx = 0
@@ -215,10 +148,13 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
             if (whoWillBeKilled == EntityType.VILLAGER)
                 hasName = false
 
-            val maximumAround = maximumAround[whoWillBeKilled] ?: 20
+            val maximumAround = maximumInChunks[whoWillBeKilled] ?: 10
 
-            if (!hasName && idx > maximumAround && it is org.bukkit.entity.Damageable) {
-                it.damage(100000.0)
+            if (!hasName && idx > maximumAround) {
+                if (it is org.bukkit.entity.Damageable)
+                    it.damage(100000.0)
+                else
+                    it.remove()
                 dead++
             }
 
