@@ -4,6 +4,7 @@ import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.InstantFirework
 import net.perfectdreams.dreamcore.utils.broadcast
+import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
@@ -71,6 +72,8 @@ class ArenaXizum(val m: DreamXizum, val data: ArenaXizumData) {
 
 		player1.walkSpeed = 0f
 		player2.walkSpeed = 0f
+		player1.removeAllPotionEffects()
+		player2.removeAllPotionEffects()
 		player1.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 100, -5))
 		player2.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 100, -5))
 
