@@ -200,7 +200,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						inventoryTarget,
 						mcMMOXp,
 						info,
-						AtomicBoolean(false)
+						AtomicBoolean(false),
+						mutableSetOf()
 					)
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest normal crops!" }
@@ -237,7 +238,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 					val ttl = System.currentTimeMillis()
 					val mcMMOXp = AtomicInteger()
-					doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false))
+					doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false), mutableSetOf())
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest cocoa!" }
 
@@ -489,7 +490,14 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		mcMMOXp: AtomicInteger,
 		info: PlayerQuickHarvestInfo,
 		playerHasBeenWarned: AtomicBoolean,
+		checkedBlocks: MutableSet<Block>
 	) {
+		// This block was already checked, so let's bail out
+		if (block in checkedBlocks)
+			return
+
+		checkedBlocks.add(block)
+
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
 
@@ -558,16 +566,12 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		// To avoid a duplication issue, we will change the type right now
 		// Dupe issue: Fill your inventory with wheat, keep clicking on the wheat: You will receive a wheat item but the block won't be changed because
 		// "I can't fit the seed in there!"
-		val changeTo = when (type) {
-			Material.PUMPKIN, Material.MELON -> Material.AIR
-			else -> type
-		}
-
-		block.type = changeTo
-		if (type != Material.MELON && type != Material.PUMPKIN) {
+		if (type == Material.MELON || type == Material.PUMPKIN) {
+			block.setType(Material.AIR, false)
+		} else {
 			val ageable = block.blockData as Ageable
 			ageable.age = 0
-			block.blockData = ageable
+			block.setBlockData(ageable, false)
 		}
 
 		if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
@@ -635,7 +639,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				return
 			}
 
-			doQuickHarvestOnCrop(startingBlock, player, it, type, fortuneLevel, inventory, mcMMOXp, info, playerHasBeenWarned)
+			doQuickHarvestOnCrop(startingBlock, player, it, type, fortuneLevel, inventory, mcMMOXp, info, playerHasBeenWarned, checkedBlocks)
 		}
 	}
 
@@ -646,8 +650,15 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		inventory: Inventory,
 		mcMMOXp: AtomicInteger,
 		info: PlayerQuickHarvestInfo,
-		playerHasBeenWarned: AtomicBoolean
+		playerHasBeenWarned: AtomicBoolean,
+		checkedBlocks: MutableSet<Block>
 	) {
+		// This block was already checked, so let's bail out
+		if (block in checkedBlocks)
+			return
+
+		checkedBlocks.add(block)
+
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
 
@@ -694,7 +705,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		addMcMMOHerbalismXP(player, block, mcMMOXp = mcMMOXp) // mcMMO EXP
 
 		blockage.age = 0
-		block.blockData = blockage
+		block.setBlockData(blockage, false)
 
 		player.world.spawnParticle(Particle.VILLAGER_HAPPY, block.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
 
@@ -716,7 +727,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				return
 			}
 
-			doQuickHarvestOnCocoa(e, player, it, inventory, mcMMOXp, info, playerHasBeenWarned)
+			doQuickHarvestOnCocoa(e, player, it, inventory, mcMMOXp, info, playerHasBeenWarned, checkedBlocks)
 		}
 	}
 
