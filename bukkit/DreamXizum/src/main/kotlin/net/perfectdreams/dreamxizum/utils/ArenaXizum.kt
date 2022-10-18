@@ -38,6 +38,7 @@ class ArenaXizum(val m: DreamXizum, val data: ArenaXizumData) {
 	var player1: Player? = null
 	var player2: Player? = null
 	var lastEventId = UUID(0, 0)
+	var isCountingDown = false
 
 	fun startArena(player1: Player, player2: Player) {
 		broadcast(DreamXizum.PREFIX + " §b${player1.displayName}§e §4§lVS §b${player2.displayName}")
@@ -74,11 +75,13 @@ class ArenaXizum(val m: DreamXizum, val data: ArenaXizumData) {
 		player2.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 100, -5))
 
 		scheduler().schedule(m) {
+			isCountingDown = true
 			for (idx in 5 downTo 1) {
 				player1.sendTitle("§a§l$idx", "", 0, 15, 5)
 				player2.sendTitle("§a§l$idx", "", 0, 15, 5)
 				waitFor(20)
 			}
+			isCountingDown = false
 			player1.walkSpeed = 0.2f
 			player2.walkSpeed = 0.2f
 			player1.sendTitle("§c§lLutem!", "", 0, 15, 5)

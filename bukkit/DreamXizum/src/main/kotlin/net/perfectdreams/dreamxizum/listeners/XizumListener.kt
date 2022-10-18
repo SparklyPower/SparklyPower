@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamxizum.listeners
 
+import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamxizum.DreamXizum
 import net.perfectdreams.dreamxizum.utils.WinType
@@ -9,6 +10,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 
@@ -89,5 +91,19 @@ class XizumListener(private val m: DreamXizum) : Listener {
             player2RequestQueue.player1.sendMessage("§cVocê saiu da fila do Xizum, pois o seu amigo se teletransportou!")
             return
         }
+    }
+
+    @EventHandler
+    fun onMovePreStart(e: PlayerMoveEvent) {
+        if (!e.displaced)
+            return
+
+        val player = e.player
+
+        // Vamos verificar se o tal usuário estava em uma arena
+        val arena = m.arenas.firstOrNull { it.player1 == player || it.player2 == player } ?: return
+
+        if (arena.isCountingDown)
+            e.isCancelled = true
     }
 }
