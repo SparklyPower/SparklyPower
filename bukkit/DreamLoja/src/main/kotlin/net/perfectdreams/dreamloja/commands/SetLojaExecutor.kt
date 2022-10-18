@@ -8,11 +8,13 @@ import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
+import net.perfectdreams.dreamcore.utils.extensions.canPlaceAt
 import net.perfectdreams.dreamcore.utils.extensions.isUnsafe
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamloja.DreamLoja
 import net.perfectdreams.dreamloja.dao.Shop
 import net.perfectdreams.dreamloja.tables.Shops
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -35,6 +37,14 @@ class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
             context.sendLojaMessage {
                 color(NamedTextColor.RED)
                 content("A sua localização atual é insegura! Vá para um lugar mais seguro antes de marcar a sua loja!")
+            }
+            return
+        }
+
+        if (!player.canPlaceAt(location, Material.DIRT)) {
+            context.sendLojaMessage {
+                color(NamedTextColor.RED)
+                content("Você não pode marcar uma loja, pois você não tem permissão para construir neste local!")
             }
             return
         }
