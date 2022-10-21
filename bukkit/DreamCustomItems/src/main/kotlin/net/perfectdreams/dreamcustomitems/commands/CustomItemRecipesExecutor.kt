@@ -19,7 +19,7 @@ class CustomItemRecipesExecutor(val m: DreamCustomItems) : SparklyCommandExecuto
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
         val customItems = m.customRecipes
-        val inventorySize = (customItems.size / 9.0).toInt()
+        val inventorySize = ((customItems.size / 9.0).toInt() + 1) * 9
 
         val menu = createMenu(inventorySize, "§cItens customizados") {
             for ((value, customItemRecipeWrapper) in customItems.withIndex()) {
