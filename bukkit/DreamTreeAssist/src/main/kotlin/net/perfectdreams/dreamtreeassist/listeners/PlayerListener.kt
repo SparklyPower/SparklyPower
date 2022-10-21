@@ -8,23 +8,19 @@ import com.gmail.nossr50.util.BlockUtils
 import com.gmail.nossr50.util.player.UserManager
 import net.perfectdreams.dreamcore.utils.chance
 import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
-import net.perfectdreams.dreamcustomitems.utils.isMagnetApplicable
 import net.perfectdreams.dreamtreeassist.DreamTreeAssist
 import net.perfectdreams.dreamtreeassist.utils.BlockLocation
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
 import org.bukkit.block.data.type.Leaves
 import org.bukkit.enchantments.Enchantment
-import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
@@ -122,17 +118,11 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
             clickedBlock.z
         )
 
-        // If it is a player placed block, break it normally
-        if (m.placedLogs.contains(position)) {
-            e.player.isMagnetApplicable(clickedBlock.type)
+        if (m.placedLogs.contains(position)) // If it is a player placed block, break it normally
             return
-        }
 
-        val drops = processTree(e.player, heldItem, e.block)
-        e.isCancelled = e.player.isMagnetApplicable(clickedBlock.type, drops)
-
-        if (e.isCancelled) Bukkit.getPluginManager().callEvent(BlockDropItemEvent(e.block, e.block.state, e.player, listOf()))
-        else drops.forEach { with (e.block) { world.dropItemNaturally(location, it) } }
+        val result = processTree(e.player, heldItem, e.block)
+        e.isCancelled = result.isNotEmpty()
     }
 
     private fun processTree(player: Player, heldItem: ItemStack, block: Block): List<ItemStack> {

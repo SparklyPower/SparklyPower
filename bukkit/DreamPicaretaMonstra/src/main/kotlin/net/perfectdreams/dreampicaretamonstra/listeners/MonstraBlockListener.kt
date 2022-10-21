@@ -8,8 +8,6 @@ import net.perfectdreams.dreamcore.utils.chance
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcustomitems.listeners.canMineRubyFrom
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
-import net.perfectdreams.dreamcustomitems.utils.hasMagnet
-import net.perfectdreams.dreamcustomitems.utils.isMagnetApplicable
 import net.perfectdreams.dreampicaretamonstra.DreamPicaretaMonstra
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
@@ -43,7 +41,6 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
         val isInMinaRecheada = e.block.world.name == "MinaRecheada"
 
         if ((e.block.world.name == "world" && isInClaim == null) || isInMinaRecheada) {
-            e.player.isMagnetApplicable(e.block.type)
             if (!isInMinaRecheada) e.player.sendMessage("§cVocê só pode usar a picareta monstra no seu terreno! Se você quer sair quebrando tudo, proteja o terreno ou vá no mundo de recursos, §6/warp recursos")
             return
         }
@@ -55,7 +52,6 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
 
         if (m.isValidForHeldItem(heldItemType, broken)) {
             e.isCancelled = true
-            val hasMagnet = e.player.hasMagnet.first
             val allDrops = mutableListOf<ItemStack>()
 
             val blocks = GeometryUtils.sphere(e.block.location, 2, false) as Set<Location>
@@ -104,7 +100,7 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                         allDrops.addAll(drops)
 
                         // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
-                        val dropsAsItems = if (!hasMagnet) drops.map { location.world.dropItem(location, it) } else listOf()
+                        val dropsAsItems = drops.map { location.world.dropItem(location, it) }
 
                         if (isPicaretaMonstra) {
                             m.doMcMMOStuffMining(
@@ -148,9 +144,6 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                     }
                 }
             }
-
-            if (e.player.isMagnetApplicable(e.block.type, allDrops))
-                Bukkit.getPluginManager().callEvent(BlockDropItemEvent(e.block, e.block.state, e.player, listOf()))
         }
     }
 }

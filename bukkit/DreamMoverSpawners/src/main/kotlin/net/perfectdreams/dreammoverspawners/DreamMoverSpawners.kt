@@ -9,7 +9,6 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamcore.utils.extensions.toItemStack
-import net.perfectdreams.dreamcustomitems.utils.isMagnetApplicable
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.Sound
@@ -213,13 +212,10 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
                 .lore("§7Spawner de §a${type.getLocalizedName()}")
                 .storeMetadata("spawnerType", type.toString()))
 
-            e.isCancelled = !e.player.isMagnetApplicable(e.block.type, drops)
+            e.block.type = Material.AIR // rip
 
-            if (e.isCancelled) {
-                e.block.type = Material.AIR // rip
-                // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
-                e.block.world.dropItem(center, drops.first())
-            }
+            // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
+            e.block.world.dropItem(center, drops.first())
 
             center.world.spawnParticle(Particle.VILLAGER_HAPPY, center, 8, 1.0, 1.0, 1.0)
             center.world.spawnParticle(Particle.FIREWORKS_SPARK, center, 8, 1.0, 1.0, 1.0)

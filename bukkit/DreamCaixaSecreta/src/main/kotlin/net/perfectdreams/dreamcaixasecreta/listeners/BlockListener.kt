@@ -7,7 +7,6 @@ import net.perfectdreams.dreamcaixasecreta.DreamCaixaSecreta
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcustomitems.utils.isMagnetApplicable
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
@@ -170,8 +169,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 				e.player.world.name
 			)
 
-			if (!e.player.isMagnetApplicable(e.block.type, listOf(item)))
-				e.player.world.dropItemNaturally(e.block.location, item)
+			e.player.world.dropItemNaturally(e.block.location, item)
 		}
 	}
 
