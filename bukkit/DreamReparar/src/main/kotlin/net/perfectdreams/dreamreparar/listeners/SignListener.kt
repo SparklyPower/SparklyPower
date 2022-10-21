@@ -13,11 +13,17 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.SignChangeEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import java.util.*
 
 class SignListener(val m: DreamReparar) : Listener {
+    @EventHandler
+    fun onQuit(e: PlayerQuitEvent) {
+        m.playerLastCheckedLocation.remove(e.player)
+    }
+
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     fun onRightClick(e: PlayerInteractEvent) {
         val clickedBlock = e.clickedBlock ?: return

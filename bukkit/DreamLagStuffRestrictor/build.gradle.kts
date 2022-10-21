@@ -13,6 +13,7 @@ repositories {
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnly(project(":bukkit:DreamCore"))
+    compileOnly(project(":bukkit:DreamEnderHopper"))
     implementation("com.github.ChestShop-authors:ChestShop-3:3.11")
 }
 

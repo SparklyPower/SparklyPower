@@ -7,7 +7,6 @@ import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamlagstuffrestrictor.commands.EntitySearchKillOutsideExecutor
 import net.perfectdreams.dreamlagstuffrestrictor.commands.declarations.EntitySearchDeclaration
 import net.perfectdreams.dreamlagstuffrestrictor.listeners.BlockLaggyBlocksListener
-import net.perfectdreams.dreamlagstuffrestrictor.listeners.BlockMinecartHopperListener
 import net.perfectdreams.dreamlagstuffrestrictor.utils.ThanosSnap
 import org.bukkit.Bukkit
 import org.bukkit.event.Listener
@@ -16,7 +15,6 @@ class DreamLagStuffRestrictor : KotlinPlugin(), Listener {
 	override fun softEnable() {
 		super.softEnable()
 
-		registerEvents(BlockMinecartHopperListener())
 		registerEvents(BlockLaggyBlocksListener())
 		registerCommand(EntitySearchDeclaration())
 

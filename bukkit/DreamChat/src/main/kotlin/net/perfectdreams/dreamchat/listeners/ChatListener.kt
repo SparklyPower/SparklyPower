@@ -7,6 +7,7 @@ import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.string
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
@@ -23,7 +24,9 @@ import net.perfectdreams.dreamchat.tables.ChatUsers
 import net.perfectdreams.dreamchat.tables.DiscordAccounts
 import net.perfectdreams.dreamchat.tables.PremiumUsers
 import net.perfectdreams.dreamchat.utils.*
+import net.perfectdreams.dreamclubes.tables.PlayerDeaths
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
+import net.perfectdreams.dreamclubes.utils.KDWrapper
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.jsonParser
@@ -46,7 +49,9 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
+import org.jetbrains.exposed.sql.count
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -100,6 +105,49 @@ class ChatListener(val m: DreamChat) : Listener {
 					false
 				)
 			)
+		}
+
+		// Get top player
+		runBlocking {
+			net.perfectdreams.exposedpowerutils.sql.transaction(Dispatchers.IO, Databases.databaseNetwork) {
+				val killedCount = PlayerDeaths.killed.count()
+				val killeds = PlayerDeaths.slice(PlayerDeaths.killed, killedCount)
+					.selectAll()
+					.groupBy(PlayerDeaths.killed)
+					.toList()
+
+				val killerCount = PlayerDeaths.killed.count()
+				val killers = PlayerDeaths.slice(PlayerDeaths.killer, killerCount)
+					.selectAll()
+					.groupBy(PlayerDeaths.killer)
+					.toList()
+
+				val ids = (killeds.map { it[PlayerDeaths.killed] } + killers.mapNotNull { it[PlayerDeaths.killer] }).toSet()
+
+				val kdrs = mutableMapOf<UUID, KDWrapper>()
+				for (id in ids) {
+					val playerDeathCount = killeds.firstOrNull { it[PlayerDeaths.killed] == id }?.get(killedCount) ?: 0
+					val playerKillCount = killers.firstOrNull { it[PlayerDeaths.killer] == id }?.get(killerCount) ?: 0
+					val kdrWrapper = KDWrapper(playerKillCount, playerDeathCount)
+					kdrs[id] = kdrWrapper
+				}
+
+				val top = kdrs.entries.maxByOrNull { it.value.getRatio() }
+				if (top?.key == e.player.uniqueId) {
+					e.tags.add(
+						PlayerTag(
+							"§c§lM",
+							"§c§lMMestre",
+							listOf(
+								"§r§b${e.player.displayName}§r§7 é o mestre do PvP",
+								"§7e possui o maior KDR do servidor!"
+							),
+							null,
+							false
+						)
+					)
+				}
+			}
 		}
 
 		if (e.player.uniqueId.toString() == m.config.get("last-enderdragon-killer")) {

@@ -1,19 +1,21 @@
 package net.perfectdreams.dreamlagstuffrestrictor.listeners
 
+import net.perfectdreams.dreamcore.utils.get
+import net.perfectdreams.dreamenderhopper.DreamEnderHopper
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.player.PlayerInteractEvent
 
 class BlockLaggyBlocksListener : Listener {
-    val maxTypesPerBlockInChunk = mapOf(
+    private val maxTypesPerBlockInChunk = mapOf(
         Material.SPAWNER to 4,
-        Material.OBSERVER to 64
+        Material.OBSERVER to 64,
+        Material.HOPPER to 128
     )
 
-    val maxMultiTypesPerBlockInChunk = mapOf(
+    private val maxMultiTypesPerBlockInChunk = mapOf(
         listOf(
             Material.PISTON,
             Material.STICKY_PISTON
@@ -26,6 +28,9 @@ class BlockLaggyBlocksListener : Listener {
 
         if (restrictCount != null) {
             var count = 1
+
+            if (e.itemInHand.hasItemMeta() && e.itemInHand.itemMeta.persistentDataContainer.get(DreamEnderHopper.HOPPER_TELEPORTER))
+                return
 
             for (x in 0..15) {
                 for (z in 0..15) {

@@ -567,11 +567,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		// Dupe issue: Fill your inventory with wheat, keep clicking on the wheat: You will receive a wheat item but the block won't be changed because
 		// "I can't fit the seed in there!"
 		if (type == Material.MELON || type == Material.PUMPKIN) {
-			block.setType(Material.AIR, false)
+			block.type = Material.AIR
 		} else {
 			val ageable = block.blockData as Ageable
 			ageable.age = 0
-			block.setBlockData(ageable, false)
+			block.blockData = ageable
 		}
 
 		if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
@@ -705,7 +705,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		addMcMMOHerbalismXP(player, block, mcMMOXp = mcMMOXp) // mcMMO EXP
 
 		blockage.age = 0
-		block.setBlockData(blockage, false)
+		block.blockData = blockage
 
 		player.world.spawnParticle(Particle.VILLAGER_HAPPY, block.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
 

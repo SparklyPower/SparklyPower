@@ -198,14 +198,14 @@ open class KotlinPlugin : JavaPlugin() {
 		DreamCore.INSTANCE.dreamEventManager.events.remove(event)
 	}
 
-	fun addRecipe(name: String, item: ItemStack, shape: List<String>, ingredients: (ShapedRecipe) -> (Unit)) {
+	fun addRecipe(name: String, item: ItemStack, shape: List<String>, ingredients: (ShapedRecipe) -> (Unit)): Recipe {
 		// create a NamespacedKey for your recipe
 		val key = NamespacedKey(this, name)
 
-		addRecipe(key, item, shape, ingredients)
+		return addRecipe(key, item, shape, ingredients)
 	}
 
-	fun addRecipe(key: NamespacedKey, item: ItemStack, shape: List<String>, ingredients: (ShapedRecipe) -> (Unit)) {
+	fun addRecipe(key: NamespacedKey, item: ItemStack, shape: List<String>, ingredients: (ShapedRecipe) -> (Unit)): Recipe {
 		// Create our custom recipe variable
 		val recipe = ShapedRecipe(key, item)
 
@@ -216,11 +216,12 @@ open class KotlinPlugin : JavaPlugin() {
 		// E = Emerald, S = Stick
 		ingredients.invoke(recipe)
 
-		addRecipe(key, recipe)
+		return addRecipe(key, recipe)
 	}
 
-	fun addRecipe(key: NamespacedKey, recipe: Recipe) {
+	fun addRecipe(key: NamespacedKey, recipe: Recipe): Recipe {
 		recipes += key
 		Bukkit.addRecipe(recipe)
+		return recipe
 	}
 }

@@ -175,6 +175,33 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 		)
 
 		registerCommand(
+			command("DreamResourceResetMapIdCommand", listOf("dreamrr mapid")) {
+				permission = "dreamresourcereset.setup"
+
+				executes {
+					val mapId = (player.inventory.itemInMainHand.itemMeta as MapMeta)
+						.mapView
+						?.id
+					val info = transaction(Databases.databaseNetwork) {
+						DeathChestsInformation.innerJoin(DeathChestMaps)
+							.select {
+								DeathChestMaps.id eq mapId
+							}.limit(1).firstOrNull()
+					}
+
+					if (info != null) {
+						player.sendMessage("X: ${info[DeathChestsInformation.x]}")
+						player.sendMessage("Y: ${info[DeathChestsInformation.y]}")
+						player.sendMessage("Z: ${info[DeathChestsInformation.z]}")
+						player.sendMessage("World: ${info[DeathChestsInformation.worldName]}")
+					} else {
+						player.sendMessage("Map does not exist!")
+					}
+				}
+			}
+		)
+
+		registerCommand(
 			command("DreamResourceResetChangeCommand", listOf("dreamrr save")) {
 				permission = "dreamresourcereset.setup"
 

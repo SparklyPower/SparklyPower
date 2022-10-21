@@ -1,7 +1,5 @@
 package net.perfectdreams.dreamloja.listeners
 
-import com.destroystokyo.paper.event.server.AsyncTabCompleteEvent
-import com.okkero.skedule.BukkitSchedulerController
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -9,7 +7,10 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.adventure.append
 import net.perfectdreams.dreamcore.utils.adventure.sendTextComponent
+import net.perfectdreams.dreamcore.utils.extensions.loadAsync
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
+import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamloja.DreamLoja
 import net.perfectdreams.dreamloja.dao.UserShopVote
 import net.perfectdreams.dreamloja.dao.VoteSign
@@ -31,34 +32,41 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 class SignListener(val m: DreamLoja) : Listener {
-    suspend fun BukkitSchedulerController.updateVoteSigns(owner: UUID) {
-        val voteSigns = transaction(Databases.databaseNetwork) {
-            VoteSign.find {
-                VoteSigns.owner eq owner
-            }.toMutableList()
-        }
+    private suspend fun updateVoteSigns(owner: UUID) {
+        onAsyncThread {
+            val voteSigns = transaction(Databases.databaseNetwork) {
+                VoteSign.find {
+                    VoteSigns.owner eq owner
+                }.toMutableList()
+            }
 
-        val voteCount = transaction(Databases.databaseNetwork) {
-            UserShopVotes.select {
-                UserShopVotes.receivedBy eq owner
-            }.count()
-        }
+            val voteCount = transaction(Databases.databaseNetwork) {
+                UserShopVotes.select {
+                    UserShopVotes.receivedBy eq owner
+                }.count()
+            }
 
-        switchContext(SynchronizationContext.SYNC)
+            onMainThread {
+                voteSigns.forEach {
+                    val location = it.getLocation()
+                    // To avoid loading multiple chunks on the main thread at the same time, we will load them async to avoid lag
+                    // If the chunk doesn't exist, we will skip the sign
+                    location.chunk.loadAsync(false) ?: return@forEach
 
-        voteSigns.forEach {
-            val location = it.getLocation()
-            val sign = location.block.state
+                    // We don't use the chunk reference, we don't *really* need it
+                    val sign = location.block.state
 
-            if (sign is Sign) {
-                sign.setLine(3, "§bVotos: §3$voteCount")
-                sign.update()
-            } else {
-                switchContext(SynchronizationContext.ASYNC)
-                transaction(Databases.databaseNetwork) {
-                    it.delete()
+                    if (sign is Sign) {
+                        sign.setLine(3, "§bVotos: §3$voteCount")
+                        sign.update()
+                    } else {
+                        onAsyncThread {
+                            transaction(Databases.databaseNetwork) {
+                                it.delete()
+                            }
+                        }
+                    }
                 }
-                switchContext(SynchronizationContext.SYNC)
             }
         }
     }
@@ -116,7 +124,7 @@ class SignListener(val m: DreamLoja) : Listener {
         e.setLine(1, "§cClique para votar")
         e.setLine(2, "§b${e.player.name}")
 
-        scheduler().schedule(m, SynchronizationContext.ASYNC) {
+        m.launchAsyncThread {
             transaction(Databases.databaseNetwork) {
                 VoteSign.new {
                     this.owner = e.player.uniqueId
@@ -126,13 +134,13 @@ class SignListener(val m: DreamLoja) : Listener {
 
             updateVoteSigns(e.player.uniqueId)
 
-            switchContext(SynchronizationContext.SYNC)
-
-            e.player.sendTextComponent {
-                color(NamedTextColor.GREEN)
-                append(DreamLoja.PREFIX)
-                append(" ")
-                append("Placa de votação criada com sucesso!")
+            onMainThread {
+                e.player.sendTextComponent {
+                    color(NamedTextColor.GREEN)
+                    append(DreamLoja.PREFIX)
+                    append(" ")
+                    append("Placa de votação criada com sucesso!")
+                }
             }
         }
     }
@@ -183,7 +191,7 @@ class SignListener(val m: DreamLoja) : Listener {
         if (sign.lines[0] != "§8[§a§lVotar§8]")
             return
 
-        scheduler().schedule(m, SynchronizationContext.ASYNC) {
+        m.launchAsyncThread {
             val voteSign = transaction(Databases.databaseNetwork) {
                 VoteSign.find {
                     (VoteSigns.x eq block.location.x) and
@@ -191,7 +199,7 @@ class SignListener(val m: DreamLoja) : Listener {
                             (VoteSigns.z eq block.location.z) and
                             (VoteSigns.worldName eq block.world.name)
                 }.firstOrNull()
-            } ?: return@schedule // Não é uma placa de votação
+            } ?: return@launchAsyncThread // Não é uma placa de votação
 
             if (e.player.uniqueId == voteSign.owner) {
                 e.player.sendTextComponent {
@@ -200,7 +208,7 @@ class SignListener(val m: DreamLoja) : Listener {
                     append(" ")
                     append("Você vê a sua placa de votação atentamente, e pensa... \"Um dia, eu serei um empreendedor incrível!\" e, como você respeita as regras dos comerciantes da LorittaLand, você sabe que não pode votar na sua própria loja.")
                 }
-                return@schedule
+                return@launchAsyncThread
             }
 
             val shopVote = transaction(Databases.databaseNetwork) {
@@ -217,7 +225,7 @@ class SignListener(val m: DreamLoja) : Listener {
                         append(" ")
                         append("Você tem que esperar ${DateUtils.formatDateDiff(shopVote.receivedAt + 300_000L)} antes de tirar o seu voto! Que tal conversar com o proprietário da loja para ver se vocês resolvem as suas diferenças?")
                     }
-                    return@schedule
+                    return@launchAsyncThread
                 }
 
                 transaction(Databases.databaseNetwork) {
@@ -226,26 +234,26 @@ class SignListener(val m: DreamLoja) : Listener {
 
                 updateVoteSigns(e.player.uniqueId)
 
-                switchContext(SynchronizationContext.SYNC)
-
-                e.player.sendTextComponent {
-                    color(NamedTextColor.GREEN)
-                    append(DreamLoja.PREFIX)
-                    append(" ")
-                    append("Você removeu o voto da loja d${MeninaAPI.getArtigo(voteSign.owner)} ")
-                    append(Bukkit.getOfflinePlayer(voteSign.owner).name ?: "???") {
-                        color(NamedTextColor.AQUA)
+                onMainThread {
+                    e.player.sendTextComponent {
+                        color(NamedTextColor.GREEN)
+                        append(DreamLoja.PREFIX)
+                        append(" ")
+                        append("Você removeu o voto da loja d${MeninaAPI.getArtigo(voteSign.owner)} ")
+                        append(Bukkit.getOfflinePlayer(voteSign.owner).name ?: "???") {
+                            color(NamedTextColor.AQUA)
+                        }
+                        append("...")
                     }
-                    append("...")
-                }
 
-                e.player.sendTextComponent {
-                    color(NamedTextColor.GRAY)
-                    append(DreamLoja.PREFIX)
-                    append(" ")
-                    append("Lembre-se, votos ajudam donos das lojas, não seja vacilão para votar e depois tirar só para ser v1d4 l0ka.")
+                    e.player.sendTextComponent {
+                        color(NamedTextColor.GRAY)
+                        append(DreamLoja.PREFIX)
+                        append(" ")
+                        append("Lembre-se, votos ajudam donos das lojas, não seja vacilão para votar e depois tirar só para ser v1d4 l0ka.")
+                    }
                 }
-                return@schedule
+                return@launchAsyncThread
             }
 
             transaction(Databases.databaseNetwork) {
@@ -258,25 +266,27 @@ class SignListener(val m: DreamLoja) : Listener {
 
             updateVoteSigns(voteSign.owner)
 
-            switchContext(SynchronizationContext.SYNC)
+            onMainThread {
 
-            e.player.sendTextComponent {
-                color(NamedTextColor.GREEN)
-                append(DreamLoja.PREFIX)
-                append(" ")
-                append("Você votou na loja d${MeninaAPI.getArtigo(voteSign.owner)} ")
-                append(Bukkit.getOfflinePlayer(voteSign.owner).name ?: "???") {
-                    color(NamedTextColor.AQUA)
+                e.player.sendTextComponent {
+                    color(NamedTextColor.GREEN)
+                    append(DreamLoja.PREFIX)
+                    append(" ")
+                    append("Você votou na loja d${MeninaAPI.getArtigo(voteSign.owner)} ")
+                    append(Bukkit.getOfflinePlayer(voteSign.owner).name ?: "???") {
+                        color(NamedTextColor.AQUA)
+                    }
+                    append("!")
                 }
-                append("!")
-            }
 
-            InstantFirework.spawn(block.location.add(0.0, 0.5, 0.0), FireworkEffect.builder()
-                    .with(FireworkEffect.Type.BALL)
-                    .withColor(Color.AQUA)
-                    .flicker(true)
-                    .build()
-            )
+                InstantFirework.spawn(
+                    block.location.add(0.0, 0.5, 0.0), FireworkEffect.builder()
+                        .with(FireworkEffect.Type.BALL)
+                        .withColor(Color.AQUA)
+                        .flicker(true)
+                        .build()
+                )
+            }
         }
     }
 }

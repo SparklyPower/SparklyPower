@@ -1,5 +1,5 @@
 name: DreamLagStuffRestrictor
 main: net.perfectdreams.dreamlagstuffrestrictor.DreamLagStuffRestrictor
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "DreamEnderHopper"]
 api-version: 1.13

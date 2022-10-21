@@ -7,7 +7,9 @@ import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamreparar.listeners.SignListener
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.block.Block
 import org.bukkit.block.Sign
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
@@ -21,6 +23,8 @@ class DreamReparar : KotlinPlugin(), Listener {
 		lateinit var INSTANCE: DreamReparar
 	}
 
+	val playerLastCheckedLocation = mutableMapOf<Player, PlayerLookingAtBlock>()
+
 	override fun softEnable() {
 		super.softEnable()
 
@@ -33,11 +37,43 @@ class DreamReparar : KotlinPlugin(), Listener {
 	fun programarPlaca() {
 		scheduler().schedule(this) {
 			while (true) {
+				var cachedHits = 0
+				var notCachedHits = 0
+
 				for (p in Bukkit.getOnlinePlayers()) {
 					try {
-						val targetBlock = p.getTargetBlock(null as HashSet<Material>?, 5)
-						if (!targetBlock.type.name.contains("SIGN") || (targetBlock.state as Sign).getLine(0) != "§1[Reparar]")
+						// Optimization: If the player didn't move, we will reuse the last checked target block, because calling getTargetBlock is very resource intensive, so it is better if we are able to skip the check
+						val cachedLookingAtRepairSign = playerLastCheckedLocation[p]
+
+						val playerLookingAtBlockWrapper = if (cachedLookingAtRepairSign?.playerLocation == p.location) {
+							cachedHits++
+							cachedLookingAtRepairSign
+						} else {
+							notCachedHits++
+							val targetBlock = p.getTargetBlock(null as HashSet<Material>?, 5)
+
+							val isRepairSign = targetBlock.type.name.contains("SIGN") && (targetBlock.state as Sign).getLine(0) == "§1[Reparar]"
+
+							val playerLookingAtBlock = PlayerLookingAtBlock(
+								p.location,
+								targetBlock,
+								isRepairSign
+							)
+
+							playerLastCheckedLocation[p] = PlayerLookingAtBlock(
+								p.location,
+								targetBlock,
+								isRepairSign
+							)
+
+							playerLookingAtBlock
+						}
+
+						// Not a repair sign, bail out!
+						if (!playerLookingAtBlockWrapper.isRepairSign)
 							continue
+
+						val targetBlock = playerLookingAtBlockWrapper.lookingAtBlock
 
 						if (p.inventory.itemInMainHand.type != Material.AIR) {
 							val itemReparar = p.inventory.itemInMainHand
@@ -89,6 +125,8 @@ class DreamReparar : KotlinPlugin(), Listener {
 						logger.log(Level.SEVERE, "Erro ao atualizar placas para " + p.name + "!", ex)
 					}
 				}
+
+				logger.info { "Updated repair sign texts! Cached hits: $cachedHits; Not cached hits: $notCachedHits" }
 
 				waitFor(20)
 			}
@@ -172,4 +210,10 @@ class DreamReparar : KotlinPlugin(), Listener {
 	fun canRepair(`is`: ItemStack): Boolean {
 		return `is`.type.name.contains("SWORD") || `is`.type.name.contains("AXE") || `is`.type.name.contains("HOE") || `is`.type.name.contains("SHOVEL") || `is`.type.name.contains("HOE") || `is`.type.name.contains("PICKAXE") || `is`.type.name.contains("CHESTPLATE") || `is`.type.name.contains("BOOTS") || `is`.type.name.contains("HELMET") || `is`.type.name.contains("BARDING") || `is`.type.name.contains("LEGGINGS") || `is`.type == Material.FISHING_ROD || `is`.type == Material.BOW || `is`.type == Material.FLINT_AND_STEEL || `is`.type == Material.SHEARS || `is`.type == Material.SHIELD || `is`.type == Material.CROSSBOW || `is`.type == Material.TRIDENT
 	}
+
+	data class PlayerLookingAtBlock(
+		val playerLocation: Location,
+		val lookingAtBlock: Block,
+		val isRepairSign: Boolean
+	)
 }

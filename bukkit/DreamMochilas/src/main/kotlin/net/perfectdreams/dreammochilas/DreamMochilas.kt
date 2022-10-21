@@ -8,7 +8,8 @@ import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.rename
-import net.perfectdreams.dreammochilas.commands.*
+import net.perfectdreams.dreamcustomitems.DreamCustomItems
+import net.perfectdreams.dreamcustomitems.utils.CustomCraftingRecipe
 import net.perfectdreams.dreammochilas.commands.declarations.MochilaCommand
 import net.perfectdreams.dreammochilas.listeners.ChestShopListener
 import net.perfectdreams.dreammochilas.listeners.InventoryListener
@@ -130,18 +131,24 @@ class DreamMochilas : KotlinPlugin(), Listener {
 			}
 		}
 
-		addRecipe(
-			"rainbow_mochila",
-			createMochila(MochilaData.Rainbow),
-			listOf(
-				" R ",
-				"RMR",
-				" R "
+		DreamCustomItems.registerCustomRecipe(
+			CustomCraftingRecipe(
+				this,
+				false,
+				addRecipe(
+					"rainbow_mochila",
+					createMochila(MochilaData.Rainbow),
+					listOf(
+						" R ",
+						"RMR",
+						" R "
+					)
+				) {
+					it.setIngredient('R', Material.WHITE_WOOL)
+					it.setIngredient('M', Material.PAPER)
+				}
 			)
-		) {
-			it.setIngredient('R', Material.WHITE_WOOL)
-			it.setIngredient('M', Material.PAPER)
-		}
+		)
 	}
 
 	override fun softDisable() {

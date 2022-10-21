@@ -5,12 +5,14 @@ import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamlagstuffrestrictor.DreamLagStuffRestrictor
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
+import org.bukkit.Material
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.vehicle.VehicleCreateEvent
+import org.bukkit.inventory.ItemStack
 
 class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
     fun start() {
@@ -98,23 +100,8 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
         EntityType.BEE to 15,
         EntityType.PILLAGER to 10,
         EntityType.VILLAGER to 10,
+        EntityType.MINECART_HOPPER to 16,
     )
-
-    @EventHandler
-    fun onSpawn(e: VehicleCreateEvent) {
-        if (e.vehicle.type == EntityType.MINECART_HOPPER) {
-            val nearby = e.vehicle.getNearbyEntities(0.001, 0.001, 0.001)
-                .filter { it.type == e.vehicle.type }
-
-            Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }.forEach {
-                it.sendMessage("§ceta §6${e.vehicle.type}§c nasceu em §9(${e.vehicle.location.x}, ${e.vehicle.location.y}, ${e.vehicle.location.z})§c, tem §e${nearby.size} iguais§c no mesmo bloco, iremos matar os demais")
-            }
-
-            nearby.forEach {
-                it.remove()
-            }
-        }
-    }
 
     @EventHandler
     fun onSpawn(e: EntitySpawnEvent) {
@@ -155,6 +142,11 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
                     it.damage(100000.0)
                 else
                     it.remove()
+
+                if (it is org.bukkit.entity.Minecart) {
+                    chunk.world.dropItem(it.location, ItemStack(it.minecartMaterial))
+                }
+
                 dead++
             }
 

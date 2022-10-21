@@ -13,7 +13,6 @@ import net.perfectdreams.dreamcustomitems.items.Microwave
 import net.perfectdreams.dreamcustomitems.items.SuperFurnace
 import net.perfectdreams.dreamcustomitems.items.TrashCan
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
-import net.perfectdreams.dreamcustomitems.utils.isMagnetApplicable
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -106,8 +105,7 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                     clickedBlock.type = Material.AIR
                     e.isCancelled = true
 
-                    if (!e.player.isMagnetApplicable(clickedBlock.type, drops))
-                        drops.forEach { with (clickedBlock) { world.dropItemNaturally(location, it) } }
+                    drops.forEach { with (clickedBlock) { world.dropItemNaturally(location, it) } }
 
                     Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, e.player, listOf()))
                 }
@@ -143,8 +141,7 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                     clickedBlock.type = Material.AIR
                     e.isCancelled = true
 
-                    if (!e.player.isMagnetApplicable(clickedBlock.type, drops))
-                        with (clickedBlock) { drops.forEach { world.dropItemNaturally(location, it) } }
+                    with (clickedBlock) { drops.forEach { world.dropItemNaturally(location, it) } }
 
                     Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, e.player, listOf()))
                 }
@@ -154,8 +151,7 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                     clickedBlock.type = Material.AIR
                     e.isCancelled = true
 
-                    if (!e.player.isMagnetApplicable(clickedBlock.type, drops))
-                        with (clickedBlock) { world.dropItemNaturally(location, drops.single()) }
+                    with (clickedBlock) { world.dropItemNaturally(location, drops.single()) }
 
                     Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, e.player, listOf()))
                 }
@@ -263,7 +259,7 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                 }
 
                 e.isCancelled = true
-                
+
                 if (e.currentItem?.type == Material.RED_STAINED_GLASS_PANE) {
                     holder.m.start()
                     return

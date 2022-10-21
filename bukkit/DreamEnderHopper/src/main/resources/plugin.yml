@@ -1,0 +1,5 @@
+name: DreamEnderHopper
+main: net.perfectdreams.dreamenderhopper.DreamEnderHopper
+version: 1.0.0
+depend: ["DreamCore", "DreamCustomItems"]
+api-version: 1.13

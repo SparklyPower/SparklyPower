@@ -9,7 +9,8 @@ import net.perfectdreams.dreambedrockintegrations.DreamBedrockIntegrations
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamcustomitems.utils.CustomItems
+import net.perfectdreams.dreamcustomitems.DreamCustomItems
+import net.perfectdreams.dreamcustomitems.utils.CustomCraftingRecipe
 import net.perfectdreams.dreamenchant.listeners.BlockListener
 import net.perfectdreams.dreamenchant.utils.PlayerEnchantmentTable
 import net.perfectdreams.dreamenchant.utils.SpawnEnchantmentTable
@@ -58,21 +59,27 @@ class DreamEnchant : KotlinPlugin() {
 
 		registerEvents(BlockListener(this))
 
-		addRecipe(
-			"super_enchanting_table",
-			createSpecialEnchantmentTableItemStack(0),
-			listOf(
-				"DRD",
-				"RER",
-				"ANA"
+		DreamCustomItems.registerCustomRecipe(
+			CustomCraftingRecipe(
+				this,
+				true,
+				addRecipe(
+					"super_enchanting_table",
+					createSpecialEnchantmentTableItemStack(0),
+					listOf(
+						"DRD",
+						"RER",
+						"ANA"
+					)
+				) {
+					it.setIngredient('D', Material.DIAMOND_BLOCK)
+					it.setIngredient('R', Material.PRISMARINE_SHARD)
+					it.setIngredient('E', Material.ENCHANTING_TABLE)
+					it.setIngredient('A', Material.AMETHYST_BLOCK)
+					it.setIngredient('N', Material.NETHERITE_INGOT)
+				}
 			)
-		) {
-			it.setIngredient('D', Material.DIAMOND_BLOCK)
-			it.setIngredient('R', Material.PRISMARINE_SHARD)
-			it.setIngredient('E', Material.ENCHANTING_TABLE)
-			it.setIngredient('A', Material.AMETHYST_BLOCK)
-			it.setIngredient('N', Material.NETHERITE_INGOT)
-		}
+		)
 
 		val bedrockIntegrations = Bukkit.getPluginManager().getPlugin("DreamBedrockIntegrations") as DreamBedrockIntegrations
 		bedrockIntegrations.registerInventoryTitleTransformer(

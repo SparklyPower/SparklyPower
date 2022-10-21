@@ -6,7 +6,6 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
-import net.perfectdreams.dreamcustomitems.utils.isMagnet
 import net.perfectdreams.dreamenchant.DreamEnchant
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -39,11 +38,6 @@ abstract class SpecialEnchantmentTable {
 
         if (enchants.isEmpty()) {
             player.sendMessage("§cO item que está na sua mão não pode ser encantado!")
-            return false
-        }
-
-        if (isMagnet.invoke(item)) {
-            player.sendMessage("§cVocê não pode encantar um ímã.")
             return false
         }
 
