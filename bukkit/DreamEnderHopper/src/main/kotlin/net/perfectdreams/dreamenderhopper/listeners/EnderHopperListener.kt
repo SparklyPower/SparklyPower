@@ -32,20 +32,6 @@ import org.bukkit.inventory.meta.ItemMeta
 class EnderHopperListener(val m: DreamEnderHopper) : Listener {
     private val settingAHopperDestination = mutableMapOf<Player, Hopper>()
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    fun onBreak(e: CraftItemEvent) {
-        val recipe = e.recipe
-        if (recipe is Keyed) {
-            val recipeKey = when(recipe.key.key) {
-                "enderhopper" -> true
-                else -> false
-            }
-
-            if (recipeKey && e.inventory.any { it.type == Material.PRISMARINE_SHARD && (!it.itemMeta.hasCustomModelData() || it.itemMeta.customModelData != 1) })
-                e.isCancelled = true
-        }
-    }
-
     // Must be on highest priority
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onPlace(e: BlockPlaceEvent) {
