@@ -18,17 +18,6 @@ import org.bukkit.persistence.PersistentDataType
 
 class BlockListener(val m: DreamEnchant) : Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	fun onCraft(e: CraftItemEvent) {
-		val recipe = e.recipe
-		if (recipe is Keyed) {
-			val recipeKey = recipe.key.key == "super_enchanting_table"
-
-			if (recipeKey && e.inventory.any { it.type == Material.PRISMARINE_SHARD && (!it.itemMeta.hasCustomModelData() || it.itemMeta.customModelData != 1) })
-				e.isCancelled = true
-		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onEnchantmentTablePlace(e: BlockPlaceEvent) {
 		val itemInHand = e.itemInHand
 		if (!itemInHand.hasItemMeta())
