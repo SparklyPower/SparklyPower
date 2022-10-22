@@ -197,7 +197,14 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
 
     private fun processHopperItems(inventory: Inventory, enderHopperInformation: EnderHopperInformation) {
         // Transfer all items from the source to the target inventory
-        val targetContainer = enderHopperInformation.enderHopperState.world.getBlockAt(enderHopperInformation.targetX, enderHopperInformation.targetY, enderHopperInformation.targetZ).state as Container
+        val targetContainer = enderHopperInformation.enderHopperState.world.getBlockAt(enderHopperInformation.targetX, enderHopperInformation.targetY, enderHopperInformation.targetZ).state as? Container
+        if (targetContainer == null) {
+            // Unknown target, remove destination from the hopper state
+            val state = enderHopperInformation.enderHopperState
+            state.persistentDataContainer.remove(DreamEnderHopper.HOPPER_COORDINATES)
+            state.update()
+            return
+        }
         val targetInventory = targetContainer.inventory
 
         // Add the item to the target container
@@ -206,7 +213,6 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
         // We will compare the holder instead of the inventory because double chests have different inventories depending on where you clicked
         // This doesn't work for double chests!
         if (inventory != targetContainer.inventory) {
-            println("Inventory: ${inventory} - Target inventory: ${targetContainer.inventory}")
             if (inventory is FurnaceInventory) {
                 val item = inventory.result
                 if (item != null && targetInventory.canHoldItem(item)) {
@@ -258,7 +264,14 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
     private fun processHopperItem(item: ItemStack, enderHopperInformation: EnderHopperInformation): Boolean {
         // Transfer a single item to the hopper
         // This won't delete the "item" from the world!
-        val targetContainer = enderHopperInformation.enderHopperState.world.getBlockAt(enderHopperInformation.targetX, enderHopperInformation.targetY, enderHopperInformation.targetZ).state as Container
+        val targetContainer = enderHopperInformation.enderHopperState.world.getBlockAt(enderHopperInformation.targetX, enderHopperInformation.targetY, enderHopperInformation.targetZ).state as? Container
+        if (targetContainer == null) {
+            // Unknown target, remove destination from the hopper state
+            val state = enderHopperInformation.enderHopperState
+            state.persistentDataContainer.remove(DreamEnderHopper.HOPPER_COORDINATES)
+            state.update()
+            return false
+        }
         val targetInventory = targetContainer.inventory
 
         // Add the item to the target container
