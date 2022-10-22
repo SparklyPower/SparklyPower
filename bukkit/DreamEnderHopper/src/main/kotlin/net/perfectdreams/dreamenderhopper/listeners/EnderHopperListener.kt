@@ -11,6 +11,7 @@ import net.perfectdreams.dreamenderhopper.DreamEnderHopper
 import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.block.Container
+import org.bukkit.block.DoubleChest
 import org.bukkit.block.Hopper
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -22,6 +23,7 @@ import org.bukkit.event.inventory.CraftItemEvent
 import org.bukkit.event.inventory.InventoryMoveItemEvent
 import org.bukkit.event.inventory.InventoryPickupItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.inventory.DoubleChestInventory
 import org.bukkit.inventory.FurnaceInventory
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -214,19 +216,13 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
 
         // Add the item to the target container
         var atLeastOneItemWasTeleported = false
-        if (inventory is FurnaceInventory) {
-            val item = inventory.result
-            if (item != null && targetInventory.canHoldItem(item)) {
-                atLeastOneItemWasTeleported = true
 
-                // Add item to target
-                targetInventory.addItem(item)
-
-                // Remove item from the source inventory
-                inventory.result = null
-            }
-        } else {
-            for (item in inventory) {
+        // We will compare the holder instead of the inventory because double chests have different inventories depending on where you clicked
+        // This doesn't work for double chests!
+        if (inventory != targetContainer.inventory) {
+            println("Inventory: ${inventory} - Target inventory: ${targetContainer.inventory}")
+            if (inventory is FurnaceInventory) {
+                val item = inventory.result
                 if (item != null && targetInventory.canHoldItem(item)) {
                     atLeastOneItemWasTeleported = true
 
@@ -234,9 +230,36 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
                     targetInventory.addItem(item)
 
                     // Remove item from the source inventory
-                    inventory.removeItem(item)
+                    inventory.result = null
+                }
+            } else {
+                for ((index, item) in inventory.withIndex()) {
+                    if (item != null && targetInventory.canHoldItem(item)) {
+                        atLeastOneItemWasTeleported = true
+
+                        // Remove item from the source inventory
+                        // We can't use removeItem because that causes issues if we are trying to add/remove an item with >= 33 quantity, if the source and the target
+                        // are the same container
+                        inventory.setItem(index, null)
+                        inventory.removeItem(item)
+
+                        // Add item to target
+                        targetInventory.addItem(item)
+                    }
                 }
             }
+        } else {
+            // If it is the same inventory, let's just "pretend" that it worked
+            // Because if we don't, this causes a duplication issue if the item being added has >= 33 amount on its stack!
+            // The reason the dupe happens is because, if the item "stacks", it won't be the same "item" anymore to the removeItem call (because the amount is different), causing issues
+            // (The dupe was actually fixed, but I wanted to keep this as an "easter egg" :3)
+            // https://imgur.com/L9XrlG9
+            // https://canary.discord.com/channels/320248230917046282/1024132819158564874/1033162453372108800
+            if (!inventory.isEmpty) {
+                spawnBrokenEffects(targetContainer.block)
+                spawnBrokenEffects(enderHopperInformation.enderHopperState.block)
+            }
+            return
         }
 
         // Successful transfer!
@@ -284,6 +307,25 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
             Particle.PORTAL,
             block.location.add(0.5, 0.0, 0.5),
             25,
+            0.5,
+            0.5,
+            0.5
+        )
+    }
+
+    private fun spawnBrokenEffects(block: Block) {
+        block.world.playSound(
+            block.location.add(0.5, 0.0, 0.5),
+            Sound.ENTITY_GENERIC_EXPLODE,
+            SoundCategory.BLOCKS,
+            0.5f,
+            DreamUtils.random.nextFloat(0.7f, 1.4f)
+        )
+
+        block.world.spawnParticle(
+            Particle.EXPLOSION_LARGE,
+            block.location.add(0.5, 0.0, 0.5),
+            5,
             0.5,
             0.5,
             0.5
