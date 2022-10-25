@@ -5,14 +5,12 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.craftbukkit.v1_19_R1.CraftServer
 import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.inventory.InventoryDragEvent
-import org.bukkit.event.inventory.InventoryMoveItemEvent
+import org.bukkit.event.inventory.*
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
@@ -132,18 +130,19 @@ class DreamMenuListener : Listener {
 		// This drags the item from the DreamMenu to your inventory
 		//
 		// We also block drag from the player's inventory to DreamMenu and vice-versa
-		val destinationHolder = e.destination.holder
-		val sourceHolder = e.source.holder
-		val dreamMenuHolder: DreamMenu.DreamMenuHolder
+
+		// Calling CraftInventory.getHolder() is very intensive, and InventoryMoveItemEvent is called for hoppers too!
+		// To avoid a big performance impact, we will check if the type is a CHEST (which doesn't need to call the holder) and THEN we will try calling the holder
+		// This way we can skip a very resource intensive check, sweet!
+		val destinationHolder = if (e.destination.type == InventoryType.CHEST) e.destination.holder else null
+		val sourceHolder = if (e.source.type == InventoryType.CHEST) e.source.holder else null
 
 		// If the destination or the source is a DreamMenuHolder...
-		if (destinationHolder is DreamMenu.DreamMenuHolder)
-			dreamMenuHolder = destinationHolder
+		val dreamMenuHolder = if (destinationHolder is DreamMenu.DreamMenuHolder)
+			destinationHolder
 		else if (sourceHolder is DreamMenu.DreamMenuHolder)
-			dreamMenuHolder = sourceHolder
+			sourceHolder
 		else return
-
-		println("DreamMenuHolder: $dreamMenuHolder")
 
 		// The item click is already handled by InventoryClickEvent so we don't need to care about this
 		val dreamMenu = dreamMenuHolder.menu
