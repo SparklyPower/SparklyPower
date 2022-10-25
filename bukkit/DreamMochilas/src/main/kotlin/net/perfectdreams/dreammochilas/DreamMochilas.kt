@@ -10,6 +10,7 @@ import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.CustomCraftingRecipe
+import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import net.perfectdreams.dreammochilas.commands.declarations.MochilaCommand
 import net.perfectdreams.dreammochilas.listeners.ChestShopListener
 import net.perfectdreams.dreammochilas.listeners.InventoryListener
@@ -134,8 +135,18 @@ class DreamMochilas : KotlinPlugin(), Listener {
 		DreamCustomItems.registerCustomRecipe(
 			CustomCraftingRecipe(
 				this,
-				false,
-				addRecipe(
+				itemRemapper = {
+					when (it) {
+						Material.WHITE_WOOL -> {
+							CustomItems.RAINBOW_WOOL
+						}
+						Material.PAPER -> {
+							createMochila(MochilaData.Brown)
+						}
+						else -> ItemStack(it)
+					}
+				},
+				recipe = addRecipe(
 					"rainbow_mochila",
 					createMochila(MochilaData.Rainbow),
 					listOf(

@@ -123,6 +123,8 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
 
         val result = processTree(e.player, heldItem, e.block)
         e.isCancelled = result.isNotEmpty()
+
+        result.forEach { with (e.block) { world.dropItemNaturally(location, it) } }
     }
 
     private fun processTree(player: Player, heldItem: ItemStack, block: Block): List<ItemStack> {

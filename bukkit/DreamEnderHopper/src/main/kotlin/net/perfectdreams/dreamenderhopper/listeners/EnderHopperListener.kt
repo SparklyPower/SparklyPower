@@ -31,6 +31,10 @@ import org.bukkit.inventory.meta.ItemMeta
 
 class EnderHopperListener(val m: DreamEnderHopper) : Listener {
     private val settingAHopperDestination = mutableMapOf<Player, Hopper>()
+    private val alreadyCheckingHopperOnNextTick = mutableSetOf<Location>()
+
+    // WorldGuard: Hoppers cause a HUGE performance impact due to "InventoryMoveItemEventDebounce"
+    // To avoid it, enable "ignore-hopper-item-move-events" in WorldGuard's configuration
 
     // Must be on highest priority
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -142,8 +146,16 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
         when (val result = getEnderHopperInformation(e.destination)) {
             is EnderHopperInformation -> {
                 e.isCancelled = true
+                // The InventoryMoveItemEvent is called for every item in the hopper
+                // To avoid checking the same hopper multiple times, we will ignore it if this hopper is already scheduled to be executed on the next tick
+                if (alreadyCheckingHopperOnNextTick.contains(result.enderHopperState.location))
+                    return
+
+                alreadyCheckingHopperOnNextTick.add(result.enderHopperState.location)
+
                 m.launchMainThread {
                     delayTicks(1L)
+                    alreadyCheckingHopperOnNextTick.remove(result.enderHopperState.location)
 
                     // Don't rely on the "inventory.contents", the stack size will always be 1 for... some reason?
                     // So let's make our own hopper, with blackjack, and hookers!
@@ -258,6 +270,8 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
         if (atLeastOneItemWasTeleported) {
             spawnEffects(targetContainer.block)
             spawnEffects(enderHopperInformation.enderHopperState.block)
+        } else {
+            m.logger.info { "[Multi Item] Hopper at ${targetContainer.location.x} ${targetContainer.location.y} ${targetContainer.location.z} didn't have any items moved!" }
         }
     }
 
@@ -288,6 +302,8 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
         if (atLeastOneItemWasTeleported) {
             spawnEffects(targetContainer.block)
             spawnEffects(enderHopperInformation.enderHopperState.block)
+        } else {
+            m.logger.info { "[Multi Item] Hopper at ${targetContainer.location.x} ${targetContainer.location.y} ${targetContainer.location.z} didn't have any items moved!" }
         }
 
         return atLeastOneItemWasTeleported

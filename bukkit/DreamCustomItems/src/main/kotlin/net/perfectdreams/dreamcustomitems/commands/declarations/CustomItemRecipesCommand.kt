@@ -9,7 +9,6 @@ import net.perfectdreams.dreamcustomitems.commands.CustomItemsMetaExecutor
 
 class CustomItemRecipesCommand(val m: DreamCustomItems) : SparklyCommandDeclarationWrapper {
     override fun declaration() = sparklyCommand(listOf("customrecipes", "customitems")) {
-        permissions = listOf("dreamcustomitems.setup")
         executor = CustomItemRecipesExecutor(m)
     }
 }

@@ -4,6 +4,7 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.CustomCraftingRecipe
+import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import net.perfectdreams.dreamenderhopper.commands.declarations.DreamEnderHopperDeclaration
 import net.perfectdreams.dreamenderhopper.listeners.EnderHopperListener
 import org.bukkit.Bukkit
@@ -33,7 +34,7 @@ class DreamEnderHopper : KotlinPlugin(), Listener {
 		DreamCustomItems.registerCustomRecipe(
 			CustomCraftingRecipe(
 				this,
-				true,
+				CustomCraftingRecipe.RUBY_REMAP,
 				addRecipe(
 					"enderhopper",
 					createEnderHopper(),

@@ -1,6 +1,8 @@
 package net.perfectdreams.dreamcustomitems.utils
 
 import net.kyori.adventure.text.Component
+import net.perfectdreams.dreamcore.utils.lore
+import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.Recipe
 import org.bukkit.plugin.Plugin
@@ -18,8 +20,25 @@ data class CustomTextualRecipe(
 
 data class CustomCraftingRecipe(
     override val plugin: Plugin,
-    val replacePrismarineShardWithRuby: Boolean,
+    val itemRemapper: (Material) -> (ItemStack) = { ItemStack(it) },
     val recipe: Recipe
 ) : CustomRecipe() {
+    companion object {
+        val RUBY_WITH_RECIPE_DESCRIPTION = CustomItems.RUBY
+            .clone()
+            .lore(
+                "§7Rubí pode ser encontrado quebrando",
+                "§7minérios de redstone, cada minério",
+                "§7possui §8${CustomItems.RUBY_DROP_CHANCE}% §7de chance de",
+                "§7dropar um rubi!"
+            )
+
+        val RUBY_REMAP: (Material) -> (ItemStack) = {
+            if (it == Material.PRISMARINE_SHARD)
+                CustomCraftingRecipe.RUBY_WITH_RECIPE_DESCRIPTION
+            else ItemStack(it)
+        }
+    }
+
     override val result = recipe.result
 }

@@ -37,15 +37,6 @@ class CustomItemRecipesExecutor(val m: DreamCustomItems) : SparklyCommandExecuto
                                     "Crafting"
                                 )
 
-                                val ruby = CustomItems.RUBY
-                                    .clone()
-                                    .lore(
-                                        "§7Rubí pode ser encontrado quebrando",
-                                        "§7minérios de redstone, cada minério",
-                                        "§7possui §8${CustomItems.RUBY_DROP_CHANCE}% §7de chance de",
-                                        "§7dropar um rubi!"
-                                    )
-
                                 val itemRecipe = customItemRecipeWrapper.recipe
 
                                 recipeInventory.setItem(0, itemRecipe.result) // Recipe result
@@ -54,18 +45,18 @@ class CustomItemRecipesExecutor(val m: DreamCustomItems) : SparklyCommandExecuto
 
                                 if (itemRecipe is ShapedRecipe) {
                                     // Parse the recipe items into the ingredient map
-                                    itemRecipe.ingredientMap.forEach { ingredient ->
-                                        when {
-                                            customItemRecipeWrapper.replacePrismarineShardWithRuby && ingredient.value.type == Material.PRISMARINE_SHARD -> {
-                                                recipeInventory.setItem(inventoryIndex, ruby)
+                                    itemRecipe.shape.forEach { line ->
+                                        line.forEach charForEach@{ char ->
+                                            val ingredient = itemRecipe.ingredientMap[char] // Can be null if the ingredient is air
+                                            if (ingredient != null) {
+                                                recipeInventory.setItem(
+                                                    inventoryIndex,
+                                                    customItemRecipeWrapper.itemRemapper.invoke(ingredient.type)
+                                                )
                                             }
 
-                                            else -> {
-                                                recipeInventory.setItem(inventoryIndex, ingredient.value)
-                                            }
+                                            inventoryIndex += 1
                                         }
-
-                                        inventoryIndex += 1
                                     }
                                 } else {
                                     error("I don't know how to handle a $itemRecipe!")

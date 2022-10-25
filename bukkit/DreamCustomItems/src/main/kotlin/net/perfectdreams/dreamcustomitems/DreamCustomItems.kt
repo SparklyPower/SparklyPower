@@ -20,6 +20,7 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.event.Listener
+import org.bukkit.inventory.ItemStack
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -157,8 +158,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
-				false,
-				addRecipe(
+				recipe = addRecipe(
 					"hamburger",
 					CustomItems.HAMBURGER,
 					listOf(
@@ -176,8 +176,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
-				false,
-				addRecipe(
+				recipe = addRecipe(
 					"cupcake",
 					CustomItems.CUPCAKE,
 					listOf(
@@ -197,8 +196,8 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
-				true,
-				addRecipe(
+				CustomCraftingRecipe.RUBY_REMAP,
+				recipe = addRecipe(
 					"microwave",
 					CustomItems.MICROWAVE,
 					listOf(
@@ -219,8 +218,8 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
-				true,
-				addRecipe(
+				CustomCraftingRecipe.RUBY_REMAP,
+				recipe = addRecipe(
 					"superfurnace",
 					CustomItems.SUPERFURNACE,
 					listOf(
@@ -240,8 +239,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
-				false,
-				addRecipe(
+				recipe = addRecipe(
 					"trashcan",
 					CustomItems.TRASHCAN,
 					listOf(
@@ -259,8 +257,8 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
-				true,
-				addRecipe(
+				CustomCraftingRecipe.RUBY_REMAP,
+				recipe = addRecipe(
 					"rainbow_wool",
 					CustomItems.RAINBOW_WOOL,
 					listOf(
@@ -280,8 +278,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
-				false,
-				addRecipe(
+				recipe = addRecipe(
 					"estalinho_red",
 					CustomItems.ESTALINHO_RED,
 					listOf(
@@ -300,8 +297,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
-				false,
-				addRecipe(
+				recipe = addRecipe(
 					"estalinho_green",
 					CustomItems.ESTALINHO_GREEN,
 					listOf(
@@ -323,6 +319,9 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 				CustomItems.FRENCH_FRIES,
 				listOf(
 					textComponent("Clique com botão direito em um caldeirão de lava com uma batata (não assada) em sua mão") {
+						color(NamedTextColor.YELLOW)
+					},
+					textComponent("Você pode fritar mais que uma batata ao mesmo tempo") {
 						color(NamedTextColor.YELLOW)
 					},
 					textComponent("Fica uma delícia!") {

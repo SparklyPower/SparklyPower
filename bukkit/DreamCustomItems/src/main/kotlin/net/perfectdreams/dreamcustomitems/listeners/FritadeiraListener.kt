@@ -1,19 +1,16 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
-import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import org.bukkit.Material
-import org.bukkit.block.data.Levelled
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.ItemMeta
 
 class FritadeiraListener(val m: DreamCustomItems) : Listener {
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onInteract(e: PlayerInteractEvent) {
         if (!e.rightClick)
             return
@@ -21,18 +18,22 @@ class FritadeiraListener(val m: DreamCustomItems) : Listener {
         val clickedBlock = e.clickedBlock ?: return
         val heldItem = e.item ?: return
 
-        if (clickedBlock.type == Material.LAVA_CAULDRON) {
-            val state = clickedBlock.blockData as Levelled
+        // Lava Cauldron do not have state!
+        if (clickedBlock.type == Material.LAVA_CAULDRON && heldItem.type == Material.POTATO) {
+            e.isCancelled = true
 
-            if (state.level == 0)
-                return
+            val potatoAmount = heldItem.amount
 
-            if (heldItem.type == Material.POTATO) {
-                heldItem.amount -= 1
-                e.player.inventory.addItem(CustomItems.FRENCH_FRIES)
-                state.level -= 1
-                clickedBlock.blockData = state
-            }
+            // The player can fry 64 potatos at the same time
+            heldItem.amount = 0
+            e.player.inventory.addItem(
+                CustomItems.FRENCH_FRIES.clone()
+                    .apply {
+                        this.amount = potatoAmount
+                    }
+            )
+
+            clickedBlock.type = Material.CAULDRON
         }
     }
 }
