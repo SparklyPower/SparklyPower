@@ -348,7 +348,7 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
     }
 
     private fun getEnderHopperInformation(inventory: Inventory): EnderHopperResult {
-        val holder = inventory.holder ?: return NotAnEnderHopper
+        val holder = inventory.getHolder(false) ?: return NotAnEnderHopper
         if (holder !is Hopper)
             return NotAnEnderHopper
 
