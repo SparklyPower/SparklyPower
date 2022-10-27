@@ -134,8 +134,8 @@ class DreamMenuListener : Listener {
 		// Calling CraftInventory.getHolder() is very intensive, and InventoryMoveItemEvent is called for hoppers too!
 		// To avoid a big performance impact, we will check if the type is a CHEST (which doesn't need to call the holder) and THEN we will try calling the holder
 		// This way we can skip a very resource intensive check, sweet!
-		val destinationHolder = if (e.destination.type == InventoryType.CHEST) e.destination.holder else null
-		val sourceHolder = if (e.source.type == InventoryType.CHEST) e.source.holder else null
+		val destinationHolder = if (e.destination.type == InventoryType.CHEST) e.destination.getHolder(false) else null
+		val sourceHolder = if (e.source.type == InventoryType.CHEST) e.source.getHolder(false) else null
 
 		// If the destination or the source is a DreamMenuHolder...
 		val dreamMenuHolder = if (destinationHolder is DreamMenu.DreamMenuHolder)
