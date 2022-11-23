@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.utils.extensions.getSafeDestination
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
+import org.bukkit.Bukkit
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Arrow
@@ -30,10 +31,12 @@ class TeleportBowListener(val m: DreamLobbyFun) : Listener {
 	@EventHandler
 	fun onShoot(e: EntityShootBowEvent) {
 		val projectile = e.projectile
+
 		if (projectile !is Arrow)
 			return
 
 		val shooter = projectile.shooter
+
 		if (shooter !is Player) // We only care if it is a player shooting the bow
 			return
 
@@ -41,6 +44,9 @@ class TeleportBowListener(val m: DreamLobbyFun) : Listener {
 		projectile.setBounce(false)
 
 		scheduler().schedule(m) {
+			// We need to wait 1 tick, since the projectile is not "valid" here
+			waitFor(1)
+
 			while (projectile.isValid && shooter.isOnline) { // Spawn the particles while the projectile is valid AND the player that shot it is still online
 				projectile.world.spawnParticle(Particle.LAVA, projectile.location, 1, 0.0, 0.0, 0.0, 0.1)
 				projectile.world.spawnParticle(Particle.FLAME, projectile.location, 1, 0.0, 0.0, 0.0, 0.1)
