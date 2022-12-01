@@ -41,45 +41,62 @@ sealed class MochilaData(
     object Santa : MochilaData("Papai Noel", 44)
     object Yellow : MochilaData("Amarela", 45)
     object Rainbow : MochilaData("Arco-íris", 46)
+    object Bread : MochilaData("Pão", 51)
+    object Portugal : MochilaData("Portugal", 52)
+    object Pride : MochilaData("Pride", 53)
+    object Maconha : MochilaData("Maconha", 54)
+    object Coelho : MochilaData("Coelho", 55)
+    object Axolote : MochilaData("Axolote", 56)
 
     companion object {
-        val list = listOf(
-            Beach,
-            Blue,
-            Brasil,
-            Brocade,
-            Brown,
-            Buggy,
-            Cake,
-            Camouflage,
-            Crown,
-            Deepling,
-            Dragon,
-            Energetic,
-            Expedition,
-            Fur,
-            GabiPersonagem,
-            Golden,
-            Green,
-            Grey,
-            Heart,
-            Holding,
-            Jewelled,
-            Loritta,
-            LorittaPersonagem,
-            LorittaPreto,
-            Moderna,
-            Moon,
-            Orange,
-            PantufaPersonagem,
-            Pillow,
-            Pirate,
-            PowerPersonagem,
-            Pudim,
-            Purple,
-            Red,
-            Santa,
-            Yellow
-        )
+        val list: List<MochilaData>
+            get() = listOf(
+                Beach,
+                Blue,
+                Brasil,
+                Brocade,
+                Brown,
+                Buggy,
+                Cake,
+                Camouflage,
+                Crown,
+                Deepling,
+                Dragon,
+                Energetic,
+                Expedition,
+                Fur,
+                GabiPersonagem,
+                Golden,
+                Green,
+                Grey,
+                Heart,
+                Holding,
+                Jewelled,
+                Loritta,
+                LorittaPersonagem,
+                LorittaPreto,
+                Moderna,
+                Moon,
+                Orange,
+                PantufaPersonagem,
+                Pillow,
+                Pirate,
+                PowerPersonagem,
+                Pudim,
+                Purple,
+                Red,
+                Santa,
+                Yellow,
+                Rainbow,
+                Bread,
+                Portugal,
+                Pride,
+                Maconha,
+                Coelho,
+                Axolote
+            )
+
+        val customModelDataIds: Set<Int>
+            get() = MochilaData.list.map { it.customModelData }.toSet()
     }
 }
