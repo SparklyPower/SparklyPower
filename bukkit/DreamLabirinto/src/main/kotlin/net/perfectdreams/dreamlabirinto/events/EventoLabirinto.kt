@@ -54,7 +54,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
 
         // Player venceu a corrida!
         wonPlayers.add(winner.uniqueId)
-        val howMuchMoneyWillBeGiven = 15_000 / wonPlayers.size
+        val howMuchMoneyWillBeGiven = 50_000 / wonPlayers.size
         val howMuchNightmaresWillBeGiven = if (wonPlayers.size == 1) 1 else 0
 
         winner.deposit(howMuchMoneyWillBeGiven.toDouble(), TransactionContext(type = TransactionType.EVENTS, extra = "Labirinto"))

@@ -241,7 +241,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             m.eventoTorreDaMorte.lastTime = System.currentTimeMillis()
             m.eventoTorreDaMorte.running = false
 
-            val howMuchMoneyWillBeGiven = 15_000
+            val howMuchMoneyWillBeGiven = 50_000
             val howMuchNightmaresWillBeGiven = 1
 
             Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} §b${player.displayName}§e venceu a Torre da Morte! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")

@@ -242,7 +242,7 @@ class TNTRun(val m: DreamTNTRun) {
 
         blocksToBeRestored.clear()
 
-        val howMuchMoneyWillBeGiven = 15_000
+        val howMuchMoneyWillBeGiven = 50_000
         val howMuchNightmaresWillBeGiven = 1
 
         Bukkit.broadcastMessage("${DreamTNTRun.PREFIX} §b${player.displayName}§e venceu o TNT Run! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
