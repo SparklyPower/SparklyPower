@@ -12,6 +12,7 @@ data class DreamConfig(
     val servers: NetworkServersConfig,
     val blacklistedWorldsTeleport: List<String>,
     val blacklistedRegionsTeleport: List<String>,
+    val allowedCommandsDuringEvents: List<String>,
     val discord: DiscordConfig
 ) {
     @Serializable
