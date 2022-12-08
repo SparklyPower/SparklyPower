@@ -11,6 +11,7 @@ rootProject.name = "sparklypower-parent"
 // ===[ GENERAL PURPOSE ]===
 include(":common:KotlinRuntime")
 include(":common:tables")
+include(":common:rpc-payloads")
 
 // ===[ PAPER ]===
 include(":bukkit:DreamAntiAFK")
