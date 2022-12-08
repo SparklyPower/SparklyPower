@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.utils.commands.CommandException
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.isBetween
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamcore.utils.withoutPermission
 import net.perfectdreams.dreamterrainadditions.DreamTerrainAdditions
 import org.bukkit.Bukkit
@@ -50,7 +51,7 @@ object BanirCommand : DSLCommandBase<DreamTerrainAdditions> {
                     val greater = Location(banned.world, claim.greaterBoundaryCorner.x, 255.0, claim.greaterBoundaryCorner.z)
 
                     if (banned.location.isBetween(lesser, greater)) {
-                        banned.teleport(DreamCore.dreamConfig.getSpawn())
+                        banned.teleportToServerSpawn()
                         banned.sendTitle("§f", "§cVocê foi banido do terreno", 20, 60, 20)
                     }
                 }

@@ -25,6 +25,8 @@ val shadowWithRuntimeDependencies by configurations.creating {
 
 dependencies {
     api(project(":common:KotlinRuntime"))
+    api(project(":common:rpc-payloads"))
+
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
     compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.8.0")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
@@ -63,6 +65,7 @@ dependencies {
     // Ktor
     api("io.ktor:ktor-server-netty:${Versions.KTOR}")
     api("io.ktor:ktor-client-cio:${Versions.KTOR}")
+    api("com.charleskorn.kaml:kaml:0.49.0")
 
     api("com.viaversion:viaversion-api:4.1.1") // Used for packet manipulation
 

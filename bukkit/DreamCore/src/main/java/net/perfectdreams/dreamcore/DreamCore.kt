@@ -2,6 +2,8 @@ package net.perfectdreams.dreamcore
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import net.perfectdreams.dreamcore.commands.*
 import net.perfectdreams.dreamcore.commands.declarations.DreamCoreCommand
 import net.perfectdreams.dreamcore.commands.declarations.MeninaCommand
@@ -46,21 +48,20 @@ class DreamCore : KotlinPlugin() {
 
 	val dreamEventManager = DreamEventManager()
 	lateinit var dreamScriptManager: DreamScriptManager
+	val rpc = RPCUtils(this)
 
 	override fun onEnable() {
 		saveDefaultConfig()
 
 		loadConfig()
 
-		dreamConfig.socket?.let {
+		dreamConfig.socket.let {
 			logger.info { "Starting socket server at port ${it.port}" }
 			thread { SocketServer(it.port).start() }
 			Bukkit.getPluginManager().registerEvents(SocketListener(), this)
 		}
 
-		val databaseConfig = dreamConfig.networkDatabase
-		val databaseType = databaseConfig?.type ?: "SQLite"
-		logger.info { "Starting Database... Database type: $databaseType" }
+		logger.info { "Starting Database..." }
 
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
@@ -129,7 +130,7 @@ class DreamCore : KotlinPlugin() {
 		}
 
 		// Carregar configuração
-		dreamConfig = DreamConfig(config)
+		dreamConfig = Json.decodeFromString(config.saveToString())
 
 		spawn = userData.getLocation("spawnLocation") ?: Bukkit.getWorlds().first().spawnLocation
 

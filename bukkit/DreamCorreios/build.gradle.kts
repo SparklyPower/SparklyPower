@@ -7,7 +7,7 @@ plugins {
 
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
-    compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":bukkit:DreamCore"))
     implementation("net.citizensnpcs:citizensapi:2.0.30-SNAPSHOT")
     compileOnly(project(":bukkit:DreamBedrockIntegrations"))
 }

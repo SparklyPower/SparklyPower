@@ -61,7 +61,7 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
     @EventHandler
     fun onRespawn(event: PlayerRespawnEvent) {
         if (event.player.location.world.name == "TorreDaMorte")
-            event.respawnLocation = DreamCore.dreamConfig.getSpawn()
+            event.respawnLocation = DreamCore.INSTANCE.spawn!!
     }
 
     @EventHandler

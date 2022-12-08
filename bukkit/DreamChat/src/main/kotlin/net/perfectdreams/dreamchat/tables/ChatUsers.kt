@@ -6,7 +6,7 @@ import java.util.*
 
 object ChatUsers : IdTable<UUID>() {
 	override val tableName: String
-		get() = "${DreamCore.dreamConfig.getTablePrefix()}_chatusers"
+		get() = "${DreamCore.dreamConfig.networkDatabase.tablePrefix}_chatusers"
 
 	val _id = uuid("id")
 

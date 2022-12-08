@@ -5,6 +5,8 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
 import net.md_5.bungee.api.chat.BaseComponent
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.dao.User
@@ -51,6 +53,9 @@ object DreamUtils {
 	val jsonParser = JsonParser()
 	val nmsVersion: String by lazy { Bukkit.getServer()::class.java.getPackage().name.split("\\.")[3] }
 	const val HEADER_LINE = "§f §3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-";
+	val http = HttpClient(CIO) {
+		expectSuccess = false
+	}
 
 	init {
 		val gsonBuilder = GsonBuilder()

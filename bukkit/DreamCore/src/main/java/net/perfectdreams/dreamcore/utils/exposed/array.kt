@@ -9,7 +9,7 @@ fun <T> Table.array(name: String, columnType: ColumnType): Column<Array<T>> = re
 
 class ArrayColumnType(private val type: ColumnType) : ColumnType() {
 
-    private fun supportsArrays() = DreamCore.dreamConfig.networkDatabase?.type?.startsWith("SQLite") != true
+    private fun supportsArrays() = true
 
     override fun sqlType(): String = buildString {
         if (!supportsArrays()) {

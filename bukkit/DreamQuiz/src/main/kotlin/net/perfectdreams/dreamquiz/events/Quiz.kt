@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamquiz.DreamQuiz
 import net.perfectdreams.dreamquiz.utils.QuizQuestion
 import net.perfectdreams.dreamquiz.utils.prettyBoolean
@@ -126,7 +127,7 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
                         it.playSound(it.location, "perfectdreams.sfx.mizeravi", 10.0f, 1.0f)
                     } else if (isWrong) {
                         it.sendMessage("${DreamQuiz.PREFIX} Que pena... você errou! :(")
-                        it.teleport(DreamCore.dreamConfig.getSpawn())
+                        it.teleportToServerSpawn()
 
                         for (onlinePlayer in Bukkit.getOnlinePlayers()) {
                             it.showPlayer(m, onlinePlayer)
@@ -135,7 +136,7 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
                         it.playSound(it.location, "perfectdreams.sfx.errou", 10.0f, 1.0f)
                     } else {
                         it.sendMessage("${DreamQuiz.PREFIX} Você estava indeciso e não soube escolher nenhum dos dois... Que pena.")
-                        it.teleport(DreamCore.dreamConfig.getSpawn())
+                        it.teleportToServerSpawn()
 
                         for (onlinePlayer in Bukkit.getOnlinePlayers()) {
                             it.showPlayer(m, onlinePlayer)
@@ -184,7 +185,7 @@ class Quiz(val m: DreamQuiz) : ServerEvent("Quiz", "") {
             switchContext(SynchronizationContext.SYNC)
             val finalPlayersInTheQuiz = players.toMutableList()
             finalPlayersInTheQuiz.forEach {
-                it.teleport(DreamCore.dreamConfig.getSpawn())
+                it.teleportToServerSpawn()
 
                 for (player in Bukkit.getOnlinePlayers()) {
                     it.showPlayer(m, player)

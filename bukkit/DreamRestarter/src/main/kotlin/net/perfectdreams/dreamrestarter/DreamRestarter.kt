@@ -4,6 +4,8 @@ import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.toJsonArray
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.tables.Transactions.time
@@ -11,6 +13,7 @@ import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamrestarter.commands.RestartCommand
+import net.sparklypower.rpc.SparklyBungeeRequest
 import org.bukkit.Bukkit
 import java.io.File
 import java.time.*
@@ -105,13 +108,17 @@ class DreamRestarter : KotlinPlugin() {
 
 				storedPlayerRestart.delete()
 
-				DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(
-					jsonObject(
-						"type" to "transferPlayersByUUID",
-						"bungeeServer" to DreamCore.dreamConfig.bungeeName,
-						"players" to uniqueIds.map { it.toString() }.toJsonArray()
+				launchAsyncThread {
+					DreamCore.INSTANCE.rpc.bungeeCord.send(
+						SparklyBungeeRequest.TransferPlayersRequest(
+							// Transfer the players to us!
+							uniqueIds.map { it.toString() },
+							SparklyBungeeRequest.TransferPlayersRequest.TransferTarget.BungeeServerNameTarget(
+								DreamCore.dreamConfig.bungeeName
+							)
+						)
 					)
-				)
+				}
 			}
 		}
 	}
@@ -132,12 +139,16 @@ class DreamRestarter : KotlinPlugin() {
 			)
 		)
 
-		DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(
-			jsonObject(
-				"type" to "transferPlayersByUUID",
-				"bungeeServer" to DreamCore.dreamConfig.bungeeName,
-				"players" to onlinePlayersUniqueIds.map { it.toString() }.toJsonArray()
+		launchAsyncThread {
+			DreamCore.INSTANCE.rpc.bungeeCord.send(
+				SparklyBungeeRequest.TransferPlayersRequest(
+					// Transfer the players to the lobby!
+					onlinePlayersUniqueIds.map { it.toString() },
+					SparklyBungeeRequest.TransferPlayersRequest.TransferTarget.BungeeServerNameTarget(
+						DreamCore.dreamConfig.servers.lobby.bungeeName
+					)
+				)
 			)
-		)
+		}
 	}
 }

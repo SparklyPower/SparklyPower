@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.utils.commands.CommandException
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.isBetween
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamcore.utils.withoutPermission
 import net.perfectdreams.dreamterrainadditions.DreamTerrainAdditions
 import net.perfectdreams.dreamvanish.DreamVanishAPI
@@ -51,7 +52,7 @@ object RetirarCommand : DSLCommandBase<DreamTerrainAdditions> {
                     return@executes
                 }
 
-                kick.teleport(DreamCore.dreamConfig.getSpawn())
+                kick.teleportToServerSpawn()
                 kick.sendTitle("§f", "§cVocê foi expulso do terreno", 20, 60, 20)
 
                 player.sendMessage("§b${kick.displayName}§a foi expulso do terreno!")

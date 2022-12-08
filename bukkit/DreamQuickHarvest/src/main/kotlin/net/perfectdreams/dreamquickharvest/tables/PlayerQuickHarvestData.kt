@@ -5,7 +5,7 @@ import org.jetbrains.exposed.dao.id.UUIDTable
 
 object PlayerQuickHarvestData : UUIDTable() {
     override val tableName: String
-        get() = "${DreamCore.dreamConfig.getTablePrefix()}_playerquickharvestdata"
+        get() = "${DreamCore.dreamConfig.networkDatabase.tablePrefix}_playerquickharvestdata"
 
     val energy = integer("energy")
 }

@@ -16,10 +16,10 @@ object Databases {
 		val databaseConfig = DreamCore.dreamConfig.networkDatabase
 		val hikariConfig = HikariConfig()
 
-		hikariConfig.jdbcUrl = "jdbc:postgresql://${databaseConfig?.ip}:${databaseConfig?.port}/${databaseConfig?.databaseName}"
+		hikariConfig.jdbcUrl = "jdbc:postgresql://${databaseConfig.ip}:${databaseConfig.port}/${databaseConfig.databaseName}"
 
-		hikariConfig.username = databaseConfig?.user
-		if (databaseConfig?.password != null)
+		hikariConfig.username = databaseConfig.user
+		if (databaseConfig.password != null)
 			hikariConfig.password = databaseConfig.password
 
 		hikariConfig.driverClassName = DRIVER_CLASS_NAME

@@ -11,6 +11,7 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamcorreios.utils.addItemIfPossibleOrAddToPlayerMailbox
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
 import net.perfectdreams.dreamtntrun.DreamTNTRun
@@ -119,7 +120,7 @@ class TNTRun(val m: DreamTNTRun) {
             isPreStart = false
 
             playersInQueue.forEach { player ->
-                player.teleport(DreamCore.dreamConfig.getSpawn())
+                player.teleportToServerSpawn()
                 player.sendMessage("${DreamTNTRun.PREFIX} §cO TNT Run foi cancelado devido a falta de players...")
             }
 
@@ -288,7 +289,7 @@ class TNTRun(val m: DreamTNTRun) {
 
         // Reset player velocity to avoid them dying before teleporting (due to falling from the tower)
         player.velocity = Vector(0, 0, 0)
-        player.teleport(DreamCore.dreamConfig.getSpawn())
+        player.teleportToServerSpawn()
         player.gameMode = GameMode.SURVIVAL
 
         if (!skipFinishCheck && isGamePhase && players.size == 1)
@@ -300,7 +301,7 @@ class TNTRun(val m: DreamTNTRun) {
         if (!playersInQueue.contains(player))
             return
 
-        player.teleport(DreamCore.dreamConfig.getSpawn())
+        player.teleportToServerSpawn()
         playersInQueue.remove(player)
     }
 

@@ -5,7 +5,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 
 object EventMessages : IntIdTable() {
 	override val tableName: String
-		get() = "${DreamCore.dreamConfig.getTablePrefix()}_eventmessages"
+		get() = "${DreamCore.dreamConfig.networkDatabase.tablePrefix}_eventmessages"
 
 	val message = text("message")
 	val lastWinner = uuid("last_winner").nullable()

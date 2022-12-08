@@ -6,7 +6,7 @@ import net.perfectdreams.dreamchat.utils.exposed.timestampWithTimeZone
 
 object TrackedOnlineHours : LongIdTable() {
 	override val tableName: String
-		get() = "${DreamCore.dreamConfig.getTablePrefix()}_trackedonlinehours"
+		get() = "${DreamCore.dreamConfig.networkDatabase.tablePrefix}_trackedonlinehours"
 
 	val player = uuid("player").index()
 	val loggedIn = timestampWithTimeZone("logged_in").index()

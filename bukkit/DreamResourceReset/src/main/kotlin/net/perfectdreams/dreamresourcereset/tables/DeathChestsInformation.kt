@@ -7,7 +7,7 @@ import org.jetbrains.exposed.dao.id.LongIdTable
 
 object DeathChestsInformation : LongIdTable() {
     override val tableName: String
-        get() = "${DreamCore.dreamConfig.getTablePrefix()}_deathchestsinformation"
+        get() = "${DreamCore.dreamConfig.networkDatabase.tablePrefix}_deathchestsinformation"
 
     val player = reference("player", Users)
     val createdAt = timestampWithTimeZone("created_at")

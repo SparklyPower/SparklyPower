@@ -5,7 +5,7 @@ import org.jetbrains.exposed.dao.id.UUIDTable
 
 object ContaCorreios : UUIDTable() {
     override val tableName: String
-        get() = "${DreamCore.dreamConfig.getTablePrefix()}_contacorreios"
+        get() = "${DreamCore}_contacorreios"
 
     val items = text("items")
 }

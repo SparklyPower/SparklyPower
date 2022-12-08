@@ -7,7 +7,7 @@ plugins {
 
 dependencies {
     paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
-    compileOnly(project(":bukkit:DreamCore", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamAuth"))
     compileOnly(files("../../libs/NoteBlockAPI.jar"))
     implementation("net.citizensnpcs:citizensapi:2.0.30-SNAPSHOT")
