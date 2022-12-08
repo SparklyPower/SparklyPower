@@ -1,4 +1,0 @@
-name: KotlinRuntime
-main: net.perfectdreams.kotlinruntime.KotlinRuntimeBungee
-version: 1.0.0
-load: STARTUP

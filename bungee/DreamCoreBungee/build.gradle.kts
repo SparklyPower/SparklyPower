@@ -42,10 +42,11 @@ dependencies {
 
     api("com.github.kevinsawicki:http-request:6.0")
 
+    api("io.ktor:ktor-client-cio:2.1.3")
     api("io.ktor:ktor-server-netty:2.1.3")
 
     api("net.perfectdreams.commands:command-framework-core:0.0.8")
-    api("net.perfectdreams.minecraftmojangapi:minecraft-mojang-api:0.0.1-SNAPSHOT")
+    api("net.perfectdreams.minecraftmojangapi:minecraft-mojang-api:0.0.2")
 }
 
 tasks.withType<KotlinCompile> {
