@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.10"
-    kotlin("plugin.serialization") version "1.7.10" apply false
+    kotlin("jvm") version "1.7.21"
+    kotlin("plugin.serialization") version "1.7.21" apply false
     id("io.papermc.paperweight.userdev") version Versions.PAPERWEIGHT_USERDEV apply false
 }
 
