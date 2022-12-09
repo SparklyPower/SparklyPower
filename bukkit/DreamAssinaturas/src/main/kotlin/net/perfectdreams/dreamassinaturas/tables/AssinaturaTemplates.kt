@@ -6,7 +6,7 @@ import java.util.*
 
 object AssinaturaTemplates : IdTable<UUID>() {
     override val tableName: String
-        get() = "${DreamCore.dreamConfig.networkDatabase.databaseName}_assinaturatemplates"
+        get() = "${DreamCore.dreamConfig.networkDatabase.tablePrefix}_assinaturatemplates"
 
     val _id = uuid("id")
 

@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcore
 
+import com.charleskorn.kaml.Yaml
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.serialization.decodeFromString
@@ -130,7 +131,7 @@ class DreamCore : KotlinPlugin() {
 		}
 
 		// Carregar configuração
-		dreamConfig = Json.decodeFromString(config.saveToString())
+		dreamConfig = Yaml.default.decodeFromString(config.saveToString())
 
 		spawn = userData.getLocation("spawnLocation") ?: Bukkit.getWorlds().first().spawnLocation
 
