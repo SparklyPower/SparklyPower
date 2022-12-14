@@ -108,7 +108,7 @@ class FightListener(val m: DreamFight) : Listener {
 
     @EventHandler
     fun onCommand(e: PlayerCommandPreprocessEvent) {
-        if (e.player in m.fight.players && e.message.split(" ").first().removePrefix("/").lowercase() in DreamCore.dreamConfig.allowedCommandsDuringEvents)
+        if (e.player in m.fight.players && e.message.split(" ").first().removePrefix("/").lowercase() !in DreamCore.dreamConfig.allowedCommandsDuringEvents)
             e.isCancelled = true
     }
 }

@@ -111,7 +111,7 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
 
     @EventHandler
     fun onCommand(e: PlayerCommandPreprocessEvent) {
-        if (e.player in m.torreDaMorte.players && e.message.split(" ").first().removePrefix("/").lowercase() in DreamCore.dreamConfig.allowedCommandsDuringEvents)
+        if (e.player in m.torreDaMorte.players && e.message.split(" ").first().removePrefix("/").lowercase() !in DreamCore.dreamConfig.allowedCommandsDuringEvents)
             e.isCancelled = true
     }
 
