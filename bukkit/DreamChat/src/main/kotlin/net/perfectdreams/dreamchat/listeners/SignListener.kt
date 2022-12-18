@@ -1,5 +1,7 @@
 package net.perfectdreams.dreamchat.listeners
 
+import com.Acrobot.ChestShop.Signs.ChestShopSign
+import com.Acrobot.ChestShop.Utils.uBlock
 import net.perfectdreams.dreamchat.DreamChat
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -8,6 +10,10 @@ import org.bukkit.event.block.SignChangeEvent
 class SignListener(val m: DreamChat) : Listener {
     @EventHandler
     fun onSignEdit(e: SignChangeEvent) {
+        // Don't replace if it is a chest shop sign
+        if (!ChestShopSign.isValid(e.lines))
+            return
+
         for (i in 0..3) {
             var line = e.getLine(i)
 
