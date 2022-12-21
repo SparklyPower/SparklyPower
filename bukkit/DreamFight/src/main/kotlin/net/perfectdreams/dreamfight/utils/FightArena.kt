@@ -38,7 +38,7 @@ class FightArena(var m: DreamFight) {
     var moveToCamarote = ArrayList<String>()
     var prize = 75
     var multiplier = 1
-    var winnerPrize = 15000
+    var winnerPrize = 50000
     var isPvPStarted = false
     // Used to track how many players played matches
     private val playersMatchesPlayed = mutableListOf<Player>()
