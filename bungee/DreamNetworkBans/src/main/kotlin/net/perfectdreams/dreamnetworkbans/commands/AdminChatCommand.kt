@@ -3,6 +3,7 @@ package net.perfectdreams.dreamnetworkbans.commands
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.github.salomonbrys.kotson.jsonObject
 import net.md_5.bungee.BungeeCord
+import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.chat.HoverEvent
@@ -20,11 +21,13 @@ import net.perfectdreams.dreamnetworkbans.DreamNetworkBans
 import net.perfectdreams.dreamnetworkbans.utils.StaffColors
 import net.perfectdreams.dreamnetworkbans.utils.emotes
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.awt.Color
 
 class AdminChatCommand : SparklyBungeeCommand(arrayOf("adminchat", "a"), permission = "dreamnetworkbans.adminchat") {
 	companion object {
 		private val bungee = BungeeCord.getInstance()
 		val lockedChat = mutableSetOf<ProxiedPlayer>()
+		private val adminChatColor = ChatColor.AQUA
 
 		fun broadcastMessage(sender: CommandSender, text: String) {
 			val staff = bungee.players.filter { it.hasPermission("dreamnetworkbans.adminchat") }
@@ -41,7 +44,8 @@ class AdminChatCommand : SparklyBungeeCommand(arrayOf("adminchat", "a"), permiss
 				val prefix = with (role.prefixes) { if (isGirl && size == 2) get(1) else get(0) }
 				val emote = emotes[player.name] ?: ""
 
-				var colorizedText = "${colors.chat} $text"
+				// Using different colors for each staff group is bad, because it is harder to track admin chat messages since all groups have different colors
+				var colorizedText = " $text"
 
 				staff.forEach {
 					val regex = Regex(".*\\b${it.name}\\b.*")
@@ -60,7 +64,7 @@ class AdminChatCommand : SparklyBungeeCommand(arrayOf("adminchat", "a"), permiss
 					colorizedText = colorizedText.replace(Regex("\\b${it.name}\\b"), colors.mention(it.name))
 				}
 
-				"$prefix $emote ${colors.nick}${player.name}:$colorizedText".toTextComponent().apply {
+				"$prefix $emote $adminChatColor${player.name}:$colorizedText".toTextComponent().apply {
 					hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "§3Servidor: §b${player.server.info.name}".toBaseComponent())
 				}
 			} ?: "\ue252 §x§a§8§a§8§a§8Mensagem do console: §x§c§6§b§f§c§3$text".toTextComponent()
