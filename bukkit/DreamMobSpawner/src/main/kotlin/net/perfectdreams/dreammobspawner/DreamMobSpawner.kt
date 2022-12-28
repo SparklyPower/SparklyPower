@@ -114,7 +114,7 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 
 		if (event.entityType != EntityType.SHULKER)
 			return
-		
+
 		event.isCancelled = true
 	}
 
