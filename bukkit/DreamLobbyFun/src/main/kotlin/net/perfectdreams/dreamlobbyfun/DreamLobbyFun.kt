@@ -67,7 +67,7 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 		)
 	}
 
-	override fun onEnable() {
+	override fun softEnable() {
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(UserSettings)
 		}
@@ -122,6 +122,15 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 				}
 				waitFor(20 * 5)
 			}
+		}
+	}
+
+	override fun softDisable() {
+		// Delete holograms when the plugin is disabled
+		serverCitizens.forEach {
+			it.playerCountHologram?.despawn()
+			it.serverNameHologram?.despawn()
+			it.clickHereHologram?.despawn()
 		}
 	}
 
