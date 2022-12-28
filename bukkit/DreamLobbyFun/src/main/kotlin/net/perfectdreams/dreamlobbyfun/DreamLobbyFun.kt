@@ -72,7 +72,9 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 		)
 	}
 
-	override fun onEnable() {
+	override fun softEnable() {
+		super.softEnable()
+
 		holographicDisplaysAPI = HolographicDisplaysAPI.get(this)
 
 		transaction(Databases.databaseNetwork) {
@@ -138,6 +140,8 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 	}
 
 	override fun softDisable() {
+		super.softDisable()
+
 		serverCitizens.forEach {
 			it.clickHereHologram?.delete()
 			it.playerCountHologram?.delete()

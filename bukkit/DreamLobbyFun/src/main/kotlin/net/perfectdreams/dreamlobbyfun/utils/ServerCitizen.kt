@@ -1,12 +1,13 @@
 package net.perfectdreams.dreamlobbyfun.utils
 
-import com.okkero.skedule.CoroutineTask
+import kotlinx.coroutines.Job
 import me.filoghost.holographicdisplays.api.hologram.Hologram
 import me.filoghost.holographicdisplays.api.hologram.line.TextHologramLine
 import net.citizensnpcs.api.CitizensAPI
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.translateColorCodes
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
+import org.bukkit.Bukkit
 import kotlin.math.cos
 
 class ServerCitizen(
@@ -17,9 +18,8 @@ class ServerCitizen(
 	var serverNameHologram: Hologram? = null
 	var clickHereHologram: Hologram? = null
 
-	var easeTask: CoroutineTask? = null
-	var currentEase = 0.0
-	var positive = true
+	var easeTask: Job? = null
+	var animationTicks = 0
 
 	fun update() {
 		val citizen = CitizensAPI.getNPCRegistry().getById(data.citizenId) ?: run {
@@ -63,21 +63,25 @@ class ServerCitizen(
 		val middle = holoLocation.clone().add(0.0, 0.5, 0.0)
 
 		if (easeTask == null) {
-			m.launchMainThread {
+			easeTask = m.launchMainThread {
 				while (true) {
 					val newLocation = middle.clone()
-					clickHereHologram.setPosition(newLocation.add(0.0, (ease(currentEase) / 4) - 0.125, 0.0))
+					val mod = animationTicks % 32
 
-					if (positive)
-						currentEase += 0.1
-					else
-						currentEase -= 0.1
-					if (currentEase == 1.0)
-						positive = false
-					if (currentEase == 0.0)
-						positive = true
+					clickHereHologram.setPosition(
+						newLocation.add(
+							0.0,
+							if (mod > 16) {
+								-0.285 + easeInOutSine((mod - 16) / 16.0) * 0.285
+							} else {
+								easeInOutSine(mod / 16.0) * -0.285
+							},
+							0.0
+						)
+					)
 
-					delayTicks(4)
+					animationTicks++
+					delayTicks(2)
 				}
 			}
 		}

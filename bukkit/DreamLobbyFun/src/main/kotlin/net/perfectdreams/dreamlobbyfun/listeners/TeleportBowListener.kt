@@ -43,11 +43,6 @@ class TeleportBowListener(val m: DreamLobbyFun) : Listener {
 		projectile.isGlowing = true
 		projectile.setBounce(false)
 
-		Bukkit.getOnlinePlayers().filter { it.name == "MrPowerGamerBR" }
-			.forEach {
-				it.sendMessage("#3 scheduling...")
-			}
-
 		scheduler().schedule(m) {
 			// We need to wait 1 tick, since the projectile is not "valid" here
 			waitFor(1)
