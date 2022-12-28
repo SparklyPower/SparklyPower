@@ -3,6 +3,7 @@ package net.perfectdreams.dreamtorredamorte.listeners
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcorreios.events.CorreiosItemReceivingEvent
 import net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
 import org.bukkit.entity.Player
@@ -78,7 +79,7 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         if (event.player.location.world.name == "TorreDaMorte")
-            event.player.teleportToServerSpawn()
+            event.player.teleportToServerSpawnWithEffects()
     }
 
     @EventHandler

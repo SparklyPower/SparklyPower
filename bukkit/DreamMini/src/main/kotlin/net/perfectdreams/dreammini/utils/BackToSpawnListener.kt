@@ -2,6 +2,7 @@ package net.perfectdreams.dreammini.utils
 
 import net.perfectdreams.dreamcore.utils.extensions.isUnsafe
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreammini.DreamMini
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -20,6 +21,6 @@ class BackToSpawnListener(val m: DreamMini) : Listener {
 			return
 
 		// Oh no, it is a unsafe location! Make the player go back to spawn!!
-		e.player.teleportToServerSpawn()
+		e.player.teleportToServerSpawnWithEffects()
 	}
 }

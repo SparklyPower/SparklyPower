@@ -1,17 +1,14 @@
 package net.perfectdreams.dreamhome.commands
 
-import com.okkero.skedule.BukkitSchedulerController
-import com.okkero.skedule.schedule
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.playTeleportEffects
 import net.perfectdreams.dreamhome.DreamHome
 import net.perfectdreams.dreamhome.dao.Home
-import org.bukkit.Particle
 import org.bukkit.entity.Player
-import java.util.*
 
 class HomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("home", "casa")) {
 	/**
@@ -62,7 +59,7 @@ class HomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("home", "casa")) {
 		}
 
 		player.teleportAsync(location).thenRun {
-			player.world.spawnParticle(Particle.VILLAGER_HAPPY, player.location.add(0.0, 0.5, 0.0), 25, 0.5, 0.5, 0.5)
+			player.playTeleportEffects()
 			player.sendMessage("§aVocê chegou ao seu destino. §cʕ•ᴥ•ʔ")
 			player.sendTitle(
 				"§b${house.houseName}",

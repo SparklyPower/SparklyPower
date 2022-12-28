@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.chance
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamdropparty.DreamDropParty
 import org.bukkit.Bukkit
@@ -120,7 +121,7 @@ class DropParty(val m: DreamDropParty) : ServerEvent("Festa da Firma", "/droppar
             switchContext(SynchronizationContext.SYNC)
 
             world.players.forEach {
-                it.teleportToServerSpawn()
+                it.teleportToServerSpawnWithEffects()
             }
 
             world.entities.filter { it.type == EntityType.DROPPED_ITEM }.forEach {

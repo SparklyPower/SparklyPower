@@ -9,6 +9,7 @@ import net.perfectdreams.dreamcore.DreamCore.Companion.dreamConfig
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
 import net.perfectdreams.dreamlobbyfun.dao.PlayerSettings
@@ -38,7 +39,7 @@ class SpawnListener(val m: DreamLobbyFun) : Listener {
 
 	@EventHandler
 	fun onLogin(e: PlayerLoggedInEvent) {
-		e.player.teleportToServerSpawn()
+		e.player.teleportToServerSpawnWithEffects()
 
 		handleJoin(e.player)
 	}

@@ -11,6 +11,7 @@ import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.extensions.isUnsafe
+import net.perfectdreams.dreamcore.utils.extensions.teleportWithEffects
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamloja.DreamLoja
 import net.perfectdreams.dreamloja.dao.Shop
@@ -140,7 +141,7 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
                         }
                     }
 
-                    player.teleport(location)
+                    player.teleportWithEffects(location)
 
                     val fancyName = Bukkit.getPlayer(user.id.value)?.displayName ?: user.username
 
@@ -150,15 +151,6 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
                         10,
                         100,
                         10
-                    )
-
-                    player.world.spawnParticle(
-                        Particle.VILLAGER_HAPPY,
-                        player.location.add(0.0, 0.5, 0.0),
-                        25,
-                        0.5,
-                        0.5,
-                        0.5
                     )
                 }
             }

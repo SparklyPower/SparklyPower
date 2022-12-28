@@ -6,6 +6,7 @@ import net.perfectdreams.dreamcore.utils.InstantFirework
 import net.perfectdreams.dreamcore.utils.broadcast
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamxizum.DreamXizum
@@ -181,7 +182,7 @@ class ArenaXizum(val m: DreamXizum, val data: ArenaXizumData) {
 		head.itemMeta = meta
 		val item = loserLocation.world.dropItemNaturally(loserLocation, head)
 
-		loser.teleportToServerSpawn()
+		loser.teleportToServerSpawnWithEffects()
 		winner.playSound(winner.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
 
 		InstantFirework.spawn(loserLocation, FireworkEffect.builder()
@@ -203,7 +204,7 @@ class ArenaXizum(val m: DreamXizum, val data: ArenaXizumData) {
 		scheduler().schedule(m) {
 			waitFor(100)
 			item.remove()
-			winner.teleportToServerSpawn()
+			winner.teleportToServerSpawnWithEffects()
 			player1 = null
 			player2 = null
 		}

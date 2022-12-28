@@ -13,6 +13,7 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.pluralize
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamlabirinto.DreamLabirinto
 import net.perfectdreams.dreamlabirinto.utils.MazeGenerator
 import org.bukkit.*
@@ -73,7 +74,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         winner.fireTicks = 0
         PlayerUtils.healAndFeed(winner)
 
-        winner.teleportToServerSpawn()
+        winner.teleportToServerSpawnWithEffects()
 
         if (howMuchNightmaresWillBeGiven == 1)
             Bukkit.broadcastMessage("${DreamLabirinto.PREFIX} §b${winner.displayName}§a venceu o labirinto em ${wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
@@ -88,7 +89,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                 it.fireTicks = 0
                 PlayerUtils.healAndFeed(it)
 
-                it.teleportToServerSpawn()
+                it.teleportToServerSpawnWithEffects()
             }
 
             running = false
@@ -146,7 +147,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
                         it.fireTicks = 0
                         PlayerUtils.healAndFeed(it)
 
-                        it.teleportToServerSpawn()
+                        it.teleportToServerSpawnWithEffects()
                     }
 
                     running = false
