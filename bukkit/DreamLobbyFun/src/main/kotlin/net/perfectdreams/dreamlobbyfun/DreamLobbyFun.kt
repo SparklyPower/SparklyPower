@@ -8,6 +8,9 @@ import com.xxmicloxx.NoteBlockAPI.NBSDecoder
 import com.xxmicloxx.NoteBlockAPI.RadioSongPlayer
 import com.xxmicloxx.NoteBlockAPI.Song
 import com.xxmicloxx.NoteBlockAPI.SoundCategory
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI
 import net.perfectdreams.dreamauth.DreamAuth
 import net.perfectdreams.dreamauth.utils.PlayerStatus
 import net.perfectdreams.dreamcore.network.DreamNetwork
@@ -19,6 +22,7 @@ import net.perfectdreams.dreamlobbyfun.dao.PlayerSettings
 import net.perfectdreams.dreamlobbyfun.listeners.*
 import net.perfectdreams.dreamlobbyfun.tables.UserSettings
 import net.perfectdreams.dreamlobbyfun.utils.ServerCitizen
+import net.perfectdreams.dreamlobbyfun.utils.ServerCitizenData
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
@@ -55,6 +59,7 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 	}
 	val songs = mutableListOf<Song>()
 	var songPlayer: RadioSongPlayer? = null
+	lateinit var holographicDisplaysAPI: HolographicDisplaysAPI
 
 	fun loadSongs() {
 		songs.clear()
@@ -68,6 +73,8 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 	}
 
 	override fun onEnable() {
+		holographicDisplaysAPI = HolographicDisplaysAPI.get(this)
+
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(UserSettings)
 		}
@@ -87,8 +94,13 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 		registerCommand(LobbyBypassCommand(this))
 		registerCommand(ConfigureServerCommand(this))
 
-		if (serverCitizensFile.exists())
-			serverCitizens = DreamUtils.gson.fromJson(serverCitizensFile.readText())
+		if (serverCitizensFile.exists()) {
+			val citizensData = Json.decodeFromString<List<ServerCitizenData>>(serverCitizensFile.readText())
+
+			serverCitizens = citizensData.map {
+				ServerCitizen(it, this)
+			}.toMutableList()
+		}
 
 		val newSongPlayer = RadioSongPlayer(songs.getRandom(), SoundCategory.RECORDS)
 		logger.info("Tocando ${newSongPlayer.song.title}")
@@ -122,6 +134,14 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 				}
 				waitFor(20 * 5)
 			}
+		}
+	}
+
+	override fun onDisable() {
+		serverCitizens.forEach {
+			it.clickHereHologram?.delete()
+			it.playerCountHologram?.delete()
+			it.serverNameHologram?.delete()
 		}
 	}
 

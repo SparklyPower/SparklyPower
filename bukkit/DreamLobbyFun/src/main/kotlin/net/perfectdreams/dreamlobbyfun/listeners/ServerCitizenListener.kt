@@ -29,12 +29,12 @@ class ServerCitizenListener(val m: DreamLobbyFun) : Listener {
 
 		val citizenId = e.npc.id
 
-		val serverCitizen = m.serverCitizens.firstOrNull { it.citizenId == citizenId } ?: return
+		val serverCitizen = m.serverCitizens.firstOrNull { it.data.citizenId == citizenId } ?: return
 
 		val jsonObject = JsonObject()
 		jsonObject["type"] = "transferPlayer"
 		jsonObject["player"] = e.clicker.name
-		jsonObject["bungeeServer"] = serverCitizen.serverName
+		jsonObject["bungeeServer"] = serverCitizen.data.serverName
 
 		DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(jsonObject)
 	}

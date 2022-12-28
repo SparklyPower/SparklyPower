@@ -1,66 +1,58 @@
 package net.perfectdreams.dreamlobbyfun.utils
 
 import com.okkero.skedule.CoroutineTask
-import com.okkero.skedule.schedule
+import me.filoghost.holographicdisplays.api.hologram.Hologram
+import me.filoghost.holographicdisplays.api.hologram.line.TextHologramLine
 import net.citizensnpcs.api.CitizensAPI
-import net.perfectdreams.dreamcore.utils.ArmorStandHologram
-import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.translateColorCodes
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
-import org.bukkit.Bukkit
 
-class ServerCitizen(val citizenId: Int, val serverName: String, val fancyServerName: String) {
-	@Transient
-	var playerCountHologram: ArmorStandHologram? = null
-	@Transient
-	var serverNameHologram: ArmorStandHologram? = null
-	@Transient
-	var clickHereHologram: ArmorStandHologram? = null
+class ServerCitizen(
+	val data: ServerCitizenData,
+	val m: DreamLobbyFun
+) {
+	var playerCountHologram: Hologram? = null
+	var serverNameHologram: Hologram? = null
+	var clickHereHologram: Hologram? = null
 
 	var easeTask: CoroutineTask? = null
 	var currentEase = 0.0
 	var positive = true
 
 	fun update() {
-		val citizen = CitizensAPI.getNPCRegistry().getById(citizenId) ?: run {
-			println("Citizen ${citizenId} não existe!")
+		val citizen = CitizensAPI.getNPCRegistry().getById(data.citizenId) ?: run {
+			m.logger.warning { "Citizen ${data.citizenId} não existe!" }
 			return
 		}
 
 		if (citizen.entity == null) { // Se é null, quer dizer que o NPC ainda não nasceu
-			println("Citizen ${citizenId} ainda não nasceu!")
+			m.logger.warning { "Citizen ${data.citizenId} ainda não nasceu!" }
+			println("Citizen ${data.citizenId} ainda não nasceu!")
 			return
 		}
 
-		val holoLocation = citizen.entity.location.clone().add(0.0, 2.1, 0.0)
+		val holoLocation = citizen.entity.location.clone().add(0.0, 3.1, 0.0)
 
 		if (playerCountHologram == null) {
-			val playerCountHologram = ArmorStandHologram(
-					holoLocation.clone().add(0.0, -0.285, 0.0),
-					"§7??? players online"
-			)
-
-			playerCountHologram.spawn()
-			this.playerCountHologram = playerCountHologram
+			playerCountHologram = m.holographicDisplaysAPI.createHologram(holoLocation.clone().add(0.0, -0.285, 0.0))
+				.apply {
+					this.lines.appendText("§7??? players online")
+				}
 		}
 
 		if (serverNameHologram == null) {
-			val serverNameHologram = ArmorStandHologram(
-					holoLocation,
-					"§a§l$fancyServerName".translateColorCodes()
-			)
-			serverNameHologram.spawn()
-			this.serverNameHologram = serverNameHologram
+			serverNameHologram = m.holographicDisplaysAPI.createHologram(holoLocation)
+				.apply {
+					this.lines.appendText("§a§l${data.fancyServerName}".translateColorCodes())
+				}
 		}
 
 		if (clickHereHologram == null) {
-			val clickHereHologram = ArmorStandHologram(
-					holoLocation.clone().add(0.0, 0.5, 0.0),
-					"§6§l» §a§lCLIQUE AQUI §6§l«"
-			)
-
-			clickHereHologram.spawn()
-			this.clickHereHologram = clickHereHologram
+			clickHereHologram = m.holographicDisplaysAPI.createHologram(holoLocation.clone().add(0.0, 0.5, 0.0))
+				.apply {
+					this.lines.appendText("§6§l» §a§lCLIQUE AQUI §6§l«")
+				}
 		}
 
 		val playerCountHologram = playerCountHologram!!
@@ -69,19 +61,12 @@ class ServerCitizen(val citizenId: Int, val serverName: String, val fancyServerN
 
 		val middle = holoLocation.clone().add(0.0, 0.5, 0.0)
 
-		if (serverNameHologram.location != holoLocation) {
-			easeTask?.cancel()
-			easeTask = null
-			playerCountHologram.teleport(holoLocation.clone().add(0.0, -0.285, 0.0))
-			serverNameHologram.teleport(holoLocation)
-			clickHereHologram.teleport(middle)
-		}
-
 		if (easeTask == null) {
-			easeTask = scheduler().schedule(Bukkit.getPluginManager().getPlugin("DreamLobbyFun")!!) {
+			m.launchMainThread {
 				while (true) {
 					val newLocation = middle.clone()
-					clickHereHologram.teleport(newLocation.add(0.0, (ease(currentEase) / 4) - 0.125, 0.0))
+					clickHereHologram.setPosition(newLocation.add(0.0, (ease(currentEase) / 4) - 0.125, 0.0))
+
 					if (positive)
 						currentEase += 0.1
 					else
@@ -90,27 +75,31 @@ class ServerCitizen(val citizenId: Int, val serverName: String, val fancyServerN
 						positive = false
 					if (currentEase == 0.0)
 						positive = true
-					waitFor(2)
+
+					delayTicks(2)
 				}
 			}
 		}
 
-		val playerCount = DreamLobbyFun.SERVER_ONLINE_COUNT[serverName]
+		val playerCount = DreamLobbyFun.SERVER_ONLINE_COUNT[data.serverName]
 
 		if (playerCount == null) {
-			playerCountHologram.setLine("§7??? players online")
+			(playerCountHologram.lines.get(0) as TextHologramLine)
+				.text = "§7??? players online"
 		} else {
 			val singular = playerCount == 1
 
 			if (singular) {
-				playerCountHologram.setLine("§7$playerCount player online")
+				(playerCountHologram.lines.get(0) as TextHologramLine)
+					.text = "§7$playerCount player online"
 			} else {
-				playerCountHologram.setLine("§7$playerCount players online")
+				(playerCountHologram.lines.get(0) as TextHologramLine)
+					.text = "§7$playerCount players online"
 			}
 		}
 	}
 
-	fun ease(x: Double): Double {
+	private fun ease(x: Double): Double {
 		return (Math.cos(Math.PI * x) + 1) / 2
 	}
 }

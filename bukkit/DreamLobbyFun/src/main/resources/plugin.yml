@@ -1,5 +1,5 @@
 name: DreamLobbyFun
 main: net.perfectdreams.dreamlobbyfun.DreamLobbyFun
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "HolographicDisplays"]
 api-version: 1.13

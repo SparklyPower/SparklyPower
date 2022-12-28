@@ -3,11 +3,14 @@ package net.perfectdreams.dreamlobbyfun.commands
 import com.xxmicloxx.NoteBlockAPI.NBSDecoder
 import com.xxmicloxx.NoteBlockAPI.RadioSongPlayer
 import com.xxmicloxx.NoteBlockAPI.SoundCategory
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.commands.AbstractCommand
 import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
 import net.perfectdreams.dreamlobbyfun.utils.ServerCitizen
+import net.perfectdreams.dreamlobbyfun.utils.ServerCitizenData
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import java.io.File
@@ -15,31 +18,33 @@ import java.io.File
 class ConfigureServerCommand(val m: DreamLobbyFun) : AbstractCommand("configureserver", permission = "dreamlobby.configureserver") {
 	@Subcommand(["create"])
 	fun createServer(player: Player, citizenId: Int, serverName: String, fancyServerName: Array<String>) {
-		val serverCitizen = ServerCitizen(citizenId.toInt(), serverName, fancyServerName.joinToString(" "))
+		val serverCitizenData = ServerCitizenData(citizenId.toInt(), serverName, fancyServerName.joinToString(" "))
+		val serverCitizen = ServerCitizen(serverCitizenData, m)
 
 		m.serverCitizens.add(serverCitizen)
 
 		player.sendMessage("§aServidor §e${fancyServerName}§a (§e$serverName§a) foi configurado no NPC §e$citizenId§a com sucesso!")
 
-		m.serverCitizensFile.writeText(DreamUtils.gson.toJson(m.serverCitizens))
+		m.serverCitizensFile.writeText(Json.encodeToString(m.serverCitizens.map { it.data }))
 	}
 
 	@Subcommand(["delete"])
 	fun deleteServer(player: Player, citizenId: Int) {
-		val serverCitizen = m.serverCitizens.firstOrNull { it.citizenId == citizenId.toInt() }
+		val serverCitizen = m.serverCitizens.firstOrNull { it.data.citizenId == citizenId.toInt() }
 
 		if (serverCitizen == null) {
 			player.sendMessage("§cNPC §e${citizenId}§c não possui nenhum servidor associado!")
 			return
 		}
 
-		serverCitizen.clickHereHologram?.despawn()
-		serverCitizen.serverNameHologram?.despawn()
+		serverCitizen.clickHereHologram?.delete()
+		serverCitizen.serverNameHologram?.delete()
+		serverCitizen.playerCountHologram?.delete()
 
 		m.serverCitizens.remove(serverCitizen)
-		player.sendMessage("§aServidor §e${serverCitizen.fancyServerName}§a (§e$serverCitizen.serverName§a) teve NPC §e$citizenId§a removido com sucesso!")
+		player.sendMessage("§aServidor §e${serverCitizen.data.fancyServerName}§a (§e$serverCitizen.serverName§a) teve NPC §e$citizenId§a removido com sucesso!")
 
-		m.serverCitizensFile.writeText(DreamUtils.gson.toJson(m.serverCitizens))
+		m.serverCitizensFile.writeText(Json.encodeToString(m.serverCitizens.map { it.data }))
 	}
 
 	@Subcommand(["skip"])

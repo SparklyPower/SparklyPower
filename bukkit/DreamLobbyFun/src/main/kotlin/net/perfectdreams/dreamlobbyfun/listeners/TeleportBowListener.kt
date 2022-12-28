@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.utils.extensions.getSafeDestination
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
+import org.bukkit.Bukkit
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Arrow
@@ -29,16 +30,29 @@ class TeleportBowListener(val m: DreamLobbyFun) : Listener {
 
 	@EventHandler
 	fun onShoot(e: EntityShootBowEvent) {
+		Bukkit.getOnlinePlayers().filter { it.name == "MrPowerGamerBR" }
+			.forEach {
+				it.sendMessage("#1 projectile: ${e.projectile}")
+			}
 		val projectile = e.projectile
 		if (projectile !is Arrow)
 			return
 
 		val shooter = projectile.shooter
+		Bukkit.getOnlinePlayers().filter { it.name == "MrPowerGamerBR" }
+			.forEach {
+				it.sendMessage("#2 shooter: ${shooter}")
+			}
 		if (shooter !is Player) // We only care if it is a player shooting the bow
 			return
 
 		projectile.isGlowing = true
 		projectile.setBounce(false)
+
+		Bukkit.getOnlinePlayers().filter { it.name == "MrPowerGamerBR" }
+			.forEach {
+				it.sendMessage("#3 scheduling...")
+			}
 
 		scheduler().schedule(m) {
 			while (projectile.isValid && shooter.isOnline) { // Spawn the particles while the projectile is valid AND the player that shot it is still online
