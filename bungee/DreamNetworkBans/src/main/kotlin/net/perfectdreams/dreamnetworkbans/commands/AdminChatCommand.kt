@@ -45,7 +45,7 @@ class AdminChatCommand : SparklyBungeeCommand(arrayOf("adminchat", "a"), permiss
 				val emote = emotes[player.name] ?: ""
 
 				// Using different colors for each staff group is bad, because it is harder to track admin chat messages since all groups have different colors
-				var colorizedText = " $text"
+				var colorizedText = "$adminChatColor $text"
 
 				staff.forEach {
 					val regex = Regex(".*\\b${it.name}\\b.*")
@@ -64,7 +64,7 @@ class AdminChatCommand : SparklyBungeeCommand(arrayOf("adminchat", "a"), permiss
 					colorizedText = colorizedText.replace(Regex("\\b${it.name}\\b"), colors.mention(it.name))
 				}
 
-				"$prefix $emote $adminChatColor${player.name}:$colorizedText".toTextComponent().apply {
+				"$prefix $emote ${colors.nick}${player.name}:$colorizedText".toTextComponent().apply {
 					hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "§3Servidor: §b${player.server.info.name}".toBaseComponent())
 				}
 			} ?: "\ue252 §x§a§8§a§8§a§8Mensagem do console: §x§c§6§b§f§c§3$text".toTextComponent()
