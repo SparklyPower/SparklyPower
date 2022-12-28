@@ -5,7 +5,7 @@ import org.jetbrains.exposed.dao.id.LongIdTable
 
 object Shops : LongIdTable() {
 	override val tableName: String
-		get() = "${DreamCore.dreamConfig.getTablePrefix()}_shops"
+		get() = "${DreamCore.dreamConfig.networkDatabase.tablePrefix}_shops"
 
 	val owner = uuid("owner").index()
 	val shopName = text("shop_name").index()

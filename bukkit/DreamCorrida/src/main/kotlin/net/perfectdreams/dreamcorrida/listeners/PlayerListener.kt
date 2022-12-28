@@ -7,6 +7,8 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcorrida.DreamCorrida
 import org.bukkit.Bukkit
 import org.bukkit.GameMode
@@ -112,7 +114,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
 
                         // Player venceu a corrida!
                         eventoCorrida.wonPlayers.add(e.player.uniqueId)
-                        val howMuchMoneyWillBeGiven = 15_000 / eventoCorrida.wonPlayers.size
+                        val howMuchMoneyWillBeGiven = 50_000 / eventoCorrida.wonPlayers.size
                         val howMuchNightmaresWillBeGiven = if (eventoCorrida.wonPlayers.size == 1) 1 else 0
 
                         e.player.deposit(howMuchMoneyWillBeGiven.toDouble(),
@@ -136,7 +138,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                         e.player.fireTicks = 0
                         PlayerUtils.healAndFeed(e.player)
 
-                        e.player.teleport(DreamCore.dreamConfig.getSpawn())
+                        e.player.teleportToServerSpawnWithEffects()
 
                         if (howMuchNightmaresWillBeGiven == 1)
                             Bukkit.broadcastMessage("${DreamCorrida.PREFIX} §b${e.player.displayName}§a venceu a corrida em ${eventoCorrida.wonPlayers.size}º lugar! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
@@ -151,7 +153,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
                                 it.fireTicks = 0
                                 PlayerUtils.healAndFeed(it)
 
-                                it.teleport(DreamCore.dreamConfig.getSpawn())
+                                it.teleportToServerSpawnWithEffects()
                             }
 
                             eventoCorrida.running = false
@@ -179,7 +181,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
         val isWithinACorridaWorld = m.availableCorridas.any { it.spawn.world == e.player.world.name }
 
         if (isWithinACorridaWorld) {
-            e.player.teleport(DreamCore.dreamConfig.getSpawn())
+            e.player.teleportToServerSpawnWithEffects()
         }
     }
 

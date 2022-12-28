@@ -133,7 +133,9 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		EntityType.SNOWMAN,
 		EntityType.SQUID,
 		EntityType.TRADER_LLAMA,
-		EntityType.TROPICAL_FISH
+		EntityType.TROPICAL_FISH,
+		EntityType.FROG,
+
 	)
 
 	val aggressiveMobs = listOf(

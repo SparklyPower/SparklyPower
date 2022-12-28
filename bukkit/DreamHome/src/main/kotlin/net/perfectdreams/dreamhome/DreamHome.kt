@@ -45,6 +45,8 @@ class DreamHome : KotlinPlugin() {
 		 */
 		fun getMaxAllowedHomes(player: Player): Int {
 			return when {
+				// Well, technically it isn't unlimited :P
+				player.hasPermission("dreamhome.unlimited") -> 100
 				player.hasPermission("dreamhome.houseplusplusplus") -> 20
 				player.hasPermission("dreamhome.houseplusplus") -> 15
 				player.hasPermission("dreamhome.houseplus") -> 10

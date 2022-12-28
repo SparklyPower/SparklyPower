@@ -8,6 +8,8 @@ import net.perfectdreams.dreamcore.utils.TextUtils
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
+import net.perfectdreams.dreamcore.utils.extensions.teleportWithEffects
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -46,15 +48,7 @@ class HomeClubeExecutor(m: DreamClubes) : SparklyClubesCommandExecutor(m) {
                     clubeHome[ClubesHomes.pitch]
                 )
 
-                player.teleport(location)
-                player.world.spawnParticle(
-                    Particle.VILLAGER_HAPPY,
-                    player.location.add(0.0, 0.5, 0.0),
-                    25,
-                    0.5,
-                    0.5,
-                    0.5
-                )
+                player.teleportWithEffects(location)
                 player.sendMessage("§aVocê chegou ao seu destino. §cʕ•ᴥ•ʔ")
                 player.sendTitle(
                     "§b${clube.name}",

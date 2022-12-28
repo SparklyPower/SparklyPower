@@ -1,6 +1,8 @@
 package net.perfectdreams.dreamquiz.listeners
 
 import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamquiz.DreamQuiz
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -34,7 +36,7 @@ class PlayerListener(val m: DreamQuiz) : Listener {
     @EventHandler
     fun onSpawn(e: PlayerQuitEvent) {
         if (e.player.world.name == "Quiz") {
-            e.player.teleport(DreamCore.dreamConfig.getSpawn())
+            e.player.teleportToServerSpawnWithEffects()
         }
     }
 

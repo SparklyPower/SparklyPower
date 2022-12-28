@@ -30,19 +30,13 @@ class TeleportBowListener(val m: DreamLobbyFun) : Listener {
 
 	@EventHandler
 	fun onShoot(e: EntityShootBowEvent) {
-		Bukkit.getOnlinePlayers().filter { it.name == "MrPowerGamerBR" }
-			.forEach {
-				it.sendMessage("#1 projectile: ${e.projectile}")
-			}
 		val projectile = e.projectile
+
 		if (projectile !is Arrow)
 			return
 
 		val shooter = projectile.shooter
-		Bukkit.getOnlinePlayers().filter { it.name == "MrPowerGamerBR" }
-			.forEach {
-				it.sendMessage("#2 shooter: ${shooter}")
-			}
+
 		if (shooter !is Player) // We only care if it is a player shooting the bow
 			return
 
@@ -55,6 +49,9 @@ class TeleportBowListener(val m: DreamLobbyFun) : Listener {
 			}
 
 		scheduler().schedule(m) {
+			// We need to wait 1 tick, since the projectile is not "valid" here
+			waitFor(1)
+
 			while (projectile.isValid && shooter.isOnline) { // Spawn the particles while the projectile is valid AND the player that shot it is still online
 				projectile.world.spawnParticle(Particle.LAVA, projectile.location, 1, 0.0, 0.0, 0.0, 0.1)
 				projectile.world.spawnParticle(Particle.FLAME, projectile.location, 1, 0.0, 0.0, 0.0, 0.1)

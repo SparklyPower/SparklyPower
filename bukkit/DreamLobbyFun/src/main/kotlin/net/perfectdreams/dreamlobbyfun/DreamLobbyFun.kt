@@ -64,11 +64,11 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 	fun loadSongs() {
 		songs.clear()
 		songs.addAll(
-				songsFolder.listFiles().filter {
-					it.extension == "nbs"
-				}.map {
-					NBSDecoder.parse(it)
-				}
+			songsFolder.listFiles().filter {
+				it.extension == "nbs"
+			}.map {
+				NBSDecoder.parse(it)
+			}
 		)
 	}
 
@@ -137,7 +137,7 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 		}
 	}
 
-	override fun onDisable() {
+	override fun softDisable() {
 		serverCitizens.forEach {
 			it.clickHereHologram?.delete()
 			it.playerCountHologram?.delete()
@@ -149,11 +149,11 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 		val inventory = player.inventory
 
 		val cyanGlass = ItemStack(Material.CYAN_STAINED_GLASS_PANE, 1)
-				.rename("§a")
+			.rename("§a")
 		val lightBlueGlass = ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE, 1)
-				.rename("§a")
+			.rename("§a")
 		val blueGlass = ItemStack(Material.BLUE_STAINED_GLASS_PANE, 1)
-				.rename("§a")
+			.rename("§a")
 
 		val playerVisibility = playerInfo.playerVisibility
 
@@ -161,29 +161,29 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 			this.clear()
 
 			this.setItem(0,
-					if (playerVisibility) {
-						ItemStack(Material.LIME_DYE, 1).rename("§a§lPlayers estão visíveis")
-								.lore("§7Cansado de aturar as outras pessoas?", "§7", "§7Então clique para deixar todas", "§7as outras pessoas invisíveis!")
-								.storeMetadata(ITEM_INFO_KEY, "setPlayerVisibility:false")
-					} else {
-						ItemStack(Material.GRAY_DYE, 1, 8).rename("§c§lPlayers estão invisíveis")
-								.lore("§7Está se sentindo sozinho?", "§7", "§7Então clique para deixar todas", "§7as outras pessoas visíveis!")
-								.storeMetadata(ITEM_INFO_KEY, "setPlayerVisibility:true")
-					}
+				if (playerVisibility) {
+					ItemStack(Material.LIME_DYE, 1).rename("§a§lPlayers estão visíveis")
+						.lore("§7Cansado de aturar as outras pessoas?", "§7", "§7Então clique para deixar todas", "§7as outras pessoas invisíveis!")
+						.storeMetadata(ITEM_INFO_KEY, "setPlayerVisibility:false")
+				} else {
+					ItemStack(Material.GRAY_DYE, 1, 8).rename("§c§lPlayers estão invisíveis")
+						.lore("§7Está se sentindo sozinho?", "§7", "§7Então clique para deixar todas", "§7as outras pessoas visíveis!")
+						.storeMetadata(ITEM_INFO_KEY, "setPlayerVisibility:true")
+				}
 			)
 
 			this.setItem(4,
-					ItemStack(Material.COMPASS).rename("§a§lSelecionador de Servidores")
-							.lore("§7Clique para ver todos nossos servidores!")
-							.storeMetadata(ITEM_INFO_KEY, "serverSelector")
+				ItemStack(Material.COMPASS).rename("§a§lSelecionador de Servidores")
+					.lore("§7Clique para ver todos nossos servidores!")
+					.storeMetadata(ITEM_INFO_KEY, "serverSelector")
 			)
 
 			this.setItem(8,
-					ItemStack(Material.BOW).rename("§e§lArco Teletransportador")
-							.lore("§7Com tédio?", "§7Esperando o seu servidor favorito reiniciar?", "§7", "§7Então que tal explorar o nosso", "§7lobby com este arco?")
-							.apply {
-								addEnchantment(Enchantment.ARROW_INFINITE, 1)
-							}
+				ItemStack(Material.BOW).rename("§e§lArco Teletransportador")
+					.lore("§7Com tédio?", "§7Esperando o seu servidor favorito reiniciar?", "§7", "§7Então que tal explorar o nosso", "§7lobby com este arco?")
+					.apply {
+						addEnchantment(Enchantment.ARROW_INFINITE, 1)
+					}
 			)
 
 			this.setItem(1, cyanGlass)

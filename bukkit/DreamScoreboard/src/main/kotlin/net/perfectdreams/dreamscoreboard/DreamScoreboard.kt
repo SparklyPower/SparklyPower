@@ -201,7 +201,7 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 				val results = transaction(Databases.databaseNetwork) {
 					EventVictories.slice(EventVictories.user, userCount).select {
-						EventVictories.wonAt greaterEq start
+						EventVictories.wonAt greaterEq start and (EventVictories.event neq "Chat")
 					}.groupBy(EventVictories.user)
 						.orderBy(userCount to SortOrder.DESC)
 						.limit(3)
@@ -345,7 +345,7 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 		val clubeMembersWithVictories = transaction(Databases.databaseNetwork) {
 			ClubeMembers.join(EventVictories, JoinType.INNER, ClubeMembers.id, EventVictories.user).select {
-				EventVictories.wonAt greaterEq start and (ClubeMembers.clube eq clube.id)
+				EventVictories.wonAt greaterEq start and (ClubeMembers.clube eq clube.id) and (EventVictories.event neq "Chat")
 			}.toList()
 		}
 
@@ -367,7 +367,7 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 		val clubeMembersWithVictories = transaction(Databases.databaseNetwork) {
 			ClubeMembers.join(EventVictories, JoinType.INNER, ClubeMembers.id, EventVictories.user).select {
-				EventVictories.wonAt greaterEq start
+				EventVictories.wonAt greaterEq start and (EventVictories.event neq "Chat")
 			}.toList()
 		}
 

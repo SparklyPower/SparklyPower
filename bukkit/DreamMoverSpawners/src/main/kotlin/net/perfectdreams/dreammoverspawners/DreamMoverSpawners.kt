@@ -209,7 +209,7 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
             }
 
             val drops = listOf(Material.SPAWNER.toItemStack()
-                .lore("§7Spawner de §a${type.getLocalizedName()}")
+                .lore("§7Spawner de §a${type.name}")
                 .storeMetadata("spawnerType", type.toString()))
 
             e.block.type = Material.AIR // rip

@@ -37,7 +37,7 @@ object EventosTopCommand : DSLCommandBase<DreamScoreboard> {
 
                 val results = transaction(Databases.databaseNetwork) {
                     EventVictories.slice(EventVictories.user, userCount).select {
-                        EventVictories.wonAt greaterEq start
+                        EventVictories.wonAt greaterEq start and (EventVictories.event neq "Chat")
                     }.groupBy(EventVictories.user)
                         .orderBy(userCount to SortOrder.DESC)
                         .limit(10)
@@ -46,10 +46,11 @@ object EventosTopCommand : DSLCommandBase<DreamScoreboard> {
 
                 val selfResults = transaction(Databases.databaseNetwork) {
                     EventVictories.select {
-                        EventVictories.wonAt greaterEq start and (EventVictories.user eq player.uniqueId)
+                        EventVictories.wonAt greaterEq start and (EventVictories.user eq player.uniqueId) and (EventVictories.event neq "Chat")
                     }.count()
                 }
 
+                player.sendMessage("§cVitórias de Evento Chat não são consideradas na contagem!")
                 player.sendMessage("§eVocê ganhou §a${selfResults} eventos§e neste mês")
                 player.sendMessage("")
                 for ((index, result) in results.take(10).withIndex()) {

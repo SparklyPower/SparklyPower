@@ -7,7 +7,7 @@ import java.util.*
 
 object Assinaturas : LongIdTable() {
     override val tableName: String
-        get() = "${DreamCore.dreamConfig.getTablePrefix()}_assinaturas"
+        get() = "${DreamCore.dreamConfig.networkDatabase.tablePrefix}_assinaturas"
 
     val signedBy = uuid("signed_by").index()
     val signedAt = long("signed_at")

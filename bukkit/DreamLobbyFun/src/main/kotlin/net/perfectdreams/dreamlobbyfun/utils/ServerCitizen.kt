@@ -7,6 +7,7 @@ import net.citizensnpcs.api.CitizensAPI
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.translateColorCodes
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
+import kotlin.math.cos
 
 class ServerCitizen(
 	val data: ServerCitizenData,
@@ -76,7 +77,7 @@ class ServerCitizen(
 					if (currentEase == 0.0)
 						positive = true
 
-					delayTicks(2)
+					delayTicks(4)
 				}
 			}
 		}
@@ -99,7 +100,7 @@ class ServerCitizen(
 		}
 	}
 
-	private fun ease(x: Double): Double {
-		return (Math.cos(Math.PI * x) + 1) / 2
+	fun easeInOutSine(x: Double): Double {
+		return -(cos(Math.PI * x) - 1) / 2
 	}
 }

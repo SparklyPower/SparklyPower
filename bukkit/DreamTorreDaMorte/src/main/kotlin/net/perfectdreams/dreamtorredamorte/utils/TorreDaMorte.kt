@@ -10,6 +10,8 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcorreios.utils.addItemIfPossibleOrAddToPlayerMailbox
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
 import net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
@@ -120,7 +122,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             isPreStart = false
 
             playersInQueue.forEach { player ->
-                player.teleport(DreamCore.dreamConfig.getSpawn())
+                player.teleportToServerSpawnWithEffects()
                 player.sendMessage("${DreamTorreDaMorte.PREFIX} §cA Torre da Morte foi cancelada devido a falta de players...")
             }
 
@@ -240,7 +242,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
             m.eventoTorreDaMorte.lastTime = System.currentTimeMillis()
             m.eventoTorreDaMorte.running = false
 
-            val howMuchMoneyWillBeGiven = 15_000
+            val howMuchMoneyWillBeGiven = 50_000
             val howMuchNightmaresWillBeGiven = 1
 
             Bukkit.broadcastMessage("${DreamTorreDaMorte.PREFIX} §b${player.displayName}§e venceu a Torre da Morte! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
@@ -290,7 +292,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
 
         // Reset player velocity to avoid them dying before teleporting (due to falling from the tower)
         player.velocity = Vector(0, 0, 0)
-        player.teleport(DreamCore.dreamConfig.getSpawn())
+        player.teleportToServerSpawnWithEffects()
 
         // Restaurar o inventário do player
         val storedInventory = storedPlayerInventory[player]
@@ -333,7 +335,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
         if (!playersInQueue.contains(player))
             return
 
-        player.teleport(DreamCore.dreamConfig.getSpawn())
+        player.teleportToServerSpawnWithEffects()
         playersInQueue.remove(player)
     }
 

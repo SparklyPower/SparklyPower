@@ -20,6 +20,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamBedrockIntegrations"))
     compileOnly(files("../../libs/mcMMO.jar"))
     compileOnly("net.luckperms:api:5.0")
+    compileOnly("com.github.ChestShop-authors:ChestShop-3:3.12")
 }
 
 tasks.withType<KotlinCompile> {

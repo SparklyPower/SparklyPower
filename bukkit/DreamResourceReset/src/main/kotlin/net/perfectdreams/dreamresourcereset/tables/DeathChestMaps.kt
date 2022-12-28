@@ -7,7 +7,7 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 
 object DeathChestMaps : IntIdTable() {
     override val tableName: String
-        get() = "${DreamCore.dreamConfig.getTablePrefix()}_deathchestmaps"
+        get() = "${DreamCore.dreamConfig.networkDatabase.tablePrefix}_deathchestmaps"
 
     val chest = reference("chest", DeathChestsInformation)
     val character = postgresEnumeration<DeathChestMapCharacter>("character")

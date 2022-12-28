@@ -3,6 +3,7 @@ package net.perfectdreams.dreamtorredamorte.listeners
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcorreios.events.CorreiosItemReceivingEvent
 import net.perfectdreams.dreamtorredamorte.DreamTorreDaMorte
 import org.bukkit.entity.Player
@@ -61,7 +62,7 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
     @EventHandler
     fun onRespawn(event: PlayerRespawnEvent) {
         if (event.player.location.world.name == "TorreDaMorte")
-            event.respawnLocation = DreamCore.dreamConfig.getSpawn()
+            event.respawnLocation = DreamCore.INSTANCE.spawn!!
     }
 
     @EventHandler
@@ -78,7 +79,7 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         if (event.player.location.world.name == "TorreDaMorte")
-            event.player.teleportToServerSpawn()
+            event.player.teleportToServerSpawnWithEffects()
     }
 
     @EventHandler
@@ -111,7 +112,7 @@ class PlayerListener(val m: DreamTorreDaMorte) : Listener {
 
     @EventHandler
     fun onCommand(e: PlayerCommandPreprocessEvent) {
-        if (e.player in m.torreDaMorte.players)
+        if (e.player in m.torreDaMorte.players && e.message.split(" ").first().removePrefix("/").lowercase() !in DreamCore.dreamConfig.allowedCommandsDuringEvents)
             e.isCancelled = true
     }
 

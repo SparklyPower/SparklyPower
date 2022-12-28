@@ -6,7 +6,7 @@ import org.jetbrains.exposed.dao.id.LongIdTable
 
 object PlayerQuickHarvestUpgrades : LongIdTable() {
     override val tableName: String
-        get() = "${DreamCore.dreamConfig.getTablePrefix()}_playerquickharvestupgrades"
+        get() = "${DreamCore.dreamConfig.networkDatabase.tablePrefix}_playerquickharvestupgrades"
 
     val playerId = uuid("player").index()
     val energy = integer("energy")

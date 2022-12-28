@@ -11,6 +11,8 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcorreios.utils.addItemIfPossibleOrAddToPlayerMailbox
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
 import net.perfectdreams.dreamtntrun.DreamTNTRun
@@ -119,7 +121,7 @@ class TNTRun(val m: DreamTNTRun) {
             isPreStart = false
 
             playersInQueue.forEach { player ->
-                player.teleport(DreamCore.dreamConfig.getSpawn())
+                player.teleportToServerSpawnWithEffects()
                 player.sendMessage("${DreamTNTRun.PREFIX} §cO TNT Run foi cancelado devido a falta de players...")
             }
 
@@ -241,7 +243,7 @@ class TNTRun(val m: DreamTNTRun) {
 
         blocksToBeRestored.clear()
 
-        val howMuchMoneyWillBeGiven = 15_000
+        val howMuchMoneyWillBeGiven = 50_000
         val howMuchNightmaresWillBeGiven = 1
 
         Bukkit.broadcastMessage("${DreamTNTRun.PREFIX} §b${player.displayName}§e venceu o TNT Run! Ele ganhou §2$howMuchMoneyWillBeGiven sonecas§a e §c$howMuchNightmaresWillBeGiven pesadelo§a!")
@@ -288,7 +290,7 @@ class TNTRun(val m: DreamTNTRun) {
 
         // Reset player velocity to avoid them dying before teleporting (due to falling from the tower)
         player.velocity = Vector(0, 0, 0)
-        player.teleport(DreamCore.dreamConfig.getSpawn())
+        player.teleportToServerSpawnWithEffects()
         player.gameMode = GameMode.SURVIVAL
 
         if (!skipFinishCheck && isGamePhase && players.size == 1)
@@ -300,7 +302,7 @@ class TNTRun(val m: DreamTNTRun) {
         if (!playersInQueue.contains(player))
             return
 
-        player.teleport(DreamCore.dreamConfig.getSpawn())
+        player.teleportToServerSpawnWithEffects()
         playersInQueue.remove(player)
     }
 

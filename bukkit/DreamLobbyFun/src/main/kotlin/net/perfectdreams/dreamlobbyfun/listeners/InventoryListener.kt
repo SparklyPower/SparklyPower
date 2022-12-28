@@ -177,7 +177,21 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 						survival.rename("§6✪ §a§lSparklyPower Survival §6✪")
 
 						// if (survivalPlayers != -1) {
-						survival.lore("§a${if (blink) "  " else "➤"} Clique para entrar!", "§a§l» §r§aAtualmente com §b${DreamLobbyFun.SERVER_ONLINE_COUNT["sparklypower_survival"]} players §aconectados!", "§7", "§7Em breve... ;)")
+						survival.lore(
+							"§a${if (blink) "  " else "➤"} Clique para entrar!",
+							"§a§l» §r§aAtualmente com §b${DreamLobbyFun.SERVER_ONLINE_COUNT["sparklypower_survival"]} players §aconectados!",
+							"§7",
+							"§7O Melhor Servidor Survival do Brasil, Sem Exceções.",
+							"§7",
+							"§7Desde 2014 trazendo experiências inovadoras que jamais",
+							"§7foram vistas antes em outros servidores.",
+							"§7",
+							"§7Afinal, em qual servidor você já viu jetpacks, coxinhas, fuscas, e muito mais?",
+							"§7",
+							"§7...e ainda por cima é o servidor oficial da Loritta!",
+							"§7",
+							"§7Entre agora... porque só falta você!"
+						)
 						// } else {
 						// 	survival.lore("§c${if (blink) "  " else "✖"} Servidor offline...", "§c§l» §r§cDesculpe pela inconveniência... :(", "§7", "§7Em breve... ;)")
 						// }

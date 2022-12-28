@@ -18,6 +18,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.entity.EntitySpawnEvent
+import org.bukkit.event.entity.EntityTeleportEvent
 import org.bukkit.event.entity.ExplosionPrimeEvent
 import java.io.File
 
@@ -100,6 +101,18 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 			return
 
 		if (event.entityType != EntityType.SHULKER_BULLET)
+			return
+
+		event.isCancelled = true
+	}
+
+	// Disable shulker tp in the Warp VIP
+	@EventHandler
+	fun onShulkerTp(event: EntityTeleportEvent) {
+		if (event.entity.world.name != "WarpVIP")
+			return
+
+		if (event.entityType != EntityType.SHULKER)
 			return
 
 		event.isCancelled = true

@@ -3,6 +3,7 @@ package net.perfectdreams.dreamnetworkbans.commands
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.github.salomonbrys.kotson.jsonObject
 import net.md_5.bungee.BungeeCord
+import net.md_5.bungee.api.ChatColor
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.chat.HoverEvent
@@ -20,11 +21,13 @@ import net.perfectdreams.dreamnetworkbans.DreamNetworkBans
 import net.perfectdreams.dreamnetworkbans.utils.StaffColors
 import net.perfectdreams.dreamnetworkbans.utils.emotes
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.awt.Color
 
 class AdminChatCommand : SparklyBungeeCommand(arrayOf("adminchat", "a"), permission = "dreamnetworkbans.adminchat") {
 	companion object {
 		private val bungee = BungeeCord.getInstance()
 		val lockedChat = mutableSetOf<ProxiedPlayer>()
+		private val adminChatColor = ChatColor.AQUA
 
 		fun broadcastMessage(sender: CommandSender, text: String) {
 			val staff = bungee.players.filter { it.hasPermission("dreamnetworkbans.adminchat") }
@@ -41,7 +44,8 @@ class AdminChatCommand : SparklyBungeeCommand(arrayOf("adminchat", "a"), permiss
 				val prefix = with (role.prefixes) { if (isGirl && size == 2) get(1) else get(0) }
 				val emote = emotes[player.name] ?: ""
 
-				var colorizedText = "${colors.chat} $text"
+				// Using different colors for each staff group is bad, because it is harder to track admin chat messages since all groups have different colors
+				var colorizedText = "$adminChatColor $text"
 
 				staff.forEach {
 					val regex = Regex(".*\\b${it.name}\\b.*")

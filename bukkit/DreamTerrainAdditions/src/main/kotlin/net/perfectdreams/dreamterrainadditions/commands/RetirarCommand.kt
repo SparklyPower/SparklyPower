@@ -7,6 +7,8 @@ import net.perfectdreams.dreamcore.utils.commands.CommandException
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.isBetween
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcore.utils.withoutPermission
 import net.perfectdreams.dreamterrainadditions.DreamTerrainAdditions
 import net.perfectdreams.dreamvanish.DreamVanishAPI
@@ -43,15 +45,15 @@ object RetirarCommand : DSLCommandBase<DreamTerrainAdditions> {
             }
 
             if (claim.ownerName == player.name || claim.checkPermission(player, ClaimPermission.Manage, null) == null) {
-                val lesser = Location(player.world, claim.lesserBoundaryCorner.x, 0.0, claim.lesserBoundaryCorner.z)
-                val greater = Location(player.world, claim.greaterBoundaryCorner.x, 255.0, claim.greaterBoundaryCorner.z)
+                val lesser = Location(player.world, claim.lesserBoundaryCorner.x, claim.lesserBoundaryCorner.y, claim.lesserBoundaryCorner.z)
+                val greater = Location(player.world, claim.greaterBoundaryCorner.x, claim.greaterBoundaryCorner.y, claim.greaterBoundaryCorner.z)
 
                 if (!kick.location.isBetween(lesser, greater)) {
                     player.sendMessage("§b${kick.displayName}§c não está neste terreno!")
                     return@executes
                 }
 
-                kick.teleport(DreamCore.dreamConfig.getSpawn())
+                kick.teleportToServerSpawnWithEffects()
                 kick.sendTitle("§f", "§cVocê foi expulso do terreno", 20, 60, 20)
 
                 player.sendMessage("§b${kick.displayName}§a foi expulso do terreno!")

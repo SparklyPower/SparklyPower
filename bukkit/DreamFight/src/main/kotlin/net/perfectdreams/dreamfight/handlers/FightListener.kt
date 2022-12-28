@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamfight.handlers
 
+import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamfight.DreamFight
 import net.perfectdreams.dreamfight.utils.FightModifier
 import net.perfectdreams.dreamfight.utils.WinReason
@@ -13,6 +14,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.PlayerDeathEvent
+import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
 class FightListener(val m: DreamFight) : Listener {
@@ -102,5 +104,11 @@ class FightListener(val m: DreamFight) : Listener {
                 e.player.teleport(m.fight.exit)
             }
         }
+    }
+
+    @EventHandler
+    fun onCommand(e: PlayerCommandPreprocessEvent) {
+        if (e.player in m.fight.players && e.message.split(" ").first().removePrefix("/").lowercase() !in DreamCore.dreamConfig.allowedCommandsDuringEvents)
+            e.isCancelled = true
     }
 }

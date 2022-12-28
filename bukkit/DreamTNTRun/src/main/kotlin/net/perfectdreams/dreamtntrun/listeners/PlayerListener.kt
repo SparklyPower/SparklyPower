@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcorreios.events.CorreiosItemReceivingEvent
 import net.perfectdreams.dreamtntrun.DreamTNTRun
 import net.perfectdreams.dreamtntrun.utils.TNTRun
@@ -40,7 +41,7 @@ class PlayerListener(val m: DreamTNTRun) : Listener {
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         if (event.player.location.world.name == TNTRun.WORLD_NAME)
-            event.player.teleportToServerSpawn()
+            event.player.teleportToServerSpawnWithEffects()
     }
 
     @EventHandler

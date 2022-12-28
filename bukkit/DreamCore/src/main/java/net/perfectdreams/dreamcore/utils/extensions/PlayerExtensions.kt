@@ -16,6 +16,7 @@ import net.perfectdreams.dreamcore.utils.collections.mutablePlayerSetOf
 import net.perfectdreams.dreamcore.utils.registerEvents
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
