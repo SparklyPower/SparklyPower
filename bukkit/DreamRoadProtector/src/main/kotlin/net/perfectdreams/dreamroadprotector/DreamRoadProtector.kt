@@ -1,9 +1,8 @@
 package net.perfectdreams.dreamroadprotector
 
 import com.okkero.skedule.schedule
-import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.displaced
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -20,6 +19,7 @@ import java.util.*
 
 class DreamRoadProtector : KotlinPlugin(), Listener {
 	val lastLocations = WeakHashMap<Player, Location>()
+	val walkingOnRoadWithSpeed = SparklyNamespacedBooleanKey("is_on_road_with_speed")
 
 	override fun softEnable() {
 		super.softEnable()
@@ -43,9 +43,21 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 
 					val hasRoadNearby = hasRoadNearby(player.location)
 
+					// Some walk speed values cause an annoying fov glitch when resetting the speed when running
+					// That's why we cancel the isSprinting before setting the player walk speed state
+					// We don't use potion effects because it gets VERY annoying on higher speeds
 					if (hasRoadNearby) {
+						val alreadyHasSpeedApplied = player.persistentDataContainer.get(walkingOnRoadWithSpeed)
+						player.persistentDataContainer.set(walkingOnRoadWithSpeed, true)
 						player.foodLevel = 20
-						player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 5 * 20, 1, true, false))
+						if (!alreadyHasSpeedApplied) {
+							player.isSprinting = false
+							player.walkSpeed = 0.65f
+						}
+					} else if (player.persistentDataContainer.get(walkingOnRoadWithSpeed)) {
+						player.persistentDataContainer.remove(walkingOnRoadWithSpeed)
+						player.isSprinting = false
+						player.walkSpeed = 0.2f
 					}
 				}
 
@@ -108,7 +120,7 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 			e.isCancelled = true
 		}
 	}
-	
+
 	@EventHandler
 	fun onBlockForm(e: BlockFormEvent) {
 		if (e.newState.block.type == Material.BLACK_CONCRETE_POWDER) {
