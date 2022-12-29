@@ -151,6 +151,12 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
         if (inHand.getStoredMetadata("isMoveSpawners") != "true")
             return
 
+        if (inHand.hasItemMeta() && !inHand.itemMeta.hasCustomModelData()) {
+            inHand.itemMeta = inHand.itemMeta.apply {
+                setCustomModelData(1)
+            }
+        }
+        
         if (e.block.world.name == "MinaRecheada")
             return
 

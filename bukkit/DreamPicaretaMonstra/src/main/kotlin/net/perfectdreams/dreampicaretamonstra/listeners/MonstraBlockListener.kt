@@ -50,6 +50,12 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
 
         val isPicaretaMonstra = heldItemType.name.contains("_PICKAXE")
 
+        if (inHand.hasItemMeta() && !inHand.itemMeta.hasCustomModelData()) {
+            inHand.itemMeta = inHand.itemMeta.apply {
+                setCustomModelData(1)
+            }
+        }
+
         if (m.isValidForHeldItem(heldItemType, broken)) {
             e.isCancelled = true
             val allDrops = mutableListOf<ItemStack>()
