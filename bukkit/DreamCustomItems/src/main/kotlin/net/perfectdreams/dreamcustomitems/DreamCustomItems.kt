@@ -196,6 +196,25 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				recipe = addRecipe(
+					"pudding",
+					CustomItems.PUDDING,
+					listOf(
+						"MMM",
+						"SSS",
+						"EEE"
+					)
+				) {
+					it.setIngredient('M', Material.MILK_BUCKET)
+					it.setIngredient('S', Material.SUGAR)
+					it.setIngredient('E', Material.EGG)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
 				CustomCraftingRecipe.RUBY_REMAP,
 				recipe = addRecipe(
 					"microwave",
@@ -322,6 +341,42 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 						color(NamedTextColor.YELLOW)
 					},
 					textComponent("Você pode fritar mais que uma batata ao mesmo tempo") {
+						color(NamedTextColor.YELLOW)
+					},
+					textComponent("Fica uma delícia!") {
+						color(NamedTextColor.YELLOW)
+					}
+				)
+			)
+		)
+
+		customRecipes.add(
+			CustomTextualRecipe(
+				this,
+				CustomItems.PASTEL,
+				listOf(
+					textComponent("Clique com botão direito em um caldeirão de lava com frango (não assado) em sua mão") {
+						color(NamedTextColor.YELLOW)
+					},
+					textComponent("Você pode fritar mais que um frango ao mesmo tempo") {
+						color(NamedTextColor.YELLOW)
+					},
+					textComponent("Fica uma delícia!") {
+						color(NamedTextColor.YELLOW)
+					}
+				)
+			)
+		)
+
+		customRecipes.add(
+			CustomTextualRecipe(
+				this,
+				CustomItems.COXINHA,
+				listOf(
+					textComponent("Clique com botão direito em um caldeirão de lava com um coelho (não assado) em sua mão") {
+						color(NamedTextColor.YELLOW)
+					},
+					textComponent("Você pode fritar mais que um coelho ao mesmo tempo") {
 						color(NamedTextColor.YELLOW)
 					},
 					textComponent("Fica uma delícia!") {

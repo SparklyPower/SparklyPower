@@ -37,10 +37,28 @@ object CustomItems {
             setDisplayName("§fCupcake")
         }
 
+    val PUDDING = ItemStack(Material.GOLDEN_CARROT)
+        .meta<ItemMeta> {
+            setCustomModelData(1)
+            setDisplayName("§fPudim")
+        }
+
     val FRENCH_FRIES = ItemStack(Material.BAKED_POTATO)
         .meta<ItemMeta> {
             this.setCustomModelData(1)
             setDisplayName("§fBatata Frita")
+        }
+
+    val PASTEL = ItemStack(Material.PUMPKIN_PIE)
+        .meta<ItemMeta> {
+            this.setCustomModelData(1)
+            setDisplayName("§fPastel")
+        }
+
+    val COXINHA = ItemStack(Material.COOKED_RABBIT)
+        .meta<ItemMeta> {
+            this.setCustomModelData(1)
+            setDisplayName("§fCoxinha")
         }
 
     val ESTALINHO_RED = ItemStack(Material.PRISMARINE_SHARD)
