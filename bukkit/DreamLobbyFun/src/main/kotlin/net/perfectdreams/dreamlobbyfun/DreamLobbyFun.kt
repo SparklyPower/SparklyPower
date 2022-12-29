@@ -8,6 +8,7 @@ import com.xxmicloxx.NoteBlockAPI.NBSDecoder
 import com.xxmicloxx.NoteBlockAPI.RadioSongPlayer
 import com.xxmicloxx.NoteBlockAPI.Song
 import com.xxmicloxx.NoteBlockAPI.SoundCategory
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI
@@ -97,7 +98,11 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 		registerCommand(ConfigureServerCommand(this))
 
 		if (serverCitizensFile.exists()) {
-			val citizensData = Json.decodeFromString<List<ServerCitizenData>>(serverCitizensFile.readText())
+			// Using ListSerializer(ServerCitizenData.serializer()) instead of <List<ServerCitizenData>> avoids plugin reload issues,
+			// probably because <List<ServerCitizenData>> class reference is kept loaded somewhere?
+			// I'm not really sure *what* causes it, because changing the code a bit seems to fix the issue???
+			// But hey, it works here correctly so let's keep it that way
+			val citizensData = Json.decodeFromString(ListSerializer(ServerCitizenData.serializer()), serverCitizensFile.readText())
 
 			serverCitizens = citizensData.map {
 				ServerCitizen(it, this)

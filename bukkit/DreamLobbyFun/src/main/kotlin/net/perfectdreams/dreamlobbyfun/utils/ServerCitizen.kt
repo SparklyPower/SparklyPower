@@ -29,7 +29,6 @@ class ServerCitizen(
 
 		if (citizen.entity == null) { // Se é null, quer dizer que o NPC ainda não nasceu
 			m.logger.warning { "Citizen ${data.citizenId} ainda não nasceu!" }
-			println("Citizen ${data.citizenId} ainda não nasceu!")
 			return
 		}
 
