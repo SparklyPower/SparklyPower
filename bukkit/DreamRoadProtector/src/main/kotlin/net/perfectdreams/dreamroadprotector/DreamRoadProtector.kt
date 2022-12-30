@@ -129,6 +129,10 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 	}
 
 	fun hasRoadNearby(location: Location): Boolean {
+		// If it isn't in the survival world, ignore it!
+		if (location.world.name != "world")
+			return false
+
 		val x = location.blockX
 		val y = location.blockY
 		val z = location.blockZ
