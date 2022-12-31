@@ -103,6 +103,7 @@ class DreamMini : KotlinPlugin(), Listener {
 
 		registerEvents(this)
 		registerEvents(DoNotPickupDropsListener(this))
+		registerEvents(DontDropItemsInSpawnListener(this))
 
 		registerCommand(BroadcastCommand(this))
 		registerCommand(FacebookCommand(this))
