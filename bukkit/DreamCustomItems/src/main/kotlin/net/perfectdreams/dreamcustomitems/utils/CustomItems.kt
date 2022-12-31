@@ -61,6 +61,18 @@ object CustomItems {
             setDisplayName("§fCoxinha")
         }
 
+    val LORITTA_AND_PANTUFA_MUG = ItemStack(Material.PAPER)
+        .meta<ItemMeta> {
+            this.setCustomModelData(57)
+            setDisplayName("§fCaneca da Loritta e da Pantufa")
+        }
+
+    val ANGEL_HALO = ItemStack(Material.PAPER)
+        .meta<ItemMeta> {
+            this.setCustomModelData(58)
+            setDisplayName("§fAuréola de Anjo")
+        }
+
     val ESTALINHO_RED = ItemStack(Material.PRISMARINE_SHARD)
         .meta<ItemMeta> {
             setCustomModelData(2)
