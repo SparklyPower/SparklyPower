@@ -1,98 +1,13 @@
 package net.perfectdreams.dreamchat.utils.bot.responses
 
-import com.okkero.skedule.schedule
-import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamchat.utils.ChatUtils
-import net.perfectdreams.dreamcore.utils.BlockUtils
-import net.perfectdreams.dreamcore.utils.LocationUtils
-import net.perfectdreams.dreamcore.utils.extensions.canPlaceAt
-import net.perfectdreams.dreamcore.utils.scheduler
-import org.bukkit.Material
-import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
-import org.bukkit.block.Sign
-import org.bukkit.entity.Player
-import org.bukkit.event.player.AsyncPlayerChatEvent
-import java.util.regex.Pattern
+import org.bukkit.ChatColor
 
-class LorittaAssinaResponse : RegExResponse() {
-	init {
-		patterns.add("loritta|lori".toPattern(Pattern.CASE_INSENSITIVE))
-		patterns.add("assina".toPattern(Pattern.CASE_INSENSITIVE))
-		patterns.add("minha|meu".toPattern(Pattern.CASE_INSENSITIVE))
-		patterns.add("casa|prédio|apartamento|home|castelo".toPattern(Pattern.CASE_INSENSITIVE))
-	}
-
-	override fun getResponse(message: String, event: AsyncPlayerChatEvent): String? {
-		val player = event.player
-
-		if (hasSign(player)) {
-			// Verificar se o player pode construir no target
-			scheduler().schedule(DreamChat.INSTANCE) {
-				val targetBlock = player.getTargetBlock(null as Set<Material>?, 10)
-
-				var signBlock: Block? = null
-				if (targetBlock.type != Material.AIR) { // Olhando para um bloco sólido...
-					if (targetBlock.getRelative(BlockFace.UP).type == Material.AIR)	{ // E o bloco acima é ar!
-						signBlock = targetBlock.getRelative(BlockFace.UP)
-						if (!event.player.canPlaceAt(signBlock.location, Material.OAK_SIGN))  {
-							ChatUtils.sendResponseAsLoritta(player, "§b${player.displayName}§a, eu não consegui colocar uma placa aonde você está...")
-							return@schedule
-						}
-
-						signBlock.type = Material.OAK_SIGN
-						val face = LocationUtils.yawToFace((player.location.yaw + 90) % 360, true).oppositeFace
-						val blockData = signBlock.blockData as org.bukkit.block.data.type.Sign
-						blockData.rotation = face
-						signBlock.blockData = blockData
-					} else { // Se o de cima não for ar, então o usuário quer assinar em uma parede!
-						val face = LocationUtils.yawToFace((player.location.yaw + 90) % 360, true).oppositeFace
-						val emptySpace = targetBlock.getRelative(face)
-						if (!event.player.canPlaceAt(emptySpace.location, Material.OAK_SIGN))  {
-							ChatUtils.sendResponseAsLoritta(player, "§b${player.displayName}§a, eu não consegui colocar uma placa aonde você está...")
-							return@schedule
-						}
-
-						signBlock = BlockUtils.attachWallSignAt(emptySpace.location)
-					}
-				}
-
-				if (signBlock == null) {
-					ChatUtils.sendResponseAsLoritta(player, "§b${player.displayName}§a, eu não consegui colocar uma placa aonde você está...")
-					return@schedule
-				}
-
-				val sign = signBlock.state as Sign
-				sign.setLine(0, "§3§m---------")
-				sign.setLine(1, "§6✪§3Loritta§6✪")
-				sign.setLine(2, "§4aprova! (◕‿◕✿)")
-				sign.setLine(3, "§3§m---------")
-				sign.update()
-				removeAnySign(player)
-				ChatUtils.sendResponseAsLoritta(player, "§b${player.displayName}§a, prontinho! §d(◕‿◕✿)")
-			}
-			return null
-		} else {
-			ChatUtils.sendResponseAsLoritta(player, "§b${player.displayName}§a, bem... eu quero muuuito assinar para você, mas você tem que ter uma placa no seu inventário!")
-		}
-		return null
-	}
-
-	fun hasSign(player: Player): Boolean {
-		player.inventory.forEach {
-			if (it != null && it.type == Material.OAK_SIGN) {
-				return true
-			}
-		}
-		return false
-	}
-
-	fun removeAnySign(player: Player) {
-		player.inventory.forEach {
-			if (it != null && it.type == Material.OAK_SIGN) {
-				it.amount -= 1
-				return
-			}
-		}
-	}
-}
+class LorittaAssinaResponse : AssinaResponse(
+	"Loritta",
+	ChatColor.DARK_AQUA,
+	"Loritta",
+	"ewogICJ0aW1lc3RhbXAiIDogMTY1NDQ0MjQwNTM3NiwKICAicHJvZmlsZUlkIiA6ICJiNTY0YWY3MWU4Njg0NTY5YWEzMTdkZjI4ODYxZDM4YyIsCiAgInByb2ZpbGVOYW1lIiA6ICJMb3JpdHRhIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2JlMWM3YjAzMDVmYzg2N2U3MDhmYjQxYmJlMDVlMGE3ZWYxY2NmNDdkMjg5MWIyNTM1NWRkYTcwOGI1NGI1OGQiLAogICAgICAibWV0YWRhdGEiIDogewogICAgICAgICJtb2RlbCIgOiAic2xpbSIKICAgICAgfQogICAgfQogIH0KfQ==",
+	"oN+59bIQXQf9mgQOs4j3uKfdm51kOpZL60a624qxq4n/1AI8usM4lSIvYZDxfmbMFsWpVRjC4FjCa33gDRe7bLCBEKhkH6Pfi0kxL1J+jlYMhJc4t7a3xitPZODQH3dJhtgDFBnEWeP5eUKIYdCq3JibOcAY5N6rjg2ItPCSh+QWYEjazwzU6/VX3inucN5uAjWjkNkKGIFq8140bawFkmrYVXNmr7DZKyoHmcIiD/zoHb36MxXlBEHcfw0pKNbo07+0DVKiRTZiG1rkNcd29zTPmSlh/HmzRKyAFLpUznkf/2UzUynxyjGzvvfAjw+k2h93w4q8rvYPhru0BGs/jExsa5m9rixsPV/TcgL3sqVKxTD5UcJ5nRZt+QO2YbB69O9SQFk8pp/W/3NW4nj1uyMJlj+QA//yVcbxONwccGEkX0R7SiJAOou6A7jRsPr7AsSNWjRYjgSzJSTfvK5Z2eCNsYEQ7YV2lHDlpMRdb2VvMGPQQTknTh9q/xospMY4okmaVotBeyE7itUc6QnszBrPFTR4x4mSMZ6XINC3GGbjuQq/bbpQXg8hUPSYmGS6KtWrscUcs/9ec6CN/UlBrO3ge9czTWcMULv+pJWjVaoZEhap7Jxxb8KTC3vSIEKmPyc1PjptZw1pN+hikG6hLfaQQUuiD0iDSi98K7HyO+M=",
+	ChatUtils::sendResponseAsLoritta
+)

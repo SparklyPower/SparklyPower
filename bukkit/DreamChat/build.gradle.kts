@@ -7,6 +7,7 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven("https://repo.alessiodp.com/releases/")
 }
 
 dependencies {
@@ -21,6 +22,7 @@ dependencies {
     compileOnly(files("../../libs/mcMMO.jar"))
     compileOnly("net.luckperms:api:5.0")
     compileOnly("com.github.ChestShop-authors:ChestShop-3:3.12")
+    compileOnly("net.citizensnpcs:citizens-main:2.0.30-SNAPSHOT")
 }
 
 tasks.withType<KotlinCompile> {

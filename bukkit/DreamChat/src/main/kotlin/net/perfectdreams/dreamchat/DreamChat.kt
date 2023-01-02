@@ -16,6 +16,8 @@ import com.greatmancode.craftconomy3.groups.WorldGroupsManager
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.delay
+import net.citizensnpcs.api.CitizensAPI
+import net.citizensnpcs.api.npc.NPC
 import net.perfectdreams.dreamchat.commands.*
 import net.perfectdreams.dreamchat.commands.declarations.TellCommand
 import net.perfectdreams.dreamchat.dao.ChatUser
@@ -58,8 +60,11 @@ class DreamChat : KotlinPlugin() {
 		var botResponses = mutableListOf<PantufaResponse>()
 		var BOT_PREFIX = "§8[§6§lSuporte§8] "
 		var LORITTA_PREFIX = "§8[§d§lDeusa Suprema§8] "
+		var GESSY_PREFIX = "§8[§d§lMascote nas horas Vagas§8] "
 		var BOT_NAME = "§ePantufa"
 		var LORITTA_NAME = "§b§lLoritta §3§lMorenitta"
+		val GABRIELA_NAME = "§dGabriela"
+		val GESSY_NAME = "§1Gessy"
 		val chatWebhooks = mutableListOf<WebhookClient>()
 		var currentWebhookIdx = 0
 		lateinit var INSTANCE: DreamChat
@@ -88,6 +93,7 @@ class DreamChat : KotlinPlugin() {
 	var tellMessagesWebhook: WebhookClient? = null
 	val tellMessagesQueue = ConcurrentLinkedQueue<String>()
 	val loginTimeDatabaseIds = mutableMapOf<Player, Long>()
+	val assinaturaCitizensNpcs = mutableListOf<NPC>()
 
 	val dataYaml by lazy {
 		File(dataFolder, "data.yml")
@@ -273,6 +279,9 @@ class DreamChat : KotlinPlugin() {
 	override fun softDisable() {
 		DreamChat.INSTANCE.saveConfig()
 		DreamCore.INSTANCE.dreamEventManager.events.remove(eventoChat)
+		assinaturaCitizensNpcs.forEach {
+			CitizensAPI.getNPCRegistry().deregister(it)
+		}
 	}
 
 	fun reload() {
@@ -362,8 +371,10 @@ class DreamChat : KotlinPlugin() {
 
 		// botResponses.add(VoteCountResponse())
 		botResponses.add(MarriedResponse())
+		botResponses.add(PantufaAssinaResponse())
 		botResponses.add(LorittaAssinaResponse())
-		botResponses.add(AssinaResponse())
+		botResponses.add(GabrielaAssinaResponse())
+		botResponses.add(GessyAssinaResponse())
 		botResponses.add(PingResponse())
 		botResponses.add(LagResponse())
 	}

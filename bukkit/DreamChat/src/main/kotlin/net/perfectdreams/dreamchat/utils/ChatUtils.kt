@@ -149,9 +149,83 @@ object ChatUtils {
 						|§eKDR: §6PvP é para os fracos, 2bj :3
 						|§eOnline no SparklyPower Survival por §6mais tempo que você
 						|
-						|§dA mascote do SparklyPower e o bot mais fofis para o Discord!
+						|§dO bot mais fofis para o Discord!
 					""".trimMargin().toBaseComponent())
 			clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "Loritta... só para saber, porque você quer me marcar? Eu sou um robô e não um player!")
+		}
+		textComponent += " §6➤ ".toBaseComponent()
+
+		val split = message.split("(?=\\b[ ])")
+		var previous: String? = null
+		for (piece in split) {
+			var editedPiece = piece
+			if (previous != null) {
+				editedPiece = "$previous$editedPiece"
+			}
+			textComponent += editedPiece.toBaseComponent()
+			previous = ChatColor.getLastColors(piece)
+		}
+
+		broadcast(textComponent)
+	}
+
+	fun sendResponseAsGabriela(player: Player, message: String) {
+		// Hora de "montar" a mensagem
+		val textComponent = TextComponent()
+
+		textComponent += TextComponent(*DreamChat.LORITTA_PREFIX.toBaseComponent()).apply {
+			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "kk eae men".toBaseComponent())
+		}
+
+		textComponent += TextComponent(*"§5${DreamChat.GABRIELA_NAME}".translateColorCodes().toBaseComponent()).apply {
+			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT,
+				"""§6✪ §a§lSobre a §r${DreamChat.GABRIELA_NAME} §6✪
+						|
+						|§eGênero: §d♀
+						|§eGrana: §6Incontáveis Sonecas
+						|§eKDR: §6PvP é para os fracos, 2bj :3
+						|§eOnline no SparklyPower Survival por §6mais tempo que você
+						|
+						|§dCuida das coisas de merchandising da PerfectDreams!
+					""".trimMargin().toBaseComponent())
+			clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "Gabriela... só para saber, porque você quer me marcar? Eu sou um robô e não um player!")
+		}
+		textComponent += " §6➤ ".toBaseComponent()
+
+		val split = message.split("(?=\\b[ ])")
+		var previous: String? = null
+		for (piece in split) {
+			var editedPiece = piece
+			if (previous != null) {
+				editedPiece = "$previous$editedPiece"
+			}
+			textComponent += editedPiece.toBaseComponent()
+			previous = ChatColor.getLastColors(piece)
+		}
+
+		broadcast(textComponent)
+	}
+
+	fun sendResponseAsGessy(player: Player, message: String) {
+		// Hora de "montar" a mensagem
+		val textComponent = TextComponent()
+
+		textComponent += TextComponent(*DreamChat.GESSY_PREFIX.toBaseComponent()).apply {
+			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "kk eae men".toBaseComponent())
+		}
+
+		textComponent += TextComponent(*"§9${DreamChat.GESSY_NAME}".translateColorCodes().toBaseComponent()).apply {
+			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT,
+				"""§6✪ §a§lSobre a §r${DreamChat.GESSY_NAME} §6✪
+						|
+						|§eGênero: §d♂
+						|§eGrana: §6Incontáveis Sonecas
+						|§eKDR: §6PvP é para os fracos, 2bj :3
+						|§eOnline no SparklyPower Survival por §6mais tempo que você
+						|
+						|§dMascote nos tempos vagos
+					""".trimMargin().toBaseComponent())
+			clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "Gessy... só para saber, porque você quer me marcar? Eu sou um robô e não um player!")
 		}
 		textComponent += " §6➤ ".toBaseComponent()
 

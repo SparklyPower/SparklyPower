@@ -80,12 +80,7 @@ class SetHomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("sethome", "setc
 	}
 
 	fun canCreateNew(player: Player, houses: List<Home>): Boolean {
-		val maxAllowed = when {
-			player.hasPermission("dreamhome.houseplusplusplus") -> 20
-			player.hasPermission("dreamhome.houseplusplus") -> 15
-			player.hasPermission("dreamhome.houseplus") -> 10
-			else -> 5
-		}
+		val maxAllowed = DreamHome.getMaxAllowedHomes(player)
 
 		if (houses.size >= maxAllowed)
 			return false
