@@ -95,6 +95,7 @@ include(":bukkit:DreamTNTRun")
 include(":bukkit:DreamResourceGenerator")
 include(":bukkit:DreamAjuda")
 include(":bukkit:DreamEnderHopper")
+include(":bukkit:DreamSplegg")
 
 // ===[ BUNGEE ]===
 include(":bungee:DreamCoreBungee")
