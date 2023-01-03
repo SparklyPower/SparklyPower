@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerDropItemEvent
 class DontDropItemsInSpawnListener(val m: DreamMini) : Listener {
 	@EventHandler
 	fun onDrop(e: PlayerDropItemEvent) {
-		if (e.player.location.isWithinRegion("spawn")) {
+		if (e.player.location.isWithinRegion("spawn") && !e.player.hasPermission("dreammini.bypassdropblock")) {
 			e.isCancelled = true
 			e.player.sendTextComponent {
 				color(NamedTextColor.RED)

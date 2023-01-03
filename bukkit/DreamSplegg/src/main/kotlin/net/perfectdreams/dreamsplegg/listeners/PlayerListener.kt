@@ -1,11 +1,13 @@
 package net.perfectdreams.dreamsplegg.listeners
 
+import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcorreios.events.CorreiosItemReceivingEvent
 import net.perfectdreams.dreamsplegg.DreamSplegg
 import net.perfectdreams.dreamsplegg.utils.Splegg
 import org.bukkit.Material
+import org.bukkit.Sound
 import org.bukkit.block.BlockFace
 import org.bukkit.entity.Egg
 import org.bukkit.entity.EntityType
@@ -137,8 +139,20 @@ class PlayerListener(val m: DreamSplegg) : Listener {
         if (!m.splegg.canDestroyBlocks)
             return
 
+        // I already had times when air blocks were being restored for some reason
+        // So let's check if the hitBlock is air before changing it to air
+        if (hitBlock.type == Material.AIR)
+            return
+
         m.splegg.blocksToBeRestored[hitBlock.location] = hitBlock.state
         hitBlock.type = Material.AIR
+
+        hitBlock.world.playSound(
+            hitBlock.location,
+            Sound.ENTITY_CHICKEN_EGG,
+            1f,
+            DreamUtils.random.nextFloat(0.9f, 1.1f)
+        )
     }
 
     @EventHandler

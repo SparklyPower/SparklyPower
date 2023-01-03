@@ -268,7 +268,7 @@ class Splegg(val m: DreamSplegg) {
         lastWinner = player.uniqueId
         player.deposit(howMuchMoneyWillBeGiven.toDouble(), TransactionContext(type = TransactionType.EVENTS, extra = "Splegg"))
 
-        val map = ItemStack(Material.FILLED_MAP).meta<MapMeta> {
+        /* val map = ItemStack(Material.FILLED_MAP).meta<MapMeta> {
             this.mapId = 26785
 
             this.displayName(
@@ -282,7 +282,7 @@ class Splegg(val m: DreamSplegg) {
         }
 
         DreamMapWatermarker.watermarkMap(map, null)
-        player.addItemIfPossibleOrAddToPlayerMailbox(map)
+        player.addItemIfPossibleOrAddToPlayerMailbox(map) */
 
         scheduler().schedule(m, SynchronizationContext.ASYNC) {
             val wonAt = System.currentTimeMillis()

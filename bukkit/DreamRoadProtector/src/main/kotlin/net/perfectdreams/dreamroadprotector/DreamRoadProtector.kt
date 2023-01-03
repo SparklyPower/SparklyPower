@@ -13,6 +13,7 @@ import org.bukkit.event.block.BlockFromToEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.util.*
@@ -43,20 +44,16 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 
 					val hasRoadNearby = hasRoadNearby(player.location)
 
-					// Some walk speed values cause an annoying fov glitch when resetting the speed when running
-					// That's why we cancel the isSprinting before setting the player walk speed state
 					// We don't use potion effects because it gets VERY annoying on higher speeds
 					if (hasRoadNearby) {
 						val alreadyHasSpeedApplied = player.persistentDataContainer.get(walkingOnRoadWithSpeed)
 						player.persistentDataContainer.set(walkingOnRoadWithSpeed, true)
 						player.foodLevel = 20
 						if (!alreadyHasSpeedApplied) {
-							player.isSprinting = false
-							player.walkSpeed = 0.65f
+							player.walkSpeed = 0.4f
 						}
 					} else if (player.persistentDataContainer.get(walkingOnRoadWithSpeed)) {
 						player.persistentDataContainer.remove(walkingOnRoadWithSpeed)
-						player.isSprinting = false
 						player.walkSpeed = 0.2f
 					}
 				}
@@ -68,6 +65,18 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 
 	override fun softDisable() {
 		super.softDisable()
+	}
+
+	@EventHandler
+	fun onTeleport(e: PlayerTeleportEvent) {
+		val player = e.player
+		
+		// Automatically reset the speed if they teleport
+		if (player.persistentDataContainer.get(walkingOnRoadWithSpeed)) {
+			player.persistentDataContainer.remove(walkingOnRoadWithSpeed)
+			player.isSprinting = false
+			player.walkSpeed = 0.2f
+		}
 	}
 
 	@EventHandler

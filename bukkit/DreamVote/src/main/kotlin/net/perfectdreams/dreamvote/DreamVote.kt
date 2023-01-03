@@ -187,17 +187,17 @@ class DreamVote : KotlinPlugin() {
 					val player = getPlayerExact(lastVoter)
 					val playerName = player?.displayName ?: lastVoter
 
-					Bukkit.broadcastMessage("§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e e ganhou $prizes§e! Vote você também! §6/votar")
+					Bukkit.broadcastMessage("§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e no §3$serviceName§e e ganhou $prizes§e! Vote você também! §6/votar")
 					player?.sendTitle("§aParabéns!", "§eVocê ganhou $prizes", 10, 60, 10)
 				}
 			}
 
 			switchContext(SynchronizationContext.ASYNC)
 
-			Cash.giveCash(uniqueId, 7, TransactionContext(type = TransactionType.VOTE_REWARDS))
+			Cash.giveCash(uniqueId, 4, TransactionContext(type = TransactionType.VOTE_REWARDS))
 
 			Webhooks.PANTUFA_INFO?.send(DiscordMessage(
-				content = "**$lastVoter** votou, agora **$lastVoter** possui ${voteCount + 1} votos. *Prêmios recebidos:* ${giveAwards.joinToString(", ", transform = { "`${it.name}`" })}"
+				content = "**$lastVoter** votou no $serviceName, agora **$lastVoter** possui ${voteCount + 1} votos. *Prêmios recebidos:* ${giveAwards.joinToString(", ", transform = { "`${it.name}`" })}"
 			))
 		}
 	}
