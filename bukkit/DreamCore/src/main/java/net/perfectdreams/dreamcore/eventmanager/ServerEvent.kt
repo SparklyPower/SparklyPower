@@ -5,6 +5,8 @@ import com.okkero.skedule.schedule
 import net.md_5.bungee.api.chat.BaseComponent
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.network.DreamNetwork
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.dreamcore.utils.scheduler
 import org.bukkit.Bukkit
 
@@ -52,8 +54,8 @@ open class ServerEvent(val eventName: String, val prefix: String) {
 				if (announce) {
 					val announcement = getWarmUpAnnouncementMessage(i)
 					when (announcement) {
-						is BaseComponent -> Bukkit.broadcast(announcement)
-						is String -> Bukkit.broadcastMessage(announcement.toString())
+						is BaseComponent -> broadcastMessage(BroadcastType.EVENT_ANNOUNCEMENT, announcement)
+						is String -> broadcastMessage(BroadcastType.EVENT_ANNOUNCEMENT) { "$announcement" }
 						else -> throw RuntimeException("Warm up announcement message is ${announcement::class.java.simpleName}, not a String or BaseComponent!")
 					}
 				}

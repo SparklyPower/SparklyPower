@@ -11,6 +11,8 @@ import net.perfectdreams.dreamcore.utils.TransactionType
 import net.perfectdreams.dreamcore.utils.deposit
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.formatted
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.dreamraffle.DreamRaffle
 import net.perfectdreams.dreamraffle.dao.Gambler
 import net.perfectdreams.dreamraffle.raffle.Raffle
@@ -128,7 +130,7 @@ object RafflesManager {
         }
 
     private fun broadcast(message: (Player) -> String) = Bukkit.getOnlinePlayers().forEach {
-        it.sendMessage(message.invoke(it))
+        broadcastMessage(BroadcastType.GAMBLING_MESSAGE, message)
     }
 
     fun save() = raffleFile.writeText(Json.encodeToString(currentRaffle))

@@ -7,6 +7,9 @@ import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.extensions.artigo
+import net.perfectdreams.dreamcore.utils.extensions.isStaff
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.shouldSeeBroadcast
 import net.perfectdreams.dreamvanish.DreamVanishAPI
 
 class TellExecutor(val m: DreamChat) : SparklyCommandExecutor() {
@@ -21,6 +24,9 @@ class TellExecutor(val m: DreamChat) : SparklyCommandExecutor() {
         val sender = context.requirePlayer()
         val receiver = args.getAndValidate(options.receiver)
         val message = args[options.message]
+
+        if (!receiver.shouldSeeBroadcast(BroadcastType.PRIVATE_MESSAGE) && !sender.isStaff)
+            context.fail("§c${receiver.name} desativou mensagens privadas nas preferências.")
 
         if (DreamVanishAPI.isQueroTrabalhar(receiver)) {
             receiver.sendMessage("§c${sender.displayName}§c tentou te enviar §e${message}§c!")

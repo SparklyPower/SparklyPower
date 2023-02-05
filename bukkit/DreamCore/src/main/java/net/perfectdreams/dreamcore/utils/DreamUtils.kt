@@ -33,6 +33,7 @@ import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.PluginManager
 import org.bukkit.scheduler.BukkitScheduler
+import org.jetbrains.exposed.sql.lowerCase
 import org.jetbrains.exposed.sql.transactions.transaction
 // import protocolsupport.api.ProtocolSupportAPI
 // import protocolsupport.api.ProtocolVersion
@@ -284,6 +285,20 @@ object DreamUtils {
 		assertAsyncThread(true)
 		return transaction(Databases.databaseNetwork) {
 			User.find { Users.username eq playerName }
+				.firstOrNull()
+		}
+	}
+
+	/**
+	 * Retrieves the user info for the specified [playerName], ignoring capitalization
+	 *
+	 * @param playerName user's name
+	 * @return the user's data, if present
+	 */
+	fun retrieveUserInfoCaseInsensitive(playerName: String): User? {
+		assertAsyncThread(true)
+		return transaction(Databases.databaseNetwork) {
+			User.find { Users.username.lowerCase() eq playerName.lowercase() }
 				.firstOrNull()
 		}
 	}

@@ -1,0 +1,5 @@
+name: DreamSocial
+main: net.perfectdreams.dreamsocial.DreamSocial
+version: 1.0.0
+depend: ["DreamCore", "DreamCasamentos", "DreamCash", "DreamChat", "DreamClubes", "DreamLoja", "DreamRaffle", "DreamVanish", "LuckPerms", "mcMMO"]
+api-version: 1.13

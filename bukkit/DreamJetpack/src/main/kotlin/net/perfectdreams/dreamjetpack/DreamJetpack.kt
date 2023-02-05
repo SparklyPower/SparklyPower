@@ -7,6 +7,8 @@ import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.extensions.hasStoredMetadataWithKey
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.sendMessage
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreamcore.utils.scheduler
@@ -220,7 +222,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 
 					flyingPlayers.add(e.player)
 
-					e.player.sendMessage("$PREFIX §eWoosh! Sua Jetpack foi ativada e está pronta para uso!")
+					e.player.sendMessage("$PREFIX §eWoosh! Sua Jetpack foi ativada e está pronta para uso!", BroadcastType.JETPACK_MESSAGE)
 				} else {
 					e.player.allowFlight = false
 
@@ -228,7 +230,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 					bossBars[e.player]?.removeAll()
 					bossBars.remove(e.player)
 
-					e.player.sendMessage("$PREFIX §eSua Jetpack foi desativada!")
+					e.player.sendMessage("$PREFIX §eSua Jetpack foi desativada!", BroadcastType.JETPACK_MESSAGE)
 				}
 			}
 		}
