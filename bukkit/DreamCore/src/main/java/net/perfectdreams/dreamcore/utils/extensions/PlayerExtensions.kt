@@ -7,6 +7,8 @@ import com.comphenix.protocol.events.PacketAdapter
 import com.comphenix.protocol.events.PacketEvent
 import com.comphenix.protocol.wrappers.EnumWrappers
 import com.okkero.skedule.schedule
+import me.ryanhamshire.GriefPrevention.Claim
+import me.ryanhamshire.GriefPrevention.ClaimPermission
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.MeninaAPI
 import net.perfectdreams.dreamcore.utils.PlayerUtils
@@ -16,7 +18,6 @@ import net.perfectdreams.dreamcore.utils.collections.mutablePlayerSetOf
 import net.perfectdreams.dreamcore.utils.registerEvents
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -176,7 +177,7 @@ val playerInventories = mutablePlayerMapOf<Array<ItemStack>> { player, content -
  * Stores [Player]'s inventory.
  */
 fun Player.storeInventory() {
-    playerInventories[this] = inventory.contents?.map { it ?: EMPTY_ITEM }?.toTypedArray() ?: arrayOf(EMPTY_ITEM)
+    playerInventories[this] = inventory.contents.map { it ?: EMPTY_ITEM }.toTypedArray()
     inventory.clear()
 }
 
@@ -192,3 +193,28 @@ fun Player.playSoundAndSendMessage(sound: Sound, message: String) {
     playSound(location, sound, 10F, 1F)
     sendMessage(message)
 }
+
+/**
+ * @return Whether [Player] has [permission] at [claim] or not.
+ */
+private fun Player.hasPermissionAtClaim(permission: ClaimPermission, claim: Claim, staffBypass: Boolean) =
+    claim.hasExplicitPermission(this, permission) || (staffBypass && this.isStaff)
+
+/**
+ * @return Whether the owner of the claim has trusted [Player] to build at said claim.
+ */
+fun Player.canBuildAtClaim(claim: Claim, staffBypass: Boolean) =
+    this.hasPermissionAtClaim(ClaimPermission.Build, claim, staffBypass)
+
+/**
+ * @return Whether the owner of the claim has trusted [Player] to manage said claim.
+ */
+fun Player.canManageClaim(claim: Claim, staffBypass: Boolean) =
+    this.hasPermissionAtClaim(ClaimPermission.Manage, claim, staffBypass)
+
+/**
+ * Since we are only interested in whether [Player] has either [ClaimPermission.Build] or [ClaimPermission.Manage]
+ * permissions, there is no need to check for the other types.
+ */
+fun Player.hasAnyPermissionAtClaim(claim: Claim, staffBypass: Boolean) =
+    this.canBuildAtClaim(claim, staffBypass) || this.canManageClaim(claim, staffBypass)

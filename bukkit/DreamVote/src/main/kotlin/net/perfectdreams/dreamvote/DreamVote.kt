@@ -8,6 +8,8 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.gson
 import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreamvote.commands.VotarCommand
 import net.perfectdreams.dreamvote.dao.Vote
@@ -66,7 +68,9 @@ class DreamVote : KotlinPlugin() {
 					}
 					earnedMoney += 15.0
 					if (earnedMoney % 180.0 == 165.0) {
-						Bukkit.broadcastMessage("§b$lastVoter§d já ganhou §2$earnedMoney sonecas§d apenas mantendo a tag de §c§lÚltimo Votador§d, roube a tag votando! §6/votar")
+						broadcastMessage(BroadcastType.VOTES_MESSAGE) {
+							"§b$lastVoter§d já ganhou §2$earnedMoney sonecas§d apenas mantendo a tag de §c§lÚltimo Votador§d, roube a tag votando! §6/votar"
+						}
 					}
 				}
 				waitFor(5 * 20)
@@ -187,7 +191,10 @@ class DreamVote : KotlinPlugin() {
 					val player = getPlayerExact(lastVoter)
 					val playerName = player?.displayName ?: lastVoter
 
-					Bukkit.broadcastMessage("§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e no §3$serviceName§e e ganhou $prizes§e! Vote você também! §6/votar")
+					broadcastMessage(BroadcastType.VOTES_MESSAGE) {
+						"§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e no §3$serviceName§e e ganhou $prizes§e! Vote você também! §6/votar"
+					}
+
 					player?.sendTitle("§aParabéns!", "§eVocê ganhou $prizes", 10, 60, 10)
 				}
 			}

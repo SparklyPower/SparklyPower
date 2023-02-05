@@ -4,6 +4,9 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcasamentos.DreamCasamentos
 import net.perfectdreams.dreamcasamentos.DreamCasamentos.Companion.PREFIX
+import net.perfectdreams.dreamcasamentos.dao.Marriage
+import net.perfectdreams.dreamcasamentos.tables.Marriages
+import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.MeninaAPI
 import org.bukkit.Bukkit
 import org.bukkit.Particle
@@ -11,7 +14,12 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEntityEvent
+import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.inventory.EquipmentSlot
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.or
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.Instant
 import java.util.*
 
 class MarryListener(val m: DreamCasamentos) : Listener {
@@ -49,6 +57,25 @@ class MarryListener(val m: DreamCasamentos) : Listener {
                     }
                 }
             }
+        }
+    }
+
+    @EventHandler
+    fun onLogin(event: PlayerLoginEvent) {
+        val playerUUID = event.player.uniqueId
+
+        m.schedule(SynchronizationContext.ASYNC) {
+            val marriage = transaction(Databases.databaseNetwork) {
+                Marriage.find {
+                    (Marriages.player1 eq playerUUID) or (Marriages.player2 eq playerUUID)
+                }.firstOrNull()
+            }
+
+            if (marriage != null)
+                if (marriage.marriedAt == null)
+                    transaction(Databases.databaseNetwork) {
+                        marriage.marriedAt = System.currentTimeMillis()
+                    }
         }
     }
 }

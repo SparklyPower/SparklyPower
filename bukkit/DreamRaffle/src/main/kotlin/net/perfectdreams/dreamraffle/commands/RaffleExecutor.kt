@@ -15,7 +15,6 @@ import kotlin.math.ceil
 import kotlin.random.Random
 
 class RaffleExecutor : SparklyCommandExecutor() {
-    
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
 

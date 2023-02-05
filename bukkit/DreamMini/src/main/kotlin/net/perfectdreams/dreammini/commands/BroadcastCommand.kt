@@ -7,7 +7,7 @@ import net.perfectdreams.dreammini.DreamMini
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 
-class BroadcastCommand(val m: DreamMini) : SparklyCommand(arrayOf("broadcast", "anunciar"), permission = "dreammini.broadcast") {
+class BroadcastCommand(val m: DreamMini) : SparklyCommand(arrayOf("broadcast"), permission = "dreammini.broadcast") {
 
 	@Subcommand
 	fun root(sender: CommandSender, arguments: Array<String>) {

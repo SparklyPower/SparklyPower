@@ -20,6 +20,8 @@ class Marriage(id: EntityID<Long>) : LongEntity(id) {
     var homeY by Marriages.homeY
     var homeZ by Marriages.homeZ
 
+    var marriedAt by Marriages.marriedAt
+
     fun getPartnerOf(player: Player): UUID {
         return getPartnerOf(player.uniqueId)
     }

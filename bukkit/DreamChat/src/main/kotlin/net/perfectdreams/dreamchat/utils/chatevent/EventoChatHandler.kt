@@ -9,6 +9,8 @@ import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.getTranslatedDisplayName
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.dreamcorreios.utils.addItemIfPossibleOrAddToPlayerMailbox
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -69,17 +71,17 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 
 		willGiveOutPesadelos = DreamUtils.random.nextInt(0, 3) == 0 // 25% chance
 
-		Bukkit.broadcastMessage(DreamUtils.HEADER_LINE)
-		Bukkit.broadcastMessage(("§6Quem " + event.getToDoWhat() + " primeiro").centralize())
-		Bukkit.broadcastMessage(("§e" + event.getAnnouncementMessage()).centralize())
+		broadcastMessage(BroadcastType.CHAT_EVENT) { DreamUtils.HEADER_LINE }
+		broadcastMessage(BroadcastType.CHAT_EVENT) { ("§6Quem " + event.getToDoWhat() + " primeiro").centralize() }
+		broadcastMessage(BroadcastType.CHAT_EVENT) { ("§e" + event.getAnnouncementMessage()).centralize() }
 
 		var message = "§6Irá ganhar §9" + currentPrize.amount + " " + ChatColor.stripColor(currentPrize.getTranslatedDisplayName("pt_BR"))
 		if (willGiveOutPesadelos)
 			message += "§6 e §cum pesadelo"
 		message += "§6!"
 
-		Bukkit.broadcastMessage(message.centralize())
-		Bukkit.broadcastMessage(DreamUtils.HEADER_LINE)
+		broadcastMessage(BroadcastType.CHAT_EVENT) { message.centralize() }
+		broadcastMessage(BroadcastType.CHAT_EVENT) { DreamUtils.HEADER_LINE }
 
 		scheduler().schedule(DreamChat.INSTANCE) {
 			waitFor(3600)
@@ -88,7 +90,10 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 				return@schedule
 
 			running = false
-			Bukkit.broadcastMessage("§cSério mesmo que NINGUÉM participou do evento chat? Que triste... estava tão animado para alguém ganhar e todos apenas desistiram...")
+
+			broadcastMessage(BroadcastType.CHAT_EVENT) {
+				"§cSério mesmo que NINGUÉM participou do evento chat? Que triste... estava tão animado para alguém ganhar e todos apenas desistiram..."
+			}
 		}
 	}
 

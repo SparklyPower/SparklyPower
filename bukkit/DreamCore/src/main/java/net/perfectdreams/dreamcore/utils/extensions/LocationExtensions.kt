@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamcore.utils.extensions
 
 import com.sk89q.worldguard.protection.ApplicableRegionSet
+import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.LocationUtils
 import net.perfectdreams.dreamcore.utils.WorldGuardUtils
 import org.bukkit.Location
@@ -42,3 +43,5 @@ val Location.rounded: Boolean
 fun Location.getRoundedDestination(): Location = LocationUtils.getRoundedDestination(this)
 
 fun Location.getSafeDestination(): Location = LocationUtils.getSafeDestination(this)
+
+val Location.claim get() = GriefPrevention.instance.dataStore.getClaimAt(this, true, null)
