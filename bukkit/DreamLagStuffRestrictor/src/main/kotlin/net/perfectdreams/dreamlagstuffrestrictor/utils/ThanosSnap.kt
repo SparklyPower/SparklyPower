@@ -1,6 +1,8 @@
 package net.perfectdreams.dreamlagstuffrestrictor.utils
 
 import com.okkero.skedule.schedule
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.sendMessage
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamlagstuffrestrictor.DreamLagStuffRestrictor
 import org.bukkit.Bukkit
@@ -24,7 +26,7 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
                 var killedMobs = mutableMapOf<EntityType, Int>()
 
                 for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }) {
-                    player.sendMessage("\ue251 §x§e§6§b§2§e§8Rodando o Thanos Snap...")
+                    player.sendMessage("\ue251 §x§e§6§b§2§e§8Rodando o Thanos Snap...", BroadcastType.THANOS_SNAP)
                 }
 
                 for (player in Bukkit.getOnlinePlayers().filter { it.world.name == "world" }) {
@@ -45,7 +47,7 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
 
                 if (total != 0) {
                     for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }) {
-                        player.sendMessage("\uE251 §cO §dThanos Snap™§c passou e levou §4${total} mobs diferentes§c, sendo eles...")
+                        player.sendMessage("\uE251 §cO §dThanos Snap™§c passou e levou §4${total} mobs diferentes§c, sendo eles...", BroadcastType.THANOS_SNAP)
                     }
 
                     fun announceIfNeeded(type: EntityType) {
@@ -53,7 +55,7 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
 
                         if (total != 0) {
                             for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }) {
-                                player.sendMessage("\uE251 §4✝ §c$total $type...")
+                                player.sendMessage("\uE251 §4✝ §c$total $type...", BroadcastType.THANOS_SNAP)
                             }
                         }
                     }
@@ -65,7 +67,7 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
                     // Bukkit.broadcastMessage("§cTema. Tente fugir. O §dThanos Snap™§c sempre chegará... (Por favor, evite farms para evitar lag no servidor! thx!!)")
                 } else {
                     for (player in Bukkit.getOnlinePlayers().filter { it.hasPermission("sparklypower.soustaff") }) {
-                        player.sendMessage("\uE251 §x§e§6§b§2§e§8Thanos Snap não limpou nenhum mob...")
+                        player.sendMessage("\uE251 §x§e§6§b§2§e§8Thanos Snap não limpou nenhum mob...", BroadcastType.THANOS_SNAP)
                     }
                 }
                 // }

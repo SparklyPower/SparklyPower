@@ -4,6 +4,8 @@ import com.okkero.skedule.CoroutineTask
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.hasStoredMetadataWithKey
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.dreammini.commands.*
 import net.perfectdreams.dreammini.utils.*
 import org.bukkit.Color
@@ -253,7 +255,9 @@ class DreamMini : KotlinPlugin(), Listener {
 					"entraram"
 				}
 
-				broadcast("§8[§a+§8] §b${joinedPlayers.joinToString("§a, §b", transform = { it.name })}§a $aux no jogo!")
+				broadcastMessage(BroadcastType.LOGIN_ANNOUNCEMENT) {
+					"§8[§a+§8] §b${joinedPlayers.joinToString("§a, §b", transform = { it.name })}§a $aux no jogo!"
+				}
 
 				joined.clear()
 			}
@@ -312,7 +316,9 @@ class DreamMini : KotlinPlugin(), Listener {
 					"sairam"
 				}
 
-				broadcast("§8[§c-§8] §b${leftPlayers.joinToString("§c, §b", transform = { it.name })}§c $aux do jogo...")
+				broadcastMessage(BroadcastType.LOGIN_ANNOUNCEMENT) {
+					"§8[§c-§8] §b${leftPlayers.joinToString("§c, §b", transform = { it.name })}§c $aux do jogo..."
+				}
 
 				left.clear()
 			}

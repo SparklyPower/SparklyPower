@@ -8,6 +8,8 @@ import net.md_5.bungee.api.chat.TextComponent
 import net.perfectdreams.dreamcore.network.socket.SocketReceivedEvent
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.girl
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
@@ -208,10 +210,11 @@ class DreamBroadcast : KotlinPlugin(), Listener {
 			)
 
 			scheduler().schedule(this) {
-				Bukkit.broadcast(message)
+				broadcastMessage(BroadcastType.SERVER_ANNOUNCEMENT, message)
+
 				for (idx in 0..11) {
 					waitFor(6000)
-					Bukkit.broadcast(messageAfter)
+					broadcastMessage(BroadcastType.SERVER_ANNOUNCEMENT, message)
 				}
 			}
 		}

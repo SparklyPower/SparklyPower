@@ -3,6 +3,8 @@ package net.perfectdreams.dreamchat.utils.chatevent
 import net.perfectdreams.dreamchat.dao.EventMessage
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.extensions.centralize
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import org.apache.commons.lang3.StringUtils
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -43,18 +45,24 @@ class EventoChatMensagem : IEventoChat {
 			// Novo recorde, woo!
 			val bestWinner = currentMessage.bestWinner
 			if (bestWinner != null) {
-				Bukkit.broadcastMessage("§c(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ §aNOVO RECORDE! §c✧ﾟ･: *ヽ(◕ヮ◕ヽ)".centralize())
+				broadcastMessage(BroadcastType.CHAT_EVENT) {
+					"§c(ﾉ◕ヮ◕)ﾉ*:･ﾟ✧ §aNOVO RECORDE! §c✧ﾟ･: *ヽ(◕ヮ◕ヽ)".centralize()
+				}
+
 				val player = Bukkit.getOfflinePlayer(bestWinner)
 
 				val faster = lastRecord.toDouble() / timeElapsed.toDouble()
-				Bukkit.broadcastMessage(
+				broadcastMessage(BroadcastType.CHAT_EVENT) {
 					"§b${winner.displayName}§r§a bateu o recorde de §b${player?.name
 						?: "???"}§r§a! §3(${faster}x mais rápido!)".centralize()
-				)
+				}
 
 				val seconds = lastRecord / 1000L
 				val milli = lastRecord % 1000L
-				Bukkit.broadcastMessage(("§6Antigo recorde: §e$seconds segundos§6 e §e$milli milissegundos§6!").centralize())
+
+				broadcastMessage(BroadcastType.CHAT_EVENT) {
+					("§6Antigo recorde: §e$seconds segundos§6 e §e$milli milissegundos§6!").centralize()
+				}
 			}
 		}
 	}
