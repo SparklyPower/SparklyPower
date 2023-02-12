@@ -3,6 +3,7 @@ package net.perfectdreams.dreamsocial.commands.announce
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamcore.utils.TimeUtils
@@ -78,20 +79,21 @@ class AnnounceExecutor(private val plugin: DreamSocial, private val dreamChat: D
 
         plugin.server.onlinePlayers.forEach {
             if (it == player) return@forEach
-            if (DreamVanishAPI.isQueroTrabalhar(it)) return@forEach
             if (it.uniqueId.toString() in ignoreList && !it.isStaff) return@forEach
             if (!it.shouldSeeBroadcast(BroadcastType.PLAYER_ANNOUNCEMENT)) return@forEach
 
-            reachedPlayers++
+            if (!DreamVanishAPI.isQueroTrabalhar(it)) reachedPlayers++
             it.sendMessage(broadcast)
         }
+
+        player.sendMessage(broadcast)
 
         if (canPlayerSaveAnnouncements) SaveAnnouncementExecutor.lastAnnouncements[player] = message
 
         if (reachedPlayers == 0)
-            player.sendMessage(REACHED_NONE)
+            player.sendMessage(REACHED_NONE.asComponent.color(NamedTextColor.YELLOW))
         else
-            player.sendMessage(REACHED_SOME.format(reachedPlayers.pluralize("jogador" to "jogadores")))
+            player.sendMessage(REACHED_SOME.format(reachedPlayers.pluralize("jogador" to "jogadores")).asComponent.color(NamedTextColor.YELLOW))
     }
 
     companion object {
