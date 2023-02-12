@@ -14,4 +14,5 @@ class DreamConfig(val serverName: String, val bungeeName: String) {
 	lateinit var pantufaInfoWebhook: String
 	lateinit var pantufaErrorWebhook: String
 	var socketPort = -1
+	var rpcPort = 25665
 }

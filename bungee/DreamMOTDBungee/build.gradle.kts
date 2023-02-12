@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":bungee:DreamCoreBungee", configuration = "shadowWithRuntimeDependencies"))
+    compileOnly(project(":bungee:DreamCoreBungee"))
 }
 
 tasks.withType<KotlinCompile> {

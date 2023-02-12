@@ -11,7 +11,7 @@ class SignListener(val m: DreamChat) : Listener {
     @EventHandler
     fun onSignEdit(e: SignChangeEvent) {
         // Don't replace if it is a chest shop sign
-        if (!ChestShopSign.isValid(e.lines))
+        if (ChestShopSign.isValid(e.lines))
             return
 
         for (i in 0..3) {

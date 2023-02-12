@@ -5,6 +5,7 @@ import net.perfectdreams.dreamcore.utils.balance
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreamcore.utils.withdraw
 import net.perfectdreams.dreamreparar.DreamReparar
+import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.block.Sign
@@ -92,7 +93,7 @@ class SignListener(val m: DreamReparar) : Listener {
 
     @EventHandler
     fun onSignChange(e: SignChangeEvent) {
-        if (e.getLine(0) == "[Reparar]") {
+        if (ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', e.getLine(0)!!)) == "[Reparar]") {
             if (e.player.hasPermission("dreamreparar.placa")) {
                 e.setLine(0, "§1[Reparar]")
                 e.player.sendMessage("§aPlaca de Repara\u00e7\u00e3o criada com sucesso!")

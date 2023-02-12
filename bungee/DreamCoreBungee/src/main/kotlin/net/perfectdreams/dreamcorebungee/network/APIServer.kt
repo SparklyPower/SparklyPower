@@ -25,7 +25,7 @@ class APIServer(private val plugin: DreamCoreBungee) {
 
     fun start() {
         logger.info { "Starting HTTP Server..." }
-        val server = embeddedServer(Netty, port = 9999) {
+        val server = embeddedServer(Netty, port = DreamCoreBungee.dreamConfig.rpcPort) {
             routing {
                 get("/") {
                     call.respondText("SparklyPower API Web Server")

@@ -216,7 +216,7 @@ object ChatUtils {
 
 		textComponent += TextComponent(*"§9${DreamChat.GESSY_NAME}".translateColorCodes().toBaseComponent()).apply {
 			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT,
-				"""§6✪ §a§lSobre a §r${DreamChat.GESSY_NAME} §6✪
+				"""§6✪ §a§lSobre o §r${DreamChat.GESSY_NAME} §6✪
 						|
 						|§eGênero: §d♂
 						|§eGrana: §6Incontáveis Sonecas
@@ -226,6 +226,41 @@ object ChatUtils {
 						|§dMascote nos tempos vagos
 					""".trimMargin().toBaseComponent())
 			clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "Gessy... só para saber, porque você quer me marcar? Eu sou um robô e não um player!")
+		}
+		textComponent += " §6➤ ".toBaseComponent()
+
+		val split = message.split("(?=\\b[ ])")
+		var previous: String? = null
+		for (piece in split) {
+			var editedPiece = piece
+			if (previous != null) {
+				editedPiece = "$previous$editedPiece"
+			}
+			textComponent += editedPiece.toBaseComponent()
+			previous = ChatColor.getLastColors(piece)
+		}
+
+		broadcast(textComponent)
+	}
+
+	fun sendResponseAsLula(player: Player, message: String) {
+		// Hora de "montar" a mensagem
+		val textComponent = TextComponent()
+
+		textComponent += TextComponent(*"§8[§4§lPolvo§8] ".toBaseComponent()).apply {
+			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, "kk eae men".toBaseComponent())
+		}
+
+		textComponent += TextComponent(*"§4Lula".translateColorCodes().toBaseComponent()).apply {
+			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT,
+				"""§6✪ §a§lSobre o §cLula §6✪
+						|
+						|§eGênero: §d♂
+						|§eGrana: §6Incontáveis Sonecas
+						|§eKDR: §6PvP é para os fracos, 2bj :3
+						|§eOnline no SparklyPower Survival por §6mais tempo que você
+					""".trimMargin().toBaseComponent())
+			clickEvent = ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "Lula... só para saber, porque você quer me marcar? Eu sou um robô e não um player!")
 		}
 		textComponent += " §6➤ ".toBaseComponent()
 

@@ -82,12 +82,12 @@ abstract class AssinaResponse(
 					} else { // Se o de cima não for ar, então o usuário quer assinar em uma parede!
 						if (!event.player.canPlaceAt(airBlockBeforeTheTargetBlock.location, targetSignMaterial))  {
 							removeNPC()
-							ChatUtils.sendResponseAsBot(player, "§b${player.displayName}§a, eu não consegui colocar uma placa aonde você está...")
+							messageSendFunction.invoke(player, "§b${player.displayName}§a, eu não consegui colocar uma placa aonde você está...")
 							return@launchMainThread
 						}
 
-						val facePriority = LocationUtils.yawToFace((playerCurrentLocation.yaw + 90) % 360, true)
-						signBlock = attachWallSignAt(airBlockBeforeTheTargetBlock.location, Material.valueOf(targetSignMaterial.name.replace("_SIGN", "_WALL_SIGN")), facePriority)
+						val facePriority = LocationUtils.yawToFace((playerCurrentLocation.yaw + 90) % 360, false)
+						signBlock = attachWallSignAt(player, airBlockBeforeTheTargetBlock.location, Material.valueOf(targetSignMaterial.name.replace("_SIGN", "_WALL_SIGN")), facePriority)
 					}
 				}
 
@@ -102,12 +102,11 @@ abstract class AssinaResponse(
 				delayTicks(40)
 
 				val sign = signBlock.state as Sign
-				sign.setLine(0, "§3§m---------")
-				sign.setLine(1, "§6✪$color$name§6✪")
-				sign.setLine(2, "§4aprova! ʕ•ᴥ•ʔ")
-				sign.setLine(3, "§3§m---------")
+				for ((index, line) in getSignLines().withIndex()) {
+					sign.setLine(index, line)
+				}
 				sign.update()
-				messageSendFunction.invoke(player, "§b${player.displayName}§a, pronto! §dʕ•ᴥ•ʔ")
+				messageSendFunction.invoke(player, getSuccessResponse(player))
 
 				delayTicks(20)
 
@@ -123,6 +122,15 @@ abstract class AssinaResponse(
 			}
 		}
 	}
+
+	open fun getSuccessResponse(player: Player) = "§b${player.displayName}§a, pronto! §dʕ•ᴥ•ʔ"
+
+	open fun getSignLines() = listOf(
+		"§3§m---------",
+		"§6✪$color$name§6✪",
+		"§4aprova! ʕ•ᴥ•ʔ",
+		"§3§m---------"
+	)
 
 	private fun hasSign(player: Player): Material? {
 		player.inventory.forEach {
@@ -142,7 +150,15 @@ abstract class AssinaResponse(
 		}
 	}
 
+	private val TRANSPARENT = setOf(
+		Material.AIR,
+		Material.CAVE_AIR,
+		Material.VOID_AIR
+	)
+
 	private val BLOCKED_ATTACHMENTS = setOf(
+		Material.CAVE_AIR,
+		Material.VOID_AIR,
 		Material.AIR,
 		Material.CAKE,
 		Material.COBWEB,
@@ -150,10 +166,10 @@ abstract class AssinaResponse(
 		Material.LAVA
 	) + Material.values().filter { it.name.endsWith("_SIGN") }
 
-	private fun attachWallSignAt(l: Location, wallSignType: Material, facePriority: BlockFace): Block? {
+	private fun attachWallSignAt(player: Player, l: Location, wallSignType: Material, facePriority: BlockFace): Block? {
 		val block = l.block
 
-		if (block.type != Material.AIR) // Can't place here!
+		if (block.type !in TRANSPARENT) // Can't place here!
 			return null
 
 		// Check any block around the location

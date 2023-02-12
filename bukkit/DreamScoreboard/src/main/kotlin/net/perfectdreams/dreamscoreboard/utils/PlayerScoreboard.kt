@@ -15,6 +15,9 @@ import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.RenderType
 import org.bukkit.scoreboard.Team
 import java.text.DecimalFormat
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -81,7 +84,7 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 	|§6Modéstia à parte... esse servidor é incrível!
 	|§x§f§6§1§7§0§0§om§x§e§8§1§f§0§b§oc§x§d§b§2§7§1§6§o.§x§c§d§2§f§2§1§os§x§b§f§3§7§2§c§op§x§b§2§4§0§3§8§oa§x§a§4§4§8§4§3§or§x§9§6§5§0§4§e§ok§x§8§9§5§8§5§9§ol§x§7§b§6§0§6§4§oy§x§6§d§6§8§6§f§op§x§6§0§7§0§7§a§oo§x§5§2§7§8§8§5§ow§x§4§4§8§0§9§0§oe§x§3§7§8§9§9§c§or§x§2§9§9§1§a§7§o.§x§1§b§9§9§b§2§on§x§0§e§a§1§b§d§oe§x§0§0§a§9§c§8§ot
     |§3§m✦-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-§b§m-§3§m-✦
-	|§aMundo: §x§3§0§e§3§3§0$fancyWorldName §7• §aTPS: §x§3§0§e§3§3§0${tpsNow}
+	|§aMundo: §x§3§0§e§3§3§0$fancyWorldName §7• §aTPS: §x§3§0§e§3§3§0${tpsNow} §7• §aPing: §x§3§0§e§3§3§0${player.spigot().ping}ms
     |§8§m-§3§m-§b§m-§f§m-§b§m-§3§m-§8§m-
     |§6§lPrecisa de ajuda? §e/ajuda
     |§6§lAlguma dúvida? §6§oPergunte no chat!
@@ -177,15 +180,16 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
 			else -> ""
 		}
 
-		phoenix.setText("§b${playerCount}§3/§b${Bukkit.getMaxPlayers()} §d${specialText}", idx--)
+		// We keep it as 120 for nostalgic purposes
+		phoenix.setText("§b${playerCount}§3/§b120 §d${specialText}", idx--)
 		return idx
 	}
 
 	private fun setupClock(_idx: Int): Int {
 		var idx = _idx
 		phoenix.setText("§4➦ §c§lHorário Atual", idx--)
-		val calendar = Calendar.getInstance()
-		phoenix.setText("§c${String.format("%02d", calendar[Calendar.HOUR_OF_DAY])}§4:§c${String.format("%02d", calendar[Calendar.MINUTE])}", idx--)
+		val localTime = LocalTime.now(ZoneId.of("America/Sao_Paulo"))
+		phoenix.setText("§c${String.format("%02d", localTime.hour)}§4:§c${String.format("%02d", localTime.minute)}", idx--)
 		return idx
 	}
 

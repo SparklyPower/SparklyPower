@@ -84,6 +84,8 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 	override fun softEnable() {
 		super.softEnable()
 
+		Bukkit.getServer().maxPlayers = 250
+
 		registerEvents(this)
 		registerEvents(TagListener(this))
 

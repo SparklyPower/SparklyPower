@@ -10,6 +10,7 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
 import net.perfectdreams.dreamcore.utils.adventure.sendTextComponent
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
+import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.bukkit.Bukkit
@@ -105,6 +106,18 @@ class DreamAjuda : KotlinPlugin(), Listener {
 
 		// And teleport it somewhere else!
 		e.player.teleport(Location(Bukkit.getWorld("TutorialIsland"), 1011.5, 100.0, 1000.5, 90f, 0f))
+	}
+
+	@EventHandler
+	fun onMove(e: PlayerMoveEvent) {
+		if (!e.displaced)
+			return
+
+		if (e.to.world.name == "TutorialIsland" && 0 >= e.to.y) {
+			// If the player falls into the voice, we will teleport them somewhere else!
+			// And teleport it somewhere else!
+			e.player.teleport(Location(Bukkit.getWorld("TutorialIsland"), 1011.5, 100.0, 1000.5, 90f, 0f))
+		}
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)

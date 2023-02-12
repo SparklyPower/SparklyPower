@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.gson
 import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
+import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreamvote.commands.VotarCommand
 import net.perfectdreams.dreamvote.dao.Vote
@@ -57,7 +58,7 @@ class DreamVote : KotlinPlugin() {
 		registerEvents(TagListener(this))
 		registerEvents(VoteListener(this))
 
-		scheduler().schedule(this) {
+		launchAsyncThread {
 			while (true) {
 				val lastVoter = lastVoter
 				if (lastVoter != null) {
@@ -69,7 +70,7 @@ class DreamVote : KotlinPlugin() {
 						Bukkit.broadcastMessage("§b$lastVoter§d já ganhou §2$earnedMoney sonecas§d apenas mantendo a tag de §c§lÚltimo Votador§d, roube a tag votando! §6/votar")
 					}
 				}
-				waitFor(5 * 20)
+				delayTicks(5 * 20L)
 			}
 		}
 

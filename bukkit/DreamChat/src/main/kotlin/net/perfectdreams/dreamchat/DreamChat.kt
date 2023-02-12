@@ -375,6 +375,7 @@ class DreamChat : KotlinPlugin() {
 		botResponses.add(LorittaAssinaResponse())
 		botResponses.add(GabrielaAssinaResponse())
 		botResponses.add(GessyAssinaResponse())
+		botResponses.add(LulaAssinaResponse())
 		botResponses.add(PingResponse())
 		botResponses.add(LagResponse())
 	}
