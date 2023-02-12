@@ -14,9 +14,9 @@ open class DreamNetwork {
 	companion object {
 		val LORITTA = DreamServer(LOCAL_HOST, LORITTA_PORT, "loritta", "Loritta", "Loritta")
 		val PANTUFA = PantufaServer(LOCAL_HOST, PANTUFA_PORT, "pantufa", "Pantufa", "Pantufa")
-		val PERFECTDREAMS_BUNGEE = MinecraftServer("172.31.255.1", PERFECTDREAMS_BUNGEE_PORT, "bungeecord", "PerfectDreams BungeeCord", "BungeeCord")
-		val PERFECTDREAMS_LOBBY = MinecraftServer("172.31.255.2", PERFECTDREAMS_LOBBY_PORT, "sparklypower_lobby", "PerfectDreams Lobby", "Lobby")
-		val PERFECTDREAMS_SURVIVAL = MinecraftServer("172.31.255.3", PERFECTDREAMS_SURVIVAL_PORT, "sparklypower_survival", "PerfectDreams Lobby", "Lobby")
+		val PERFECTDREAMS_BUNGEE = MinecraftServer("sparkly-bungee", 60800, "bungeecord", "PerfectDreams BungeeCord", "BungeeCord")
+		val PERFECTDREAMS_LOBBY = MinecraftServer("sparkly-lobby", 60800, "sparklypower_lobby", "PerfectDreams Lobby", "Lobby")
+		val PERFECTDREAMS_SURVIVAL = MinecraftServer("sparkly-survival", 60800, "sparklypower_survival", "PerfectDreams Lobby", "Lobby")
 
 		val servers = mutableListOf<DreamServer>()
 
