@@ -305,7 +305,7 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 			if (clubePrefix != null)
 				prefix = "$tabPrefixColor[$clubePrefix$tabPrefixColor] "
 			if (player.isBedrockClient)
-				prefix = "§f鈷$tabPrefixColor "
+				prefix = "$tabPrefixColor(§f鈷$tabPrefixColor) "
 
 			val prefixWithoutChanges = prefix
 
