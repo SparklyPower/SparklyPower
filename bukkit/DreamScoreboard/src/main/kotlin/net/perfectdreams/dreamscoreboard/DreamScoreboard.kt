@@ -2,6 +2,8 @@ package net.perfectdreams.dreamscoreboard
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.perfectdreams.dreambedrockintegrations.DreamBedrockIntegrations
+import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamclubes.dao.Clube
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
@@ -300,9 +302,11 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 			val clubePrefix = cachedClubesPrefixes[player]
 
-			if (clubePrefix != null) {
+			if (clubePrefix != null)
 				prefix = "$tabPrefixColor[$clubePrefix$tabPrefixColor] "
-			}
+			if (player.isBedrockClient)
+				prefix = "$tabPrefixColor(§f鈷$tabPrefixColor) "
+
 			val prefixWithoutChanges = prefix
 
 			if (player.playerListName != prefixWithoutChanges + player.displayName)

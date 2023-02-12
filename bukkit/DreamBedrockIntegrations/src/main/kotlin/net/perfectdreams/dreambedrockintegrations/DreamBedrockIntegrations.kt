@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component
 import net.perfectdreams.dreambedrockintegrations.packetlisteners.BedrockPacketListener
 import net.perfectdreams.dreamcore.network.socket.SocketReceivedEvent
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.registerEvents
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
@@ -29,6 +30,8 @@ class DreamBedrockIntegrations : KotlinPlugin(), Listener {
 
 		val protocolManager = ProtocolLibrary.getProtocolManager()
 		protocolManager.addPacketListener(BedrockPacketListener(this))
+
+		registerEvents(this)
 	}
 
 	override fun softDisable() {
