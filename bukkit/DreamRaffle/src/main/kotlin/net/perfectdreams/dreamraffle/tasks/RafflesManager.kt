@@ -129,9 +129,7 @@ object RafflesManager {
             }
         }
 
-    private fun broadcast(message: (Player) -> String) = Bukkit.getOnlinePlayers().forEach {
-        broadcastMessage(BroadcastType.GAMBLING_MESSAGE, message)
-    }
+    private fun broadcast(message: (Player) -> String) = broadcastMessage(BroadcastType.GAMBLING_MESSAGE, message)
 
     fun save() = raffleFile.writeText(Json.encodeToString(currentRaffle))
 }
