@@ -424,37 +424,37 @@ fun renderProfileMenu(plugin: DreamSocial, targetUUID: UUID, profileLayout: Prof
 
         val numberOfYears = (today - firstLogin) / 31_556_926_000
 
-        if (numberOfYears > 0)
-            optionalItems.add {
-                item = ItemStack(Material.PAPER).meta<ItemMeta> {
-                    setCustomModelData(getPlayerAnniversaryCustomModelData(numberOfYears))
-                    displayName("Primeiro login".asBoldComponent.color { 0xffc000 })
+        optionalItems.add {
+            item = ItemStack(Material.PAPER).meta<ItemMeta> {
+                setCustomModelData(getPlayerAnniversaryCustomModelData(numberOfYears))
+                displayName("Primeiro login".asBoldComponent.color { 0xffc000 })
 
-                    lore {
-                        textWithoutDecorations {
-                            val date = dateFormatter.format(Instant.ofEpochMilli(firstLogin).atZone(brazilZoneId))
+                lore {
+                    textWithoutDecorations {
+                        val date = dateFormatter.format(Instant.ofEpochMilli(firstLogin).atZone(brazilZoneId))
 
-                            color { 0xffd44e }
-                            append("$pronounOrName logou pela primeira vez em ")
-                            append(date.asComponent.color { 0xffe79d })
-                            append(".")
-                        }
+                        color { 0xffd44e }
+                        append("$pronounOrName logou pela primeira vez em ")
+                        append(date.asComponent.color { 0xffe79d })
+                        append(".")
+                    }
 
-                        emptyLine()
+                    emptyLine()
 
-                        textWithoutDecorations {
-                            color { 0xffd44e }
-                            append("Durante toda sua estadia conosco, $pronoun esteve")
-                        }
+                    textWithoutDecorations {
+                        color { 0xffd44e }
+                        append("Durante toda sua estadia conosco, $pronoun esteve")
+                    }
 
-                        textWithoutDecorations {
-                            val onlineTime = (offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20).toLong()
+                    textWithoutDecorations {
+                        val onlineTime = (offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20).toLong()
 
-                            color { 0xffd44e }
-                            append("online por ")
-                            append(generateOnlineTimeMessage(onlineTime))
-                        }
+                        color { 0xffd44e }
+                        append("online por ")
+                        append(generateOnlineTimeMessage(onlineTime))
+                    }
 
+                    if (numberOfYears > 0) {
                         emptyLine()
 
                         textWithoutDecorations {
@@ -466,6 +466,7 @@ fun renderProfileMenu(plugin: DreamSocial, targetUUID: UUID, profileLayout: Prof
                     }
                 }
             }
+        }
 
         /* Shop */
         val shops = transaction(Databases.databaseNetwork) { Shop.find { Shops.owner eq targetUUID }.count() }
