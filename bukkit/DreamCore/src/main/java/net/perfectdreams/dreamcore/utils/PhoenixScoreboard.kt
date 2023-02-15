@@ -7,6 +7,7 @@ import org.bukkit.OfflinePlayer
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Scoreboard
 import java.lang.IllegalArgumentException
+import java.util.*
 
 /**
  * PhoenixScoreboard - Uma scoreboard sem flickers, usando teams
@@ -125,21 +126,21 @@ class PhoenixScoreboard {
 		lateinit var line15: OfflinePlayer
 
 		fun init() {
-			PhoenixScoreboard.line1 = Bukkit.getOfflinePlayer("§a§f")
-			PhoenixScoreboard.line2 = Bukkit.getOfflinePlayer("§6§f")
-			PhoenixScoreboard.line3 = Bukkit.getOfflinePlayer("§7§f")
-			PhoenixScoreboard.line4 = Bukkit.getOfflinePlayer("§d§f")
-			PhoenixScoreboard.line5 = Bukkit.getOfflinePlayer("§4§f")
-			PhoenixScoreboard.line6 = Bukkit.getOfflinePlayer("§8§f")
-			PhoenixScoreboard.line7 = Bukkit.getOfflinePlayer("§3§f")
-			PhoenixScoreboard.line8 = Bukkit.getOfflinePlayer("§c§f")
-			PhoenixScoreboard.line9 = Bukkit.getOfflinePlayer("§f§f")
-			PhoenixScoreboard.line10 = Bukkit.getOfflinePlayer("§e§f")
-			PhoenixScoreboard.line11 = Bukkit.getOfflinePlayer("§6§e§f")
-			PhoenixScoreboard.line12 = Bukkit.getOfflinePlayer("§6§f§f")
-			PhoenixScoreboard.line13 = Bukkit.getOfflinePlayer("§6§1§f")
-			PhoenixScoreboard.line14 = Bukkit.getOfflinePlayer("§6§2§f")
-			PhoenixScoreboard.line15 = Bukkit.getOfflinePlayer("§6§3§f")
+			PhoenixScoreboard.line1 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§a§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line2 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line3 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§7§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line4 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§d§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line5 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§4§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line6 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§8§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line7 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§3§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line8 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§c§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line9 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§f§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line10 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§e§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line11 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§e§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line12 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§f§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line13 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§1§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line14 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§2§f".toByteArray(Charsets.UTF_8)))
+			PhoenixScoreboard.line15 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§3§f".toByteArray(Charsets.UTF_8)))
 		}
 
 		fun getOfflinePlayerForLine(line: Int): OfflinePlayer? {
