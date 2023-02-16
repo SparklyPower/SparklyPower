@@ -7,8 +7,15 @@ import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.string
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.content.*
+import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
 import net.md_5.bungee.api.chat.ClickEvent
@@ -34,6 +41,9 @@ import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.girl
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.pantufa.rpc.GetDiscordUserRequest
+import net.perfectdreams.pantufa.rpc.GetDiscordUserResponse
+import net.perfectdreams.pantufa.rpc.PantufaRPCRequest
 import org.apache.commons.lang3.StringUtils
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -55,6 +65,7 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.logging.Level
 import kotlin.collections.set
 
 class ChatListener(val m: DreamChat) : Listener {
@@ -154,20 +165,20 @@ class ChatListener(val m: DreamChat) : Listener {
 			val gender = e.player.artigo == "a"
 
 			e.tags.add(
-					PlayerTag(
-							"§a§lC",
-							"§a§l${if(gender) "Caçadora" else "Caçador"}",
-							listOf(
-									"§r§9${e.player.displayName}§r§7 conseguiu matar o Ender Dragon! ${if(gender) "Ela" else "Ele"}",
-									"§7mostrou a todos suas habilidades como ${if(gender) "caçadora" else "caçador"},",
-									"§7trazendo para casa a cabeça do temido dragão e também uma linda tag!"
-							),
-							null,
-							false
-					)
+				PlayerTag(
+					"§a§lC",
+					"§a§l${if(gender) "Caçadora" else "Caçador"}",
+					listOf(
+						"§r§9${e.player.displayName}§r§7 conseguiu matar o Ender Dragon! ${if(gender) "Ela" else "Ele"}",
+						"§7mostrou a todos suas habilidades como ${if(gender) "caçadora" else "caçador"},",
+						"§7trazendo para casa a cabeça do temido dragão e também uma linda tag!"
+					),
+					null,
+					false
+				)
 			)
 		}
- 	}
+	}
 
 	@EventHandler
 	fun onJoin(e: PlayerCommandPreprocessEvent) {
@@ -208,13 +219,13 @@ class ChatListener(val m: DreamChat) : Listener {
 				m.config.set("last-enderdragon-killer", whoKilled.uniqueId.toString())
 				m.saveConfig()
 
-                val enderDragonEgg = ItemStack(Material.DRAGON_EGG, 1)
+				val enderDragonEgg = ItemStack(Material.DRAGON_EGG, 1)
 
 				whoKilled.inventory.addItem(enderDragonEgg)
 
 				enderDragonKilledMessage = "§8[§5§lThe End§8] §c§lO Dragão do The End foi morto por §6§l${whoKilled.name}§c§l, parabéns!"
 			}
-			
+
 			Bukkit.broadcastMessage(enderDragonKilledMessage)
 		}
 	}
@@ -642,29 +653,19 @@ class ChatListener(val m: DreamChat) : Listener {
 			}
 
 			if (discordAccount != null) {
-				val cachedDiscordAccount = m.cachedDiscordAccounts.getOrPut(discordAccount.discordId, {
-					val request = HttpRequest.get("https://discordapp.com/api/v6/users/${discordAccount.discordId}")
-						.userAgent("SparklyPower DreamChat")
-						.header("Authorization", "Bot ${m.config.getString("pantufa-token")}")
-
-					val statusCode = request.code()
-					if (statusCode != 200)
-						Optional.empty()
-					else {
-						val json = jsonParser.parse(request.body())
-
-						Optional.of(
-							DiscordAccountInfo(
-								json["username"].string,
-								json["discriminator"].string
-							)
-						)
+				try {
+					val bodyContent = runBlocking {
+						DreamUtils.http.post("http://pantufa:25665/rpc") {
+							setBody(TextContent(Json.encodeToString<PantufaRPCRequest>(GetDiscordUserRequest(discordAccount.discordId)), ContentType.Application.Json))
+						}.bodyAsText()
 					}
-				})
 
-				if (cachedDiscordAccount.isPresent) {
-					val info = cachedDiscordAccount.get()
-					aboutLines.add("§eDiscord: §6${info.name}§8#§6${info.discriminator} §8(§7${discordAccount.discordId}§8)")
+					when (val response = Json.decodeFromString<GetDiscordUserResponse>(bodyContent)) {
+						GetDiscordUserResponse.NotFound -> {} // Unknown user, bail out
+						is GetDiscordUserResponse.Success -> aboutLines.add("§eDiscord: §6${response.name}§8#§6${response.discriminator} §8(§7${discordAccount.discordId}§8)")
+					}
+				} catch (e: Exception) {
+					m.logger.log(Level.WARNING, e) { "Failed to get discord account info for ${discordAccount.discordId}" }
 				}
 			}
 
