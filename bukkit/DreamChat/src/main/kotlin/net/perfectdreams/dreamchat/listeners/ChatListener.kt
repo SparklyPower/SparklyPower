@@ -63,6 +63,7 @@ import org.jetbrains.exposed.sql.count
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.text.NumberFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
@@ -629,6 +630,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			// The runBlocking is required for the getPlayerKD call
 			// Because this is called async, I don't think there is any issues in blocking
 			val aboutLines = runBlocking {
+				val numberFormat = NumberFormat.getInstance(Locale.forLanguageTag("pt"))
 				mutableListOf(
 					"§6✪ §a§lSobre ${player.artigo} §r§b${toDisplay}§r §6✪",
 					"",
@@ -639,8 +641,8 @@ class ChatListener(val m: DreamChat) : Listener {
 							"§d♀"
 						}
 					}",
-					"§eGrana: §6${player.balance} Sonecas",
-					"§eKDR: §6${ClubeAPI.getPlayerKD(e.player.uniqueId).getRatio()}",
+					"§eGrana: §6${numberFormat.format(player.balance)} Sonecas",
+					"§eKDR: §6${numberFormat.format(ClubeAPI.getPlayerKD(e.player.uniqueId).getRatio())}",
 					"§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!",
 					"§eUsando a Resource Pack? $rpStatus",
 					"§eMinecraft Original? $mcPremiumStatus",
@@ -655,14 +657,14 @@ class ChatListener(val m: DreamChat) : Listener {
 			if (discordAccount != null) {
 				try {
 					val bodyContent = runBlocking {
-						DreamUtils.http.post("http://pantufa:25665/rpc") {
+						DreamUtils.http.post("http://pantufa.tail2f90.ts.net:25665/rpc") {
 							setBody(TextContent(Json.encodeToString<PantufaRPCRequest>(GetDiscordUserRequest(discordAccount.discordId)), ContentType.Application.Json))
 						}.bodyAsText()
 					}
 
 					when (val response = Json.decodeFromString<GetDiscordUserResponse>(bodyContent)) {
 						GetDiscordUserResponse.NotFound -> {} // Unknown user, bail out
-						is GetDiscordUserResponse.Success -> aboutLines.add("§eDiscord: §6${response.name}§8#§6${response.discriminator} §8(§7${discordAccount.discordId}§8)")
+						is GetDiscordUserResponse.Success -> aboutLines.add("§eDiscord: §6${response.name}§x§c§c§8§8§0§0#${response.discriminator} §8(§7${discordAccount.discordId}§8)")
 					}
 				} catch (e: Exception) {
 					m.logger.log(Level.WARNING, e) { "Failed to get discord account info for ${discordAccount.discordId}" }
@@ -673,7 +675,7 @@ class ChatListener(val m: DreamChat) : Listener {
 
 			if (adoption != null) {
 				aboutLines.add("")
-				aboutLines.add("§eParentes: §b${Bukkit.getOfflinePlayer(adoption.player1)?.name ?: "???"} §b${Bukkit.getOfflinePlayer(adoption.player2)?.name ?: "???"}")
+				aboutLines.add("§eParentes: §b${Bukkit.getOfflinePlayer(adoption.player1).name ?: "???"} §b${Bukkit.getOfflinePlayer(adoption.player2)?.name ?: "???"}")
 			}
 			hoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT,
 				aboutLines.joinToString("\n").toBaseComponent()
