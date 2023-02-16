@@ -3,11 +3,8 @@ package net.perfectdreams.dreamcore.utils
 import com.google.common.base.Splitter
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
-import org.bukkit.OfflinePlayer
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Scoreboard
-import java.lang.IllegalArgumentException
-import java.util.*
 
 /**
  * PhoenixScoreboard - Uma scoreboard sem flickers, usando teams
@@ -27,35 +24,35 @@ class PhoenixScoreboard {
 		scoreboard.registerNewObjective("alphys", "dummy")
 		scoreboard.getObjective("alphys")!!.displaySlot = DisplaySlot.SIDEBAR
 		scoreboard.registerNewTeam("line1")
-		scoreboard.getTeam("line1")!!.addPlayer(line1)
+		scoreboard.getTeam("line1")!!.addEntry(getColorCodeForLine(1))
 		scoreboard.registerNewTeam("line2")
-		scoreboard.getTeam("line2")!!.addPlayer(line2)
+		scoreboard.getTeam("line2")!!.addEntry(getColorCodeForLine(2))
 		scoreboard.registerNewTeam("line3")
-		scoreboard.getTeam("line3")!!.addPlayer(line3)
+		scoreboard.getTeam("line3")!!.addEntry(getColorCodeForLine(3))
 		scoreboard.registerNewTeam("line4")
-		scoreboard.getTeam("line4")!!.addPlayer(line4)
+		scoreboard.getTeam("line4")!!.addEntry(getColorCodeForLine(4))
 		scoreboard.registerNewTeam("line5")
-		scoreboard.getTeam("line5")!!.addPlayer(line5)
+		scoreboard.getTeam("line5")!!.addEntry(getColorCodeForLine(5))
 		scoreboard.registerNewTeam("line6")
-		scoreboard.getTeam("line6")!!.addPlayer(line6)
+		scoreboard.getTeam("line6")!!.addEntry(getColorCodeForLine(6))
 		scoreboard.registerNewTeam("line7")
-		scoreboard.getTeam("line7")!!.addPlayer(line7)
+		scoreboard.getTeam("line7")!!.addEntry(getColorCodeForLine(7))
 		scoreboard.registerNewTeam("line8")
-		scoreboard.getTeam("line8")!!.addPlayer(line8)
+		scoreboard.getTeam("line8")!!.addEntry(getColorCodeForLine(8))
 		scoreboard.registerNewTeam("line9")
-		scoreboard.getTeam("line9")!!.addPlayer(line9)
+		scoreboard.getTeam("line9")!!.addEntry(getColorCodeForLine(9))
 		scoreboard.registerNewTeam("line10")
-		scoreboard.getTeam("line10")!!.addPlayer(line10)
+		scoreboard.getTeam("line10")!!.addEntry(getColorCodeForLine(10))
 		scoreboard.registerNewTeam("line11")
-		scoreboard.getTeam("line11")!!.addPlayer(line11)
+		scoreboard.getTeam("line11")!!.addEntry(getColorCodeForLine(11))
 		scoreboard.registerNewTeam("line12")
-		scoreboard.getTeam("line12")!!.addPlayer(line12)
+		scoreboard.getTeam("line12")!!.addEntry(getColorCodeForLine(12))
 		scoreboard.registerNewTeam("line13")
-		scoreboard.getTeam("line13")!!.addPlayer(line13)
+		scoreboard.getTeam("line13")!!.addEntry(getColorCodeForLine(13))
 		scoreboard.registerNewTeam("line14")
-		scoreboard.getTeam("line14")!!.addPlayer(line14)
+		scoreboard.getTeam("line14")!!.addEntry(getColorCodeForLine(14))
 		scoreboard.registerNewTeam("line15")
-		scoreboard.getTeam("line15")!!.addPlayer(line15)
+		scoreboard.getTeam("line15")!!.addEntry(getColorCodeForLine(15))
 	}
 
 	fun setText(text: String, line: Int) {
@@ -92,7 +89,7 @@ class PhoenixScoreboard {
 		val isVisible = lineVisibility[line] ?: false
 
 		if (!isVisible) {
-			val currentScore = scoreboard.getObjective("alphys")!!.getScore(getOfflinePlayerForLine(line)!!)
+			val currentScore = scoreboard.getObjective("alphys")!!.getScore(getColorCodeForLine(line))
 			currentScore.score = line
 
 			lineVisibility[line] = true
@@ -100,7 +97,7 @@ class PhoenixScoreboard {
 	}
 
 	fun removeLine(line: Int) {
-		scoreboard.resetScores(getOfflinePlayerForLine(line)!!)
+		scoreboard.resetScores(getColorCodeForLine(line))
 		lineVisibility[line] = false
 	}
 
@@ -108,60 +105,25 @@ class PhoenixScoreboard {
 		scoreboard.getObjective("alphys")!!.displayName = title
 	}
 
-	companion object {
-		lateinit var line1: OfflinePlayer
-		lateinit var line2: OfflinePlayer
-		lateinit var line3: OfflinePlayer
-		lateinit var line4: OfflinePlayer
-		lateinit var line5: OfflinePlayer
-		lateinit var line6: OfflinePlayer
-		lateinit var line7: OfflinePlayer
-		lateinit var line8: OfflinePlayer
-		lateinit var line9: OfflinePlayer
-		lateinit var line10: OfflinePlayer
-		lateinit var line11: OfflinePlayer
-		lateinit var line12: OfflinePlayer
-		lateinit var line13: OfflinePlayer
-		lateinit var line14: OfflinePlayer
-		lateinit var line15: OfflinePlayer
-
-		fun init() {
-			PhoenixScoreboard.line1 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§a§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line2 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line3 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§7§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line4 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§d§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line5 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§4§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line6 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§8§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line7 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§3§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line8 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§c§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line9 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§f§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line10 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§e§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line11 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§e§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line12 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§f§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line13 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§1§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line14 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§2§f".toByteArray(Charsets.UTF_8)))
-			PhoenixScoreboard.line15 = Bukkit.getOfflinePlayer(UUID.nameUUIDFromBytes("OfflinePlayer:§6§3§f".toByteArray(Charsets.UTF_8)))
-		}
-
-		fun getOfflinePlayerForLine(line: Int): OfflinePlayer? {
-			when (line) {
-				15 -> return line15
-				14 -> return line14
-				13 -> return line13
-				12 -> return line12
-				11 -> return line11
-				10 -> return line10
-				9 -> return line9
-				8 -> return line8
-				7 -> return line7
-				6 -> return line6
-				5 -> return line5
-				4 -> return line4
-				3 -> return line3
-				2 -> return line2
-				1 -> return line1
-				else -> return null
-			}
+	fun getColorCodeForLine(line: Int): String {
+		when (line) {
+			15 -> return "§0"
+			14 -> return "§1"
+			13 -> return "§2"
+			12 -> return "§3"
+			11 -> return "§4"
+			10 -> return "§5"
+			9 -> return "§6"
+			8 -> return "§7"
+			7 -> return "§8"
+			6 -> return "§9"
+			5 -> return "§a"
+			4 -> return "§b"
+			3 -> return "§c"
+			2 -> return "§d"
+			1 -> return "§e"
+			else -> error("Unsupported line ID $line")
 		}
 	}
 }
+

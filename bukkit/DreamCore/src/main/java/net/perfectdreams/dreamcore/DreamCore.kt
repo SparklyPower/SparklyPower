@@ -78,12 +78,6 @@ class DreamCore : KotlinPlugin() {
 		TranslationUtils.loadLocale(dataFolder, "en_us")
 		TranslationUtils.loadLocale(dataFolder, "pt_br")
 
-		logger.info { "Preparing no flicker scoreboard in a separate thread..." }
-
-		thread {
-			PhoenixScoreboard.init()
-		}
-
 		if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
 			SignGUIUtils.registerSignGUIListener()
 

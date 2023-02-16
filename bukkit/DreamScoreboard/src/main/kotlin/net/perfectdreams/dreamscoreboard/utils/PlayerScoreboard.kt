@@ -3,22 +3,18 @@ package net.perfectdreams.dreamscoreboard.utils
 import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamscoreboard.DreamScoreboard
 import net.perfectdreams.dreamvanish.DreamVanishAPI
 import net.perfectdreams.dreamvote.DreamVote
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
-import org.bukkit.craftbukkit.v1_19_R1.scoreboard.CraftScoreboardManager
 import org.bukkit.entity.Player
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.RenderType
 import org.bukkit.scoreboard.Team
 import java.text.DecimalFormat
-import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
