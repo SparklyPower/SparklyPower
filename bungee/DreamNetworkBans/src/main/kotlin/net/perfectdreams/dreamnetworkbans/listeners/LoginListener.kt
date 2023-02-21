@@ -284,13 +284,15 @@ class LoginListener(val m: DreamNetworkBans) : Listener {
 			val uniqueId = event.connection.uniqueId
 			val playerName = event.connection.name
 
-			if (isGeyser)
+			if (isGeyser) {
+				m.logger.info { "Notifying ${DreamNetwork.PERFECTDREAMS_SURVIVAL.host}:${DreamNetwork.PERFECTDREAMS_SURVIVAL.socketPort} that ${event.connection.name} is a Geyser player..." }
 				DreamNetwork.PERFECTDREAMS_SURVIVAL.send(
 					jsonObject(
 						"type" to "addToGeyserPlayerList",
 						"uniqueId" to uniqueId.toString()
 					)
 				)
+			}
 
 			// We need to update it on the DreamNetworkBans plugin because BungeeCord does *not* respect event priority.
 			// This sucks, but sadly that's what we need to do :(

@@ -17,6 +17,7 @@ import net.perfectdreams.dreamvote.dao.Vote
 import net.perfectdreams.dreamvote.listeners.TagListener
 import net.perfectdreams.dreamvote.listeners.VoteListener
 import net.perfectdreams.dreamvote.tables.Votes
+import net.perfectdreams.dreamvote.tables.VotesUserAvailableNotifications
 import net.perfectdreams.dreamvote.utils.VoteAward
 import org.bukkit.Bukkit
 import org.bukkit.Bukkit.getPlayerExact
@@ -24,9 +25,12 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
+import java.time.Instant
+import java.time.ZoneId
 import java.util.*
 
 class DreamVote : KotlinPlugin() {
@@ -44,7 +48,8 @@ class DreamVote : KotlinPlugin() {
 
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
-				Votes
+				Votes,
+				VotesUserAvailableNotifications
 			)
 		}
 
@@ -144,10 +149,24 @@ class DreamVote : KotlinPlugin() {
 			val giveAwards = mutableListOf<VoteAward>()
 
 			transaction(Databases.databaseNetwork) {
-				Vote.new {
+				val vote = Vote.new {
 					this.player = uniqueId
 					this.votedAt = System.currentTimeMillis()
 					this.website = serviceName
+				}
+
+				VotesUserAvailableNotifications.insert {
+					it[VotesUserAvailableNotifications.userId] = uniqueId
+					it[VotesUserAvailableNotifications.serviceName] = serviceName
+					it[VotesUserAvailableNotifications.notifyAt] = Instant.now().atZone(ZoneId.of("America/New_York"))
+						.plusDays(1)
+						.withHour(0)
+						.withMinute(0)
+						.withSecond(0)
+						.withNano(0)
+						.toInstant()
+					it[VotesUserAvailableNotifications.botVote] = vote.id
+					it[VotesUserAvailableNotifications.notified] = false
 				}
 			}
 
