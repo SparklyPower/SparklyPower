@@ -13,6 +13,7 @@ import io.ktor.content.*
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -79,6 +80,8 @@ class ChatListener(val m: DreamChat) : Listener {
 		.expireAfterAccess(1L, TimeUnit.MINUTES)
 		.build<Player, String>()
 		.asMap()
+
+	var lastPantufaTimeout = 0L
 
 	@EventHandler
 	fun onJoin(e: PlayerJoinEvent) {
@@ -656,15 +659,32 @@ class ChatListener(val m: DreamChat) : Listener {
 
 			if (discordAccount != null) {
 				try {
-					val bodyContent = runBlocking {
-						DreamUtils.http.post("http://pantufa.tail2f90.ts.net:25665/rpc") {
-							setBody(TextContent(Json.encodeToString<PantufaRPCRequest>(GetDiscordUserRequest(discordAccount.discordId)), ContentType.Application.Json))
-						}.bodyAsText()
-					}
+					val bodyContent = if (System.currentTimeMillis() - lastPantufaTimeout >= 15_000) {
+						runBlocking {
+							// Timeout for when Pantufa is offline
+							withTimeoutOrNull(250) {
+								DreamUtils.http.post("http://pantufa.tail2f90.ts.net:25665/rpc") {
+									setBody(
+										TextContent(
+											Json.encodeToString<PantufaRPCRequest>(
+												GetDiscordUserRequest(
+													discordAccount.discordId
+												)
+											), ContentType.Application.Json
+										)
+									)
+								}.bodyAsText()
+							}
+						}
+					} else null
 
-					when (val response = Json.decodeFromString<GetDiscordUserResponse>(bodyContent)) {
-						GetDiscordUserResponse.NotFound -> {} // Unknown user, bail out
-						is GetDiscordUserResponse.Success -> aboutLines.add("§eDiscord: §6${response.name}§x§c§c§8§8§0§0#${response.discriminator} §8(§7${discordAccount.discordId}§8)")
+					if (bodyContent != null) {
+						when (val response = Json.decodeFromString<GetDiscordUserResponse>(bodyContent)) {
+							GetDiscordUserResponse.NotFound -> {} // Unknown user, bail out
+							is GetDiscordUserResponse.Success -> aboutLines.add("§eDiscord: §6${response.name}§x§c§c§8§8§0§0#${response.discriminator} §8(§7${discordAccount.discordId}§8)")
+						}
+					} else {
+						lastPantufaTimeout = System.currentTimeMillis()
 					}
 				} catch (e: Exception) {
 					m.logger.log(Level.WARNING, e) { "Failed to get discord account info for ${discordAccount.discordId}" }
