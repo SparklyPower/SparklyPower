@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
+    paperDevBundle("1.19.4-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamEnderHopper"))
     implementation("com.github.ChestShop-authors:ChestShop-3:3.11")

@@ -1,13 +1,11 @@
 package net.perfectdreams.dreamcustomitems
 
-import com.comphenix.protocol.ProtocolLibrary
 import com.google.common.collect.Sets
 import com.okkero.skedule.schedule
 import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamcustomitems.blocks.BlockPacketAdapter
 import net.perfectdreams.dreamcustomitems.commands.declarations.CustomItemRecipesCommand
 import net.perfectdreams.dreamcustomitems.commands.declarations.DreamCustomItemsCommand
 import net.perfectdreams.dreamcustomitems.items.Microwave
@@ -20,7 +18,6 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.event.Listener
-import org.bukkit.inventory.ItemStack
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -99,13 +96,6 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		registerEvents(CustomBlocksListener(this))
 		registerEvents(EstalinhoListener(this))
 		registerEvents(RemoveDisabledPluginsRecipesListener(this))
-
-		// https://gist.github.com/aadnk/8119275
-		val protocolManager = ProtocolLibrary.getProtocolManager()
-		protocolManager
-			.asynchronousManager
-			.registerAsyncHandler(BlockPacketAdapter(this))
-			.start(WORKER_THREADS)
 
 		registerCommand(DreamCustomItemsCommand)
 		registerCommand(CustomItemRecipesCommand(this))

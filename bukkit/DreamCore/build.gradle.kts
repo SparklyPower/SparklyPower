@@ -27,7 +27,7 @@ dependencies {
     api(project(":common:KotlinRuntime"))
     api(project(":common:rpc-payloads"))
 
-    paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
+    paperDevBundle("1.19.4-R0.1-SNAPSHOT")
     compileOnlyApi("com.github.dmulloy2:ProtocolLib:4.8.0")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
     compileOnlyApi(files("../../libs/WorldGuard.jar"))

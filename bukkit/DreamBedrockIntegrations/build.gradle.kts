@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
+    paperDevBundle("1.19.4-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly("fr.neatmonster:nocheatplus:3.16.1-SNAPSHOT")
     compileOnly("com.github.dmulloy2:ProtocolLib:4.8.0")

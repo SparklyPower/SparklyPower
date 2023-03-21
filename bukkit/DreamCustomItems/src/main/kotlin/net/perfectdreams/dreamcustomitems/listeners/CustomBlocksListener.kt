@@ -1,15 +1,9 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
-import com.comphenix.packetwrapper.WrapperPlayClientBlockPlace
-import com.comphenix.packetwrapper.WrapperPlayClientEntityAction
-import com.comphenix.protocol.wrappers.EnumWrappers
 import com.okkero.skedule.schedule
-import ml.beancraft.haricot.event.block.NoteBlockUpdateEvent
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.BlockPosition
 import net.perfectdreams.dreamcustomitems.utils.CustomBlocks
-import org.bukkit.Bukkit
-import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.Note
 import org.bukkit.block.data.type.NoteBlock
@@ -19,7 +13,6 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.block.NotePlayEvent
 import org.bukkit.event.player.PlayerInteractEvent
 
 class CustomBlocksListener(val m: DreamCustomItems) : Listener {
@@ -88,7 +81,8 @@ class CustomBlocksListener(val m: DreamCustomItems) : Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    // Removed for now
+    /* @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onNotePlay(e: NotePlayEvent) {
         // Disallow Note Block Note Play
         if (m.getCustomBlocksInWorld(e.block.world.name).contains(BlockPosition.fromBlock(e.block)))
@@ -105,5 +99,5 @@ class CustomBlocksListener(val m: DreamCustomItems) : Listener {
                 it.sendBlockChange(e.block.location, e.block.blockData)
             }
         }
-    }
+    } */
 }

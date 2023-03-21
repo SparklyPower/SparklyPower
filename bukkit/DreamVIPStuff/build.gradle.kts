@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
+    paperDevBundle("1.19.4-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     implementation("net.citizensnpcs:citizensapi:2.0.30-SNAPSHOT")
     implementation("net.luckperms:api:5.0")

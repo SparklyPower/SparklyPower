@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
+    paperDevBundle("1.19.4-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly("us.dynmap:DynmapCoreAPI:3.4-beta-5")
     compileOnly("us.dynmap:dynmap-api:3.4-beta-5")
