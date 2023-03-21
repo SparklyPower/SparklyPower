@@ -46,8 +46,6 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 		val DEATH_CHEST_ID = SparklyNamespacedKey("death_chest_id")
 	}
 
-	val toBeUsedWorldsFolder = File(dataFolder, "resource_worlds")
-	val oldWorldsFolder = File(dataFolder, "old_worlds")
 	val cachedInhabitedChunkTimers = mutableMapOf<Long, Long>()
 
 	val stoneImage = ImageIO.read(File(dataFolder, "stone.png"))
@@ -79,10 +77,12 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 			)
 		}
 
-		toBeUsedWorldsFolder.mkdirs()
-		oldWorldsFolder.mkdirs()
-
 		loadInhabitedChunkTimers()
+
+		// If the file "Resources.ready" is present, then it means that we need to switch the world!
+		if (File(dataFolder, "Resources.ready").exists()) {
+			changeResourceWorld()
+		}
 
 		registerEvents(PlayerListener(this))
 		registerEvents(InteractListener(this))
@@ -392,33 +392,10 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 
 	fun changeResourceWorld() {
 		schedule {
-			val resourcesWorldFolder = File("Resources")
-
-			logger.info("Unloading resources world...")
-			// Unloading the world...
-			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mvunload Resources")
-
-			logger.info("Moving old world to the old worlds folder...")
-			switchContext(SynchronizationContext.ASYNC)
-			File("Resources").renameTo(File(oldWorldsFolder, "Resources-${System.currentTimeMillis()}"))
-
-			logger.info("Getting a random world from the worlds folder...")
-			val worldToBeUsed = toBeUsedWorldsFolder.listFiles().filter { it.isDirectory }.random()
-			logger.info("We are going to use ${worldToBeUsed}!")
-
-			logger.info("Copying the world folder...")
-
-			File("Resources").mkdirs()
-
-			worldToBeUsed.copyRecursively(resourcesWorldFolder, true)
-
 			switchContext(SynchronizationContext.SYNC)
 			logger.info("Clearing cached inhabited chunk timers...")
 			cachedInhabitedChunkTimers.clear()
 			saveInhabitedChunkTimers()
-
-			logger.info("Loading the new world...")
-			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "mvload Resources")
 
 			logger.info("Deleting homes in the resources world...")
 			switchContext(SynchronizationContext.ASYNC)
@@ -426,13 +403,12 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 				Homes.deleteWhere { Homes.worldName eq "Resources" }
 			}
 
-			switchContext(SynchronizationContext.SYNC)
-			logger.info("Reloading DreamWarps...")
-			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman reload DreamWarps")
-
-			logger.info("Increase resource world change count...")
+			logger.info("Increasing resource world change count...")
 			config.set("resourceWorldChange", config.getInt("resourceWorldChange", 0) + 1)
 			saveConfig()
+
+			logger.info("Deleting Resources.ready file...")
+			File(dataFolder, "Resources.ready").delete()
 
 			logger.info("Done! Resource world changed!")
 		}

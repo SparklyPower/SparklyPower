@@ -1,5 +1,5 @@
 name: DreamResourceGenerator
 main: net.perfectdreams.dreamresourcegenerator.DreamResourceGenerator
 version: 1.0.0
-depend: ["DreamCore"]
+depend: ["DreamCore", "Chunky", "WorldEdit"]
 api-version: 1.13

@@ -16,6 +16,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamHome"))
     compileOnly(project(":bukkit:DreamMapWatermarker"))
     compileOnly(project(":bukkit:DreamCorreios"))
+    compileOnly(group = "org.popcraft", name = "chunky-common", version = "1.3.38")
 }
 
 tasks.withType<KotlinCompile> {
