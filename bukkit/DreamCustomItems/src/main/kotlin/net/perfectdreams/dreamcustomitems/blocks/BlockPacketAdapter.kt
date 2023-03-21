@@ -16,7 +16,7 @@ import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.BlockPosition
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_19_R1.block.data.CraftBlockData
+import org.bukkit.craftbukkit.v1_19_R3.block.data.CraftBlockData
 import sun.misc.Unsafe
 import java.lang.reflect.Field
 import kotlin.math.absoluteValue

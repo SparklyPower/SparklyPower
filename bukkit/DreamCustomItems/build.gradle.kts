@@ -16,7 +16,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamMini"))
     // compileOnly(project(":bukkit:DreamMochilas"))
     compileOnly(files("../../libs/mcMMO.jar"))
-    compileOnly("com.comphenix.protocol:ProtocolLib:4.8.0")
+    compileOnly("com.github.dmulloy2:ProtocolLib:4.8.0")
 }
 
 tasks.withType<KotlinCompile> {

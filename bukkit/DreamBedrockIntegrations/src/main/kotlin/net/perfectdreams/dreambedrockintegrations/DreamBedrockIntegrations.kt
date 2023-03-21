@@ -26,7 +26,8 @@ class DreamBedrockIntegrations : KotlinPlugin(), Listener {
 	override fun softEnable() {
 		super.softEnable()
 
-		NCPHookManager.addHook(CheckType.ALL, ncpHook)
+		// For now we won't add any kind of Bedrock bypass on NCP
+		// NCPHookManager.addHook(CheckType.ALL, ncpHook)
 
 		val protocolManager = ProtocolLibrary.getProtocolManager()
 		protocolManager.addPacketListener(BedrockPacketListener(this))
@@ -37,7 +38,7 @@ class DreamBedrockIntegrations : KotlinPlugin(), Listener {
 	override fun softDisable() {
 		super.softDisable()
 
-		NCPHookManager.removeHook(ncpHook)
+		// NCPHookManager.removeHook(ncpHook)
 	}
 
 	fun registerInventoryTitleTransformer(

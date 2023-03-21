@@ -15,7 +15,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamCash"))
     compileOnly(project(":bukkit:DreamChat"))
-    compileOnly("com.comphenix.protocol:ProtocolLib:4.8.0")
+    compileOnly("com.github.dmulloy2:ProtocolLib:4.8.0")
 }
 
 tasks.withType<KotlinCompile> {
