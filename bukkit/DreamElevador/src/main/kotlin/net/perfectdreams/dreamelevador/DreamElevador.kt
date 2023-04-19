@@ -97,7 +97,7 @@ class DreamElevador : KotlinPlugin(), Listener {
         updateStoryTrack(sign)
         var idx = 0
         val world = sign.world
-        for (y in world.minHeight..world.minHeight) {
+        for (y in world.minHeight until world.maxHeight) {
             val block = world.getBlockAt(sign.x, y, sign.z)
             val material = block.type
 
@@ -170,7 +170,7 @@ class DreamElevador : KotlinPlugin(), Listener {
 
             var idx = 0
             // Pegar o andar atual quando está descendo é mais difícil, é necessário fazer um loop "ao contrário"
-            for (_y in 0..world.maxHeight) {
+            for (_y in world.minHeight until world.maxHeight) {
                 val block = world.getBlockAt(sign.x, _y, sign.z)
                 val material = block?.type ?: continue
 
