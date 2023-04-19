@@ -70,58 +70,46 @@ class ColheitaUpgradeExecutor(val m: DreamQuickHarvest) : SparklyCommandExecutor
                     onClick {
                         it.closeInventory()
 
-                        val menu = createMenu(9, "Confirmar Compra") {
-                            slot(3, 0) {
-                                item = ItemStack(Material.LIME_CONCRETE)
-                                    .rename("§a§lConfirmar Compra")
+                        InventoryUtils.askForConfirmation(
+                            player,
+                            afterAccept = {
+                                it.closeInventory()
 
-                                onClick {
-                                    it.closeInventory()
+                                m.launchAsyncThread {
+                                    val cash = Cash.getCash(player)
 
-                                    m.launchAsyncThread {
-                                        val cash = Cash.getCash(player)
-
-                                        if (upgrade.pesadelos > cash) {
-                                            onMainThread {
-                                                player.sendMessage("§cVocê não tem pesadelos suficientes para este upgrade!")
-                                            }
-                                            return@launchAsyncThread
-                                        }
-
-                                        val now = Clock.System.now()
-                                        transaction(Databases.databaseNetwork) {
-                                            PlayerQuickHarvestUpgrades.insert {
-                                                it[PlayerQuickHarvestUpgrades.playerId] = player.uniqueId
-                                                it[PlayerQuickHarvestUpgrades.energy] = upgrade.energy
-                                                it[PlayerQuickHarvestUpgrades.boughtAt] = now.toJavaInstant()
-                                                it[PlayerQuickHarvestUpgrades.expiresAt] = now.plus(
-                                                    1,
-                                                    DateTimeUnit.MONTH,
-                                                    TimeZone.of("America/Sao_Paulo")
-                                                ).toJavaInstant()
-                                            }
-                                        }
-
-                                        Cash.takeCash(player, upgrade.pesadelos, TransactionContext(extra = "upgrade de ${upgrade.energy} energia no sistema de colheita rápida"))
-
+                                    if (upgrade.pesadelos > cash) {
                                         onMainThread {
-                                            player.sendMessage("§aUpgrade aplicado!")
+                                            player.sendMessage("§cVocê não tem pesadelos suficientes para este upgrade!")
+                                        }
+                                        return@launchAsyncThread
+                                    }
+
+                                    val now = Clock.System.now()
+                                    transaction(Databases.databaseNetwork) {
+                                        PlayerQuickHarvestUpgrades.insert {
+                                            it[PlayerQuickHarvestUpgrades.playerId] = player.uniqueId
+                                            it[PlayerQuickHarvestUpgrades.energy] = upgrade.energy
+                                            it[PlayerQuickHarvestUpgrades.boughtAt] = now.toJavaInstant()
+                                            it[PlayerQuickHarvestUpgrades.expiresAt] = now.plus(
+                                                1,
+                                                DateTimeUnit.MONTH,
+                                                TimeZone.of("America/Sao_Paulo")
+                                            ).toJavaInstant()
                                         }
                                     }
+
+                                    Cash.takeCash(player, upgrade.pesadelos, TransactionContext(extra = "upgrade de ${upgrade.energy} energia no sistema de colheita rápida"))
+
+                                    onMainThread {
+                                        player.sendMessage("§aUpgrade aplicado!")
+                                    }
                                 }
+                            },
+                            afterDecline = {
+                                it.closeInventory()
                             }
-
-                            slot(5, 0) {
-                                item = ItemStack(Material.LIME_CONCRETE)
-                                    .rename("§c§lCancelar Compra")
-
-                                onClick {
-                                    it.closeInventory()
-                                }
-                            }
-                        }
-
-                        menu.sendTo(player)
+                        )
                     }
                 }
             }

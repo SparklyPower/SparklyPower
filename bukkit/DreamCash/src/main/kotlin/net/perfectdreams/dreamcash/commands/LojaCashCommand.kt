@@ -43,32 +43,39 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                     onClick {
                         checkIfPlayerHasSufficientMoney(sender, quantity) {
-                            askForConfirmation(sender) {
-                                sender.closeInventory()
+                            InventoryUtils.askForConfirmation(
+                                sender,
+                                afterAccept = {
+                                    sender.closeInventory()
 
-                                scheduler().schedule(m, SynchronizationContext.SYNC) {
-                                    val result = callback.invoke()
+                                    scheduler().schedule(m, SynchronizationContext.SYNC) {
+                                        val result = callback.invoke()
 
-                                    if (result) {
-                                        switchContext(SynchronizationContext.ASYNC)
+                                        if (result) {
+                                            switchContext(SynchronizationContext.ASYNC)
 
-                                        transaction(Databases.databaseNetwork) {
-                                            try {
-                                                Cash.takeCash(sender, quantity, TransactionContext(extra = "comprar `$name` no `/lojacash`"))
-                                            } catch (e: IllegalArgumentException) {
-                                                sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
-                                                return@transaction
+                                            transaction(Databases.databaseNetwork) {
+                                                try {
+                                                    Cash.takeCash(sender, quantity, TransactionContext(extra = "comprar `$name` no `/lojacash`"))
+                                                } catch (e: IllegalArgumentException) {
+                                                    sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
+                                                    return@transaction
+                                                }
                                             }
+
+                                            switchContext(SynchronizationContext.SYNC)
+
+                                            sender.sendMessage("§aObrigado pela compra! ^-^")
+
+                                            Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou $name§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
                                         }
-
-                                        switchContext(SynchronizationContext.SYNC)
-
-                                        sender.sendMessage("§aObrigado pela compra! ^-^")
-
-                                        Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou $name§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
                                     }
+                                },
+                                afterDecline = {
+                                    it.closeInventory()
+                                    showShopMenu(sender)
                                 }
-                            }
+                            )
                         }
                     }
                 }
@@ -96,7 +103,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             generateItemAt(1, 0, Material.GOLD_INGOT, 1, "§b§lVIP§e+ §7(um mês • R$ 29,99)", 1_000) {
                 if (hasAnyVip && !isVipPlus) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
-                        false
+                    false
                 } else {
                     Bukkit.dispatchCommand(
                         Bukkit.getConsoleSender(),
@@ -149,48 +156,55 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                 onClick {
                     checkIfPlayerHasSufficientMoney(sender, 100) {
-                        askForConfirmation(sender) {
-                            sender.closeInventory()
+                        InventoryUtils.askForConfirmation(
+                            sender,
+                            afterAccept = {
+                                sender.closeInventory()
 
-                            scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                                val clube = ClubeAPI.getPlayerClube(sender)
+                                scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                                    val clube = ClubeAPI.getPlayerClube(sender)
 
-                                switchContext(SynchronizationContext.SYNC)
+                                    switchContext(SynchronizationContext.SYNC)
 
-                                if (clube == null) {
-                                    sender.sendMessage("§cVocê não possui um clube!")
-                                    return@schedule
-                                }
-
-                                if (clube.ownerId != sender.uniqueId) {
-                                    sender.sendMessage("§cApenas o dono do clube pode aumentar os slots!")
-                                    return@schedule
-                                }
-
-                                if (clube.maxMembers >= 32) {
-                                    sender.sendMessage("§cVocê já comprou todos os slots disponíveis!")
-                                    return@schedule
-                                }
-
-                                switchContext(SynchronizationContext.ASYNC)
-
-                                transaction(Databases.databaseNetwork) {
-                                    try {
-                                        Cash.takeCash(sender, 100, TransactionContext(extra = "comprar `slots adicionais para o clube` no `/lojacash`"))
-                                        clube.maxMembers++
-                                    } catch (e: IllegalArgumentException) {
-                                        sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
-                                        return@transaction
+                                    if (clube == null) {
+                                        sender.sendMessage("§cVocê não possui um clube!")
+                                        return@schedule
                                     }
+
+                                    if (clube.ownerId != sender.uniqueId) {
+                                        sender.sendMessage("§cApenas o dono do clube pode aumentar os slots!")
+                                        return@schedule
+                                    }
+
+                                    if (clube.maxMembers >= 32) {
+                                        sender.sendMessage("§cVocê já comprou todos os slots disponíveis!")
+                                        return@schedule
+                                    }
+
+                                    switchContext(SynchronizationContext.ASYNC)
+
+                                    transaction(Databases.databaseNetwork) {
+                                        try {
+                                            Cash.takeCash(sender, 100, TransactionContext(extra = "comprar `slots adicionais para o clube` no `/lojacash`"))
+                                            clube.maxMembers++
+                                        } catch (e: IllegalArgumentException) {
+                                            sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
+                                            return@transaction
+                                        }
+                                    }
+
+                                    switchContext(SynchronizationContext.SYNC)
+
+                                    sender.sendMessage("§aObrigado pela compra! ^-^")
+
+                                    Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou §dslots adicionais para o clube§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
                                 }
-
-                                switchContext(SynchronizationContext.SYNC)
-
-                                sender.sendMessage("§aObrigado pela compra! ^-^")
-
-                                Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou §dslots adicionais para o clube§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
+                            },
+                            afterDecline = {
+                                it.closeInventory()
+                                showShopMenu(sender)
                             }
-                        }
+                        )
                     }
                 }
             }
@@ -211,57 +225,64 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                 onClick {
                     checkIfPlayerHasSufficientMoney(sender, 250) {
-                        askForConfirmation(sender) {
-                            sender.closeInventory()
+                        InventoryUtils.askForConfirmation(
+                            sender,
+                            afterAccept = {
+                                sender.closeInventory()
 
-                            scheduler().schedule(m, SynchronizationContext.ASYNC) {
-                                val clube = ClubeAPI.getPlayerClube(sender)
+                                scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                                    val clube = ClubeAPI.getPlayerClube(sender)
 
-                                switchContext(SynchronizationContext.SYNC)
+                                    switchContext(SynchronizationContext.SYNC)
 
-                                if (clube == null) {
-                                    sender.sendMessage("§cVocê não possui um clube!")
-                                    return@schedule
-                                }
-
-                                if (clube.ownerId != sender.uniqueId) {
-                                    sender.sendMessage("§cApenas o dono do clube pode aumentar os slots!")
-                                    return@schedule
-                                }
-
-                                switchContext(SynchronizationContext.ASYNC)
-
-                                val totalUpgrades = transaction(Databases.databaseNetwork) {
-                                    ClubeHomeUpgrades.select {
-                                        ClubeHomeUpgrades.clube eq clube.id
-                                    }.count()
-                                }
-
-                                if (totalUpgrades == 5L) {
-                                    sender.sendMessage("§cVocê já comprou todos os upgrades de casa disponíveis!")
-                                    return@schedule
-                                }
-
-                                transaction(Databases.databaseNetwork) {
-                                    try {
-                                        Cash.takeCash(sender, 250, TransactionContext(extra = "comprar `slots adicionais para casas do clube` no `/lojacash`"))
-                                        ClubeHomeUpgrades.insert {
-                                            it[ClubeHomeUpgrades.clube] = clube.id
-                                            it[ClubeHomeUpgrades.boughtAt] = Instant.now()
-                                        }
-                                    } catch (e: IllegalArgumentException) {
-                                        sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
-                                        return@transaction
+                                    if (clube == null) {
+                                        sender.sendMessage("§cVocê não possui um clube!")
+                                        return@schedule
                                     }
+
+                                    if (clube.ownerId != sender.uniqueId) {
+                                        sender.sendMessage("§cApenas o dono do clube pode aumentar os slots!")
+                                        return@schedule
+                                    }
+
+                                    switchContext(SynchronizationContext.ASYNC)
+
+                                    val totalUpgrades = transaction(Databases.databaseNetwork) {
+                                        ClubeHomeUpgrades.select {
+                                            ClubeHomeUpgrades.clube eq clube.id
+                                        }.count()
+                                    }
+
+                                    if (totalUpgrades == 5L) {
+                                        sender.sendMessage("§cVocê já comprou todos os upgrades de casa disponíveis!")
+                                        return@schedule
+                                    }
+
+                                    transaction(Databases.databaseNetwork) {
+                                        try {
+                                            Cash.takeCash(sender, 250, TransactionContext(extra = "comprar `slots adicionais para casas do clube` no `/lojacash`"))
+                                            ClubeHomeUpgrades.insert {
+                                                it[ClubeHomeUpgrades.clube] = clube.id
+                                                it[ClubeHomeUpgrades.boughtAt] = Instant.now()
+                                            }
+                                        } catch (e: IllegalArgumentException) {
+                                            sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
+                                            return@transaction
+                                        }
+                                    }
+
+                                    switchContext(SynchronizationContext.SYNC)
+
+                                    sender.sendMessage("§aObrigado pela compra! ^-^")
+
+                                    Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou §dslots adicionais para casas do clube§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
                                 }
-
-                                switchContext(SynchronizationContext.SYNC)
-
-                                sender.sendMessage("§aObrigado pela compra! ^-^")
-
-                                Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou §dslots adicionais para casas do clube§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
+                            },
+                            afterDecline = {
+                                it.closeInventory()
+                                showShopMenu(sender)
                             }
-                        }
+                        )
                     }
                 }
             }
@@ -339,29 +360,5 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
             callback.invoke()
         }
-    }
-
-    fun askForConfirmation(sender: Player, afterAccept: () -> (Unit)) {
-        val menu = createMenu(9, "§a§lConfirme a sua compra!") {
-            slot(3, 0) {
-                item = ItemStack(Material.GREEN_WOOL)
-                    .rename("§a§lQuero comprar!")
-
-                onClick {
-                    afterAccept.invoke()
-                }
-            }
-            slot(5, 0) {
-                item = ItemStack(Material.RED_WOOL)
-                    .rename("§c§lTalvez outro dia...")
-
-                onClick {
-                    sender.closeInventory()
-                    showShopMenu(sender)
-                }
-            }
-        }
-
-        menu.sendTo(sender)
     }
 }

@@ -2,6 +2,8 @@ package net.perfectdreams.dreamcore.utils
 
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.entity.HumanEntity
+import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
@@ -25,6 +27,29 @@ object InventoryUtils {
 		inventory.chestplate = null
 		inventory.leggings = null
 		inventory.boots = null
+	}
+
+	fun askForConfirmation(sender: Player, afterAccept: (HumanEntity) -> (Unit), afterDecline: (HumanEntity) -> (Unit)) {
+		val menu = createMenu(9, "§a§lConfirme a sua compra!") {
+			slot(3, 0) {
+				item = ItemStack(Material.GREEN_WOOL)
+					.rename("§a§lQuero comprar!")
+
+				onClick {
+					afterAccept.invoke(it)
+				}
+			}
+			slot(5, 0) {
+				item = ItemStack(Material.RED_WOOL)
+					.rename("§c§lTalvez outro dia...")
+
+				onClick {
+					afterDecline.invoke(it)
+				}
+			}
+		}
+
+		menu.sendTo(sender)
 	}
 }
 
