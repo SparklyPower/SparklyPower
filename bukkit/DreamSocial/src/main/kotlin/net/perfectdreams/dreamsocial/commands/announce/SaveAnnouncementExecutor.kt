@@ -8,11 +8,12 @@ import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import net.perfectdreams.dreamcore.utils.extensions.*
-import net.perfectdreams.dreamcore.utils.minutes
 import net.perfectdreams.dreamsocial.DreamSocial
 import net.perfectdreams.dreamsocial.dao.AnnouncementsEntity
 import net.perfectdreams.dreamsocial.gui.announcement.renderAnnouncementsMenu
 import org.bukkit.entity.Player
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toJavaDuration
 
 class SaveAnnouncementExecutor(private val plugin: DreamSocial) : SparklyCommandExecutor() {
     override fun execute(context: CommandContext, args: CommandArguments) {
@@ -40,7 +41,7 @@ class SaveAnnouncementExecutor(private val plugin: DreamSocial) : SparklyCommand
         private val RED_COLOR = TextColor.color(0xFF5555)
 
         val lastAnnouncements = Caffeine.newBuilder()
-            .expireAfterWrite(15.minutes)
+            .expireAfterWrite(15.minutes.toJavaDuration())
             .build<Player, String>()
             .asMap()
     }
