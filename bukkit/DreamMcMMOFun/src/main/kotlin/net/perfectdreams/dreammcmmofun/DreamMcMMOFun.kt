@@ -77,7 +77,7 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 						sendMcMMOBoostInformationToDiscord(endsAt)
 					}
 
-					if (isScheduledXPEventEnabled && mcMMO.p.isXPEventEnabled) {
+					if (currentHour !in startsAt until endsAt && isScheduledXPEventEnabled && mcMMO.p.isXPEventEnabled) {
 						isScheduledXPEventEnabled = false
 
 						switchContext(SynchronizationContext.SYNC)
