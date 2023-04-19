@@ -3,12 +3,14 @@ package net.perfectdreams.dreamterrainadditions
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
+import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
@@ -30,6 +32,7 @@ import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import java.io.File
+import java.lang.IllegalArgumentException
 import java.util.*
 
 class DreamTerrainAdditions : KotlinPlugin(), Listener {
@@ -163,6 +166,48 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		EntityType.SLIME,
 		EntityType.MAGMA_CUBE
 	)
+
+	@EventHandler
+	fun onTrustChanged(e: TrustChangedEvent) {
+		launchMainThread {
+			// If it is all, we will remove ALL permissions
+			if (e.identifier == "all") {
+				for (claim in e.claims) {
+					val claimAdditions = getClaimAdditionsById(claim.id) ?: return@launchMainThread
+
+					if (e.claimPermission == null) {
+						// Claim permission was removed!
+						claimAdditions.temporaryTrustedPlayersMutex.withLock {
+							claimAdditions.temporaryTrustedPlayers.clear()
+						}
+
+						saveInAsyncTask()
+					}
+				}
+				return@launchMainThread
+			}
+
+			val affectedId = try {
+				UUID.fromString(e.identifier)
+			} catch (e: IllegalArgumentException) {
+				// The identifier can be other values other than a UUID, such as "all", "public", etc
+				return@launchMainThread
+			}
+
+			for (claim in e.claims) {
+				val claimAdditions = getClaimAdditionsById(claim.id) ?: return@launchMainThread
+
+				if (e.claimPermission == null) {
+					// Claim permission was removed!
+					claimAdditions.temporaryTrustedPlayersMutex.withLock {
+						claimAdditions.temporaryTrustedPlayers.remove(affectedId)
+					}
+
+					saveInAsyncTask()
+				}
+			}
+		}
+	}
 
 	@EventHandler
 	fun onSpawn(e: EntitySpawnEvent) {
