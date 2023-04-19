@@ -1,7 +1,6 @@
 package net.perfectdreams.dreamterrainadditions.commands
 
 import kotlinx.coroutines.sync.withLock
-import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.TimeUtils
@@ -33,18 +32,14 @@ class TempTrustListExecutor(val plugin: DreamTerrainAdditions): SparklyCommandEx
                 player.sendMessage("§9§lLista de pessoas que temporariamente possuem permissão no terreno ${claim.id}:")
                 player.sendMessage("")
                 temporarilyTrustedPlayers.forEach { (uuid, timeInMillis) ->
-                    // We check if the user has explicit permission because the user may have removed the permission with GriefPrevention's "/untrust" command
-                    // So, if they actually DON'T have permission to build, we won't show them in the list
-                    if (claim.hasExplicitPermission(uuid, ClaimPermission.Build)) {
-                        val playerName = DreamUtils.retrieveUserInfo(uuid)?.username?.uppercase() ?: uuid.toString()
-                        player.sendMessage(
-                            "§6$playerName §f-> §7${
-                                TimeUtils.convertEpochMillisToAbbreviatedTime(
-                                    timeInMillis - System.currentTimeMillis()
-                                )
-                            }"
-                        )
-                    }
+                    val playerName = DreamUtils.retrieveUserInfo(uuid)?.username?.uppercase() ?: uuid.toString()
+                    player.sendMessage(
+                        "§6$playerName §f-> §7${
+                            TimeUtils.convertEpochMillisToAbbreviatedTime(
+                                timeInMillis - System.currentTimeMillis()
+                            )
+                        }"
+                    )
                 }
             }
         }
