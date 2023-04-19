@@ -3,7 +3,6 @@ package net.perfectdreams.dreammcmmofun
 import club.minnced.discord.webhook.WebhookClient
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
-import com.gmail.nossr50.events.chat.McMMOPartyChatEvent
 import com.gmail.nossr50.mcMMO
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
@@ -17,6 +16,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
+import java.io.File
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.ZoneId
@@ -30,6 +30,20 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 		DayOfWeek.WEDNESDAY,
 		DayOfWeek.FRIDAY
 	)
+
+	private val isScheduledXPEventEnabledFile = File(dataFolder, "is_xp_event_enabled")
+
+	/**
+	 * Returns if the McMMO XP rate event was enabled by the plugin
+	 */
+	private var isScheduledXPEventEnabled
+		set(value) {
+			if (value)
+				isScheduledXPEventEnabledFile.createNewFile()
+			else
+				isScheduledXPEventEnabledFile.delete()
+		}
+		get() = isScheduledXPEventEnabledFile.exists()
 
 	override fun softEnable() {
 		super.softEnable()
@@ -53,6 +67,8 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 					logger.info { "Today's mcMMO Boost will start at $startsAt and end at $endsAt" }
 
 					if (currentHour in startsAt until endsAt && !mcMMO.p.isXPEventEnabled) {
+						isScheduledXPEventEnabled = true
+
 						switchContext(SynchronizationContext.SYNC)
 						// We could use McMMO's API but it doesn't broadcast
 						Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "xprate 2 true")
@@ -61,7 +77,9 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 						sendMcMMOBoostInformationToDiscord(endsAt)
 					}
 
-					if (currentHour == endsAt && mcMMO.p.isXPEventEnabled) {
+					if (isScheduledXPEventEnabled && mcMMO.p.isXPEventEnabled) {
+						isScheduledXPEventEnabled = false
+
 						switchContext(SynchronizationContext.SYNC)
 						// We could use McMMO's API but it doesn't broadcast
 						Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "xprate reset")
