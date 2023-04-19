@@ -23,7 +23,7 @@ object TimeUtils {
         .toInstant()
         .toEpochMilli()
 
-    fun convertToLocalDateTimeRelativeToNow(input: String) = convertToLocalDateTimeRelativeToTime(input, LocalDateTime.now().atZone(TIME_ZONE))
+    fun convertToLocalDateTimeRelativeToNow(input: String) = convertToLocalDateTimeRelativeToTime(input, ZonedDateTime.now(TIME_ZONE))
 
     fun convertToLocalDateTimeRelativeToTime(input: String, relativeTo: ZonedDateTime): ZonedDateTime {
         val content = input.toLowerCase()
