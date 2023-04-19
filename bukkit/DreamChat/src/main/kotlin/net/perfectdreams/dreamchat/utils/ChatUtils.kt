@@ -19,6 +19,7 @@ import org.bukkit.ChatColor
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.entity.Player
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.asSequence
 import kotlin.collections.filterNot
@@ -339,8 +340,8 @@ object ChatUtils {
 		DreamChat.INSTANCE.quickReply[receiver] = sender
 
 		scheduler().schedule(DreamChat.INSTANCE, SynchronizationContext.ASYNC) {
-			val calendar = Calendar.getInstance()
-			val date = "${String.format("%02d", calendar[Calendar.DAY_OF_MONTH])}/${String.format("%02d", calendar[Calendar.MONTH] + 1)}/${String.format("%02d", calendar[Calendar.YEAR])} ${String.format("%02d", calendar[Calendar.HOUR_OF_DAY])}:${String.format("%02d", calendar[Calendar.MINUTE])}"
+			val calendar = LocalDateTime.now(TimeUtils.TIME_ZONE)
+			val date = "${String.format("%02d", calendar.dayOfMonth)}/${String.format("%02d", calendar.monthValue + 1)}/${String.format("%02d", calendar.year)} ${String.format("%02d", calendar.hour)}:${String.format("%02d", calendar.minute)}"
 			DreamChat.INSTANCE.pmLog.appendText("[$date] ${sender.name} -> ${receiver.name}: $message\n")
 
 			DreamChat.INSTANCE.tellMessagesQueue

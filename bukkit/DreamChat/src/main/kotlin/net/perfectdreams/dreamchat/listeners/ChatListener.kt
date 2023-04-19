@@ -65,6 +65,7 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.text.NumberFormat
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
@@ -732,8 +733,8 @@ class ChatListener(val m: DreamChat) : Listener {
 				onlinePlayer.spigot().sendMessage(textComponent)
 		}
 
-		val calendar = Calendar.getInstance()
-		m.chatLog.appendText("[${String.format("%02d", calendar[Calendar.DAY_OF_MONTH])}/${String.format("%02d", calendar[Calendar.MONTH] + 1)}/${String.format("%02d", calendar[Calendar.YEAR])} ${String.format("%02d", calendar[Calendar.HOUR_OF_DAY])}:${String.format("%02d", calendar[Calendar.MINUTE])}] ${player.name}: $message\n")
+		val calendar = LocalDateTime.now(TimeUtils.TIME_ZONE)
+		m.chatLog.appendText("[${String.format("%02d", calendar.dayOfMonth)}/${String.format("%02d", calendar.monthValue + 1)}/${String.format("%02d", calendar.year)} ${String.format("%02d", calendar.hour)}:${String.format("%02d", calendar.minute)}] ${player.name}: $message\n")
 
 		// Tudo OK? Então vamos verificar se a mensagem tem algo de importante para nós respondermos
 		for (response in DreamChat.botResponses) {
