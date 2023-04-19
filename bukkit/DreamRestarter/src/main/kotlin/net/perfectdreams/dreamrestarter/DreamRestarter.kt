@@ -37,10 +37,9 @@ class DreamRestarter : KotlinPlugin() {
 
 		scheduler().schedule(this) {
 			launchAsyncThread {
-				val now = ZonedDateTime.now()
 				val today = ZonedDateTime.now(SERVER_ZONE_ID)
 				val todayAtTime = ZonedDateTime.of(today.toLocalDate(), LocalTime.of(5, 0), SERVER_ZONE_ID)
-				val gonnaBeScheduledAtTime =  if (now > todayAtTime) {
+				val gonnaBeScheduledAtTime =  if (today > todayAtTime) {
 					// If today at time is larger than today, then it means that we need to schedule it for tomorrow
 					todayAtTime.plusDays(1)
 				} else todayAtTime
