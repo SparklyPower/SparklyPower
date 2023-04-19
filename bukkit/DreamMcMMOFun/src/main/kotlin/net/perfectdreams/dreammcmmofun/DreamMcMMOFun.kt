@@ -47,7 +47,7 @@ class DreamMcMMOFun : KotlinPlugin(), Listener {
 
 	override fun softEnable() {
 		super.softEnable()
-		
+
 		dataFolder.mkdirs()
 
 		registerEvents(this)
