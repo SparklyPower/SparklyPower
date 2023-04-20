@@ -22,6 +22,8 @@ import net.perfectdreams.dreamsocial.dao.AnnouncementsEntity
 import net.perfectdreams.dreamsocial.gui.announcement.renderAnnouncementsMenu
 import net.perfectdreams.dreamvanish.DreamVanishAPI
 import org.bukkit.entity.Player
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.toJavaDuration
 
 class AnnounceExecutor(private val plugin: DreamSocial, private val dreamChat: DreamChat) : SparklyCommandExecutor() {
     inner class Options : CommandOptions() {
@@ -107,7 +109,7 @@ class AnnounceExecutor(private val plugin: DreamSocial, private val dreamChat: D
         private var lastAnnouncement = 0L
 
         private val cooldowns = Caffeine.newBuilder()
-            .expireAfterWrite(3.minutes)
+            .expireAfterWrite(3.minutes.toJavaDuration())
             .build<Player, Long>()
             .asMap()
     }
