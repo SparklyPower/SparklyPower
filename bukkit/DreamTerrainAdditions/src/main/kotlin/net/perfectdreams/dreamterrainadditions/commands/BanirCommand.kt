@@ -51,7 +51,8 @@ object BanirCommand : DSLCommandBase<DreamTerrainAdditions> {
                     val lesser = Location(banned.world, claim.lesserBoundaryCorner.x, 0.0, claim.lesserBoundaryCorner.z)
                     val greater = Location(banned.world, claim.greaterBoundaryCorner.x, 255.0, claim.greaterBoundaryCorner.z)
 
-                    if (banned.location.isBetween(lesser, greater)) {
+                    // If we are staff, we can bypass the ban
+                    if (!banned.hasPermission("sparklypower.soustaff") && banned.location.isBetween(lesser, greater)) {
                         banned.teleportToServerSpawnWithEffects()
                         banned.sendTitle("§f", "§cVocê foi banido do terreno", 20, 60, 20)
                     }
