@@ -94,7 +94,11 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		val claim = GriefPrevention.instance.dataStore.getClaimAt(e.to, false, null) ?: return
 		val claimAdditions = getClaimAdditionsById(claim.id) ?: return
 
-		if (claimAdditions.bannedPlayers.contains(e.player.name) && !e.player.hasPermission("sparklypower.soustaff")) {
+		// If we are staff, we can bypass the ban
+		if (e.player.hasPermission("sparklypower.soustaff"))
+			return
+
+		if (claimAdditions.bannedPlayers.contains(e.player.name)) {
 			e.isCancelled = true
 
 			e.player.sendTitle("§f", "§cVocê está banido deste terreno", 0, 60, 0)
