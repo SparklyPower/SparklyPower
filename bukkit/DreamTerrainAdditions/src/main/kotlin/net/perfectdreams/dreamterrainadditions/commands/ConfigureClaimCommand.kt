@@ -216,6 +216,30 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                             plugin.saveInAsyncTask()
                         }
                     }
+                    slot(3, 3) {
+                        item = ItemStack(Material.BARRIER)
+                            .meta<ItemMeta> {
+                                this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+
+                                if (claimAdditions.blockAllPlayersExceptTrusted) {
+                                    setDisplayName("§a§lPermitir que outros membros entrem no terreno")
+                                } else {
+                                    setDisplayName("§b§Bloquear que outros membros entrem no terreno")
+                                }
+
+                                lore = listOf(
+                                    "§7Bloqueia outros players de entrarem no seu terreno, exceto quem tem permissão no terreno.",
+                                )
+                            }
+
+                        onClick {
+                            it.closeInventory()
+                            claimAdditions.blockAllPlayersExceptTrusted = !claimAdditions.blockAllPlayersExceptTrusted
+                            it.sendMessage("§aO bloqueio de membros no terreno está agora ${humanizeBoolean(claimAdditions.blockAllPlayersExceptTrusted)} no seu terreno!")
+
+                            plugin.saveInAsyncTask()
+                        }
+                    }
 
                     slot(8, 1) {
                         item = ItemStack(Material.PLAYER_HEAD)

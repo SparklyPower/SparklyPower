@@ -98,6 +98,10 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			e.player.sendTitle("§f", "§cVocê está banido deste terreno", 0, 60, 0)
+		} else if (claimAdditions.blockAllPlayersExceptTrusted && !(claim.ownerName == e.player.name || claim.hasExplicitPermission(e.player, ClaimPermission.Build))) {
+			e.isCancelled = true
+
+			e.player.sendTitle("§f", "§cO dono não deixa outros players entrarem no terreno!", 0, 60, 0)
 		}
 	}
 
@@ -331,6 +335,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		var disablePlantsSpreading by data::disablePlantsSpreading
 		var disableTrapdoorAndDoorAccess by data::disableTrapdoorAndDoorAccess
 		var allowSpawnFromMobSpawners by data::allowSpawnFromMobSpawners
+		var blockAllPlayersExceptTrusted by data::blockAllPlayersExceptTrusted
 
 		val temporaryTrustedPlayersMutex = Mutex()
 	}
@@ -347,6 +352,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		var disableSnowFormation: Boolean = false,
 		var disablePlantsSpreading: Boolean = false,
 		var disableTrapdoorAndDoorAccess: Boolean = false,
-		var allowSpawnFromMobSpawners: Boolean = false
+		var allowSpawnFromMobSpawners: Boolean = false,
+		var blockAllPlayersExceptTrusted: Boolean = false
 	)
 }
