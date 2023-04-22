@@ -31,6 +31,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.event.player.PlayerTeleportEvent
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.util.*
@@ -91,6 +92,26 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		if (e.from.blockX == e.to.blockX && e.from.blockY == e.to.blockY && e.from.blockZ == e.to.blockZ)
 			return
 
+		val claim = GriefPrevention.instance.dataStore.getClaimAt(e.to, false, null) ?: return
+		val claimAdditions = getClaimAdditionsById(claim.id) ?: return
+
+		// If we are staff, we can bypass the ban
+		if (e.player.hasPermission("sparklypower.soustaff"))
+			return
+
+		if (claimAdditions.bannedPlayers.contains(e.player.name)) {
+			e.isCancelled = true
+
+			e.player.sendTitle("§f", "§cVocê está banido deste terreno", 0, 60, 0)
+		} else if (claimAdditions.blockAllPlayersExceptTrusted && !(claim.ownerName == e.player.name || claim.hasExplicitPermission(e.player, ClaimPermission.Build))) {
+			e.isCancelled = true
+
+			e.player.sendTitle("§f", "§cO dono não deixa outros players entrarem no terreno!", 0, 60, 0)
+		}
+	}
+
+	@EventHandler
+	fun onTeleport(e: PlayerTeleportEvent) {
 		val claim = GriefPrevention.instance.dataStore.getClaimAt(e.to, false, null) ?: return
 		val claimAdditions = getClaimAdditionsById(claim.id) ?: return
 
