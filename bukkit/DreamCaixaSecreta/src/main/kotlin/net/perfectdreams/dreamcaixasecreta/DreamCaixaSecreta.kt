@@ -49,6 +49,7 @@ class DreamCaixaSecreta : KotlinPlugin() {
 			}
 		})
 
+
 		var chance = 0.1
 		prizes.add(
 			RandomItem(
@@ -57,11 +58,39 @@ class DreamCaixaSecreta : KotlinPlugin() {
 				), chance
 			)
 		)
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.NETHERITE_INGOT
+				), chance
+			)
+		)
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.TOTEM_OF_UNDYING
+				), chance
+			)
+		)
 		chance = 0.2
 		prizes.add(
 			RandomItem(
 				ItemStack(
 					Material.NETHER_STAR
+				), chance
+			)
+		)
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.NETHERITE_SCRAP
+				), chance
+			)
+		)
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.CONDUIT
 				), chance
 			)
 		)
@@ -266,6 +295,82 @@ class DreamCaixaSecreta : KotlinPlugin() {
 				)
 			}
 
+			if (material.name.endsWith("CONCRETE")) {
+				prizes.add(
+					RandomItem(
+						ItemStack(
+							material,
+							8
+						), chance
+					)
+				)
+			}
+
+			if (material.name.endsWith("CONCRETE_POWDER")) {
+				prizes.add(
+					RandomItem(
+						ItemStack(
+							material,
+							8
+						), chance
+					)
+				)
+			}
+
+			if (material.name.endsWith("CORAL_BLOCK")) {
+				prizes.add(
+					RandomItem(
+						ItemStack(
+							material,
+							2
+						), chance
+					)
+				)
+			}
+
+			if (material.name.endsWith("CORAL")) {
+				prizes.add(
+					RandomItem(
+						ItemStack(
+							material,
+							2
+						), chance
+					)
+				)
+			}
+
+			if (material.name.endsWith("CORAL_FAN")) {
+				prizes.add(
+					RandomItem(
+						ItemStack(
+							material,
+							2
+						), chance
+					)
+				)
+			}
+
+			if (material.name.endsWith("CANDLE")) {
+				prizes.add(
+					RandomItem(
+						ItemStack(
+							material,
+							2
+						), chance
+					)
+				)
+			}
+
+			if (material.name.endsWith("ENCHANTED_BOOK")) {
+				prizes.add(
+					RandomItem(
+						ItemStack(
+							material,
+						), chance
+					)
+				)
+			}
+
 			if (material.name.endsWith("TERRACOTTA")) {
 				prizes.add(
 					RandomItem(
@@ -286,6 +391,34 @@ class DreamCaixaSecreta : KotlinPlugin() {
 				), chance
 			)
 		)
+
+		chance = 2.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.FIRE_CHARGE
+				), chance
+			)
+		)
+
+		chance = 2.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.SHULKER_BOX
+				), chance
+			)
+		)
+
+		chance = 1.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.SCUTE
+				), chance
+			)
+		)
+
 		chance = 2.0
 		prizes.add(
 			RandomItem(
@@ -327,6 +460,60 @@ class DreamCaixaSecreta : KotlinPlugin() {
 				ItemStack(
 					Material.QUARTZ_BLOCK,
 					16
+				), chance
+			)
+		)
+		chance = 4.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.EGG,
+					16
+				), chance
+			)
+		)
+		chance = 2.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.FIREWORK_ROCKET,
+					4
+				), chance
+			)
+		)
+		chance = 2.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.GILDED_BLACKSTONE,
+					4
+				), chance
+			)
+		)
+		chance = 4.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.AMETHYST_BLOCK,
+					4
+				), chance
+			)
+		)
+		chance = 2.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.CHAIN,
+					8
+				), chance
+			)
+		)
+		chance = 4.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.AMETHYST_SHARD,
+					8
 				), chance
 			)
 		)
@@ -417,6 +604,30 @@ class DreamCaixaSecreta : KotlinPlugin() {
 			RandomItem(
 				ItemStack(
 					Material.JUNGLE_LOG,
+					64
+				), chance
+			)
+		)
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.MANGROVE_LOG,
+					64
+				), chance
+			)
+		)
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.WARPED_STEM,
+					64
+				), chance
+			)
+		)
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.CRIMSON_STEM,
 					64
 				), chance
 			)
@@ -549,6 +760,15 @@ class DreamCaixaSecreta : KotlinPlugin() {
 				), chance
 			)
 		)
+		chance = 15.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.DEEPSLATE,
+					64
+				), chance
+			)
+		)
 		chance = 16.0
 		prizes.add(
 			RandomItem(
@@ -607,8 +827,53 @@ class DreamCaixaSecreta : KotlinPlugin() {
 		prizes.add(
 			RandomItem(
 				ItemStack(
+					Material.MELON_SLICE,
+					4
+				), chance
+			)
+		)
+		chance = 16.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.RABBIT_STEW,
+					4
+				), chance
+			)
+		)
+		chance = 16.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.BEETROOT,
+					4
+				), chance
+			)
+		)
+		chance = 16.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
 					Material.APPLE,
 					4
+				), chance
+			)
+		)
+		chance = 8.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.HONEYCOMB,
+					2
+				), chance
+			)
+		)
+		chance = 2.0
+		prizes.add(
+			RandomItem(
+				ItemStack(
+					Material.TNT,
+					2
 				), chance
 			)
 		)
