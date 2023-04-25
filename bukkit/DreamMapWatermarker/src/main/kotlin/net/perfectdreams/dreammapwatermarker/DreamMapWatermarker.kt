@@ -2,11 +2,16 @@ package net.perfectdreams.dreammapwatermarker
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.command
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreammapwatermarker.commands.DreamMapMakerCommand
+import net.perfectdreams.dreammapwatermarker.map.ImgRenderer
+import org.bukkit.Bukkit
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -17,9 +22,14 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.MapMeta
+import org.bukkit.map.MapPalette
+import org.bukkit.map.MapRenderer
 import org.bukkit.persistence.PersistentDataType
-import org.jetbrains.exposed.sql.transactions.transaction
+import java.awt.Image
+import java.awt.image.BufferedImage
+import java.io.File
 import java.util.*
+import javax.imageio.ImageIO
 
 class DreamMapWatermarker : KotlinPlugin(), Listener {
 	companion object {
@@ -35,11 +45,18 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 		}
 	}
 
+	val imageFolder = File(dataFolder, "img")
+
 	override fun softEnable() {
 		super.softEnable()
+		imageFolder.mkdirs()
+
+		registerCommand(DreamMapMakerCommand(this))
 
 		registerEvents(this)
 
+		restoreMaps()
+		
 		registerCommand(
 			command("DreamWatermarkMap", listOf("watermarkmap")) {
 				permission = "dreamwatermarkmap.watermark"
@@ -109,5 +126,77 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 		}
 
 		// Bukkit.broadcastMessage("Moveu item ${event.destination}")
+	}
+
+	fun restoreMaps() {
+		if (!imageFolder.exists()) {
+			logger.warning { "Image Folder does not exist! Skipping map restore process..." }
+			return
+		}
+
+		// Load the maps in parallel, to speed up server load times
+		val jobs = mutableListOf<Job>()
+		val semaphore = Semaphore(32)
+
+		imageFolder.listFiles().forEach {
+			if (it.extension == "png") {
+				jobs.add(
+					GlobalScope.launch(Dispatchers.IO) {
+						semaphore.withPermit {
+							val mapId = it.nameWithoutExtension.toIntOrNull()
+							if (mapId == null) {
+								logger.warning { "Invalid Map ID ${it.nameWithoutExtension}! Skipping..." }
+								return@launch
+							}
+
+							val mapView = Bukkit.getMap(mapId)
+							if (mapView == null) {
+								logger.warning { "Map with ID $mapId does not exist! The map must exist/claimed before we are able to restore it! Skipping..." }
+								return@launch
+							}
+
+							val image = ImageIO.read(it)
+
+							val renderers: List<MapRenderer> = mapView.renderers
+
+							for (r in renderers) {
+								mapView.removeRenderer(r)
+							}
+
+							mapView.addRenderer(ImgRenderer(MapPalette.imageToBytes(image)))
+
+							logger.info { "Restored map $mapId!" }
+						}
+					}
+				)
+			}
+		}
+
+		runBlocking {
+			jobs.joinAll()
+		}
+	}
+
+	/**
+	 * Converts a given Image into a BufferedImage
+	 *
+	 * @param img The Image to be converted
+	 * @return The converted BufferedImage
+	 */
+	fun toBufferedImage(img: Image): BufferedImage {
+		if (img is BufferedImage) {
+			return img
+		}
+
+		// Create a buffered image with transparency
+		val bimage = BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_ARGB)
+
+		// Draw the image on to the buffered image
+		val bGr = bimage.createGraphics()
+		bGr.drawImage(img, 0, 0, null)
+		bGr.dispose()
+
+		// Return the buffered image
+		return bimage
 	}
 }
