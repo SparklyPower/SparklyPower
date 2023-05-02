@@ -99,6 +99,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		registerEvents(CustomBlocksListener(this))
 		registerEvents(EstalinhoListener(this))
 		registerEvents(RemoveDisabledPluginsRecipesListener(this))
+		registerEvents(MagnetListener(this))
 
 		// https://gist.github.com/aadnk/8119275
 		val protocolManager = ProtocolLibrary.getProtocolManager()
@@ -120,40 +121,46 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 					.addIngredient(Material.AMETHYST_SHARD)
 					.addIngredient(Material.COPPER_INGOT)
 			)
-		)
-
-		customRecipes.add(
-			addRecipe(
-				"magnet_2",
-				CustomItems.MAGNET_2,
-				listOf(
-					"CEC",
-					"R R",
-					"R R"
-				)
-			) {
-				it.setIngredient('C', Material.CRYING_OBSIDIAN)
-				it.setIngredient('E', Material.ENDER_EYE)
-				it.setIngredient('R', Material.PRISMARINE_SHARD)
-			}
-		)
-
-		customRecipes.add(
-			addRecipe(
-				"magnet",
-				CustomItems.MAGNET,
-				listOf(
-					"BSB",
-					"R R",
-					"I I"
-				)
-			) {
-				it.setIngredient('B', Material.IRON_BLOCK)
-				it.setIngredient('S', Material.STONE)
-				it.setIngredient('R', Material.PRISMARINE_SHARD)
-				it.setIngredient('I', Material.IRON_INGOT)
-			}
 		) */
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				recipe = addRecipe(
+					"magnet",
+					CustomItems.MAGNET,
+					listOf(
+						"BSB",
+						"R R",
+						"I I"
+					)
+				) {
+					it.setIngredient('B', Material.IRON_BLOCK)
+					it.setIngredient('S', Material.STONE)
+					it.setIngredient('R', Material.PRISMARINE_SHARD)
+					it.setIngredient('I', Material.IRON_INGOT)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				recipe = addRecipe(
+					"magnet_2",
+					CustomItems.MAGNET_2,
+					listOf(
+						"CEC",
+						"R R",
+						"R R"
+					)
+				) {
+					it.setIngredient('C', Material.CRYING_OBSIDIAN)
+					it.setIngredient('E', Material.ENDER_EYE)
+					it.setIngredient('R', Material.PRISMARINE_SHARD)
+				}
+			)
+		)
 
 		customRecipes.add(
 			CustomCraftingRecipe(

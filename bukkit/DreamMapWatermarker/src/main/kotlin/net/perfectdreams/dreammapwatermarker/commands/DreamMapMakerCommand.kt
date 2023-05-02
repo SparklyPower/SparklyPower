@@ -115,7 +115,7 @@ class DreamMapMakerCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
                         color(NamedTextColor.YELLOW)
                         content("Aplicando imagem no mapa...")
                     }
-                    
+
                     val renderers: List<MapRenderer> = map.renderers
 
                     for (r in renderers) {

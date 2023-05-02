@@ -164,4 +164,33 @@ object CustomItems {
 
         persistentDataContainer.set(IS_TRASHCAN_KEY, PersistentDataType.BYTE, 1)
     }
+
+    val MAGNET = ItemStack(Material.STONE_HOE)
+        .meta<ItemMeta> {
+            addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+            setCustomModelData(1)
+            setDisplayName("§c§lÍmã")
+
+            lore = listOf(
+                "§7Graças aos seus polos §bmagnéticos§7, esse item atrai",
+                "§7todo §cminério§7 que você minerar para o seu inventário.",
+                "",
+                "§6Pode atrair até §f4320 §6minérios"
+            )
+        }
+
+    val MAGNET_2 = ItemStack(Material.STONE_HOE)
+        .meta<ItemMeta> {
+            addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+            setCustomModelData(2)
+            setDisplayName("§x§d§1§6§d§e§9§lÍmã grotesco")
+
+            lore = listOf(
+                "§7Ele atrai qualquer bloco que seja quebrado",
+                "§7por você, sendo um minério ou não.",
+                "§eBizarro§7, mas funciona.",
+                "",
+                "§6Pode atrair até §f8640 §6itens"
+            )
+        }
 }
