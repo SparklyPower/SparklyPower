@@ -3,6 +3,7 @@ package net.perfectdreams.dreamcustomitems.listeners
 import net.perfectdreams.dreamcore.utils.canHoldItem
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
+import net.perfectdreams.dreamcustomitems.utils.MagnetUtils
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -94,9 +95,9 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
             if (it == null)
                 return@mapNotNull null
 
-            val magnetType = getMagnetType(it) ?: return@mapNotNull null
+            val magnetType = MagnetUtils.getMagnetType(it) ?: return@mapNotNull null
 
-            Magnet(
+            MagnetUtils.Magnet(
                 it,
                 magnetType
             )
@@ -105,11 +106,11 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
         val magnet = magnetsInPlayerInventory.firstOrNull() ?: return
 
         when (magnet.type) {
-            MagnetType.MAGNET -> {
+            MagnetUtils.MagnetType.MAGNET -> {
                 if (e.blockState.type !in magnizableBlocks)
                     return
             }
-            MagnetType.WEIRD_MAGNET -> {
+            MagnetUtils.MagnetType.WEIRD_MAGNET -> {
                 if (e.blockState.type !in weirdMagnizableBlocks)
                     return
             }
@@ -134,33 +135,4 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
             }
         }
     }
-
-    private fun getMagnetType(itemStack: ItemStack): MagnetType? {
-        if (itemStack.type != Material.STONE_HOE)
-            return null
-
-        if (!itemStack.hasItemMeta())
-            return null
-
-        if (!itemStack.itemMeta.hasCustomModelData())
-            return null
-
-        if (itemStack.itemMeta.customModelData == 1)
-            return MagnetType.MAGNET
-
-        if (itemStack.itemMeta.customModelData == 2)
-            return MagnetType.WEIRD_MAGNET
-
-        return null
-    }
-
-    enum class MagnetType {
-        MAGNET,
-        WEIRD_MAGNET
-    }
-
-    data class Magnet(
-        val itemStack: ItemStack,
-        val type: MagnetType
-    )
 }

@@ -167,6 +167,26 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				CustomCraftingRecipe.RUBY_REMAP,
+				recipe = addRecipe(
+					"magnet_repair",
+					CustomItems.MAGNET,
+					listOf(
+						"   ",
+						"AMC",
+						"   "
+					)
+				) {
+					it.setIngredient('A', Material.AMETHYST_SHARD)
+					it.setIngredient('C', Material.COPPER_INGOT)
+					it.setIngredient('M', Material.STONE_HOE)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
 				recipe = addRecipe(
 					"hamburger",
 					CustomItems.HAMBURGER,
