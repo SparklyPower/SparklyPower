@@ -126,6 +126,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				CustomCraftingRecipe.RUBY_REMAP,
 				recipe = addRecipe(
 					"magnet",
 					CustomItems.MAGNET,
@@ -146,6 +147,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				CustomCraftingRecipe.RUBY_REMAP,
 				recipe = addRecipe(
 					"magnet_2",
 					CustomItems.MAGNET_2,
