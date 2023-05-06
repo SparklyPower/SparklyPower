@@ -1,7 +1,9 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
+import com.gmail.nossr50.events.items.McMMOItemSpawnEvent
 import net.perfectdreams.dreamcore.utils.canHoldItem
-import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.get
+import net.perfectdreams.dreamcore.utils.set
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.MagnetUtils
 import org.bukkit.Material
@@ -9,15 +11,14 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockDropItemEvent
-import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 
 class MagnetListener(val m: DreamCustomItems) : Listener {
-    private val magnizableBlocks = Material.values()
+    private val magnetizableBlocks = Material.values()
         .filter { it.name.endsWith("_ORE") }
         .toSet()
 
-    private val weirdMagnizableBlocks = magnizableBlocks + setOf(
+    private val weirdMagnetizableBlocks = magnetizableBlocks + setOf(
         Material.STONE,
         Material.DIRT,
         Material.GRASS_BLOCK,
@@ -107,11 +108,11 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
 
         when (magnet.type) {
             MagnetUtils.MagnetType.MAGNET -> {
-                if (e.blockState.type !in magnizableBlocks)
+                if (e.blockState.type !in magnetizableBlocks)
                     return
             }
             MagnetUtils.MagnetType.WEIRD_MAGNET -> {
-                if (e.blockState.type !in weirdMagnizableBlocks)
+                if (e.blockState.type !in weirdMagnetizableBlocks)
                     return
             }
         }
@@ -129,9 +130,65 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
                 e.items.remove(item)
                 e.player.inventory.addItem(item.itemStack)
 
-                magnet.itemStack.meta<Damageable> {
-                    damage += 1
+                val meta = magnet.itemStack.itemMeta as Damageable
+                val currentDurability = meta.persistentDataContainer.get(MagnetUtils.MAGNET_DURABILITY) ?: 0
+
+                meta.persistentDataContainer.set(MagnetUtils.MAGNET_DURABILITY, currentDurability + 1)
+                val mapMagnetDurabilityToVanillaToolDurabilityMultiplier = magnet.itemStack.type.maxDurability.toDouble() / magnet.type.maxDamage.toDouble()
+
+                meta.damage = (currentDurability * mapMagnetDurabilityToVanillaToolDurabilityMultiplier).toInt()
+                magnet.itemStack.itemMeta = meta
+
+                if (currentDurability >= magnet.type.maxDamage) {
+                    magnet.itemStack.amount -= 1
                 }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onMcMMOBlockDropItem(e: McMMOItemSpawnEvent) {
+        // Are we holding a magnet?
+        val player = e.player ?: return
+
+        val magnetsInPlayerInventory = player.inventory.mapNotNull {
+            if (it == null)
+                return@mapNotNull null
+
+            val magnetType = MagnetUtils.getMagnetType(it) ?: return@mapNotNull null
+
+            MagnetUtils.Magnet(
+                it,
+                magnetType
+            )
+        }
+
+        val magnet = magnetsInPlayerInventory.firstOrNull() ?: return
+
+        // We can't get the magnet type, so we will default to the weird magnetizable blocks
+        val itemStack = e.itemStack
+
+        // Ignore items that are in our disallowed drops list
+        val playerDisallowedDrops = m.dropsBlacklist[e.player]?.mapNotNull { it?.type }
+        if (playerDisallowedDrops != null && itemStack.type !in playerDisallowedDrops)
+            return
+
+        // If we can hold the item in our inventory, we will add it to our inventory and remove it from the drops list
+        if (player.inventory.canHoldItem(itemStack)) {
+            e.isCancelled = true
+            player.inventory.addItem(itemStack)
+
+            val meta = magnet.itemStack.itemMeta as Damageable
+            val currentDurability = meta.persistentDataContainer.get(MagnetUtils.MAGNET_DURABILITY) ?: 0
+
+            meta.persistentDataContainer.set(MagnetUtils.MAGNET_DURABILITY, currentDurability + 1)
+            val mapMagnetDurabilityToVanillaToolDurabilityMultiplier = magnet.itemStack.type.maxDurability.toDouble() / magnet.type.maxDamage.toDouble()
+
+            meta.damage = (currentDurability * mapMagnetDurabilityToVanillaToolDurabilityMultiplier).toInt()
+            magnet.itemStack.itemMeta = meta
+
+            if (currentDurability >= magnet.type.maxDamage) {
+                magnet.itemStack.amount -= 1
             }
         }
     }

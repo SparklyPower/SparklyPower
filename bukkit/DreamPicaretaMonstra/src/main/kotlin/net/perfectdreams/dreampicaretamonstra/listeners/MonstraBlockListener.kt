@@ -1,6 +1,7 @@
 package net.perfectdreams.dreampicaretamonstra.listeners
 
 import me.ryanhamshire.GriefPrevention.GriefPrevention
+import net.minecraft.world.entity.item.ItemEntity
 import net.perfectdreams.dreamcore.utils.BlockUtils
 import net.perfectdreams.dreamcore.utils.GeometryUtils
 import net.perfectdreams.dreamcore.utils.PlayerUtils
@@ -10,9 +11,13 @@ import net.perfectdreams.dreamcustomitems.listeners.canMineRubyFrom
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import net.perfectdreams.dreampicaretamonstra.DreamPicaretaMonstra
 import org.bukkit.*
+import org.bukkit.craftbukkit.v1_19_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftItem
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ExperienceOrb
+import org.bukkit.entity.Item
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -103,8 +108,16 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                         if (inHand canMineRubyFrom e.block.type) drops.add(CustomItems.RUBY.clone())
                         allDrops.addAll(drops)
 
-                        // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
-                        val dropsAsItems = drops.map { location.world.dropItem(location, it) }
+                        // Because we want to create an item entity reference, we need to make it ourselves with NMS
+                        // We are going to mimick how items normally spawn when dropping, with the FakeBlockDropItemEvent too, to trigger all plugins that
+                        // are using that event
+                        val craftWorld = (location.world as CraftWorld).handle
+
+                        val dropsAsItems = drops.map {
+                            // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
+                            ItemEntity(craftWorld, location.x, location.y, location.z, CraftItemStack.asNMSCopy(it))
+                                .bukkitEntity as Item
+                        }
 
                         if (isPicaretaMonstra) {
                             m.doMcMMOStuffMining(
@@ -119,6 +132,18 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                                 location.block.state,
                                 dropsAsItems
                             )
+                        }
+
+                        // For my friend mcMMO xoxo, and for the magnet stuff too
+                        val fakeEvent = DreamPicaretaMonstra.FakeBlockDropItemEvent(
+                            location.block,
+                            location.block.state,
+                            e.player,
+                            dropsAsItems
+                        )
+                        Bukkit.getPluginManager().callEvent(fakeEvent)
+                        fakeEvent.items.forEach {
+                            craftWorld.addFreshEntity((it as CraftItem).handle)
                         }
 
                         // Do not update physics, this tries to avoid a lot of "notify()" calls

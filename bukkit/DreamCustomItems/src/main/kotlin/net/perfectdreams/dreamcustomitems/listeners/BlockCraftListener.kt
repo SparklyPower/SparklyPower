@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.set
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.*
 import org.bukkit.Keyed
@@ -25,6 +26,7 @@ class BlockCraftListener(val m: DreamCustomItems) : Listener {
                     is MagnetCraftValidationResult.Success -> {
                         e.inventory.result = result.magnet.clone().meta<Damageable> {
                             damage = 0
+                            persistentDataContainer.set(MagnetUtils.MAGNET_DURABILITY, 0)
                         }
                     }
 
@@ -49,6 +51,7 @@ class BlockCraftListener(val m: DreamCustomItems) : Listener {
 
                         e.currentItem = result.magnet.meta<Damageable> {
                             damage = 0
+                            persistentDataContainer.set(MagnetUtils.MAGNET_DURABILITY, 0)
                         }
                     }
 

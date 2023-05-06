@@ -2,6 +2,7 @@ package net.perfectdreams.dreampvptweaks
 
 import com.okkero.skedule.BukkitSchedulerController
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.delay
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
@@ -16,6 +17,8 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityToggleGlideEvent
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.PlayerRiptideEvent
+import org.bukkit.util.Vector
 import java.util.*
 
 class DreamPvPTweaks : KotlinPlugin(), Listener {
@@ -181,5 +184,23 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 
 		lastDamage.remove(e.player)
 		battleModeTasks.remove(e.player)
+	}
+
+	@EventHandler
+	fun onRiptide(e: PlayerRiptideEvent) {
+		if (e.player.world.name in ENABLED_WORLDS) {
+			e.player.sendMessage("§cVocê não pode usar o encantamento de Correnteza na Arena PvP!")
+			
+			// Attempt to reset the player's riptide
+			// This is very hacky since
+			val originalLocation = e.player.location
+			launchMainThread {
+				repeat(20) {
+					e.player.velocity = Vector(0, 0, 0)
+					e.player.teleport(originalLocation)
+					delay(1L)
+				}
+			}
+		}
 	}
 }

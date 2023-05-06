@@ -13,9 +13,11 @@ import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamcore.utils.extensions.toItemStack
 import org.bukkit.Material
+import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.ShapelessRecipe
+import org.bukkit.inventory.meta.EnchantmentStorageMeta
 import org.bukkit.inventory.meta.ItemMeta
 import java.io.File
 
@@ -261,6 +263,22 @@ class DreamCaixaSecreta : KotlinPlugin() {
 				), chance
 			)
 		)
+
+		for (enchantment in Enchantment.values()) {
+			for (level in enchantment.startLevel..enchantment.maxLevel) {
+				prizes.add(
+					RandomItem(
+						ItemStack(
+							Material.ENCHANTED_BOOK,
+						).meta<EnchantmentStorageMeta> {
+							this.addStoredEnchant(enchantment, level, false)
+						},
+						chance
+					)
+				)
+			}
+		}
+
 		for (material in Material.values().filter { !it.isLegacy }) {
 			if (material.name.startsWith("MUSIC_DISC_")) {
 				prizes.add(

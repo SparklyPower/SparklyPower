@@ -98,16 +98,6 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 				blockState,
 				heldItemHasSilkTouch
 			)
-
-			// For my friend mcMMO xoxo
-			Bukkit.getPluginManager().callEvent(
-				FakeBlockDropItemEvent(
-					blockState.block,
-					blockState,
-					player,
-					drops
-				)
-			)
 		}
 	}
 
@@ -122,16 +112,6 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 		) {
 			val excavationManager: ExcavationManager = mcMMOPlayer.excavationManager
 			excavationManager.excavationBlockCheck(blockState)
-
-			// For my friend mcMMO xoxo
-			Bukkit.getPluginManager().callEvent(
-				FakeBlockDropItemEvent(
-					blockState.block,
-					blockState,
-					player,
-					drops
-				)
-			)
 		}
 	}
 

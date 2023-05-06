@@ -11,6 +11,7 @@ import net.perfectdreams.dreamcustomitems.utils.CustomCraftingRecipe
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import net.perfectdreams.dreamcustomitems.utils.CustomTextualRecipe
 import org.bukkit.Bukkit
+import org.bukkit.Keyed
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.ShapedRecipe
@@ -18,7 +19,11 @@ import org.bukkit.inventory.ShapedRecipe
 class CustomItemRecipesExecutor(val m: DreamCustomItems) : SparklyCommandExecutor() {
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
-        val customItems = m.customRecipes
+        val customItems = m.customRecipes.filter {
+            if (it is CustomCraftingRecipe && it.recipe is Keyed)
+                it.recipe.key.key != "magnet_repair"
+            else
+                true }
         val inventorySize = ((customItems.size / 9.0).toInt() + 1) * 9
 
         val menu = createMenu(inventorySize, "§cItens customizados") {

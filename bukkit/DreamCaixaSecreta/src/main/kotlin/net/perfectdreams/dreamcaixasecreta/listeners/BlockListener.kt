@@ -46,7 +46,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 		if (caixaSecretaWorld == "Resources") {
 			val sonecasChance = chanceMultiplied(1.0, level)
 			val pesadelosChance = chanceMultiplied(0.1, level)
-			val nitroClassicChance = chanceMultiplied(0.0, level) // Never because this is super annoying
+			val nitroClassicChance = chanceMultiplied(0.01, level)
 
 			if (chance(sonecasChance)) {
 				val sonecas = DreamUtils.random.nextInt(25_000, 50_001)
@@ -76,7 +76,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 				}
 
 			} else if (chance(nitroClassicChance)) {
-				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu ${DISCORD_COLOR}Um Nitro Classic§a pela caixa secreta! Parabéns!!")
+				Bukkit.broadcastMessage("§b${e.player.displayName}§a conseguiu ${DISCORD_COLOR}Um Nitro no Discord§a pela caixa secreta! Parabéns!!")
 
 				val now = Instant.now()
 					.atZone(ZoneId.of("America/Sao_Paulo"))
@@ -88,11 +88,11 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 				items.add(
 					ItemStack(Material.TRIPWIRE_HOOK)
 						.rename("${DISCORD_COLOR}Nitro Classic")
-						.lore("§aPara receber o seu prêmio, contate", "§aa equipe do SparklyPower no", "§anosso Discord!", "§a", "§7Prêmio de §b${e.player.name}", "§a", "§aData: §2$day/$month/$year")
+						.lore("§aPara receber o seu prêmio, abra um ticket no", "§anosso Discord!", "§a", "§7Prêmio de §b${e.player.name}", "§a", "§aData: §2$day/$month/$year")
 				)
 
 				try {
-					m.nitroNotifyWebhook.send("@everyone :money_with_wings: `${e.player.name}` conseguiu um nitro classic pela caixa secreta!")
+					m.nitroNotifyWebhook.send("@everyone :money_with_wings: `${e.player.name}` conseguiu um Nitro pela caixa secreta!")
 				} catch(e: Exception) {
 					e.printStackTrace()
 				}
