@@ -1,6 +1,9 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
 import com.gmail.nossr50.events.items.McMMOItemSpawnEvent
+import net.kyori.adventure.text.format.NamedTextColor
+import net.perfectdreams.dreamcore.utils.adventure.append
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.canHoldItem
 import net.perfectdreams.dreamcore.utils.get
 import net.perfectdreams.dreamcore.utils.set
@@ -11,6 +14,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockDropItemEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.meta.Damageable
 
 class MagnetListener(val m: DreamCustomItems) : Listener {
@@ -89,6 +93,32 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
         Material.FLINT,
     )
 
+    @EventHandler(ignoreCancelled = false)
+    fun onMagnetInteract(e: PlayerInteractEvent) {
+        val item = e.item ?: return
+
+        val magnet = MagnetUtils.getMagnetType(item) ?: return
+
+        e.isCancelled = true
+
+        val currentDurability = item.itemMeta.persistentDataContainer.get(MagnetUtils.MAGNET_DURABILITY) ?: 0
+
+        e.player.sendMessage(
+            textComponent {
+                color(NamedTextColor.GREEN)
+
+                append("Usos do Ímã: ") {}
+                append(currentDurability.toString()) {
+                    color(NamedTextColor.YELLOW)
+                }
+                append("/")
+                append(magnet.maxDamage.toString()) {
+                    color(NamedTextColor.YELLOW)
+                }
+            }
+        )
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onBlockDropItem(e: BlockDropItemEvent) {
         // Are we holding a magnet?
@@ -122,26 +152,26 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
         for (item in items) {
             // Ignore items that are in our disallowed drops list
             val playerDisallowedDrops = m.dropsBlacklist[e.player]?.mapNotNull { it?.type }
-            if (playerDisallowedDrops != null && item.itemStack.type !in playerDisallowedDrops)
+            if (playerDisallowedDrops != null && item.itemStack.type in playerDisallowedDrops)
                 continue
 
             // If we can hold the item in our inventory, we will add it to our inventory and remove it from the drops list
             if (e.player.inventory.canHoldItem(item.itemStack)) {
-                e.items.remove(item)
-                e.player.inventory.addItem(item.itemStack)
-
                 val meta = magnet.itemStack.itemMeta as Damageable
                 val currentDurability = meta.persistentDataContainer.get(MagnetUtils.MAGNET_DURABILITY) ?: 0
+                if (currentDurability >= magnet.type.maxDamage) // You need to repair your magnet at this point
+                    return
 
-                meta.persistentDataContainer.set(MagnetUtils.MAGNET_DURABILITY, currentDurability + 1)
+                val newDurability = currentDurability + 1
+
+                meta.persistentDataContainer.set(MagnetUtils.MAGNET_DURABILITY, newDurability)
                 val mapMagnetDurabilityToVanillaToolDurabilityMultiplier = magnet.itemStack.type.maxDurability.toDouble() / magnet.type.maxDamage.toDouble()
 
                 meta.damage = (currentDurability * mapMagnetDurabilityToVanillaToolDurabilityMultiplier).toInt()
                 magnet.itemStack.itemMeta = meta
 
-                if (currentDurability >= magnet.type.maxDamage) {
-                    magnet.itemStack.amount -= 1
-                }
+                e.items.remove(item)
+                e.player.inventory.addItem(item.itemStack)
             }
         }
     }
@@ -170,26 +200,26 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
 
         // Ignore items that are in our disallowed drops list
         val playerDisallowedDrops = m.dropsBlacklist[e.player]?.mapNotNull { it?.type }
-        if (playerDisallowedDrops != null && itemStack.type !in playerDisallowedDrops)
+        if (playerDisallowedDrops != null && itemStack.type in playerDisallowedDrops)
             return
 
         // If we can hold the item in our inventory, we will add it to our inventory and remove it from the drops list
         if (player.inventory.canHoldItem(itemStack)) {
-            e.isCancelled = true
-            player.inventory.addItem(itemStack)
-
             val meta = magnet.itemStack.itemMeta as Damageable
             val currentDurability = meta.persistentDataContainer.get(MagnetUtils.MAGNET_DURABILITY) ?: 0
+            if (currentDurability >= magnet.type.maxDamage) // You need to repair your magnet at this point
+                return
 
-            meta.persistentDataContainer.set(MagnetUtils.MAGNET_DURABILITY, currentDurability + 1)
+            val newDurability = currentDurability + 1
+
+            meta.persistentDataContainer.set(MagnetUtils.MAGNET_DURABILITY, newDurability)
             val mapMagnetDurabilityToVanillaToolDurabilityMultiplier = magnet.itemStack.type.maxDurability.toDouble() / magnet.type.maxDamage.toDouble()
 
             meta.damage = (currentDurability * mapMagnetDurabilityToVanillaToolDurabilityMultiplier).toInt()
             magnet.itemStack.itemMeta = meta
 
-            if (currentDurability >= magnet.type.maxDamage) {
-                magnet.itemStack.amount -= 1
-            }
+            e.isCancelled = true
+            player.inventory.addItem(itemStack)
         }
     }
 }

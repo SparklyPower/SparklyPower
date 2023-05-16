@@ -92,11 +92,18 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onDamage(e: EntityDamageByEntityEvent) {
 		val victim = e.entity
-		val damager = e.damager
+		var damager = e.damager
 
 		if (victim.world.name !in ENABLED_WORLDS) // Do not enable the PvP tweaks outside of the PvP worlds
 			return
 
+		// If the damager was a projectile, get the shooter
+		if (damager is Projectile) {
+			val shooter = damager.shooter
+			if (shooter != null && shooter is Entity)
+				damager = shooter
+		}
+		
 		if (victim is Player && damager is Player) {
 			val lastDamageReceivedVictim = lastDamage.getOrDefault(victim, 0L)
 			val lastDamageReceivedDamager = lastDamage.getOrDefault(damager, 0L)
@@ -190,7 +197,7 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 	fun onRiptide(e: PlayerRiptideEvent) {
 		if (e.player.world.name in ENABLED_WORLDS) {
 			e.player.sendMessage("§cVocê não pode usar o encantamento de Correnteza na Arena PvP!")
-			
+
 			// Attempt to reset the player's riptide
 			// This is very hacky since
 			val originalLocation = e.player.location
