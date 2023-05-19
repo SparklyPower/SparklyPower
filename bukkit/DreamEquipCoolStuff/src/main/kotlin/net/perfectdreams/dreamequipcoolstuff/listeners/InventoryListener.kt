@@ -42,13 +42,14 @@ class InventoryListener(val m: DreamEquipCoolStuff) : Listener {
         if (event.rawSlot != RAW_HAT_SLOT_ID) return
         val cursor: ItemStack? = event.cursor
 
-        if (cursor?.type != Material.WOODEN_HOE)
+        if (cursor?.type != Material.PAPER)
             return
 
         val meta = cursor.itemMeta
-        val damageable = meta as Damageable
+        if (!meta.hasCustomModelData())
+            return
 
-        if (damageable.damage in 1..24) {
+        if (meta.customModelData in 133..162) {
             // ... then perform the switch.
             // We deny the normal result
             // NOTE: There is no need to cancel the event since that is just a proxy method for the line below.

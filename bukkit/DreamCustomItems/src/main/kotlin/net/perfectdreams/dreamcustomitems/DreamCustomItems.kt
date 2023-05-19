@@ -100,6 +100,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		registerEvents(EstalinhoListener(this))
 		registerEvents(RemoveDisabledPluginsRecipesListener(this))
 		registerEvents(MagnetListener(this))
+		registerEvents(ConvertLegacyItemsToCustomModelDataListener(this))
 
 		// https://gist.github.com/aadnk/8119275
 		val protocolManager = ProtocolLibrary.getProtocolManager()
@@ -110,18 +111,6 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 
 		registerCommand(DreamCustomItemsCommand)
 		registerCommand(CustomItemRecipesCommand(this))
-
-		// TODO: Disabled due to dupe issues
-		/* customRecipes.add(
-			addRecipe(
-				repairMagnetKey,
-				ShapelessRecipe(
-					repairMagnetKey, Material.STONE_HOE.toItemStack()
-				).addIngredient(Material.STONE_HOE)
-					.addIngredient(Material.AMETHYST_SHARD)
-					.addIngredient(Material.COPPER_INGOT)
-			)
-		) */
 
 		customRecipes.add(
 			CustomCraftingRecipe(
