@@ -315,12 +315,39 @@ class ConvertLegacyItemsToCustomModelDataListener(val m: DreamCustomItems) : Lis
     )
 
     @EventHandler
+    fun onHoeInteract(e: PlayerInteractEvent) {
+        val itemInMainHand = e.item ?: return
+
+        if (itemInMainHand.type != Material.WOODEN_HOE)
+            return
+
+        val meta = itemInMainHand.itemMeta
+
+        if (meta.isUnbreakable && (meta as Damageable).damage == 0) {
+            // This means that the user has fixed the hoe at some point, and this shouldn't be possible, so let's remove the hoe from their inventory
+            itemInMainHand.amount--
+            return
+        }
+
+        if (!meta.hasCustomModelData())
+            return
+
+        e.isCancelled = true
+    }
+
+    @EventHandler
     fun onInteract(e: PlayerInteractEvent) {
         val itemInMainHand = e.item ?: return
 
+        if (!itemInMainHand.itemMeta.isUnbreakable)
+            return
+        
         val legacyItemInfo = legacyItemsConverter.firstOrNull {
             it.oldData.type == itemInMainHand.type && (itemInMainHand.itemMeta as? Damageable)?.damage == it.oldData.damage
         } ?: return
+
+        // Cancel the interaction since we will convert the item
+        e.isCancelled = true
 
         itemInMainHand.type = legacyItemInfo.newData.type
         itemInMainHand.meta<Damageable> {
