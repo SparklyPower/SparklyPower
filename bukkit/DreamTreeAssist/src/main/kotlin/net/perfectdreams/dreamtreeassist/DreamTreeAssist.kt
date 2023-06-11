@@ -21,7 +21,8 @@ class DreamTreeAssist : KotlinPlugin(), Listener {
 		Material.DARK_OAK_SAPLING,
 		Material.BIRCH_SAPLING,
 		Material.OAK_SAPLING,
-		Material.JUNGLE_SAPLING
+		Material.JUNGLE_SAPLING,
+		Material.CHERRY_SAPLING
 	)
 
 	val placedLogs = mutableSetOf<BlockLocation>()

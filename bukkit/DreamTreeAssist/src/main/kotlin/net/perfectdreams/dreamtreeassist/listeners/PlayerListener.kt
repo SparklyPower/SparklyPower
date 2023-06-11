@@ -36,7 +36,8 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
         Material.SPRUCE_LOG,
         Material.MANGROVE_LOG,
         Material.MANGROVE_ROOTS,
-        Material.MUDDY_MANGROVE_ROOTS
+        Material.MUDDY_MANGROVE_ROOTS,
+        Material.CHERRY_LOG
     )
 
     private val leaves = setOf(
@@ -46,7 +47,8 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
         Material.JUNGLE_LEAVES,
         Material.OAK_LEAVES,
         Material.SPRUCE_LEAVES,
-        Material.MANGROVE_LEAVES
+        Material.MANGROVE_LEAVES,
+        Material.CHERRY_LEAVES
     )
 
     private val axes = setOf(
@@ -64,7 +66,8 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
         Material.DARK_OAK_LOG to Material.DARK_OAK_SAPLING,
         Material.JUNGLE_LOG to Material.JUNGLE_SAPLING,
         Material.OAK_LOG to Material.OAK_SAPLING,
-        Material.SPRUCE_LOG to Material.SPRUCE_SAPLING
+        Material.SPRUCE_LOG to Material.SPRUCE_SAPLING,
+        Material.CHERRY_LOG to Material.CHERRY_SAPLING
     )
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
