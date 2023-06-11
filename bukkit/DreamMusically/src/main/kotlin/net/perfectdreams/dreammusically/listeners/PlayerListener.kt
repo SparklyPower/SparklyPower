@@ -83,26 +83,11 @@ class PlayerListener(val m: DreamMusically) : Listener {
                 if (jukebox.playing != Material.AIR) // ignore se não for ar
                     return
 
-                // Uma gambiarra, já que Spigot não deixa colocar itens que não sejam records dentro de jukeboxes
-                val nmsWorld = (e.player.world as org.bukkit.craftbukkit.v1_19_R1.CraftWorld).handle
-                val tileEntity = nmsWorld.getBlockEntity(BlockPos(clickedBlock.x, clickedBlock.y, clickedBlock.z))
-
                 val copyOfItemInMainHand = e.player.inventory.itemInMainHand.clone()
 
                 m.schedule {
                     waitFor(1)
-                    val nmsJukebox = tileEntity as net.minecraft.world.level.block.entity.JukeboxBlockEntity
-                    nmsWorld.setBlock(
-                        nmsJukebox.blockPos,
-                        Blocks.JUKEBOX.defaultBlockState()
-                            .setValue(
-                                JukeboxBlock.HAS_RECORD,
-                                true
-                            ),
-                        3
-                    )
-
-                    nmsJukebox.record = org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack.asNMSCopy(copyOfItemInMainHand)
+                    jukebox.setRecord(copyOfItemInMainHand)
                     e.player.inventory.setItemInMainHand(copyOfItemInMainHand.clone().apply { this.amount-- })
                     e.player.world.playSound(clickedBlock.location, customPlayingSong.play, SoundCategory.RECORDS, 4f, 1f)
 

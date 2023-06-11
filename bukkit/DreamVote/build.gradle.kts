@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    paperweightDevBundle(SparklyPaperDevBundle.GROUP, SparklyPaperDevBundle.VERSION)
+    paperDevBundle("1.20-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamChat"))
     compileOnly(project(":bukkit:DreamCash"))

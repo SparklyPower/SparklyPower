@@ -11,9 +11,9 @@ import net.perfectdreams.dreamcustomitems.listeners.canMineRubyFrom
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import net.perfectdreams.dreampicaretamonstra.DreamPicaretaMonstra
 import org.bukkit.*
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftItem
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_20_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftItem
+import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ExperienceOrb

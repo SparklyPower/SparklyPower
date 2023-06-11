@@ -5,8 +5,8 @@ import net.minecraft.world.level.Level
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_20_R1.CraftWorld
+import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack
 import org.bukkit.entity.Firework
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -30,7 +30,8 @@ class InstantFirework(world: Level, location: Location) : FireworkRocketEntity(
 			return
 
 		gone = true
-		this.level.broadcastEntityEvent(this, 17.toByte())
+
+		this.level().broadcastEntityEvent(this, 17.toByte())
 		this.remove(RemovalReason.KILLED)
 	}
 

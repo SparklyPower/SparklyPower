@@ -27,7 +27,7 @@ import net.perfectdreams.dreamcore.utils.commands.options.*
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.command.PluginIdentifiableCommand
-import org.bukkit.craftbukkit.v1_19_R1.command.VanillaCommandWrapper
+import org.bukkit.craftbukkit.v1_20_R1.command.VanillaCommandWrapper
 import java.util.concurrent.CompletableFuture
 
 class SparklyBukkitBrigadierCommandWrapper(
