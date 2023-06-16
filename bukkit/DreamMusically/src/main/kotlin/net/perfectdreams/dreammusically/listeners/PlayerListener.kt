@@ -1,15 +1,19 @@
 package net.perfectdreams.dreammusically.listeners
 
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.delay
 import net.minecraft.core.BlockPos
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.JukeboxBlock
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity
+import net.minecraft.world.level.gameevent.GameEvent
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreammusically.DreamMusically
 import net.perfectdreams.dreammusically.utils.MusicPack
 import org.bukkit.Material
 import org.bukkit.SoundCategory
+import org.bukkit.craftbukkit.v1_20_R1.block.CraftJukebox
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -79,22 +83,54 @@ class PlayerListener(val m: DreamMusically) : Listener {
 
             if (customPlayingSong != null) {
                 val jukebox = clickedBlock.state as org.bukkit.block.Jukebox
-
                 if (jukebox.playing != Material.AIR) // ignore se não for ar
                     return
 
                 val copyOfItemInMainHand = e.player.inventory.itemInMainHand.clone()
 
-                m.schedule {
-                    waitFor(1)
-                    jukebox.setRecord(copyOfItemInMainHand)
-                    e.player.inventory.setItemInMainHand(copyOfItemInMainHand.clone().apply { this.amount-- })
-                    e.player.world.playSound(clickedBlock.location, customPlayingSong.play, SoundCategory.RECORDS, 4f, 1f)
+                // Cancel the event to avoid the block being updated
+                e.isCancelled = true
 
-                    clickedBlock.world.players.filter { 4096 >= it.location.distanceSquared(clickedBlock.location) }.forEach {
-                        e.player.sendActionBar("Tocando agora: ${customPlayingSong.name}")
-                        it.stopSound(customPlayingSong.play, SoundCategory.RECORDS)
-                    }
+                // Uma gambiarra, já que Spigot não deixa colocar itens que não sejam records dentro de jukeboxes
+                // Even tho you *should* be able to set the record via the .setRecord function, it doesn't change the item within the Jukebox if it
+                // isn't a record.
+                // (Last tested: 1.20)
+                val nmsWorld = (e.player.world as org.bukkit.craftbukkit.v1_20_R1.CraftWorld).handle
+                val tileEntity = nmsWorld.getBlockEntity(BlockPos(clickedBlock.x, clickedBlock.y, clickedBlock.z))
+
+                // Yes this delay is required, if not the record will pop out after putting it in
+                m.launchMainThread {
+                    delay(1)
+                    val nmsJukebox = tileEntity as JukeboxBlockEntity
+                    val level = nmsJukebox.level ?: error("NMS Jukebox does not have a level!")
+
+                    // Update record and set that there is a record within it
+                    nmsJukebox.setRecordWithoutPlaying(
+                        org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack.asNMSCopy(
+                            copyOfItemInMainHand
+                        )
+                    )
+                    level.setBlock(
+                        nmsJukebox.blockPos,
+                        nmsJukebox.blockState.setValue(JukeboxBlock.HAS_RECORD, true),
+                        2
+                    )
+                    level.gameEvent(GameEvent.BLOCK_CHANGE, nmsJukebox.blockPos, GameEvent.Context.of(null, nmsJukebox.blockState))
+
+                    e.player.inventory.setItemInMainHand(copyOfItemInMainHand.clone().apply { this.amount-- })
+                    e.player.world.playSound(
+                        clickedBlock.location,
+                        customPlayingSong.play,
+                        SoundCategory.RECORDS,
+                        4f,
+                        1f
+                    )
+
+                    clickedBlock.world.players.filter { 4096 >= it.location.distanceSquared(clickedBlock.location) }
+                        .forEach {
+                            e.player.sendActionBar("Tocando agora: ${customPlayingSong.name}")
+                            it.stopSound(customPlayingSong.play, SoundCategory.RECORDS)
+                        }
                 }
             }
         }
