@@ -245,7 +245,6 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
                         // We can't use removeItem because that causes issues if we are trying to add/remove an item with >= 33 quantity, if the source and the target
                         // are the same container
                         inventory.setItem(index, null)
-                        inventory.removeItem(item)
 
                         // Add item to target
                         targetInventory.addItem(item)
