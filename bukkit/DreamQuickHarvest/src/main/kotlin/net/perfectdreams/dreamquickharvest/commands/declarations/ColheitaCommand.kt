@@ -5,7 +5,6 @@ import net.perfectdreams.dreamcore.utils.commands.declarations.sparklyCommand
 import net.perfectdreams.dreamquickharvest.DreamQuickHarvest
 import net.perfectdreams.dreamquickharvest.commands.ColheitaExecutor
 import net.perfectdreams.dreamquickharvest.commands.ColheitaUpgradeExecutor
-import net.perfectdreams.dreamquickharvest.commands.FixStemExecutor
 
 class ColheitaCommand(val m: DreamQuickHarvest) : SparklyCommandDeclarationWrapper {
     override fun declaration() = sparklyCommand(listOf("colheita")) {
@@ -13,10 +12,6 @@ class ColheitaCommand(val m: DreamQuickHarvest) : SparklyCommandDeclarationWrapp
 
         subcommand(listOf("upgrade")) {
             executor = ColheitaUpgradeExecutor(m)
-        }
-
-        subcommand(listOf("caule")) {
-            executor = FixStemExecutor(m)
         }
     }
 }
