@@ -323,16 +323,24 @@ class ConvertLegacyItemsToCustomModelDataListener(val m: DreamCustomItems) : Lis
 
         val meta = itemInMainHand.itemMeta
 
-        if (meta.isUnbreakable && (meta as Damageable).damage == 0) {
-            // This means that the user has fixed the hoe at some point, and this shouldn't be possible, so let's remove the hoe from their inventory
-            itemInMainHand.amount--
+        if (meta.hasCustomModelData()) {
+            // The new kind of custom items with custom model data, but they are still using wooden hoes
+            // So let's just cancel the event and bye bye!
+            e.isCancelled = true
             return
         }
 
-        if (!meta.hasCustomModelData())
-            return
-
-        e.isCancelled = true
+        // This item does NOT have a custom model data, but has the unbreakable tag!
+        if (meta.isUnbreakable) {
+            if ((meta as Damageable).damage == 0) {
+                // This means that the user has fixed the hoe at some point, and this shouldn't be possible, so let's remove the hoe from their inventory
+                itemInMainHand.amount--
+                return
+            } else {
+                // Just cancel the event because it is probably a custom item...
+                e.isCancelled = true
+            }
+        }
     }
 
     @EventHandler
@@ -341,7 +349,7 @@ class ConvertLegacyItemsToCustomModelDataListener(val m: DreamCustomItems) : Lis
 
         if (!itemInMainHand.itemMeta.isUnbreakable)
             return
-        
+
         val legacyItemInfo = legacyItemsConverter.firstOrNull {
             it.oldData.type == itemInMainHand.type && (itemInMainHand.itemMeta as? Damageable)?.damage == it.oldData.damage
         } ?: return
