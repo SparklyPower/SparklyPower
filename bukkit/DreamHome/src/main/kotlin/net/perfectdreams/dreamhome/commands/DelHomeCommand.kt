@@ -6,7 +6,6 @@ import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.Webhooks
-import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
 import net.perfectdreams.dreamcore.utils.generateCommandInfo
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamhome.DreamHome
@@ -49,9 +48,7 @@ class DelHomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("delhome", "delc
 
 				player.sendMessage("§aCasa deletada com sucesso!")
 
-				Webhooks.PANTUFA_INFO?.send(DiscordMessage(
-						content = "**${player.name}** deletou casa `${house.houseName}`. **Localização:** `${newLocation.world.name}` `${newLocation.x}`, `${newLocation.y}`, `${newLocation.z}`"
-				))
+				Webhooks.PANTUFA_INFO?.send("**${player.name}** deletou casa `${house.houseName}`. **Localização:** `${newLocation.world.name}` `${newLocation.x}`, `${newLocation.y}`, `${newLocation.z}`")
 			}
 		}
 	}

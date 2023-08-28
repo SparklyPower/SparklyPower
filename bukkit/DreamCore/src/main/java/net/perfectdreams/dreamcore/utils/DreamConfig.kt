@@ -56,6 +56,7 @@ data class DreamConfig(
     ) {
         @Serializable
         data class WebhooksConfig(
+            val news: String,
             val warn: String,
             val info: String,
             val error: String

@@ -10,7 +10,6 @@ import net.perfectdreams.dreamcore.utils.adventure.*
 import net.perfectdreams.dreamcore.utils.commands.AbstractCommand
 import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
 import net.perfectdreams.dreamcore.utils.commands.annotation.SubcommandPermission
-import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
 import net.perfectdreams.dreamcore.utils.exposed.upsert
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamkits.DreamKits
@@ -207,9 +206,7 @@ class KitCommand(val m: DreamKits) : AbstractCommand("kits", listOf("kit")) {
 
 			switchContext(SynchronizationContext.ASYNC)
 
-			Webhooks.PANTUFA_INFO?.send(DiscordMessage(
-				content = "**${p0.name}** recebeu kit `${kit.name}`."
-			))
+			Webhooks.PANTUFA_INFO?.send("**${p0.name}** recebeu kit `${kit.name}`.")
 		}
 	}
 }

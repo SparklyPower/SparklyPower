@@ -1,7 +1,9 @@
 package net.perfectdreams.dreamresourcereset
 
+import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.future.await
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -411,6 +413,17 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 			File(dataFolder, "Resources.ready").delete()
 
 			logger.info("Done! Resource world changed!")
+
+			Webhooks.PANTUFA_NEWS?.send(
+				WebhookMessageBuilder()
+					.setContent("""<@&961736936790302800> <:pantufa_megaphone:997669904633299014>
+						|
+						|# <a:pantufa_pickaxe:997671670468853770> A warp recursos foi resetada! <a:pantufa_pickaxe:997671670468853770>
+						|
+						|Divirtam-se <:pantufa_yay:1004450173495287848>
+					""".trimMargin())
+					.build()
+			)
 		}
 	}
 

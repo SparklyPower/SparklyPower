@@ -144,7 +144,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                 item = ItemStack(Material.ARMOR_STAND)
                     .rename("§aAumentar o seu Clube em +1 slot para Membros")
                     .lore(
-                        "§aPermita que o seu clube tenha mais pessoas! (Máximo: 20 membros)",
+                        "§aPermita que o seu clube tenha mais pessoas! (Máximo: 32 membros)",
                         "§aLembre-se: Isto apenas afeta o seu clube atual, se você deletar",
                         "§ao seu clube, você irá perder os slots adicionais!",
                         "§f",

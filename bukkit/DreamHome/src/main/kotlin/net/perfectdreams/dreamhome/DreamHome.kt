@@ -3,7 +3,6 @@ package net.perfectdreams.dreamhome
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
 import net.perfectdreams.dreamhome.commands.DelHomeCommand
 import net.perfectdreams.dreamhome.commands.HomeCommand
 import net.perfectdreams.dreamhome.commands.SetHomeCommand
@@ -119,18 +118,10 @@ class DreamHome : KotlinPlugin() {
 			val house = house ?: throw RuntimeException("home é nulo, mas isto jamais deve acontecer!")
 
 			if (new) {
-				Webhooks.PANTUFA_INFO?.send(
-					DiscordMessage(
-						content = "**${player.name}** marcou nova casa `${house.houseName}` em `${newLocation.world.name}` `${newLocation.x}`, `${newLocation.y}`, `${newLocation.z}`"
-					)
-				)
+				Webhooks.PANTUFA_INFO?.send("**${player.name}** marcou nova casa `${house.houseName}` em `${newLocation.world.name}` `${newLocation.x}`, `${newLocation.y}`, `${newLocation.z}`")
 			} else {
 				if (oldLocation != null)
-					Webhooks.PANTUFA_INFO?.send(
-						DiscordMessage(
-							content = "**${player.name}** alterou a localização da casa `${house.houseName}`.\n\n**Localização Velha:** `${oldLocation.world.name}` `${oldLocation.x}`, `${oldLocation.y}`, `${oldLocation.z}`\n**Localização Nova:** `${newLocation.world.name}` `${newLocation.x}`, `${newLocation.y}`, `${newLocation.z}`"
-						)
-					)
+					Webhooks.PANTUFA_INFO?.send("**${player.name}** alterou a localização da casa `${house.houseName}`.\n\n**Localização Velha:** `${oldLocation.world.name}` `${oldLocation.x}`, `${oldLocation.y}`, `${oldLocation.z}`\n**Localização Nova:** `${newLocation.world.name}` `${newLocation.x}`, `${newLocation.y}`, `${newLocation.z}`")
 			}
 
 			callback.invoke()

@@ -7,7 +7,6 @@ import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.gson
-import net.perfectdreams.dreamcore.utils.discord.DiscordMessage
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
 import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
@@ -223,9 +222,7 @@ class DreamVote : KotlinPlugin() {
 
 			Cash.giveCash(uniqueId, 4, TransactionContext(type = TransactionType.VOTE_REWARDS))
 
-			Webhooks.PANTUFA_INFO?.send(DiscordMessage(
-				content = "**$lastVoter** votou no $serviceName, agora **$lastVoter** possui ${voteCount + 1} votos. *Prêmios recebidos:* ${giveAwards.joinToString(", ", transform = { "`${it.name}`" })}"
-			))
+			Webhooks.PANTUFA_INFO?.send("**$lastVoter** votou no $serviceName, agora **$lastVoter** possui ${voteCount + 1} votos. *Prêmios recebidos:* ${giveAwards.joinToString(", ", transform = { "`${it.name}`" })}")
 		}
 	}
 

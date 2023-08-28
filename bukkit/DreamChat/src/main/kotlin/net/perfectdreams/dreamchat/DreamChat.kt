@@ -35,7 +35,6 @@ import net.perfectdreams.dreamchat.utils.bot.responses.*
 import net.perfectdreams.dreamchat.utils.chatevent.EventoChatHandler
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.discord.DiscordWebhook
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import org.bukkit.Bukkit
