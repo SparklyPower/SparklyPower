@@ -171,6 +171,11 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
 
             e.isCancelled = true
 
+            // I don't know how, and why, the type can be null
+            // But oh well
+            if (type == null)
+                return
+
             val center = e.block.location.add(0.5, 0.5, 0.5)
 
             schedule {
