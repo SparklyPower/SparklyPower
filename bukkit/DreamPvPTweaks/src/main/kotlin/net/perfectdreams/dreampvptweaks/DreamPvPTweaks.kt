@@ -168,7 +168,7 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 	@EventHandler
 	fun onWorldChange(e: PlayerChangedWorldEvent) {
 		// If the player has a totem of undying, tell them that they don't work on the PvP arena!
-		if (e.player.inventory.contains(Material.TOTEM_OF_UNDYING)) {
+		if (e.player.world.name in PVP_WORLDS && e.player.inventory.contains(Material.TOTEM_OF_UNDYING)) {
 			e.player.sendMessage(
 				textComponent {
 					color(NamedTextColor.RED)
