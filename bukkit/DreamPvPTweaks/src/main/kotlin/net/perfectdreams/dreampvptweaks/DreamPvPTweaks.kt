@@ -3,7 +3,10 @@ package net.perfectdreams.dreampvptweaks
 import com.okkero.skedule.BukkitSchedulerController
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.delay
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.title.Title
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
 import org.bukkit.Bukkit
@@ -14,7 +17,9 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.entity.EntityResurrectEvent
 import org.bukkit.event.entity.EntityToggleGlideEvent
+import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerRiptideEvent
@@ -23,8 +28,11 @@ import java.util.*
 
 class DreamPvPTweaks : KotlinPlugin(), Listener {
 	companion object {
-		private val ENABLED_WORLDS = listOf(
-			"RealArenasPvP",
+		private val PVP_WORLDS = listOf(
+			"RealArenasPvP"
+		)
+
+		private val ENABLED_WORLDS = PVP_WORLDS + listOf(
 			"SuperSuperTheEnd"
 		)
 
@@ -103,7 +111,7 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 			if (shooter != null && shooter is Entity)
 				damager = shooter
 		}
-		
+
 		if (victim is Player && damager is Player) {
 			val lastDamageReceivedVictim = lastDamage.getOrDefault(victim, 0L)
 			val lastDamageReceivedDamager = lastDamage.getOrDefault(damager, 0L)
@@ -149,10 +157,44 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onElytraToggle(e: EntityToggleGlideEvent) {
-		e.isCancelled = e.entity.world.name == "RealArenasPvP"
+		e.isCancelled = e.entity.world.name in PVP_WORLDS
 	}
 
-	fun createBattleModeTask(player: Player) {
+	@EventHandler
+	fun onTotem(e: EntityResurrectEvent) {
+		e.isCancelled = e.entity.world.name in PVP_WORLDS
+	}
+
+	@EventHandler
+	fun onWorldChange(e: PlayerChangedWorldEvent) {
+		// If the player has a totem of undying, tell them that they don't work on the PvP arena!
+		if (e.player.inventory.contains(Material.TOTEM_OF_UNDYING)) {
+			e.player.sendMessage(
+				textComponent {
+					color(NamedTextColor.RED)
+
+					content("Cuidado! Totens da Imortalidade não funcionam aqui! Se você morrer, já era parceiro.")
+				}
+			)
+
+			e.player.showTitle(
+				Title.title(
+					textComponent {
+						color(NamedTextColor.RED)
+
+						content("Cuidado! Se você morrer, já era parceiro.")
+					},
+					textComponent {
+						color(NamedTextColor.RED)
+
+						content("Totens da Imortalidade não funcionam aqui!")
+					}
+				)
+			)
+		}
+	}
+
+	private fun createBattleModeTask(player: Player) {
 		battleModeTasks[player]?.currentTask?.cancel()
 
 		scheduler().schedule(this) {
