@@ -9,6 +9,7 @@ import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -23,6 +24,7 @@ import org.bukkit.event.player.PlayerChangedWorldEvent
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerRiptideEvent
+import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.Vector
 import java.util.*
 
@@ -49,6 +51,29 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 
 	override fun softEnable() {
 		registerEvents(this)
+
+		this.launchMainThread {
+			while (true) {
+				PVP_WORLDS.forEach {
+					val world = Bukkit.getWorld(it)
+
+					world?.players?.forEach {
+						if (it.hasPotionEffect(PotionEffectType.INVISIBILITY)) {
+							it.sendMessage(
+								textComponent {
+									color(NamedTextColor.RED)
+
+									content("Em um passe de mágica, a sua invisibilidade some! Você não pode ficar invisível aqui, bobinho!")
+								}
+							)
+
+							it.removePotionEffect(PotionEffectType.INVISIBILITY)
+						}
+					}
+				}
+				delayTicks(20)
+			}
+		}
 	}
 
 	val lastDamage = WeakHashMap<Player, Long>()
