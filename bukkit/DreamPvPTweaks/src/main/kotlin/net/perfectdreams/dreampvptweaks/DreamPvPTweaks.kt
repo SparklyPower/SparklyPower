@@ -187,7 +187,8 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onTotem(e: EntityResurrectEvent) {
-		e.isCancelled = e.entity.world.name in PVP_WORLDS
+		if (e.entity.world.name in PVP_WORLDS)
+		    e.isCancelled = true
 	}
 
 	@EventHandler
