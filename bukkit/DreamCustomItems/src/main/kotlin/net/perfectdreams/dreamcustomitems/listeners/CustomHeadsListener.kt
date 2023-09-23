@@ -310,10 +310,6 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                 }
             }
 
-            is CustomItemRecipeHolder -> {
-                e.isCancelled = true
-            }
-
             else -> return
         }
     }
