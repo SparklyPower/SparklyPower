@@ -233,7 +233,7 @@ class DreamElevador : KotlinPlugin(), Listener {
         var total = 0
         val world = sign.world
 
-        for (y in 0..world.maxHeight) {
+        for (y in world.minHeight until world.maxHeight) {
             val block = world.getBlockAt(sign.x, y, sign.z)
             val material = block?.type ?: continue
 
@@ -251,7 +251,7 @@ class DreamElevador : KotlinPlugin(), Listener {
         // ALTERAR A PLACA
         var idx = 0
 
-        for (y in 0..world.maxHeight) {
+        for (y in world.minHeight until world.maxHeight) {
             val block = world.getBlockAt(sign.x, y, sign.z)
             val material = block?.type ?: continue
 
