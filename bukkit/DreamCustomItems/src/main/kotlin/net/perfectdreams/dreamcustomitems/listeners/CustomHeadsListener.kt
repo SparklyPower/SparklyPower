@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
 import me.ryanhamshire.GriefPrevention.GriefPrevention
+import net.perfectdreams.dreamcore.utils.DreamMenu
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreamcore.utils.fromBase64Item
@@ -242,6 +243,19 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onRecipePreviewClick(e: InventoryClickEvent) {
+        // We block EVERYTHING
+        // No, we don't care that the user cannot manipulate their inventory while the menu is open
+        // JUST CLOSE IT BEFORE TRYING TO MESS WITH YOUR INVENTORY
+        // Sorry, but trying to be "nice" just causes a lot of dupe issues
+        val inventoryHolder = e.inventory.holder as? CustomItemRecipeHolder
+        val clickedInventoryHolder = e.clickedInventory?.holder as? CustomItemRecipeHolder
+
+        if (inventoryHolder != null || clickedInventoryHolder != null)
+            e.isCancelled = true
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onInventoryClick(e: InventoryClickEvent) {
         val holder = e.clickedInventory?.holder
 
@@ -294,10 +308,6 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                     holder.m.stop()
                     return
                 }
-            }
-
-            is CustomItemRecipeHolder -> {
-                e.isCancelled = true
             }
 
             else -> return

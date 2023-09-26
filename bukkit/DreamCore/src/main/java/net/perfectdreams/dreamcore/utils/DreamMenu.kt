@@ -88,16 +88,16 @@ class DreamMenuSlotBuilder(val index: Int) {
 class DreamMenuListener : Listener {
 	@EventHandler
 	fun onMove(e: InventoryClickEvent) {
-		if (e.click == ClickType.SHIFT_LEFT && e.inventory.holder is DreamMenu.DreamMenuHolder) {
-			e.isCancelled = true
-			return
-		}
+		// We block EVERYTHING
+		// No, we don't care that the user cannot manipulate their inventory while the menu is open
+		// JUST CLOSE IT BEFORE TRYING TO MESS WITH YOUR INVENTORY
+		// Sorry, but trying to be "nice" just causes a lot of dupe issues
+		val inventoryHolder = e.inventory.holder as? DreamMenu.DreamMenuHolder
+		val clickedInventoryHolder = e.clickedInventory?.holder as? DreamMenu.DreamMenuHolder
 
-		val clickedInventoryHolder = e.clickedInventory?.holder
-		if (clickedInventoryHolder !is DreamMenu.DreamMenuHolder)
-			return
+		val targetInventoryHolder = inventoryHolder ?: clickedInventoryHolder ?: return
 
-		val dreamMenu = clickedInventoryHolder.menu
+		val dreamMenu = targetInventoryHolder.menu
 
 		if (dreamMenu.cancelItemMovement)
 			e.isCancelled = true

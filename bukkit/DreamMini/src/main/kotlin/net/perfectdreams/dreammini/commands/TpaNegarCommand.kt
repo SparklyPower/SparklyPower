@@ -12,14 +12,18 @@ class TpaNegarCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpnegar", "tpa
 		val tpaRequest = m.tpaManager.requests.firstOrNull { it.playerThatWillBeTeleported == sender }
 		val tpaHereRequest = m.tpaManager.hereRequests.firstOrNull { it.playerThatWillBeTeleported == sender }
 
-		if (tpaRequest == null || tpaHereRequest == null) {
+		if (tpaRequest == null && tpaHereRequest == null) {
 			sender.sendMessage("§cVocê não tem nenhum pedido de teletransporte pendente!")
 			return
 		}
 
-		val requester = tpaRequest?.playerThatRequestedTheTeleport ?: tpaHereRequest.playerThatRequestedTheTeleport
-		sender.sendMessage("§aVocê rejeitou o pedido de teletransporte de §b${requester.displayName}§a!")
-		requester.sendMessage("§b${sender.displayName}§c rejeitou o seu pedido de teletransporte!")
+		val requester = tpaRequest?.playerThatRequestedTheTeleport ?: tpaHereRequest?.playerThatRequestedTheTeleport
+		sender.sendMessage("§aVocê rejeitou o pedido de teletransporte de §b${requester?.displayName}§a!")
+		requester?.sendMessage("§b${sender.displayName}§c rejeitou o seu pedido de teletransporte!")
+
+		// Remove request from pool (it'll either remove one of two)
+		m.tpaManager.requests.remove(tpaRequest)
+		m.tpaManager.hereRequests.remove(tpaHereRequest)
 		return
 	}
 }
