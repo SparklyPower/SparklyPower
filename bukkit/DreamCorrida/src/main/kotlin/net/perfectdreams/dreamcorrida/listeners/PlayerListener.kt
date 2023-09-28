@@ -114,7 +114,7 @@ class PlayerListener(val m: DreamCorrida) : Listener {
 
                         // Player venceu a corrida!
                         eventoCorrida.wonPlayers.add(e.player.uniqueId)
-                        val howMuchMoneyWillBeGiven = 50_000 / eventoCorrida.wonPlayers.size
+                        val howMuchMoneyWillBeGiven = 80_000 / eventoCorrida.wonPlayers.size
                         val howMuchNightmaresWillBeGiven = if (eventoCorrida.wonPlayers.size == 1) 1 else 0
 
                         e.player.deposit(howMuchMoneyWillBeGiven.toDouble(),
