@@ -10,7 +10,7 @@ import net.perfectdreams.dreamhome.DreamHome
 import net.perfectdreams.dreamhome.dao.Home
 import org.bukkit.entity.Player
 
-class HomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("home", "casa")) {
+class HomeCommand(val m: DreamHome) : SparklyCommand(arrayOf("h","home", "casa")) {
 	/**
 	 * Lists all [houses] to the specified [player]
 	 */

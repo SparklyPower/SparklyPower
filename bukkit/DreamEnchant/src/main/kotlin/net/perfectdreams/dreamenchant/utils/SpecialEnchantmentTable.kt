@@ -29,7 +29,7 @@ abstract class SpecialEnchantmentTable {
 
     fun validateIfItemCanBeEnchanted(player: Player, item: ItemStack): Boolean {
         if (item.type == Material.AIR) {
-            player.sendMessage("§cSegue o item que você deseja encantar!")
+            player.sendMessage("§cPegue o item que você deseja encantar!")
             return false
         }
 
