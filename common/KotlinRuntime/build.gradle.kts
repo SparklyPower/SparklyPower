@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    api(kotlin("stdlib-jdk8"))
+    api(kotlin("stdlib"))
     paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly("io.github.waterfallmc:waterfall-api:1.13-SNAPSHOT")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
@@ -15,6 +15,7 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
     api("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
     api(kotlin("reflect"))
+    api("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
     api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.0-RC")
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0-RC")
     api("io.github.microutils:kotlin-logging-jvm:2.1.21")

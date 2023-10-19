@@ -2,16 +2,18 @@ package net.perfectdreams.dreammini
 
 import com.okkero.skedule.CoroutineTask
 import com.okkero.skedule.schedule
+import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.commands.AbstractCommand
+import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
+import net.perfectdreams.dreamcore.utils.commands.annotation.SubcommandPermission
 import net.perfectdreams.dreamcore.utils.extensions.hasStoredMetadataWithKey
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
 import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.dreammini.commands.*
 import net.perfectdreams.dreammini.utils.*
-import org.bukkit.Color
-import org.bukkit.FireworkEffect
-import org.bukkit.Material
-import org.bukkit.Particle
+import org.bukkit.*
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
@@ -137,6 +139,89 @@ class DreamMini : KotlinPlugin(), Listener {
 		registerCommand(OpenEcCommand(this))
 		registerCommand(DoNotPickupCommand(this))
 		registerCommand(CraftCommand(this))
+
+		if (DreamCore.dreamConfig.bungeeName == "sparklypower_survival") {
+			registerCommand(object : AbstractCommand("survival") {
+				@Subcommand
+				fun root(player: Player) {
+					Bukkit.dispatchCommand(player, "warp survival")
+				}
+			})
+
+			registerCommand(object : AbstractCommand("baltop") {
+				@Subcommand
+				fun root(player: Player) {
+					Bukkit.dispatchCommand(player, "money top")
+				}
+
+				@Subcommand
+				fun root(player: Player, idx: String) {
+					Bukkit.dispatchCommand(player, "money top Sonho $idx")
+				}
+			})
+
+			registerCommand(object : AbstractCommand("givehelditemall") {
+				@Subcommand
+				@SubcommandPermission("dreammini.givehelditemall")
+				fun root(player: Player) {
+					Bukkit.getOnlinePlayers().forEach {
+						if (player != it)
+							it.inventory.addItem(player.inventory.itemInMainHand)
+					}
+
+					player.sendMessage("§aProntinho!")
+				}
+			})
+
+			registerCommand(object : AbstractCommand("onlinestatedit") {
+				@Subcommand
+				@SubcommandPermission("onlinestatedit.plz")
+				fun root(player: Player) {
+					player.sendMessage("Você está a ${player.getStatistic(Statistic.PLAY_ONE_MINUTE)} ticks online!")
+				}
+
+				@Subcommand
+				@SubcommandPermission("onlinestatedit.plz")
+				fun root(sender: CommandSender, playerName: String) {
+					val offlinePlayer = Bukkit.getOfflinePlayer(playerName)
+					sender.sendMessage("$playerName está ${offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE)} ticks online!")
+					sender.sendMessage("${offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20} segundos")
+					sender.sendMessage("${offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60} minutos")
+					sender.sendMessage("${offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60 / 24} horas")
+					sender.sendMessage("${offlinePlayer.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20 / 60 / 24 / 30} dias")
+				}
+
+				@Subcommand(["stat"])
+				@SubcommandPermission("onlinestatedit.blocktype")
+				fun stat(player: CommandSender, playerName: String, type: String) {
+					val offlinePlayer = Bukkit.getOfflinePlayer(playerName)
+					player.sendMessage(
+						"Stat: ${
+							offlinePlayer.getStatistic(
+								Statistic.MINE_BLOCK,
+								Material.valueOf(type)
+							)
+						}"
+					)
+				}
+
+				@Subcommand(["set"])
+				@SubcommandPermission("onlinestatedit.plz")
+				fun uuid2name(player: Player, number: Int) {
+					player.setStatistic(Statistic.PLAY_ONE_MINUTE, number)
+					player.sendMessage("Tempo alterado!")
+				}
+
+				@Subcommand(["set_player"])
+				@SubcommandPermission("onlinestatedit.plz")
+				fun uuid2name2(player: CommandSender, playerName: String, number: Int) {
+					val offlinePlayer = Bukkit.getOfflinePlayer(playerName)
+					OfflinePlayer::class.java.getDeclaredMethod("setStatistic", Statistic::class.java, Integer.TYPE)
+						.invoke(offlinePlayer, Statistic.PLAY_ONE_MINUTE, number)
+					player.sendMessage("Tempo alterado!")
+				}
+			})
+		}
 	}
 
 	override fun softDisable() {

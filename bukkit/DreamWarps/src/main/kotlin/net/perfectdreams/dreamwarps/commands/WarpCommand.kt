@@ -10,7 +10,7 @@ import org.bukkit.entity.Player
 class WarpCommand(val m: DreamWarps) : AbstractCommand("warp", listOf("warps", "dwarps")) {
 	@Subcommand
 	fun root(player: Player) {
-		m.warpsMenu.generateMenu(player).sendTo(player)
+		m.warpsMenu.sendTo(player)
 	}
 
 	@Subcommand

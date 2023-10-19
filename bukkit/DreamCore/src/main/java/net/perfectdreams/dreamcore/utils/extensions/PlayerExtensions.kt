@@ -12,7 +12,6 @@ import me.ryanhamshire.GriefPrevention.ClaimPermission
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.MeninaAPI
 import net.perfectdreams.dreamcore.utils.PlayerUtils
-import net.perfectdreams.dreamcore.utils.collections.CaseInsensitiveStringSet
 import net.perfectdreams.dreamcore.utils.collections.mutablePlayerMapOf
 import net.perfectdreams.dreamcore.utils.collections.mutablePlayerSetOf
 import net.perfectdreams.dreamcore.utils.registerEvents
@@ -136,37 +135,6 @@ fun Player.unfreeze() {
     frozenPlayers.remove(this)
     walkSpeed = .2F
 }
-
-class CommandsAndMessage(val commands: CaseInsensitiveStringSet, val message: String)
-
-val blockedPlayers = mutablePlayerMapOf<CommandsAndMessage>().also { map ->
-    DreamCore.INSTANCE.registerEvents(
-        object : Listener {
-            @EventHandler(priority = EventPriority.HIGHEST)
-            fun onCommand(event: PlayerCommandPreprocessEvent) =
-                with (event.player) {
-                    if (this in map)
-                        event.message.split(" ")[0].let { command ->
-                            if (command !in map[this]!!.commands) {
-                                event.isCancelled = true
-                                sendMessage("§c" + map[this]!!.message)
-                            }
-                        }
-                }
-        }
-    )
-}
-
-/**
- * Prevents [Player] from using all commands except [allowedCommands].
- */
-fun Player.blockCommandsExcept(allowedCommands: Set<String>, message: String) =
-    blockedPlayers.put(this, CommandsAndMessage(CaseInsensitiveStringSet().apply { addAll(allowedCommands) }, message))
-
-/**
- * Allows [Player] to use all commands once again.
- */
-fun Player.allowAllCommands() = blockedPlayers.remove(this)
 
 val EMPTY_ITEM = Material.AIR.toItemStack()
 val playerInventories = mutablePlayerMapOf<Array<ItemStack>> { player, content ->
