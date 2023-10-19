@@ -27,7 +27,7 @@ dependencies {
     api(project(":common:KotlinRuntime"))
     api(project(":common:rpc-payloads"))
 
-    paperDevBundle("1.20-R0.1-SNAPSHOT")
+    paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.8.0")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
     compileOnlyApi(files("../../libs/WorldGuard.jar"))

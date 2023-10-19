@@ -32,7 +32,7 @@ import net.perfectdreams.dreamlobbyfun.utils.ServerCitizen
 import net.perfectdreams.dreamlobbyfun.utils.ServerCitizenData
 import org.bukkit.Bukkit
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener

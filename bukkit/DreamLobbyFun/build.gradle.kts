@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    paperDevBundle("1.20-R0.1-SNAPSHOT")
+    paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamAuth"))
     compileOnly(files("../../libs/NoteBlockAPI.jar"))

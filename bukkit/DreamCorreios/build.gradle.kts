@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    paperDevBundle("1.20-R0.1-SNAPSHOT")
+    paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     implementation("net.citizensnpcs:citizensapi:2.0.30-SNAPSHOT")
     compileOnly(project(":bukkit:DreamBedrockIntegrations"))

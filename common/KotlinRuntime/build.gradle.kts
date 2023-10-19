@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
     api(kotlin("stdlib-jdk8"))
-    paperDevBundle("1.20-R0.1-SNAPSHOT")
+    paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly("io.github.waterfallmc:waterfall-api:1.13-SNAPSHOT")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-debug:1.6.0")

@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    paperDevBundle("1.20-R0.1-SNAPSHOT")
+    paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     implementation(project(":bukkit:DreamCash"))
     implementation(files("../../libs/mcMMO.jar"))

@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    paperDevBundle("1.20-R0.1-SNAPSHOT")
+    paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     implementation(kotlin("stdlib-jdk8"))
     implementation(files("../../libs/paper_server.jar"))
     implementation(files("../../libs/DreamCore-shadow.jar"))

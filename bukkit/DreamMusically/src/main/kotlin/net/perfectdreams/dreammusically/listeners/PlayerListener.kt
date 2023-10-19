@@ -13,7 +13,7 @@ import net.perfectdreams.dreammusically.DreamMusically
 import net.perfectdreams.dreammusically.utils.MusicPack
 import org.bukkit.Material
 import org.bukkit.SoundCategory
-import org.bukkit.craftbukkit.v1_20_R1.block.CraftJukebox
+import org.bukkit.craftbukkit.v1_20_R2.block.CraftJukebox
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -95,7 +95,7 @@ class PlayerListener(val m: DreamMusically) : Listener {
                 // Even tho you *should* be able to set the record via the .setRecord function, it doesn't change the item within the Jukebox if it
                 // isn't a record.
                 // (Last tested: 1.20)
-                val nmsWorld = (e.player.world as org.bukkit.craftbukkit.v1_20_R1.CraftWorld).handle
+                val nmsWorld = (e.player.world as org.bukkit.craftbukkit.v1_20_R2.CraftWorld).handle
                 val tileEntity = nmsWorld.getBlockEntity(BlockPos(clickedBlock.x, clickedBlock.y, clickedBlock.z))
 
                 // Yes this delay is required, if not the record will pop out after putting it in
@@ -106,7 +106,7 @@ class PlayerListener(val m: DreamMusically) : Listener {
 
                     // Update record and set that there is a record within it
                     nmsJukebox.setRecordWithoutPlaying(
-                        org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack.asNMSCopy(
+                        org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack.asNMSCopy(
                             copyOfItemInMainHand
                         )
                     )

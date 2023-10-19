@@ -59,7 +59,7 @@ class InventoryListener(val m: DreamEquipCoolStuff) : Listener {
 
             // Set
             event.currentItem = cursor
-            view.cursor = current
+            view.setCursor(current)
 
             // Update
             clicker.updateInventory()
