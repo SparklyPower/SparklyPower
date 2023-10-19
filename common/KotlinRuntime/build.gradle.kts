@@ -15,6 +15,7 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
     api("org.jetbrains.kotlinx:kotlinx-datetime:0.3.2")
     api(kotlin("reflect"))
+    api(kotlin("script-util"))
     api(kotlin("compiler"))
     api(kotlin("scripting-compiler"))
     api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.0-RC")
