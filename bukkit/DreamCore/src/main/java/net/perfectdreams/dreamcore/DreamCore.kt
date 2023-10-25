@@ -18,6 +18,7 @@ import net.perfectdreams.dreamcore.tables.Transactions
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.*
+import net.perfectdreams.dreamcore.utils.npc.SparklyNPCManager
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.configuration.file.YamlConfiguration
@@ -46,6 +47,7 @@ class DreamCore : KotlinPlugin() {
 	}
 
 	val dreamEventManager = DreamEventManager()
+	val sparklyNPCManager = SparklyNPCManager(this)
 	val rpc = RPCUtils(this)
 
 	override fun onEnable() {
@@ -110,6 +112,7 @@ class DreamCore : KotlinPlugin() {
 
 		ArmorStandHologram.loadArmorStandsIdsMarkedForRemoval()
 		dreamEventManager.startEventsTask()
+		sparklyNPCManager.start()
 	}
 
 	fun loadConfig() {
