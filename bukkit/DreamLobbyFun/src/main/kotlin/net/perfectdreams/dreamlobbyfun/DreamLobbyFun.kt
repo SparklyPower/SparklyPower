@@ -16,10 +16,11 @@ import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData
 import net.perfectdreams.dreamauth.DreamAuth
 import net.perfectdreams.dreamauth.utils.PlayerStatus
+import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import net.perfectdreams.dreamlobbyfun.commands.ConfigureServerCommand
+import net.perfectdreams.dreamcore.utils.npc.SkinTexture
 import net.perfectdreams.dreamlobbyfun.commands.LobbyBypassCommand
 import net.perfectdreams.dreamlobbyfun.dao.PlayerSettings
 import net.perfectdreams.dreamlobbyfun.listeners.*
@@ -31,6 +32,7 @@ import net.perfectdreams.dreamlobbyfun.tables.UserSettings
 import net.perfectdreams.dreamlobbyfun.utils.ServerCitizen
 import net.perfectdreams.dreamlobbyfun.utils.ServerCitizenData
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer
 import org.bukkit.enchantments.Enchantment
@@ -434,12 +436,10 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 		registerEvents(SimpleChatListener(this))
 		registerEvents(TeleportBowListener(this))
 		registerEvents(InventoryListener(this))
-		registerEvents(ServerCitizenListener(this))
 		registerEvents(SongListener(this))
 		registerEvents(HungerListener(this))
 
 		registerCommand(LobbyBypassCommand(this))
-		registerCommand(ConfigureServerCommand(this))
 
 		if (serverCitizensFile.exists()) {
 			// Using ListSerializer(ServerCitizenData.serializer()) instead of <List<ServerCitizenData>> avoids plugin reload issues,
@@ -449,7 +449,38 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 			val citizensData = Json.decodeFromString(ListSerializer(ServerCitizenData.serializer()), serverCitizensFile.readText())
 
 			serverCitizens = citizensData.map {
-				ServerCitizen(it, this)
+				val sparklyNPC = DreamCore.INSTANCE.sparklyNPCManager.spawnFakePlayer(
+					this@DreamLobbyFun,
+					Location(
+						Bukkit.getWorld("world"),
+						it.locationX,
+						it.locationY,
+						it.locationZ,
+						it.locationYaw,
+						it.locationPitch
+					),
+					"",
+					SkinTexture(
+						"ewogICJ0aW1lc3RhbXAiIDogMTY5ODI2NjU0ODk4MSwKICAicHJvZmlsZUlkIiA6ICJiODM3ZjNkNjc3MjA0YjQ2OWE4ZTJiNmJmMDRhMjQxYSIsCiAgInByb2ZpbGVOYW1lIiA6ICJQYW50dWZpbmhhIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlLzlkZDEyNTZkNmI5MjNkM2FlNjE4ZjVmMTNmZGEwYTY0MGY2ZTQ1ODVhZTNjMzUzZDg1ZTlmZTY1ODk5NmM4YWEiLAogICAgICAibWV0YWRhdGEiIDogewogICAgICAgICJtb2RlbCIgOiAic2xpbSIKICAgICAgfQogICAgfQogIH0KfQ==",
+						"UzRNP1iGvhcKiDCnYu0weJ1xl2sIOZz/vPlWN+KBZuIM2Jiqv+6n/ozds0wNUf8et7v8tN3Nh3YLj54TrJez5xTtOros7HSjFBlf8+HYFrR/0IqseCksvxC0gSeouuTNMVrYzFI0OyG16ZShlneMQQQ7rgIhP5xUSrgy7Xow4tLV2Uy9Fnpd7+bbKCJxs+PXnWoruJVN1NfSYD//b223v0P1m1rk1/F3nZ+m/Bv1zcgmclCwqOGBkQ90NgKHU6yo2Rfi95jxdYXxv73sF3CSAbmWCoZZZzdRumEWJSK68bDRcD0PVRWNidnpBhfOU/Lvh+pcsnwXNekoGmeu11vXKliafs2LK+BNT19F73eYI0nOlpVlbHrKaNRZgKtL4zrHp8ZsK6koh25QCGvygwwHzg1s3flfRKFBQztg8GlsiMIK6SNBP4HdAd/FNqXFW6p9BycKAR9HODUI9S+Nvgd6DQtIvCbgBCxDx4hqqR+o1451euSF9PPRuHLP1judZ8+bYKnTrXxDA/M4Yq+QW/lbkBY4r+52u+9YKbdFTLE6zPn0LkBnYSXfmib2FI3A7BvVPgN9vHQ03UodS1gSFdvVsS7qmkKP+02gYNpvhXAOW3G+k4oFV7ytHxEWw2SaEl2H0SLsG+lwU3gKXSaStkteu1T28nBauaWq2yQ2MFOoZ0A="
+					)
+				)
+
+				sparklyNPC.onClick { player ->
+					player.sendMessage("§aConectando...")
+
+					if (teleportToLoginLocationIfNotLoggedIn(player))
+						return@onClick
+
+					val jsonObject = JsonObject()
+					jsonObject["type"] = "transferPlayer"
+					jsonObject["player"] = player.name
+					jsonObject["bungeeServer"] = it.serverName
+
+					DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(jsonObject)
+				}
+
+				ServerCitizen(it, sparklyNPC, this)
 			}.toMutableList()
 		}
 
