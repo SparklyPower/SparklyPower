@@ -204,6 +204,7 @@ class SparklyNPCManager(val m: DreamCore) {
 
         entity.removeWhenFarAway = false
         entity.setAI(false)
+        entity.isSilent = true
         entity.isInvulnerable = true
 
         entity.persistentDataContainer.set(

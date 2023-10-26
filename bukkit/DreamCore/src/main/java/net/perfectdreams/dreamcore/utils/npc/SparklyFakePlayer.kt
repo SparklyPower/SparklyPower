@@ -3,6 +3,7 @@ package net.perfectdreams.dreamcore.utils.npc
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.Level
 
+// This is unused, maybe in the future we should modify SparklyPaper to create entities with this exact ticking code
 class SparklyFakePlayer(world: Level) : net.minecraft.world.entity.monster.Husk(
     EntityType.HUSK,
     world
