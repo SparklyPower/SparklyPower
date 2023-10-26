@@ -7,6 +7,7 @@ import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.event.HoverEventSource
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.inventory.meta.ItemMeta
 
@@ -33,11 +34,22 @@ fun ItemMeta.displayNameWithoutDecorations(content: String, block: TextComponent
 
 fun ItemMeta.lore(block: LoreBuilder.() -> (Unit) = {}) = lore(LoreBuilder().apply(block).components)
 
+fun TextComponent.Builder.append(color: TextColor, content: String, block: TextComponent.Builder.() -> (Unit) = {}) = append(
+    Component.text()
+        .color(color)
+        .content(content)
+        .apply(block)
+)
+
 fun TextComponent.Builder.append(content: String, block: TextComponent.Builder.() -> (Unit) = {}) = append(
     Component.text()
         .content(content)
         .apply(block)
 )
+
+fun TextComponent.Builder.suggestCommandOnClick(command: String) {
+    clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, command))
+}
 
 fun TextComponent.Builder.runCommandOnClick(command: String) {
     clickEvent(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, command))
@@ -51,7 +63,7 @@ fun TextComponent.Builder.appendCommand(command: String) = append(
     textComponent {
         content(command)
         color(NamedTextColor.GOLD)
-        runCommandOnClick(command)
+        suggestCommandOnClick(command)
         hoverText {
             content("Clique para executar o comando!")
         }

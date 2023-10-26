@@ -4,21 +4,21 @@ import com.charleskorn.kaml.Yaml
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.serialization.decodeFromString
+import net.perfectdreams.dreamcore.commands.SkinCommand
 import net.perfectdreams.dreamcore.commands.declarations.DreamCoreCommand
 import net.perfectdreams.dreamcore.commands.declarations.MeninaCommand
 import net.perfectdreams.dreamcore.commands.declarations.MeninoCommand
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.eventmanager.DreamEventManager
 import net.perfectdreams.dreamcore.listeners.EntityListener
+import net.perfectdreams.dreamcore.listeners.SkinsListener
 import net.perfectdreams.dreamcore.listeners.SocketListener
 import net.perfectdreams.dreamcore.network.socket.SocketServer
-import net.perfectdreams.dreamcore.tables.EventVictories
-import net.perfectdreams.dreamcore.tables.PreferencesTable
-import net.perfectdreams.dreamcore.tables.Transactions
-import net.perfectdreams.dreamcore.tables.Users
+import net.perfectdreams.dreamcore.tables.*
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.*
 import net.perfectdreams.dreamcore.utils.npc.SparklyNPCManager
+import net.perfectdreams.dreamcore.utils.skins.SkinUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.configuration.file.YamlConfiguration
@@ -48,6 +48,7 @@ class DreamCore : KotlinPlugin() {
 
 	val dreamEventManager = DreamEventManager()
 	val sparklyNPCManager = SparklyNPCManager(this)
+	val skinUtils = SkinUtils(this)
 	val rpc = RPCUtils(this)
 
 	override fun onEnable() {
@@ -68,7 +69,8 @@ class DreamCore : KotlinPlugin() {
 				Users,
 				EventVictories,
 				Transactions,
-				PreferencesTable
+				PreferencesTable,
+				PlayerSkins
 			)
 		}
 
@@ -94,6 +96,10 @@ class DreamCore : KotlinPlugin() {
 		sparklyCommandManager.register(MeninaCommand(this))
 		// Test command, should not be registered!
 		// sparklyCommandManager.register(TestCommand, HelloWorldCommandExecutor(), HelloLoriCommandExecutor(), HelloCommandExecutor(), DoYouLikeCommandExecutor(), TellExecutor())
+
+		// SparklySkinRestorer
+		Bukkit.getPluginManager().registerEvents(SkinsListener(this), this)
+		sparklyCommandManager.register(SkinCommand(this))
 
 		val scheduler = Bukkit.getScheduler()
 
