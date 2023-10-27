@@ -47,7 +47,7 @@ jobs:
         path: "bukkit/*/build/libs/*-reobf.jar"
 
     - uses: actions/upload-artifact@v2
-      name: "Upload BungeeCord Plugins"
+      name: "Upload Velocity Plugins"
       with:
-        name: SparklyPower BungeeCord Plugins
-        path: "bungee/*/build/libs/*.jar"
+        name: SparklyPower Velocity Plugins
+        path: "velocity/*/build/libs/*.jar"
