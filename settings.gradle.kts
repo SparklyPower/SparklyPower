@@ -9,6 +9,7 @@ pluginManagement {
 rootProject.name = "sparklypower-parent"
 
 // ===[ GENERAL PURPOSE ]===
+include(":common-utils")
 include(":common:KotlinRuntime")
 include(":common:tables")
 include(":common:rpc-payloads")
@@ -102,3 +103,6 @@ include(":bukkit:DreamSocial")
 include(":bungee:DreamCoreBungee")
 include(":bungee:DreamMOTDBungee")
 include(":bungee:DreamNetworkBans")
+
+// ===[ VELOCITY ]===
+include(":velocity:SparklyNeonVelocity")

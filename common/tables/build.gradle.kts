@@ -20,7 +20,6 @@ dependencies {
     api("com.zaxxer:HikariCP:5.0.1")
     api("org.postgresql:postgresql:42.3.6")
     api("com.michael-bull.kotlin-coroutines-jdbc:kotlin-coroutines-jdbc:1.0.2")
-    api("io.github.microutils:kotlin-logging-jvm:2.1.21")
 }
 
 tasks.withType<KotlinCompile> {

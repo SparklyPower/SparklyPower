@@ -18,7 +18,6 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
     api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.4.0-RC")
     api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0-RC")
-    api("io.github.microutils:kotlin-logging-jvm:2.1.21")
 }
 
 tasks.withType<KotlinCompile> {
