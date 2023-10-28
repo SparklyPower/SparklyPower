@@ -94,13 +94,6 @@ class DreamMini : KotlinPlugin(), Listener {
 			registerEvents(NetherTeleportListener(this))
 		}
 
-		if (config.getBoolean("atendente-da-loja")) {
-			val listener = AtendenteListener(this)
-			registerEvents(listener)
-			registerCommand(AtendenteListener.AtendenteMenuCommand(listener))
-			listener.loadAtendenteMenu()
-		}
-
 		if (config.getBoolean("back-to-spawn-on-unsafe-join")) {
 			registerEvents(BackToSpawnListener(this))
 		}
