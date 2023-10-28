@@ -5,31 +5,37 @@ import com.gmail.nossr50.datatypes.experience.XPGainSource
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.datatypes.skills.SubSkillType
 import com.gmail.nossr50.mcMMO
+import com.gmail.nossr50.util.Permissions
 import com.gmail.nossr50.util.player.UserManager
+import com.gmail.nossr50.util.random.RandomChanceSkill
+import com.gmail.nossr50.util.random.RandomChanceUtil
 import dev.forst.exposed.insertOrUpdate
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.toJavaInstant
+import me.ryanhamshire.GriefPrevention.Claim
+import me.ryanhamshire.GriefPrevention.ClaimPermission
+import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreammochilas.utils.MochilaAccessHolder
 import net.perfectdreams.dreammochilas.utils.MochilaInventoryHolder
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
-import net.perfectdreams.dreamquickharvest.commands.ColheitaExecutor
-import net.perfectdreams.dreamquickharvest.commands.ColheitaUpgradeExecutor
 import net.perfectdreams.dreamquickharvest.commands.declarations.ColheitaCommand
-import org.bukkit.Bukkit
-import org.bukkit.Material
-import org.bukkit.Particle
+import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestData
+import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestUpgrades
+import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
+import org.bukkit.block.BlockState
 import org.bukkit.block.data.Ageable
+import org.bukkit.block.data.Directional
+import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftInventoryPlayer
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -39,20 +45,16 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.experimental.and
-import kotlinx.serialization.Serializable
-import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestData
-import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestUpgrades
-import org.bukkit.Sound
-import org.bukkit.block.BlockState
+import org.bukkit.inventory.PlayerInventory
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.sum
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.experimental.and
 
 class DreamQuickHarvest : KotlinPlugin(), Listener {
 	companion object {
@@ -191,18 +193,27 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 					val ttl = System.currentTimeMillis()
 					val mcMMOXp = AtomicInteger()
+					// Optimization: This is from McMMO's com.gmail.nossr50.util.BlockUtils.checkDoubleDrops, but we have "inlined" the getDoubleDropsEnabled and isSubSkillEnabled check for when the player attempts to harvest something, this way we avoid multiple repeating checks
+					val executeDoubleDropsCheck = mcMMO.p.generalConfig.getDoubleDropsEnabled(PrimarySkillType.HERBALISM, e.block.type) && Permissions.isSubSkillEnabled(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS)
+					// Optimization: Create a RandomChanceSkill only once
+					val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
+					// Optimization: Get the current GriefPrevention claim of the clicked block, we are going to reuse it in the canBreak checks to avoid checking all claims
+					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
 					doQuickHarvestOnCrop(
 						e.block,
 						e.player,
-						e.block,
 						e.block.type,
 						e.player.inventory.itemInMainHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS),
 						inventoryTarget,
 						mcMMOXp,
 						info,
 						AtomicBoolean(false),
-						mutableSetOf()
+						mutableSetOf(),
+						executeDoubleDropsCheck,
+						randomChanceSkill,
+						claim
 					)
+
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest normal crops!" }
 
@@ -238,7 +249,13 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 					val ttl = System.currentTimeMillis()
 					val mcMMOXp = AtomicInteger()
-					doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false), mutableSetOf())
+					// Optimization: This is from McMMO's com.gmail.nossr50.util.BlockUtils.checkDoubleDrops, but we have "inlined" the getDoubleDropsEnabled and isSubSkillEnabled check for when the player attempts to harvest something, this way we avoid multiple repeating checks
+					val executeDoubleDropsCheck = mcMMO.p.generalConfig.getDoubleDropsEnabled(PrimarySkillType.HERBALISM, e.block.type) && Permissions.isSubSkillEnabled(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS)
+					// Optimization: Create a RandomChanceSkill only once
+					val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
+					// Optimization: Get the current GriefPrevention claim of the clicked block, we are going to reuse it in the canBreak checks to avoid checking all claims
+					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
+					doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false), mutableSetOf(), executeDoubleDropsCheck, randomChanceSkill, claim)
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest cocoa!" }
 
@@ -271,7 +288,13 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 					val ttl = System.currentTimeMillis()
 					val mcMMOXp = AtomicInteger()
-					doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false))
+					// Optimization: This is from McMMO's com.gmail.nossr50.util.BlockUtils.checkDoubleDrops, but we have "inlined" the getDoubleDropsEnabled and isSubSkillEnabled check for when the player attempts to harvest something, this way we avoid multiple repeating checks
+					val executeDoubleDropsCheck = mcMMO.p.generalConfig.getDoubleDropsEnabled(PrimarySkillType.HERBALISM, e.block.type) && Permissions.isSubSkillEnabled(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS)
+					// Optimization: Create a RandomChanceSkill only once
+					val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
+					// Optimization: Get the current GriefPrevention claim of the clicked block, we are going to reuse it in the canBreak checks to avoid checking all claims
+					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
+					doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false), executeDoubleDropsCheck, randomChanceSkill, claim)
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest sugar canes!" }
 
@@ -430,7 +453,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		material: Material? = null,
 		mcMMOXp: AtomicInteger
 	) {
-		if (mcMMO.getPlaceStore().isTrue(block.state))
+		if (mcMMO.getPlaceStore().isTrue(block)) // Optimization (albeit very smol): No need to get a BlockState instance, mcMMO allows us to pass a block instance instead
 			return
 
 		var xpBlockPlant = 0
@@ -483,163 +506,223 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	fun doQuickHarvestOnCrop(
 		startingBlock: Block,
 		player: Player,
-		block: Block,
 		type: Material,
 		fortuneLevel: Int,
 		inventory: Inventory,
 		mcMMOXp: AtomicInteger,
 		info: PlayerQuickHarvestInfo,
 		playerHasBeenWarned: AtomicBoolean,
-		checkedBlocks: MutableSet<Block>
+		checkedBlocks: MutableSet<Block>,
+		executeDoubleDropsCheck: Boolean,
+		randomChanceSkill: RandomChanceSkill,
+		cachedClaim: Claim?
 	) {
-		// This block was already checked, so let's bail out
-		if (block in checkedBlocks)
-			return
+		// Optimization: Instead of being a recursive function, use a stack
+		val blocksToBeChecked = ArrayDeque<Block>(1024)
+		blocksToBeChecked.add(startingBlock)
 
-		checkedBlocks.add(block)
+		while (blocksToBeChecked.isNotEmpty()) {
+			val block = blocksToBeChecked.pop() // Pop!
 
-		if (!player.isValid) // Se o player saiu, cancele o quick harvest
-			return
+			checkedBlocks.add(block)
 
-		if (!block.chunk.isLoaded) // Se o chunk não está carregado, ignore, não vamos carregar ele apenas para fazer quick harvest
-			return
+			if (!player.isValid) // Se o player saiu, cancele o quick harvest
+				return
 
-		if (block.type != type)
-			return
+			if (!block.chunk.isLoaded) // Se o chunk não está carregado, ignore, não vamos carregar ele apenas para fazer quick harvest
+				continue
 
-		if (!player.canBreakAt(block.location, type))
-			return
+			if (block.type != type)
+				continue
 
-		// A gente deixa na mesma altitude porque não tem problema se está tudo no mesmo chunk
-		val distance = player.location.distanceSquared(block.location.apply { this.y = player.location.y })
+			if (!canBreakAt(block.location, player, type, cachedClaim))
+				continue
 
-		// Player está distante, 2304 = 48 ^ 2
-		if (distance > 2304)
-			return
+			// A gente deixa na mesma altitude porque não tem problema se está tudo no mesmo chunk
+			val distance = player.location.distanceSquared(block.location.apply { this.y = player.location.y })
+			// Player está distante, 2304 = 48 ^ 2
+			if (distance > 2304)
+				continue
 
-		val damage = block.data
+			val damage = block.data
 
-		val fullyGrown = when (type) {
-			Material.MELON -> true
-			Material.PUMPKIN -> true
-			Material.NETHER_WART -> damage == 3.toByte()
-			Material.BEETROOTS -> damage == 3.toByte()
-			else -> damage == 7.toByte()
-		}
+			val fullyGrown = when (type) {
+				Material.MELON -> true
+				Material.PUMPKIN -> true
+				Material.NETHER_WART -> damage == 3.toByte()
+				Material.BEETROOTS -> damage == 3.toByte()
+				else -> damage == 7.toByte()
+			}
 
-		if (!fullyGrown)
-			return
+			if (!fullyGrown)
+				continue
 
-		val itemStack = ItemStack(
-			when (type) {
-				Material.WHEAT -> Material.WHEAT
-				Material.NETHER_WART -> Material.NETHER_WART
-				Material.CARROTS -> Material.CARROT
-				Material.POTATOES -> Material.POTATO
-				Material.BEETROOTS -> Material.BEETROOT
-				else -> type
-			},
-			getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
-				player,
-				block.state,
+			val itemStack = ItemStack(
 				when (type) {
-					Material.WHEAT -> 1
-					Material.NETHER_WART -> DreamUtils.random.nextInt(2, 5 + fortuneLevel)
-					Material.CARROTS -> DreamUtils.random.nextInt(1, 5)
-					Material.POTATOES -> DreamUtils.random.nextInt(1, 5)
-					Material.BEETROOTS -> 1
-					else -> 1
+					Material.WHEAT -> Material.WHEAT
+					Material.NETHER_WART -> Material.NETHER_WART
+					Material.CARROTS -> Material.CARROT
+					Material.POTATOES -> Material.POTATO
+					Material.BEETROOTS -> Material.BEETROOT
+					else -> type
+				},
+				getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
+					player,
+					block.state,
+					when (type) {
+						Material.WHEAT -> 1
+						Material.NETHER_WART -> DreamUtils.random.nextInt(2, 5 + fortuneLevel)
+						Material.CARROTS -> DreamUtils.random.nextInt(1, 5)
+						Material.POTATOES -> DreamUtils.random.nextInt(1, 5)
+						Material.BEETROOTS -> 1
+						else -> 1
+					},
+					executeDoubleDropsCheck,
+					randomChanceSkill
+				)
+			)
+
+			if (!inventory.canHoldItem(itemStack)) {
+				sendInventoryFullTitle(player)
+				return
+			}
+
+			if (removePlayerEnergyIfTheyHaveAndIfTheyDontSendMessage(player, info, block.type))
+				return
+
+			inventory.addItem(itemStack)
+
+			// To avoid a duplication issue, we will change the type right now
+			// Dupe issue: Fill your inventory with wheat, keep clicking on the wheat: You will receive a wheat item but the block won't be changed because
+			// "I can't fit the seed in there!"
+			if (type == Material.MELON || type == Material.PUMPKIN) {
+				block.setType(Material.AIR, false) // Optimization: Do not apply physics when updating the block
+
+				// However, this for melon and pumpkins, we need to check the blocks around the pumpkin to reset the stem!
+				val possibleStemBlocks = listOf(
+					block.getRelative(BlockFace.NORTH),
+					block.getRelative(BlockFace.SOUTH),
+					block.getRelative(BlockFace.EAST),
+					block.getRelative(BlockFace.WEST),
+				)
+
+				for (possibleStemBlock in possibleStemBlocks) {
+					if (type == Material.PUMPKIN && possibleStemBlock.type == Material.ATTACHED_PUMPKIN_STEM) {
+						// Are we attached to the current block?
+						val directional = (possibleStemBlock.blockData as Directional)
+						if (possibleStemBlock.getRelative(directional.facing) == block) {
+							// Reset to a fully grown pumpking stem
+							val newStemData = Bukkit.createBlockData(Material.PUMPKIN_STEM) as Ageable
+							newStemData.age = newStemData.maximumAge
+							possibleStemBlock.setBlockData(newStemData, false)
+						}
+						break
+					}
+
+					if (type == Material.MELON && possibleStemBlock.type == Material.ATTACHED_MELON_STEM) {
+						// Are we attached to the current block?
+						val directional = (possibleStemBlock.blockData as Directional)
+						if (possibleStemBlock.getRelative(directional.facing) == block) {
+							// Reset to a fully grown pumpking stem
+							val newStemData = Bukkit.createBlockData(Material.MELON_STEM) as Ageable
+							newStemData.age = newStemData.maximumAge
+							possibleStemBlock.setBlockData(newStemData, false)
+						}
+						break
+					}
 				}
+			} else {
+				val ageable = block.blockData as Ageable
+				ageable.age = 0
+				block.setBlockData(ageable, false) // Optimization: Do not apply physics when updating the block
+			}
+
+			if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
+				val seed = getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
+					player,
+					block.state,
+					DreamUtils.random.nextInt(0, 4),
+					executeDoubleDropsCheck,
+					randomChanceSkill
+				)
+
+				if (seed != 0) {
+					val seedItemStack = ItemStack(Material.WHEAT_SEEDS, seed)
+
+					if (inventory.canHoldItem(seedItemStack)) {
+						inventory.addItem(seedItemStack)
+					} else {
+						player.sendTitle(
+							"",
+							"§cVocê está com o inventário cheio!",
+							0,
+							60,
+							10
+						)
+						return
+					}
+				}
+			}
+
+			addMcMMOHerbalismXP(player, block, type, mcMMOXp) // mcMMO EXP
+
+			player.world.spawnParticle(
+				Particle.VILLAGER_HAPPY,
+				block.location.add(0.5, 0.5, 0.5),
+				3,
+				0.5,
+				0.5,
+				0.5
 			)
-		)
 
-		if (!inventory.canHoldItem(itemStack)) {
-			sendInventoryFullTitle(player)
-			return
-		}
+			// Optimization: If the additional blocks are only used in pumpkin and melon farms, then only check them FOR pumpkin and melon farms!
+			// This way we can avoid additional "useless" overhead on the for each down below
+			val blocksThatMustBeHarvestedLater = if (type != Material.PUMPKIN && type != Material.MELON)
+				listOf(
+					block.getRelative(BlockFace.NORTH),
+					block.getRelative(BlockFace.SOUTH),
+					block.getRelative(BlockFace.EAST),
+					block.getRelative(BlockFace.WEST)
+				)
+			else {
+				listOf(
+					block.getRelative(BlockFace.NORTH),
+					block.getRelative(BlockFace.SOUTH),
+					block.getRelative(BlockFace.EAST),
+					block.getRelative(BlockFace.WEST),
+					// All of these are just for pumpkin/melon farms
+					block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
+					block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
+					block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
+					block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST),
+					block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
+					block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
+					block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
+					block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST),
+					block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
+					block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
+					block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
+					block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST)
+				)
+			}
 
-		if (removePlayerEnergyIfTheyHaveAndIfTheyDontSendMessage(player, info, block.type))
-			return
+			// Optimization: Don't use .sortedBy { startingBlock.location.distanceSquared(it.location) }
+			// Yeah, it looks prettier, but avoiding calling distanceSquared is better :3
+			for (it in blocksThatMustBeHarvestedLater) {
+				if (playerHasBeenWarned.get())
+					return
 
-		inventory.addItem(itemStack)
-
-		// To avoid a duplication issue, we will change the type right now
-		// Dupe issue: Fill your inventory with wheat, keep clicking on the wheat: You will receive a wheat item but the block won't be changed because
-		// "I can't fit the seed in there!"
-		if (type == Material.MELON || type == Material.PUMPKIN) {
-			block.type = Material.AIR
-		} else {
-			val ageable = block.blockData as Ageable
-			ageable.age = 0
-			block.blockData = ageable
-		}
-
-		if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
-			val seed = getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
-				player,
-				block.state,
-				DreamUtils.random.nextInt(0, 4)
-			)
-
-			if (seed != 0) {
-				val seedItemStack = ItemStack(Material.WHEAT_SEEDS, seed)
-
-				if (inventory.canHoldItem(seedItemStack)) {
-					inventory.addItem(seedItemStack)
-				} else {
-					player.sendTitle(
-						"",
-						"§cVocê está com o inventário cheio!",
-						0,
-						60,
-						10
-					)
+				if (doesPlayerNotHaveEnoughEnergyToHarvestIfTheyDontSendMessage(player, info, type)) {
+					playerHasBeenWarned.set(true)
 					return
 				}
+
+				// This block was already checked, so let's bail out
+				if (it in checkedBlocks)
+					continue
+
+				blocksToBeChecked.add(it)
 			}
-		}
-
-		addMcMMOHerbalismXP(player, block, type, mcMMOXp) // mcMMO EXP
-
-		player.world.spawnParticle(
-			Particle.VILLAGER_HAPPY,
-			block.location.add(0.5, 0.5, 0.5),
-			3,
-			0.5,
-			0.5,
-			0.5
-		)
-
-		val blocksThatMustBeHarvestedLater = listOf(
-			block.getRelative(BlockFace.NORTH),
-			block.getRelative(BlockFace.SOUTH),
-			block.getRelative(BlockFace.EAST),
-			block.getRelative(BlockFace.WEST),
-			// All of these are just for pumpkin/melon farms
-			block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
-			block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
-			block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
-			block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST),
-			block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
-			block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
-			block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
-			block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST),
-			block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
-			block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
-			block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
-			block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST)
-		)
-
-		blocksThatMustBeHarvestedLater.sortedBy { startingBlock.location.distanceSquared(it.location) }.forEach {
-			if (playerHasBeenWarned.get())
-				return
-
-			if (doesPlayerNotHaveEnoughEnergyToHarvestIfTheyDontSendMessage(player, info, type)) {
-				playerHasBeenWarned.set(true)
-				return
-			}
-
-			doQuickHarvestOnCrop(startingBlock, player, it, type, fortuneLevel, inventory, mcMMOXp, info, playerHasBeenWarned, checkedBlocks)
 		}
 	}
 
@@ -651,7 +734,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		mcMMOXp: AtomicInteger,
 		info: PlayerQuickHarvestInfo,
 		playerHasBeenWarned: AtomicBoolean,
-		checkedBlocks: MutableSet<Block>
+		checkedBlocks: MutableSet<Block>,
+		executeDoubleDropsCheck: Boolean,
+		randomChanceSkill: RandomChanceSkill,
+		cachedClaim: Claim?
 	) {
 		// This block was already checked, so let's bail out
 		if (block in checkedBlocks)
@@ -668,7 +754,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (block.type != Material.COCOA)
 			return
 
-		if (!player.canBreakAt(block.location, block.type))
+		if (!canBreakAt(block.location, player, block.type, cachedClaim))
 			return
 
 		// A gente deixa na mesma altitude porque não tem problema se está tudo no mesmo chunk
@@ -688,7 +774,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
 				player,
 				block.state,
-				DreamUtils.random.nextInt(2, 4)
+				DreamUtils.random.nextInt(2, 4),
+				executeDoubleDropsCheck,
+				randomChanceSkill
 			)
 		)
 
@@ -718,7 +806,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			block.getRelative(BlockFace.DOWN)
 		)
 
-		blocksThatMustBeHarvestedLater.sortedBy { e.block.location.distanceSquared(it.location) }.forEach {
+		// Optimization: Don't use .sortedBy { startingBlock.location.distanceSquared(it.location) }
+		// Yeah, it looks prettier, but avoiding calling distanceSquared is better :3
+		blocksThatMustBeHarvestedLater.forEach {
 			if (playerHasBeenWarned.get())
 				return
 
@@ -727,7 +817,19 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				return
 			}
 
-			doQuickHarvestOnCocoa(e, player, it, inventory, mcMMOXp, info, playerHasBeenWarned, checkedBlocks)
+			doQuickHarvestOnCocoa(
+				e,
+				player,
+				it,
+				inventory,
+				mcMMOXp,
+				info,
+				playerHasBeenWarned,
+				checkedBlocks,
+				executeDoubleDropsCheck,
+				randomChanceSkill,
+				cachedClaim
+			)
 		}
 	}
 
@@ -738,7 +840,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		inventory: Inventory,
 		mcMMOXp: AtomicInteger,
 		info: PlayerQuickHarvestInfo,
-		playerHasBeenWarned: AtomicBoolean
+		playerHasBeenWarned: AtomicBoolean,
+		executeDoubleDropsCheck: Boolean,
+		randomChanceSkill: RandomChanceSkill,
+		cachedClaim: Claim?
 	) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
@@ -749,7 +854,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (block.type != Material.SUGAR_CANE)
 			return
 
-		if (!player.canBreakAt(block.location, block.type))
+		if (!canBreakAt(block.location, player, block.type, cachedClaim))
 			return
 
 		// A gente deixa na mesma altitude porque não tem problema se está tudo no mesmo chunk
@@ -776,7 +881,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
 					player,
 					block.state,
-					1
+					1,
+					executeDoubleDropsCheck,
+					randomChanceSkill
 				)
 			)
 
@@ -810,7 +917,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			bottom.getRelative(BlockFace.UP).getRelative(BlockFace.SOUTH_EAST)
 		)
 
-		blocksThatMustBeHarvestedLater.sortedBy { e.block.location.distanceSquared(it.location) }.forEach {
+		// Optimization: Don't use .sortedBy { startingBlock.location.distanceSquared(it.location) }
+		// Yeah, it looks prettier, but avoiding calling distanceSquared is better :3
+		blocksThatMustBeHarvestedLater.forEach {
 			if (playerHasBeenWarned.get())
 				return
 
@@ -819,7 +928,18 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				return
 			}
 
-			doQuickHarvestOnSugarCane(e, player, it, inventory, mcMMOXp, info, playerHasBeenWarned)
+			doQuickHarvestOnSugarCane(
+				e,
+				player,
+				it,
+				inventory,
+				mcMMOXp,
+				info,
+				playerHasBeenWarned,
+				executeDoubleDropsCheck,
+				randomChanceSkill,
+				cachedClaim
+			)
 		}
 	}
 
@@ -858,18 +978,21 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		)
 	}
 
-	private fun getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(player: Player, blockState: BlockState, stackCount: Int): Int {
-		if (mcMMO.getPlaceStore().isTrue(blockState)) {
+	private fun getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
+		player: Player,
+		blockState: BlockState,
+		stackCount: Int,
+		executeDoubleDropsCheck: Boolean,
+		randomChanceSkill: RandomChanceSkill
+	): Int {
+		return if (!executeDoubleDropsCheck || mcMMO.getPlaceStore().isTrue(blockState)) {
 			// User placed the block
-			return stackCount
+			stackCount
 		} else {
-			val hasDoubleDrops = com.gmail.nossr50.util.BlockUtils.checkDoubleDrops(
-				player,
-				blockState,
-				PrimarySkillType.HERBALISM,
-				SubSkillType.HERBALISM_DOUBLE_DROPS
-			)
-			return if (hasDoubleDrops) {
+			// Optimization: This is from McMMO's com.gmail.nossr50.util.BlockUtils.checkDoubleDrops, but we have "inlined" the getDoubleDropsEnabled and isSubSkillEnabled check for when the player attempts to harvest something, this way we avoid multiple repeating checks
+			val hasDoubleDrops = RandomChanceUtil.checkRandomChanceExecutionSuccess(randomChanceSkill)
+
+			if (hasDoubleDrops) {
 				stackCount * 2
 			} else {
 				stackCount
@@ -879,10 +1002,14 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 	data class PlayerQuickHarvestInfo(var activeBlocks: Int)
 
-	@Serializable
-	data class QuickHarvestUpgrade(
-		val energy: Int,
-		val boughtAt: Instant,
-		val expiresAt: Instant
-	)
+	fun canBreakAt(loc: Location, p: Player, m: Material, cachedClaim: Claim?): Boolean {
+		val claim = GriefPrevention.instance.dataStore.getClaimAt(loc, false, cachedClaim)
+		// Performance: https://github.com/TechFortress/GriefPrevention/issues/1438#issuecomment-872363793
+		var canBuildClaim = true
+
+		if (claim != null) // The supplier can be "null"!
+			canBuildClaim = claim.checkPermission(p, ClaimPermission.Build, PlayerUtils.CompatBuildBreakEvent(m, true)) == null
+
+		return canBuildClaim && WorldGuardUtils.canBreakAt(loc, p)
+	}
 }
