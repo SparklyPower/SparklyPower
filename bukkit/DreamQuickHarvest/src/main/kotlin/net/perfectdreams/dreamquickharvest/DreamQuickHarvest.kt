@@ -675,36 +675,25 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				0.5
 			)
 
-			// Optimization: If the additional blocks are only used in pumpkin and melon farms, then only check them FOR pumpkin and melon farms!
-			// This way we can avoid additional "useless" overhead on the for each down below
-			val blocksThatMustBeHarvestedLater = if (type != Material.PUMPKIN && type != Material.MELON)
-				listOf(
-					block.getRelative(BlockFace.NORTH),
-					block.getRelative(BlockFace.SOUTH),
-					block.getRelative(BlockFace.EAST),
-					block.getRelative(BlockFace.WEST)
-				)
-			else {
-				listOf(
-					block.getRelative(BlockFace.NORTH),
-					block.getRelative(BlockFace.SOUTH),
-					block.getRelative(BlockFace.EAST),
-					block.getRelative(BlockFace.WEST),
-					// All of these are just for pumpkin/melon farms
-					block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
-					block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
-					block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
-					block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST),
-					block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
-					block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
-					block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
-					block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST),
-					block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
-					block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
-					block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
-					block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST)
-				)
-			}
+			val blocksThatMustBeHarvestedLater = listOf(
+				block.getRelative(BlockFace.NORTH),
+				block.getRelative(BlockFace.SOUTH),
+				block.getRelative(BlockFace.EAST),
+				block.getRelative(BlockFace.WEST),
+				// All of these are just for pumpkin/melon farms, we keep them as is because some people may have farms that "jump over" blocks (like: a line of glowstone between the farm sections)
+				block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
+				block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
+				block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
+				block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST),
+				block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
+				block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
+				block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
+				block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST),
+				block.getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH).getRelative(BlockFace.NORTH),
+				block.getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH).getRelative(BlockFace.SOUTH),
+				block.getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST).getRelative(BlockFace.EAST),
+				block.getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST).getRelative(BlockFace.WEST)
+			)
 
 			// Optimization: Don't use .sortedBy { startingBlock.location.distanceSquared(it.location) }
 			// Yeah, it looks prettier, but avoiding calling distanceSquared is better :3
