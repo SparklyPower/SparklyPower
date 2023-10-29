@@ -99,5 +99,5 @@ class CheckBanCommand(private val m: SparklyNeonVelocity, private val server: Pr
         }
     }
 
-    override fun hasPermission(invocation: SimpleCommand.Invocation) = invocation.source().hasPermission("")
+    override fun hasPermission(invocation: SimpleCommand.Invocation) = invocation.source().hasPermission("sparklyneonvelocity.checkban")
 }

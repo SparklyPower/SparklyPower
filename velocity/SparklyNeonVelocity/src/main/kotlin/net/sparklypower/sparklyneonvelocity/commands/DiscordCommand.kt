@@ -51,6 +51,27 @@ class DiscordCommand(private val m: SparklyNeonVelocity) : SimpleCommand {
             return
         }
 
+        if (arg0 == "desregistrar" || arg0 == "unregister") {
+            val account = m.pudding.transactionBlocking {
+                DiscordAccount.find { DiscordAccounts.minecraftId eq player.uniqueId and (DiscordAccounts.isConnected eq true) }
+                    .firstOrNull()
+            }
+
+            if (account == null) {
+                player.sendMessage("§cVocê não tem nenhum registro! Use \"-registrar ${player.username}\" no nosso servidor no Discord para registrar a sua conta!".fromLegacySectionToTextComponent())
+                return
+            }
+
+            m.pudding.transactionBlocking {
+                account.delete()
+            }
+
+            player.sendMessage("§aConta do Discord foi desregistrada com sucesso, yay!".fromLegacySectionToTextComponent())
+
+            m.discordAccountAssociationsWebhook.send("Conta **`${player.username}`** (`${player.uniqueId}`) foi desassociada da conta `${account.discordId}` (<@${account.discordId}>)")
+            return
+        }
+
         invocation.source().sendMessage("§dNosso Discord! https://discord.gg/JYN6g2s".fromLegacySectionToTextComponent())
     }
 }
