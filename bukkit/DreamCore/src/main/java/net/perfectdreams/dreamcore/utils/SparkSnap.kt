@@ -61,7 +61,7 @@ class SparkSnap(val m: DreamCore) {
 
         val exportProps = Sampler.ExportProps()
             .creator(CommandSender.Data("SparklyPower", null))
-            .comment("Automagically saved by ${m.name} - ${DreamCore.dreamConfig.serverName}")
+            .comment("Automagically saved by ${m.name} - ${DreamCore.dreamConfig.bungeeName}")
             .mergeMode {
                 val methodDisambiguator = MethodDisambiguator()
                 MergeMode.sameMethod(methodDisambiguator)
