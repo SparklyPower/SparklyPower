@@ -4,6 +4,7 @@ import com.charleskorn.kaml.Yaml
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.serialization.decodeFromString
+import mu.KotlinLogging
 import net.perfectdreams.dreamcore.commands.SkinCommand
 import net.perfectdreams.dreamcore.commands.declarations.DreamCoreCommand
 import net.perfectdreams.dreamcore.commands.declarations.MeninaCommand
@@ -53,6 +54,7 @@ class DreamCore : KotlinPlugin() {
 	val scoreboardManager = SparklyScoreboardManager(this)
 	val skinUtils = SkinUtils(this)
 	val rpc = RPCUtils(this)
+	val sparkSnap = SparkSnap(this)
 
 	override fun onEnable() {
 		saveDefaultConfig()
@@ -126,6 +128,7 @@ class DreamCore : KotlinPlugin() {
 		ArmorStandHologram.loadArmorStandsIdsMarkedForRemoval()
 		dreamEventManager.startEventsTask()
 		sparklyNPCManager.start()
+		sparkSnap.startTask()
 	}
 
 	fun loadConfig() {

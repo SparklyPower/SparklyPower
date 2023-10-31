@@ -31,6 +31,7 @@ dependencies {
     compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.8.0")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
     compileOnlyApi(files("../../libs/WorldGuard.jar"))
+    compileOnlyApi(files("../../libs/spark-1.10.34-bukkit.jar")) // jitpack doesn't compile spark because it requires Java 17
     compileOnlyApi("com.github.TechFortress:GriefPrevention:06cc566769") // Using commits instead of pinning a version because GP hasn't released a new version yet
     implementation("com.github.ChestShop-authors:ChestShop-3:3.12")
     api("net.perfectdreams.commands:command-framework-core:0.0.8")
@@ -68,6 +69,8 @@ dependencies {
     api("com.charleskorn.kaml:kaml:0.49.0")
 
     api("com.viaversion:viaversion-api:4.1.1") // Used for packet manipulation
+
+    implementation("com.github.luben:zstd-jni:1.5.5-7")
 
     compileOnlyApi("com.greatmancode:craftconomy3:3.3.1")
     compileOnlyApi("me.lucko.luckperms:luckperms-api:4.3")
