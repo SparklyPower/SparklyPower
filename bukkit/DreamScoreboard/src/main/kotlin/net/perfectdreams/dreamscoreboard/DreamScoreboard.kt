@@ -8,6 +8,9 @@ import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamclubes.dao.Clube
 import net.perfectdreams.dreamclubes.tables.ClubeMembers
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
+import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.event.PlayerScoreboardCreatedEvent
+import net.perfectdreams.dreamcore.event.PlayerScoreboardRemovedEvent
 import net.perfectdreams.dreamcore.tables.EventVictories
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamscoreboard.commands.*
@@ -61,28 +64,6 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 	val scoreboards = ConcurrentHashMap<Player, PlayerScoreboard>()
 	var cachedClubesPrefixes = WeakHashMap<Player, String?>()
 
-	// 13/07/2021 - YES, THIS IS NEEDED, PAPER HASN'T FIXED THIS ISSUE YET
-	// THERE IS A PATCH THAT IMPLEMENTS SCOREBOARD CLEAN UP, BUT THAT DOESN'T FIX OUR USE CASE!!
-	// https://canary.discord.com/channels/@me/646488209274044457/864264697356091393
-	val scoreboardsField by lazy {
-		(Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("scoreboards").apply {
-			this.isAccessible = true
-		}
-	}
-
-	val playerBoardsField by lazy {
-		(Bukkit.getScoreboardManager() as CraftScoreboardManager)::class.java.getDeclaredField("playerBoards")
-			.apply {
-				this.isAccessible = true
-			}
-	}
-
-	fun cleanUp(scoreboard: Scoreboard) {
-		// Needs to be fixed: https://github.com/PaperMC/Paper/issues/4260
-		val scoreboards = scoreboardsField.get(Bukkit.getScoreboardManager()) as WeakCollection<Scoreboard>
-		scoreboards.remove(scoreboard)
-	}
-
 	override fun softEnable() {
 		super.softEnable()
 
@@ -116,8 +97,11 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 					if (!noCollisionTeam.hasEntry(it.name))
 						noCollisionTeam.addEntry(it.name)
 
+					// This should NEVER happen, except if the plugin is reloaded...
 					if (scoreboards[it] == null) {
-						val playerScoreboard = PlayerScoreboard(this@DreamScoreboard, it)
+						// This is sort of duplicated work, since the getOrCreateScoreboard call will invoke an event if the scoreboard is created
+						val phoenixScoreboard = DreamCore.INSTANCE.scoreboardManager.getOrCreateScoreboard(it)
+						val playerScoreboard = PlayerScoreboard(this@DreamScoreboard, it, phoenixScoreboard)
 						playerScoreboard.updateScoreboard()
 						scoreboards[it] = playerScoreboard
 					}
@@ -126,23 +110,6 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 				setupTabDisplayNames()
 
 				waitFor(20 * 15)
-			}
-		}
-
-		// Needs to be fixed: https://github.com/PaperMC/Paper/issues/4260
-		scheduler().schedule(this, SynchronizationContext.SYNC) {
-			while (true) {
-				val weakCollection = scoreboardsField.get(Bukkit.getScoreboardManager()) as WeakCollection<CraftScoreboard>
-
-				logger.info("Weak Collection before clean up size is ${weakCollection.size}")
-
-				val playerBoards = playerBoardsField.get(Bukkit.getScoreboardManager()) as Map<CraftPlayer, CraftScoreboard>
-
-				weakCollection.removeAll(weakCollection - playerBoards.values)
-
-				logger.info("Weak Collection after clean up size is ${weakCollection.size}")
-
-				waitFor(20 * 60) // 1 minute
 			}
 		}
 
@@ -318,20 +285,14 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 	}
 
 	@EventHandler
-	fun onJoin(e: PlayerJoinEvent) {
-		val playerScoreboard = PlayerScoreboard(this, e.player)
+	fun onScoreboardCreated(e: PlayerScoreboardCreatedEvent) {
+		val playerScoreboard = PlayerScoreboard(this, e.player, e.phoenixScoreboard)
 		playerScoreboard.updateScoreboard()
 		scoreboards[e.player] = playerScoreboard
 	}
 
 	@EventHandler
-	fun onQuit(e: PlayerQuitEvent) {
-		// Manually clean up scoreboards
-		val playerScoreboard = scoreboards[e.player]
-		playerScoreboard?.let {
-			cleanUp(it.phoenix.scoreboard)
-		}
-
+	fun onScoreboardRemoved(e: PlayerScoreboardRemovedEvent) {
 		scoreboards.remove(e.player)
 	}
 

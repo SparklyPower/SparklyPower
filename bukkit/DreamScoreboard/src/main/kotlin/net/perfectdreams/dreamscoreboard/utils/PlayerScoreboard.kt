@@ -17,12 +17,11 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.util.concurrent.TimeUnit
 
-class PlayerScoreboard(val m: DreamScoreboard, val player: Player) {
+class PlayerScoreboard(val m: DreamScoreboard, val player: Player, val phoenix: PhoenixScoreboard) {
 	companion object {
 		private val PANTUFA_ICON = "\uE238"
 	}
-	
-	val phoenix: PhoenixScoreboard = PhoenixScoreboard()
+
 	var lastIndex = 15
 	var randomEmote = "?"
 

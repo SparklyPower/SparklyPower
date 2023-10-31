@@ -11,16 +11,13 @@ import org.bukkit.scoreboard.Scoreboard
  *
  * @author MrPowerGamerBR
  */
-class PhoenixScoreboard {
-	var scoreboard: Scoreboard
-
+class PhoenixScoreboard(val scoreboard: Scoreboard) {
 	/**
 	 * Used to avoid getting and setting the score in the scoreboard multiple times for no reason
 	 */
 	private val lineVisibility = mutableMapOf<Int, Boolean>()
 
 	init {
-		scoreboard = Bukkit.getScoreboardManager().newScoreboard
 		scoreboard.registerNewObjective("alphys", "dummy")
 		scoreboard.getObjective("alphys")!!.displaySlot = DisplaySlot.SIDEBAR
 		scoreboard.registerNewTeam("line1")

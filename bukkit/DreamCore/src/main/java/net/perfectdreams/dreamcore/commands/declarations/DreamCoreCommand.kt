@@ -19,6 +19,18 @@ class DreamCoreCommand(val plugin: DreamCore) : SparklyCommandDeclarationWrapper
             }
         }
 
+        subcommand(listOf("sparklyboards")) {
+            subcommand(listOf("reset")) {
+                executor = DreamCoreResetScoreboardsExecutor(plugin)
+                permissions = listOf("dreamcore.setup")
+            }
+
+            subcommand(listOf("stats")) {
+                executor = DreamCoreScoreboardStatsExecutor(plugin)
+                permissions = listOf("dreamcore.setup")
+            }
+        }
+
         executor = DreamCoreExecutor()
         permissions = listOf("dreamcore.setup")
     }

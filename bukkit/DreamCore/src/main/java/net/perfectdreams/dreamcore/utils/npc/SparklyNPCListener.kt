@@ -6,13 +6,13 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import io.papermc.paper.event.player.PrePlayerAttackEntityEvent
-import kotlinx.coroutines.delay
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.level.GameType
+import net.perfectdreams.dreamcore.event.PlayerScoreboardCreatedEvent
 import net.perfectdreams.dreamcore.utils.JVMUnsafeUtils
 import net.perfectdreams.dreamcore.utils.get
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer
@@ -196,11 +196,13 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
                     }
                 }
             )
+    }
 
+    @EventHandler
+    fun onScoreboardCreation(event: PlayerScoreboardCreatedEvent) {
         // Update currently spawned NPC names
-        val scoreboard = m.getScoreboard(event.player)
         for ((_, npc) in m.npcEntities) {
-            m.updateFakePlayerName(scoreboard, npc)
+            m.updateFakePlayerName(event.phoenixScoreboard.scoreboard, npc)
         }
     }
 

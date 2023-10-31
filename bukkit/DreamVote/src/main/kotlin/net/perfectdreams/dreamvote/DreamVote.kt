@@ -3,6 +3,7 @@ package net.perfectdreams.dreamvote
 import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.delay
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
@@ -31,6 +32,7 @@ import java.io.File
 import java.time.Instant
 import java.time.ZoneId
 import java.util.*
+import kotlin.time.Duration.Companion.seconds
 
 class DreamVote : KotlinPlugin() {
 	companion object {
@@ -78,7 +80,7 @@ class DreamVote : KotlinPlugin() {
 						}
 					}
 				}
-				delayTicks(5 * 20L)
+				delay(5.seconds)
 			}
 		}
 

@@ -18,6 +18,8 @@ import net.perfectdreams.dreamcore.tables.*
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.*
 import net.perfectdreams.dreamcore.utils.npc.SparklyNPCManager
+import net.perfectdreams.dreamcore.utils.scoreboards.SparklyScoreboardListener
+import net.perfectdreams.dreamcore.utils.scoreboards.SparklyScoreboardManager
 import net.perfectdreams.dreamcore.utils.skins.SkinUtils
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -48,6 +50,7 @@ class DreamCore : KotlinPlugin() {
 
 	val dreamEventManager = DreamEventManager()
 	val sparklyNPCManager = SparklyNPCManager(this)
+	val scoreboardManager = SparklyScoreboardManager(this)
 	val skinUtils = SkinUtils(this)
 	val rpc = RPCUtils(this)
 
@@ -100,6 +103,10 @@ class DreamCore : KotlinPlugin() {
 		// SparklySkinRestorer
 		Bukkit.getPluginManager().registerEvents(SkinsListener(this), this)
 		sparklyCommandManager.register(SkinCommand(this))
+
+		// Scoreboards
+		scoreboardManager.startScoreboardCleanUpTask()
+		Bukkit.getPluginManager().registerEvents(SparklyScoreboardListener(this), this)
 
 		val scheduler = Bukkit.getScheduler()
 

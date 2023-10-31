@@ -130,18 +130,11 @@ class SparklyNPCManager(val m: DreamCore) {
         }
     }
 
-    fun getScoreboard(player: Player): Scoreboard {
-        return if (player.scoreboard == Bukkit.getScoreboardManager().mainScoreboard) {
-            val newScoreboard = Bukkit.getScoreboardManager().newScoreboard
-            player.scoreboard = newScoreboard
-            newScoreboard
-        } else player.scoreboard
-    }
-
     fun updateFakePlayerName(npc: SparklyNPC) {
         // Set the NPC name to the player's scoreboard
         for (player in Bukkit.getOnlinePlayers()) {
-            updateFakePlayerName(getScoreboard(player), npc)
+            val phoenixScoreboard = m.scoreboardManager.getScoreboard(player) ?: continue
+            updateFakePlayerName(phoenixScoreboard.scoreboard, npc)
         }
     }
 
@@ -156,7 +149,8 @@ class SparklyNPCManager(val m: DreamCore) {
 
         for (player in Bukkit.getOnlinePlayers()) {
             // Set the NPC name to the player's scoreboard
-            getScoreboard(player).getTeam(teamName)?.unregister()
+            val phoenixScoreboard = m.scoreboardManager.getScoreboard(player) ?: continue
+            phoenixScoreboard.scoreboard.getTeam(teamName)?.unregister()
         }
     }
 
