@@ -38,9 +38,11 @@ class SparkSnap(val m: DreamCore) {
 
     fun startTask() {
         m.launchAsyncThread {
-            // We delay first because we don't want to create a snap right after the server started up
-            delay(1.hours)
-            snap()
+            while (true) {
+                // We delay first because we don't want to create a snap right after the server started up
+                delay(1.hours)
+                snap()
+            }
         }
     }
 
