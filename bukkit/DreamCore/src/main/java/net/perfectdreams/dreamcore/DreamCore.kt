@@ -150,6 +150,5 @@ class DreamCore : KotlinPlugin() {
 
 	override fun onDisable() {
 		playerInventories.keys.forEach { it.restoreInventory() }
-		frozenPlayers.forEach { it.unfreeze() }
 	}
 }
