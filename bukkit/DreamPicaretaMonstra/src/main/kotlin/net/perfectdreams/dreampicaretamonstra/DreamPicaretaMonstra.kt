@@ -42,7 +42,8 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 			Material.SMOOTH_BASALT,
 			Material.AMETHYST_BLOCK,
 			Material.TUFF,
-			Material.DEEPSLATE
+			Material.DEEPSLATE,
+			Material.SANDSTONE
 		)
 
 		private val SHOVELLING_BLOCKS = listOf(
