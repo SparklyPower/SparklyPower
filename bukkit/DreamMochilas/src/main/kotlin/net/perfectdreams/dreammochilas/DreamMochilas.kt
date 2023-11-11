@@ -36,7 +36,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 
 		fun createMochila(mochilaData: MochilaData): ItemStack {
 			val item = ItemStack(Material.PAPER)
-				.rename("§rMochila")
+				.rename("§r${if (mochilaData.displayName != null) mochilaData.displayName else "Mochila"}")
 				.meta<ItemMeta> {
 					setCustomModelData(mochilaData.customModelData)
 

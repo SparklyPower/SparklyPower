@@ -19,11 +19,16 @@ class ChestShopListener : Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     fun onClick(e: ItemParseEvent) {
         val cleanItemString = ChatColor.stripColor(e.itemString)!!
-        if (cleanItemString.startsWith("Mochila ")) {
-            val mochilaName = cleanItemString.substringAfter("Mochila ")
-            val mochilaData = MochilaData.list.firstOrNull { it.name.startsWith(mochilaName, true) }
-            if (mochilaData != null) {
-                e.item = DreamMochilas.createMochila(mochilaData)
+        if (cleanItemString == "Moch Aniversário") {
+            e.item = DreamMochilas.createMochila(MochilaData.birthday9.random())
+        } else {
+            if (cleanItemString.startsWith("Mochila ")) {
+                val mochilaName = cleanItemString.substringAfter("Mochila ")
+
+                val mochilaData = MochilaData.list.firstOrNull { it.name.startsWith(mochilaName, true) }
+                if (mochilaData != null) {
+                    e.item = DreamMochilas.createMochila(mochilaData)
+                }
             }
         }
 
