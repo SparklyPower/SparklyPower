@@ -5,6 +5,7 @@ import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket
 import net.minecraft.world.entity.EntityType
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.SparklyNamespacedBooleanKey
+import net.perfectdreams.dreamcore.utils.get
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.set
@@ -90,6 +91,24 @@ class SparklyNPCManager(val m: DreamCore) {
 
         // Create look close and remove outdated teams
         m.launchMainThread {
+            // This is the same code as the one in the SparklyNPCListener EntitiesLoadEvent listener
+            // Why it is here? Because entities may have been loaded BEFORE DreamCore has started
+            for (world in Bukkit.getWorlds()) {
+                for (entity in world.entities) {
+                    // Is this an NPC?
+                    if (entity.persistentDataContainer.get(npcKey)) {
+                        // Is the entity's unique ID present in the NPC Entities list?
+                        if (!npcEntities.containsKey(entity.uniqueId)) {
+                            // If not, we are going to delete it!
+                            m.logger.warning("Deleting entity ${entity.uniqueId} because their ID isn't present in the NPC list!")
+
+                            // Bail out!
+                            entity.remove()
+                        }
+                    }
+                }
+            }
+
             while (true) {
                 // logger.info { "Checking look close NPCs..." }
                 for ((id, sparklyNPCData) in npcEntities) {
