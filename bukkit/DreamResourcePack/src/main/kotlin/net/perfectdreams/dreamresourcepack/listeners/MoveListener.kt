@@ -1,5 +1,7 @@
 package net.perfectdreams.dreamresourcepack.listeners
 
+import net.perfectdreams.dreambedrockintegrations.DreamBedrockIntegrations
+import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamresourcepack.DreamResourcePack
 import org.bukkit.event.EventHandler
@@ -28,19 +30,25 @@ class MoveListener(val m: DreamResourcePack) : Listener {
 
     @EventHandler
     fun onResourcePackStatus(e: PlayerResourcePackStatusEvent) {
-        when (e.status) {
-            PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED -> {
-                e.player.sendMessage("§aA resource pack foi baixada e ativada com sucesso, obrigado por aceitar a nossa resource pack! ^-^")
-            }
-            PlayerResourcePackStatusEvent.Status.DECLINED -> {
-                e.player.sendMessage("§cAo recusar a nossa resource pack você poderá enfrentar problemas e algumas coisas podem aparecer meio... \"estranhas\".")
-                e.player.sendMessage("§cCaso você mude de ideia e queria reativar a resource pack, edite o servidor na lista de servidores para aceitar a resource pack!")
-            }
-            PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD -> {
-                e.player.sendMessage("§cParece que ocorreu algum problema ao baixar a resource pack, tente novamente mais tarde e desculpe pela inconveniência...")
-            }
-            PlayerResourcePackStatusEvent.Status.ACCEPTED -> {
-                e.player.sendMessage("§aObrigado por aceitar a resource pack! Ela está sendo baixada e, ao terminar, ela será ativada automaticamente!")
+        // No need to tell the user that they rejected the resource pack if they are using Geyser
+        if (!e.player.isBedrockClient) {
+            when (e.status) {
+                PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED -> {
+                    e.player.sendMessage("§aA resource pack foi baixada e ativada com sucesso, obrigado por aceitar a nossa resource pack! ^-^")
+                }
+
+                PlayerResourcePackStatusEvent.Status.DECLINED -> {
+                    e.player.sendMessage("§cAo recusar a nossa resource pack você poderá enfrentar problemas e algumas coisas podem aparecer meio... \"estranhas\".")
+                    e.player.sendMessage("§cCaso você mude de ideia e queria reativar a resource pack, edite o servidor na lista de servidores para aceitar a resource pack!")
+                }
+
+                PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD -> {
+                    e.player.sendMessage("§cParece que ocorreu algum problema ao baixar a resource pack, tente novamente mais tarde e desculpe pela inconveniência...")
+                }
+
+                PlayerResourcePackStatusEvent.Status.ACCEPTED -> {
+                    e.player.sendMessage("§aObrigado por aceitar a resource pack! Ela está sendo baixada e, ao terminar, ela será ativada automaticamente!")
+                }
             }
         }
     }
