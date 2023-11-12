@@ -139,7 +139,7 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 
 	fun hasRoadNearby(location: Location): Boolean {
 		// If it isn't in the survival world, ignore it!
-		if (location.world.name != "world")
+		if (location.world.name != "world" && location.world.name != "Survival2")
 			return false
 
 		val x = location.blockX
@@ -151,7 +151,7 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 				for (currentZ in z - 3..z + 3) {
 					val block = location.world.getBlockAt(currentX, currentY, currentZ)
 
-					val isConcrete = block?.type == Material.BLACK_CONCRETE
+					val isConcrete = block.type == Material.BLACK_CONCRETE
 
 					if (isConcrete)
 						return true
