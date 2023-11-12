@@ -10,6 +10,7 @@ import net.perfectdreams.dreamcore.utils.commands.annotation.SubcommandPermissio
 import net.perfectdreams.dreamcore.utils.extensions.hasStoredMetadataWithKey
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
 import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
+import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreammini.commands.*
 import net.perfectdreams.dreammini.utils.*
 import org.bukkit.*
@@ -157,9 +158,10 @@ class DreamMini : KotlinPlugin(), Listener {
 				@Subcommand
 				@SubcommandPermission("dreammini.givehelditemall")
 				fun root(player: Player) {
+					val itemInMainHand = player.inventory.itemInMainHand.clone()
 					Bukkit.getOnlinePlayers().forEach {
 						if (player != it)
-							it.inventory.addItem(player.inventory.itemInMainHand)
+							DreamCorreios.getInstance().addItem(it, itemInMainHand)
 					}
 
 					player.sendMessage("§aProntinho!")

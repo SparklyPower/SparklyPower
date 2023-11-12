@@ -13,6 +13,7 @@ dependencies {
     paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamChat"))
+    compileOnly(project(":bukkit:DreamCorreios"))
 }
 
 tasks.withType<KotlinCompile> {
