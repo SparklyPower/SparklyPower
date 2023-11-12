@@ -10,6 +10,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
+import me.ryanhamshire.GriefPrevention.events.ClaimChangeEvent
+import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent
+import me.ryanhamshire.GriefPrevention.events.ClaimResizeEvent
 import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
@@ -85,6 +88,34 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 					.map { it.data }
 			)
 		)
+	}
+
+	@EventHandler
+	fun onClaim(e: ClaimCreatedEvent) {
+		val creator = e.creator
+		if (creator is Player && creator.world.name == "Survival2") {
+			val userClaims = GriefPrevention.instance.dataStore.getPlayerData(e.claim.ownerID).claims
+			val totalClaimedArea = userClaims.filter { it.greaterBoundaryCorner.world.name == "Survival2" }.sumOf { it.area } + e.claim.area
+
+			if (totalClaimedArea >= 10000) {
+				e.isCancelled = true
+				creator.sendMessage("§cAtualmente não é possível proteger mais de 10000 blocos no survival2!")
+			}
+		}
+	}
+
+	@EventHandler
+	fun onResize(e: ClaimResizeEvent) {
+		val creator = e.modifier
+		if (creator is Player && creator.world.name == "Survival2") {
+			val userClaims = GriefPrevention.instance.dataStore.getPlayerData(e.claim.ownerID).claims
+			val totalClaimedArea = userClaims.filter { it.greaterBoundaryCorner.world.name == "Survival2" }.sumOf { it.area } + e.claim.area
+
+			if (totalClaimedArea >= 10000) {
+				e.isCancelled = true
+				creator.sendMessage("§cAtualmente não é possível proteger mais de 10000 blocos no survival2!")
+			}
+		}
 	}
 
 	@EventHandler

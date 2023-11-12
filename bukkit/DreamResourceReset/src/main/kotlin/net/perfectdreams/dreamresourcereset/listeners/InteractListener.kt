@@ -1,11 +1,8 @@
 package net.perfectdreams.dreamresourcereset.listeners
 
 import com.okkero.skedule.schedule
-import net.perfectdreams.dreamcore.utils.DreamUtils
-import net.perfectdreams.dreamcore.utils.LocationUtils
-import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.*
-import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamresourcereset.DreamResourceReset
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -104,7 +101,7 @@ class InteractListener(val m: DreamResourceReset) : Listener {
                 } else {
                     Bukkit.dispatchCommand(e.player, "spawn")
                 }
-            } else if (playerLocation.world.name == "world" || playerLocation.world.name == "Survival2") {
+            } else if (playerLocation.world.name in Constants.SPARKLYPOWER_SURVIVAL_WORLDS) {
                 // User is in Survival world
                 persistentDataContainer.set(
                     QUICK_RESOURCES_TELEPORT_PREVIOUS_WORLD_LOCATION_KEY,

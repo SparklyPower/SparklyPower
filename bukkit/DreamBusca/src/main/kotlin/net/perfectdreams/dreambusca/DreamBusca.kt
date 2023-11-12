@@ -1,5 +1,6 @@
 package net.perfectdreams.dreambusca
 
+import kotlinx.coroutines.future.await
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -348,7 +349,8 @@ class DreamBusca : KotlinPlugin(), Listener {
 						continue
 					}
 
-					val chunk = world.getChunkAt(chunkX, chunkY)
+					// Get the chunk async to avoid synchronized loads
+					val chunk = world.getChunkAtAsync(chunkX, chunkY).await()
 
 					if (!bypassChecks) {
 						// If there is any players in the current chunk, skip it
@@ -383,7 +385,7 @@ class DreamBusca : KotlinPlugin(), Listener {
 			}
 
 			e.player.sendTitle("§bWoosh!", "", 0, 20, 10)
-			e.player.teleport(location) // Teletransportar player
+			e.player.teleportAsync(location).await() // Teletransportar player
 			e.player.removePotionEffect(PotionEffectType.INVISIBILITY)
 			// Efeito de velocidade
 			e.player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 600, 1))

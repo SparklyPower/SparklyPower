@@ -9,4 +9,12 @@ object Constants {
 	const val PANTUFA_PORT = 60799
 	const val LORITTA_PORT = 10699
 	const val LOCAL_HOST = "127.0.0.1"
+
+	/**
+	 * List of worlds that are "Survival" worlds in SparklyPower Survival
+	 */
+	val SPARKLYPOWER_SURVIVAL_WORLDS = setOf(
+		"world",
+		"Survival2"
+	)
 }

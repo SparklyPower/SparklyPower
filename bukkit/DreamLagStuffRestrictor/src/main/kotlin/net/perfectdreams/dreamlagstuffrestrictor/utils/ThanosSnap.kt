@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamlagstuffrestrictor.utils
 
 import com.okkero.skedule.schedule
+import net.perfectdreams.dreamcore.utils.Constants
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
 import net.perfectdreams.dreamcore.utils.preferences.sendMessage
 import net.perfectdreams.dreamcore.utils.registerEvents
@@ -29,7 +30,7 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
                     player.sendMessage("\ue251 §x§e§6§b§2§e§8Rodando o Thanos Snap...", BroadcastType.THANOS_SNAP)
                 }
 
-                for (player in Bukkit.getOnlinePlayers().filter { it.world.name == "world" }) {
+                for (player in Bukkit.getOnlinePlayers().filter { it.world.name in Constants.SPARKLYPOWER_SURVIVAL_WORLDS }) {
                     val currentChunk = player.chunk
 
                     fun checkMobNearby(type: EntityType) {

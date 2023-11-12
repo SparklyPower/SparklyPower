@@ -49,7 +49,7 @@ class InventoryListener(val m: DreamEquipCoolStuff) : Listener {
         if (!meta.hasCustomModelData())
             return
 
-        if (meta.customModelData in 133..162) {
+        if (meta.customModelData in 133..169) {
             // ... then perform the switch.
             // We deny the normal result
             // NOTE: There is no need to cancel the event since that is just a proxy method for the line below.

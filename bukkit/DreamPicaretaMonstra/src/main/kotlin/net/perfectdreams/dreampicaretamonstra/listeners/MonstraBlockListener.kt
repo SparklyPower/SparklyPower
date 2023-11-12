@@ -2,10 +2,7 @@ package net.perfectdreams.dreampicaretamonstra.listeners
 
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.minecraft.world.entity.item.ItemEntity
-import net.perfectdreams.dreamcore.utils.BlockUtils
-import net.perfectdreams.dreamcore.utils.GeometryUtils
-import net.perfectdreams.dreamcore.utils.PlayerUtils
-import net.perfectdreams.dreamcore.utils.chance
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcustomitems.listeners.canMineRubyFrom
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
@@ -45,7 +42,7 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
         val isInClaim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
         val isInMinaRecheada = e.block.world.name == "MinaRecheada"
 
-        if ((e.block.world.name == "world" && isInClaim == null) || isInMinaRecheada) {
+        if ((e.block.world.name in Constants.SPARKLYPOWER_SURVIVAL_WORLDS && isInClaim == null) || isInMinaRecheada) {
             if (!isInMinaRecheada) e.player.sendMessage("§cVocê só pode usar a picareta monstra no seu terreno! Se você quer sair quebrando tudo, proteja o terreno ou vá no mundo de recursos, §6/warp recursos")
             return
         }
@@ -82,7 +79,7 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                     val claim = GriefPrevention.instance.dataStore
                             .getClaimAt(location, false, null)
 
-                    if (PlayerUtils.canBreakAt(location, e.player, location.block.type) && (e.player.world.name != "world" || (e.player.world.name == "world" && claim != null))) {
+                    if (PlayerUtils.canBreakAt(location, e.player, location.block.type) && (e.player.world.name !in Constants.SPARKLYPOWER_SURVIVAL_WORLDS || (e.player.world.name in Constants.SPARKLYPOWER_SURVIVAL_WORLDS && claim != null))) {
                         if (chance(100.0 / (efficiencyLevel + 1))) {
                             if ((damageable.damage + 1) == inHand.type.maxDurability.toInt()) {
                                 val name = if (heldItemType == Material.DIAMOND_PICKAXE)
