@@ -50,7 +50,8 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 			Material.GRASS_BLOCK,
 			Material.DIRT,
 			Material.SAND,
-			Material.GRAVEL
+			Material.GRAVEL,
+			Material.CLAY
 		)
 	}
 

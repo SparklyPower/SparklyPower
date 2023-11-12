@@ -138,6 +138,10 @@ class DreamResourceGenerator : KotlinPlugin(), Listener {
 			delayTicks(20L)
 		}
 
+		// Set the vanilla world border
+		resourcesWorld.worldBorder.setCenter(0.0, 0.0)
+		resourcesWorld.worldBorder.size = 10000.0
+
 		// Start generating the world
 		val started = chunkyAPI.startTask(
 			"Resources",

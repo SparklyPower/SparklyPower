@@ -66,7 +66,7 @@ class InteractListener(val m: DreamResourceReset) : Listener {
             val persistentDataContainer = itemMeta.persistentDataContainer
             val playerLocation = e.player.location
 
-            if (playerLocation.world.name != "world" && playerLocation.world.name != "Resources") {
+            if (playerLocation.world.name != "world" && playerLocation.world.name != "Survival2" && playerLocation.world.name != "Resources") {
                 e.player.sendMessage("§cVocê não pode usar a tocha de teletransporte rápido neste mundo!")
                 return
             }
@@ -104,7 +104,7 @@ class InteractListener(val m: DreamResourceReset) : Listener {
                 } else {
                     Bukkit.dispatchCommand(e.player, "spawn")
                 }
-            } else if (playerLocation.world.name == "world") {
+            } else if (playerLocation.world.name == "world" || playerLocation.world.name == "Survival2") {
                 // User is in Survival world
                 persistentDataContainer.set(
                     QUICK_RESOURCES_TELEPORT_PREVIOUS_WORLD_LOCATION_KEY,
