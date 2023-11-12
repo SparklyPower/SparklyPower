@@ -41,6 +41,23 @@ class DreamWarps : KotlinPlugin(), Listener {
 				(clicker as Player).performCommand("warp survival")
 			}
 		}
+		slot(3, 1) {
+			item = ItemStack(Material.ACACIA_PLANKS)
+				.rename("§a§lLocal para Construir 2")
+				.lore(
+					"§7Sua aventura no SparklyPower começa aqui.",
+					"§7O lugar aonde você pode construir suas incríveis coisas!",
+					"§7",
+					"§7Você pode proteger as suas coisas usando a pá de ouro",
+					"§7do §6/kit noob§7!",
+					"§7",
+					"§7Clique aqui para ir ao survival! (§6/warp survival2§7)"
+				)
+
+			onClick { clicker ->
+				(clicker as Player).performCommand("warp survival2")
+			}
+		}
 		slot(5, 0) {
 			item = ItemStack(Material.DIAMOND_PICKAXE)
 				.rename("§a§lMundo de Recursos")
