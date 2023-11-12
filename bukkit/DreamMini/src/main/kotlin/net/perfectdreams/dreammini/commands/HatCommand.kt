@@ -7,8 +7,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 
-class HatCommand(val m: DreamMini) : SparklyCommand(arrayOf("hat", "capacete", "chapéu"), permission = "dreammini.hat"){
-
+class HatCommand(val m: DreamMini) : SparklyCommand(arrayOf("hat", "capacete", "chapéu")) {
 	@Subcommand
 	fun root(sender: Player, playerName: String? = null){
 		var player = sender
@@ -22,20 +21,34 @@ class HatCommand(val m: DreamMini) : SparklyCommand(arrayOf("hat", "capacete", "
 
 		val item = player.inventory.itemInMainHand
 
-		if(item != null) {
-			val type = item.type
+		val type = item.type
 
+		var allowed = false
+
+		if (player.hasPermission("dreammini.hat")) {
+			allowed = true
+		} else {
+			if (type == Material.PAPER) {
+				val meta = item.itemMeta
+				if (meta.hasCustomModelData()) {
+					if (meta.customModelData in 133..169)
+						allowed = true
+				}
+			}
+		}
+
+		if (allowed) {
 			player.inventory.setItemInMainHand(player.inventory.helmet)
 
 			player.inventory.helmet = item
 
-			if(type != Material.AIR){
+			if (type != Material.AIR) {
 				sender.sendMessage("§a(ﾉ ≧ ∀ ≦)ﾉ Adorei seu novo look!")
-			}else{
+			} else {
 				sender.sendMessage("§aVocê consegue novamente sentir o vento soprar sua cabeça! ヽ(･ˇ ∀ˇ･ゞ)")
 			}
-		}else{
-			sender.sendMessage("§cSegure um item/bloco na sua mão antes de usar!")
+		} else {
+			sender.sendMessage("§cVocê não pode colocar este item na sua cabeça!")
 		}
 	}
 }
