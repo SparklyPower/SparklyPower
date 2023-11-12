@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     id("io.papermc.paperweight.userdev")
+    kotlin("plugin.serialization")
 }
 
 repositories {
