@@ -11,7 +11,7 @@ class DreamCoreSetSpawnExecutor(val plugin: DreamCore) : SparklyCommandExecutor(
 
         plugin.spawn = player.location
         plugin.userData.set("spawnLocation", player.location)
-        plugin.saveConfig()
+        plugin.userData.save(plugin.dataYaml)
 
         player.sendMessage("§aSpawn atualizado!")
     }

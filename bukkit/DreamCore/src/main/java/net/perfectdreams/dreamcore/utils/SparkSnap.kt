@@ -1,12 +1,13 @@
 package net.perfectdreams.dreamcore.utils
 
 import com.github.luben.zstd.Zstd
-import com.google.common.collect.Iterables
+import com.google.common.collect.ImmutableSet
 import kotlinx.coroutines.delay
 import me.lucko.spark.bukkit.BukkitSparkPlugin
 import me.lucko.spark.common.SparkPlatform
 import me.lucko.spark.common.command.sender.CommandSender
 import me.lucko.spark.common.sampler.Sampler
+import me.lucko.spark.common.sampler.ThreadDumper
 import me.lucko.spark.common.sampler.node.MergeMode
 import me.lucko.spark.common.sampler.source.ClassSourceLookup
 import me.lucko.spark.common.util.MethodDisambiguator
@@ -21,7 +22,7 @@ import java.util.*
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
-class SparkSnap(val m: DreamCore) {
+class SparkSnap(val m: DreamCore, val spark: BukkitSparkPlugin) {
     companion object {
         val getPlatformFieldHandler: MethodHandle by lazy {
             val lookup: MethodHandles.Lookup = MethodHandles.lookup()
@@ -48,11 +49,6 @@ class SparkSnap(val m: DreamCore) {
 
     private fun snap() {
         m.logger.info { "Automagically saving current spark profile to a file..." }
-        val spark = Bukkit.getPluginManager().getPlugin("spark") as BukkitSparkPlugin?
-        if (spark == null) {
-            m.logger.warning("Spark not detected! Ignoring...")
-            return
-        }
         val platform = getPlatformFieldHandler.invoke(spark) as SparkPlatform
 
         val sampler = platform.samplerContainer.activeSampler

@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerTeleportEvent
@@ -98,6 +99,17 @@ class XizumListener(private val m: DreamXizum) : Listener {
         if (!e.displaced)
             return
 
+        val player = e.player
+
+        // Vamos verificar se o tal usuário estava em uma arena
+        val arena = m.arenas.firstOrNull { it.player1 == player || it.player2 == player } ?: return
+
+        if (arena.isCountingDown)
+            e.isCancelled = true
+    }
+
+    @EventHandler
+    fun onInteractPreStart(e: PlayerInteractEvent) {
         val player = e.player
 
         // Vamos verificar se o tal usuário estava em uma arena

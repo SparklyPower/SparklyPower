@@ -9,8 +9,11 @@ import org.bukkit.Sound
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerTeleportEvent
+import java.util.concurrent.CompletableFuture
 
 fun Entity.teleportToServerSpawn(teleportCause: PlayerTeleportEvent.TeleportCause = PlayerTeleportEvent.TeleportCause.PLUGIN) = this.teleport(DreamCore.INSTANCE.spawn!!, teleportCause)
+fun Entity.teleportToServerSpawnAsync(teleportCause: PlayerTeleportEvent.TeleportCause = PlayerTeleportEvent.TeleportCause.PLUGIN) = this.teleportAsync(DreamCore.INSTANCE.spawn!!, teleportCause)
+
 suspend fun Entity.teleportAwait(location: Location, teleportCause: PlayerTeleportEvent.TeleportCause = PlayerTeleportEvent.TeleportCause.PLUGIN) = this.teleportAsync(location, teleportCause).await()
 
 /**
@@ -18,6 +21,16 @@ suspend fun Entity.teleportAwait(location: Location, teleportCause: PlayerTelepo
  */
 fun Entity.teleportToServerSpawnWithEffects(teleportCause: PlayerTeleportEvent.TeleportCause = PlayerTeleportEvent.TeleportCause.PLUGIN) {
     teleportToServerSpawn(teleportCause)
+    playTeleportEffects()
+}
+
+/**
+ * Teleports the entity and plays a nice teleportation effect and sound effect at the entity's current location
+ */
+suspend fun Entity.teleportToServerSpawnWithEffectsAwait(teleportCause: PlayerTeleportEvent.TeleportCause = PlayerTeleportEvent.TeleportCause.PLUGIN) {
+    val c = teleportToServerSpawnAsync(teleportCause)
+    c.await()
+    // Only player the effects AFTER the teleport
     playTeleportEffects()
 }
 

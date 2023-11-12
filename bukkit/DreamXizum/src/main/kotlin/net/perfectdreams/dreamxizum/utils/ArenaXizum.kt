@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.utils.broadcast
 import net.perfectdreams.dreamcore.utils.extensions.removeAllPotionEffects
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
+import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffectsAwait
 import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamxizum.DreamXizum
@@ -182,7 +183,13 @@ class ArenaXizum(val m: DreamXizum, val data: ArenaXizumData) {
 		head.itemMeta = meta
 		val item = loserLocation.world.dropItemNaturally(loserLocation, head)
 
-		loser.teleportToServerSpawnWithEffects()
+		m.launchMainThread {
+			// We need to be in a separate thread because...
+			// 1. this is async
+			// 2. PlayerDeathEvent runs on a server level ticking thread and that causes issues with parallel world ticking (and Folia)
+			loser.teleportToServerSpawnWithEffectsAwait()
+		}
+
 		winner.playSound(winner.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
 
 		InstantFirework.spawn(loserLocation, FireworkEffect.builder()
@@ -201,10 +208,10 @@ class ArenaXizum(val m: DreamXizum, val data: ArenaXizumData) {
 				.withTrail()
 				.build())
 
-		scheduler().schedule(m) {
-			waitFor(100)
+		m.launchMainThread {
+			delayTicks(100)
 			item.remove()
-			winner.teleportToServerSpawnWithEffects()
+			winner.teleportToServerSpawnWithEffectsAwait()
 			player1 = null
 			player2 = null
 		}
