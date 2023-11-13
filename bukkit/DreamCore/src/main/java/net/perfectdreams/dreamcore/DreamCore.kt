@@ -20,6 +20,8 @@ import net.perfectdreams.dreamcore.tables.*
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.*
 import net.perfectdreams.dreamcore.utils.npc.SparklyNPCManager
+import net.perfectdreams.dreamcore.utils.npc.user.SparklyNPCCommand
+import net.perfectdreams.dreamcore.utils.npc.user.SparklyUserNPCManager
 import net.perfectdreams.dreamcore.utils.scoreboards.SparklyScoreboardListener
 import net.perfectdreams.dreamcore.utils.scoreboards.SparklyScoreboardManager
 import net.perfectdreams.dreamcore.utils.skins.SkinUtils
@@ -52,6 +54,7 @@ class DreamCore : KotlinPlugin() {
 
 	val dreamEventManager = DreamEventManager()
 	val sparklyNPCManager = SparklyNPCManager(this)
+	val sparklyUserNPCManager = SparklyUserNPCManager(this)
 	val scoreboardManager = SparklyScoreboardManager(this)
 	val skinUtils = SkinUtils(this)
 	val rpc = RPCUtils(this)
@@ -111,6 +114,11 @@ class DreamCore : KotlinPlugin() {
 		scoreboardManager.startScoreboardCleanUpTask()
 		Bukkit.getPluginManager().registerEvents(SparklyScoreboardListener(this), this)
 
+		// SparklyNPC
+		sparklyNPCManager.start()
+		sparklyUserNPCManager.start()
+		registerCommand(SparklyNPCCommand(this))
+
 		val scheduler = Bukkit.getScheduler()
 
 		scheduler.schedule(this, SynchronizationContext.ASYNC) {
@@ -128,7 +136,6 @@ class DreamCore : KotlinPlugin() {
 
 		ArmorStandHologram.loadArmorStandsIdsMarkedForRemoval()
 		dreamEventManager.startEventsTask()
-		sparklyNPCManager.start()
 		val sparkPlugin = Bukkit.getPluginManager().getPlugin("spark") as BukkitSparkPlugin?
 		if (sparkPlugin != null) {
 			logger.info { "Spark detected, enabling SparkSnap..." }
@@ -158,6 +165,7 @@ class DreamCore : KotlinPlugin() {
 	}
 
 	override fun onDisable() {
+		sparklyUserNPCManager.save()
 		playerInventories.keys.forEach { it.restoreInventory() }
 	}
 }

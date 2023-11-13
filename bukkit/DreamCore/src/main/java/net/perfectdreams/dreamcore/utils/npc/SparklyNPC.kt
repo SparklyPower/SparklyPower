@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcore.utils.npc
 
+import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -13,7 +14,7 @@ class SparklyNPC(
     var name: String,
     val fakePlayerName: String,
     val initialLocation: Location,
-    val textures: SkinTexture?,
+    var textures: SkinTexture?,
     // We can't (and shouldn't!) store the entity reference, since the reference may change when the entity is despawned!
     // So we store the unique ID
     val uniqueId: UUID
@@ -59,6 +60,20 @@ class SparklyNPC(
         this.name = name
 
         m.updateFakePlayerName(this)
+    }
+
+    /**
+     * Sets the player's skin textures
+     */
+    fun setPlayerTextures(textures: SkinTexture?) {
+        this.textures = textures
+
+        // When changing the texture, we need to hide and unhide the entity for all players, to resend the player list packet
+        val bukkitEntity = getEntity() ?: return // Nevermind...
+        Bukkit.getOnlinePlayers().forEach {
+            it.hideEntity(m.m, bukkitEntity)
+            it.showEntity(m.m, bukkitEntity)
+        }
     }
 
     internal fun updateName(scoreboard: Scoreboard) {

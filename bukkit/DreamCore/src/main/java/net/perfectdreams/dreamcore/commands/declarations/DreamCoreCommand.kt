@@ -31,11 +31,6 @@ class DreamCoreCommand(val plugin: DreamCore) : SparklyCommandDeclarationWrapper
             }
         }
 
-        subcommand(listOf("sparklynpc")) {
-            executor = DreamCoreFakeNPCTestExecutor(plugin)
-            permissions = listOf("dreamcore.setup")
-        }
-
         executor = DreamCoreExecutor()
         permissions = listOf("dreamcore.setup")
     }

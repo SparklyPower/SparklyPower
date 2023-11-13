@@ -84,6 +84,11 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
 
         val nmsPlayer = (event.player as CraftPlayer).handle
 
+        // This is per player! It is an entity ID to Entity UUID reference
+        // We don't really *need* to store a SparklyNPC reference (it would be dead btw because we had removed the NPC), we just need this to send
+        // a remove player packet
+        val spawnedNPCEntities = mutableMapOf<Int, UUID>()
+
         // Create Netty pipeline to intercept packets
         nmsPlayer
             .connection
@@ -173,6 +178,8 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
                                                         )
                                                     }
                                             )
+
+                                            spawnedNPCEntities[subPacket.id] = subPacket.uuid
                                         } else {
                                             newSubPackets.add(subPacket)
                                         }
@@ -190,6 +197,17 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
                                 promise
                             )
                             return
+                        }
+
+                        if (msg is ClientboundRemoveEntitiesPacket) {
+                            for (entityId in msg.entityIds.iterator()) {
+                                val uuid = spawnedNPCEntities[entityId]
+
+                                if (uuid != null) {
+                                    spawnedNPCEntities.remove(entityId)
+                                    nmsPlayer.connection.connection.send(ClientboundPlayerInfoRemovePacket(listOf(uuid)))
+                                }
+                            }
                         }
 
                         super.write(ctx, msg, promise)

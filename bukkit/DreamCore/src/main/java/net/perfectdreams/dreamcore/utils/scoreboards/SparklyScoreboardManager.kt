@@ -68,6 +68,7 @@ class SparklyScoreboardManager(val m: DreamCore) {
         val scoreboard = Bukkit.getScoreboardManager().newScoreboard
         val phoenixScoreboard = PhoenixScoreboard(scoreboard)
         scoreboards[player] = phoenixScoreboard
+        player.scoreboard = scoreboard
 
         Bukkit.getPluginManager().callEvent(PlayerScoreboardCreatedEvent(player, phoenixScoreboard))
 
