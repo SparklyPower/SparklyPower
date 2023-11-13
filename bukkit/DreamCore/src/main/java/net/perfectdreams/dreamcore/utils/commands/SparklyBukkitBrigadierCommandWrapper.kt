@@ -106,11 +106,19 @@ class SparklyBukkitBrigadierCommandWrapper(
             val context = CommandContext(commandContext)
 
             try {
+                val requiredPermissions = mutableListOf<String>()
+                val selfPermissions = declaration.permissions
+                if (selfPermissions?.isNotEmpty() == true)
+                    requiredPermissions.addAll(selfPermissions)
+                val rootPermissions = this.declaration.permissions
+                if (this.declaration.childrenInheritPermissions && rootPermissions?.isNotEmpty() == true)
+                    requiredPermissions.addAll(rootPermissions)
+
                 // If there are permissions set in the declaration, we are going to check with "requirePermissions"
                 // If the user does not have a permission, it will fail! (so, it will throw an exception)
                 // This needs to be within this try catch block so it will catch the CommandException!
-                if (declaration.permissions?.isNotEmpty() == true)
-                    context.requirePermissions(*declaration.permissions.toTypedArray())
+                if (requiredPermissions.isNotEmpty())
+                    context.requirePermissions(*requiredPermissions.toTypedArray())
 
                 val executor = declaration.executor ?: error("I couldn't find a executor!")
                 executor.execute(context, CommandArguments(context))

@@ -12,6 +12,18 @@ class SparklyCommandDeclarationBuilder(val labels: List<String>) {
     var executor: SparklyCommandExecutor? = null
     var permissions: List<String>? = null
     val subcommands = mutableListOf<SparklyCommandDeclaration>()
+    var permission: String
+        get() = TODO("Can't get single permission, please use permissions")
+        set(value) {
+            permissions = listOf(value)
+        }
+
+    /**
+     * If disabled, children commands won't inherit the permission set in the root command declaration
+     *
+     * **Only permissions at the root level will be inherited!** Nested permissions won't be inherited.
+     */
+    var childrenInheritPermissions = true
 
     fun subcommand(labels: List<String>, block: SparklyCommandDeclarationBuilder.() -> (Unit)) {
         subcommands += SparklyCommandDeclarationBuilder(labels).apply(block)
@@ -23,7 +35,8 @@ class SparklyCommandDeclarationBuilder(val labels: List<String>) {
             labels,
             permissions,
             executor,
-            subcommands
+            subcommands,
+            childrenInheritPermissions
         )
     }
 }

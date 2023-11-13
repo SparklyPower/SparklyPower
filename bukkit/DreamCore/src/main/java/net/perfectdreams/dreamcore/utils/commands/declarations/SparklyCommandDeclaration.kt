@@ -6,5 +6,6 @@ class SparklyCommandDeclaration(
     val labels: List<String>,
     val permissions: List<String>? = null,
     val executor: SparklyCommandExecutor? = null,
-    val subcommands: List<SparklyCommandDeclaration>
+    val subcommands: List<SparklyCommandDeclaration>,
+    val childrenInheritPermissions: Boolean
 )

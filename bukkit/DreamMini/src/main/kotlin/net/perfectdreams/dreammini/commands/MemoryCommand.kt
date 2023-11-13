@@ -1,21 +1,39 @@
 package net.perfectdreams.dreammini.commands
 
-import net.perfectdreams.commands.annotation.Subcommand
-import net.perfectdreams.commands.bukkit.SparklyCommand
+import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
+import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
+import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclarationWrapper
+import net.perfectdreams.dreamcore.utils.commands.declarations.sparklyCommand
+import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import net.perfectdreams.dreammini.DreamMini
 import org.bukkit.Bukkit
 import org.bukkit.World
-import org.bukkit.command.CommandSender
 import java.lang.management.ManagementFactory
 import java.util.*
 
-class MemoryCommand(val m: DreamMini) : SparklyCommand(arrayOf("memory", "mem", "uptime"), permission = "dreammini.memory"){
+class MemoryCommand(val m: DreamMini) : SparklyCommandDeclarationWrapper {
+	override fun declaration() = sparklyCommand(listOf("memory", "mem", "uptime")) {
+		permission = "dreammini.memory"
 
-	@Subcommand
-	fun root(sender: CommandSender, args: Array<String>){
-		val arg = args.getOrNull(0)
+		subcommand(listOf("worlds", "mundos")) {
+			executor = MemoryWorldsExecutor()
+		}
 
-		if(arg == "worlds"){
+		executor = MemoryExecutor()
+	}
+
+	inner class MemoryExecutor : SparklyCommandExecutor() {
+		override fun execute(context: CommandContext, args: CommandArguments) {
+			context.sendMessage("§bUptime: §3${formatDateDiff(ManagementFactory.getRuntimeMXBean().startTime)}")
+			context.sendMessage("§bMemória Máxima: §3${(Runtime.getRuntime().maxMemory() / 1024 / 1024)}MB")
+			context.sendMessage("§bMemória Alocada: §3${(Runtime.getRuntime().totalMemory() / 1024 / 1024)}MB")
+			context.sendMessage("§bMemória Livre: §3${(Runtime.getRuntime().freeMemory() / 1024 / 1024)}MB")
+			context.sendMessage("§7Para ver mais informações, use §6/memory worlds")
+		}
+	}
+
+	inner class MemoryWorldsExecutor : SparklyCommandExecutor() {
+		override fun execute(context: CommandContext, args: CommandArguments) {
 			for (world in Bukkit.getWorlds()) {
 				val type = when (world.environment) {
 					World.Environment.NORMAL -> "Overworld"
@@ -29,16 +47,13 @@ class MemoryCommand(val m: DreamMini) : SparklyCommand(arrayOf("memory", "mem", 
 					tileEntities += it.tileEntities.size
 				}
 
-				sender.sendMessage("§e${world.name} §b$type")
-				sender.sendMessage("§8• §bChunks: §3${world.loadedChunks.size} §bEntities: §3${world.entities.size} §bTile Entities: §3${tileEntities}")
+				context.sendMessage("§e${world.name} §b$type")
+				context.sendMessage("§8• §bChunks: §3${world.loadedChunks.size}")
+				context.sendMessage("§8• §bEntities: §3${world.entities.size}")
+				context.sendMessage("§8• §bTile Entities: §3${tileEntities}")
+				context.sendMessage("§8• §bPlayers: §3${world.playerCount}")
 			}
 		}
-
-		sender.sendMessage("§bUptime: §3${formatDateDiff(ManagementFactory.getRuntimeMXBean().startTime)}")
-		sender.sendMessage("§bMemória Máxima: §3${(Runtime.getRuntime().maxMemory() / 1024 / 1024)}MB")
-		sender.sendMessage("§bMemória Alocada: §3${(Runtime.getRuntime().totalMemory() / 1024 / 1024)}MB")
-		sender.sendMessage("§bMemória Livre: §3${(Runtime.getRuntime().freeMemory() / 1024 / 1024)}MB")
-		sender.sendMessage("§7Para ver mais informações, use §6/memory worlds")
 	}
 
 	private val maxYears = 100000
