@@ -32,6 +32,9 @@ data class UserCreatedNPCData(
             class SparklyTextureSource(
                 val uniqueId: String
             ) : SkinTextureSource()
+
+            @Serializable
+            data object MineSkinTextureSource : SkinTextureSource()
         }
     }
 

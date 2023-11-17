@@ -95,13 +95,18 @@ object LocationUtils {
 	}
 
 	fun isLocationBetweenLocations(location: Location, loc1: Location, loc2: Location): Boolean {
+		if (loc1.world != loc2.world) // If both locations are in different worlds, then the target location will never be between them
+			return false
+		if (location.world != loc1.world)
+			return false
+
 		val minX = Math.min(loc1.x, loc2.x)
 		val minY = Math.min(loc1.y, loc2.y)
 		val minZ = Math.min(loc1.z, loc2.z)
 		val maxX = Math.max(loc1.x, loc2.x)
 		val maxY = Math.max(loc1.y, loc2.y)
 		val maxZ = Math.max(loc1.z, loc2.z)
-		return location.world == loc1.world && location.x in minX..maxX && location.y in minY..maxY && location.z in minZ..maxZ
+		return location.x in minX..maxX && location.y in minY..maxY && location.z in minZ..maxZ
 	}
 
 	fun isBlockAboveAir(world: World, x: Int, y: Int, z: Int): Boolean {
