@@ -9,6 +9,7 @@ import net.perfectdreams.dreamvote.DreamVote
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
+import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.RenderType
 import org.bukkit.scoreboard.Team
@@ -51,17 +52,20 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player, val phoenix: 
 		if (!noCollisionTeam.hasEntry(player.name))
 			noCollisionTeam.addEntry(player.name) */
 
-		// Shows the player's health bellow the player's name
-		if (phoenix.scoreboard.getObjective("healthBelowName") == null) {
-			val healthObj = phoenix.scoreboard.registerNewObjective("healthBelowName", "health", "§c♥")
-			healthObj.displaySlot = DisplaySlot.BELOW_NAME
-			healthObj.renderType = RenderType.HEARTS
-		}
+		// We don't show the player's health below their name anymore because, when a scoreboard uses a criteria that isn't a DUMMY criteria, it is registered in vanilla's scoreboard system
+		// And the issue with this is that the scoreboard is looped when the "awardStat" is called, and that's bad because it can impact performance
+		// with a lot of players ("getScoreboardScores" is using 0.50% of the server main thread)
+		// If we really want to, we can manually track the health below their name later
+		// if (phoenix.scoreboard.getObjective("healthBelowName") == null) {
+		// 	 val healthObj = phoenix.scoreboard.registerNewObjective("healthBelowName", Criteria.HEALTH, "§c♥")
+		// 	 healthObj.displaySlot = DisplaySlot.BELOW_NAME
+		// 	 healthObj.renderType = RenderType.HEARTS
+		// }
 
 		// Displays the player's ping on the TAB screen
 		// Before we used the player's health, but it looked kinda bad tbh
 		if (phoenix.scoreboard.getObjective("pingPlayerList") == null) {
-			val healthObj = phoenix.scoreboard.registerNewObjective("pingPlayerList", "dummy", "ms")
+			val healthObj = phoenix.scoreboard.registerNewObjective("pingPlayerList", Criteria.DUMMY, "ms")
 			healthObj.displaySlot = DisplaySlot.PLAYER_LIST
 			healthObj.renderType = RenderType.INTEGER
 		}
