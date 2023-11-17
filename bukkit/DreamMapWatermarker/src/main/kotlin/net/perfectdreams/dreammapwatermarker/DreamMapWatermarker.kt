@@ -157,6 +157,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 
 							val image = ImageIO.read(it)
 
+							mapView.isLocked = true // Optimizes the map because the server doesn't attempt to get the world data when the player is holding the map in their hand
 							val renderers: List<MapRenderer> = mapView.renderers
 
 							for (r in renderers) {

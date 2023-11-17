@@ -116,6 +116,7 @@ class DreamMapMakerCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
                         content("Aplicando imagem no mapa...")
                     }
 
+                    map.isLocked = true // Optimizes the map because the server doesn't attempt to get the world data when the player is holding the map in their hand
                     val renderers: List<MapRenderer> = map.renderers
 
                     for (r in renderers) {
