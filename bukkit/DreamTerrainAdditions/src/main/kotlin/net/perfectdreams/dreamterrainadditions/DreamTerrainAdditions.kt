@@ -15,11 +15,14 @@ import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent
 import me.ryanhamshire.GriefPrevention.events.ClaimResizeEvent
 import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.VaultUtils
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.serializer.UUIDAsStringSerializer
 import net.perfectdreams.dreamterrainadditions.commands.*
 import net.perfectdreams.dreamterrainadditions.commands.declarations.TempTrustCommand
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -57,6 +60,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		registerCommand(ConfigureClaimCommand)
 		registerCommand(ListarBanidosCommand)
 		registerCommand(TempTrustCommand(this))
+		registerCommand(DreamTerrainAdditionsCommand(this))
 
 		dataFolder.mkdir()
 
@@ -68,6 +72,33 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 				}
 		}
 		startCheckingTemporaryTrustsExpirationDate()
+
+		/* launchAsyncThread {
+			// task tasky task
+			// get all claims
+			// this is HARD
+			// we need to know how many players
+			val playerToClaimSizes = mutableMapOf<UUID, Long>()
+
+			val claimList = onAsyncThread { GriefPrevention.instance.dataStore.claims.toList() } // We are in an async task, let's create a copy of the original list
+			for (claim in claimList) {
+				playerToClaimSizes[claim.ownerID] = playerToClaimSizes.getOrDefault(claim.ownerID, 0) + claim.area
+			}
+
+			// Now we get the money, and restrict claims that didn't pay the price
+			for ((playerId, claimSize) in playerToClaimSizes) {
+				val offlinePlayer = Bukkit.getOfflinePlayer(playerId)
+				val valueToBeRemoved = claimSize.toDouble()
+
+				if (VaultUtils.econ.has(offlinePlayer, valueToBeRemoved)) {
+					VaultUtils.econ.withdrawPlayer(offlinePlayer, valueToBeRemoved)
+				} else {
+					// Restrict the current player's claim
+				}
+			}
+
+			// Done! (yay)
+		} */
 	}
 
 	override fun softDisable() {
@@ -90,7 +121,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		)
 	}
 
-	@EventHandler
+	/* @EventHandler
 	fun onClaim(e: ClaimCreatedEvent) {
 		val creator = e.creator
 		if (creator is Player && creator.world.name == "Survival2") {
@@ -116,7 +147,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 				creator.sendMessage("§cAtualmente não é possível proteger mais de 10000 blocos no survival2!")
 			}
 		}
-	}
+	} */
 
 	@EventHandler
 	fun onWalk(e: PlayerMoveEvent) {
@@ -134,7 +165,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			e.player.sendTitle("§f", "§cVocê está banido deste terreno", 0, 60, 0)
-		} else if (claimAdditions.blockAllPlayersExceptTrusted && !(claim.ownerName == e.player.name || claim.hasExplicitPermission(e.player, ClaimPermission.Build))) {
+		} else if (claimAdditions.blockAllPlayersExceptTrusted && !(claim.ownerID == e.player.uniqueId || claim.hasExplicitPermission(e.player, ClaimPermission.Build))) {
 			e.isCancelled = true
 
 			e.player.sendTitle("§f", "§cO dono não deixa outros players entrarem no terreno!", 0, 60, 0)

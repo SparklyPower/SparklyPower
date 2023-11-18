@@ -45,8 +45,9 @@ object RetirarCommand : DSLCommandBase<DreamTerrainAdditions> {
             }
 
             if (claim.ownerName == player.name || claim.checkPermission(player, ClaimPermission.Manage, null) == null) {
-                val lesser = Location(player.world, claim.lesserBoundaryCorner.x, claim.lesserBoundaryCorner.y, claim.lesserBoundaryCorner.z)
-                val greater = Location(player.world, claim.greaterBoundaryCorner.x, claim.greaterBoundaryCorner.y, claim.greaterBoundaryCorner.z)
+                // The Y must be expanded to the bottom and to the top of the world
+                val lesser = Location(player.world, claim.lesserBoundaryCorner.x, player.world.minHeight.toDouble(), claim.lesserBoundaryCorner.z)
+                val greater = Location(player.world, claim.greaterBoundaryCorner.x, (player.world.maxHeight - 1).toDouble(), claim.greaterBoundaryCorner.z)
 
                 if (!kick.location.isBetween(lesser, greater)) {
                     player.sendMessage("§b${kick.displayName}§c não está neste terreno!")
