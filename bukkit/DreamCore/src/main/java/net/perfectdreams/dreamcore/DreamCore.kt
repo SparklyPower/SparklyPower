@@ -111,7 +111,6 @@ class DreamCore : KotlinPlugin() {
 		sparklyCommandManager.register(SkinCommand(this))
 
 		// Scoreboards
-		scoreboardManager.startScoreboardCleanUpTask()
 		Bukkit.getPluginManager().registerEvents(SparklyScoreboardListener(this), this)
 
 		// SparklyNPC
