@@ -48,10 +48,8 @@ class MemoryCommand(val m: DreamMini) : SparklyCommandDeclarationWrapper {
 				}
 
 				context.sendMessage("§e${world.name} §b$type")
-				context.sendMessage("§8• §bChunks: §3${world.loadedChunks.size}")
-				context.sendMessage("§8• §bEntities: §3${world.entities.size}")
-				context.sendMessage("§8• §bTile Entities: §3${tileEntities}")
-				context.sendMessage("§8• §bPlayers: §3${world.playerCount}")
+				context.sendMessage("§8• §bChunks: §3${world.loadedChunks.size} §8| §bEntities: §3${world.entities.size}")
+				context.sendMessage("§8• §bTile Entities: §3${tileEntities} §8| §bPlayers: §3${world.playerCount}")
 			}
 		}
 	}
