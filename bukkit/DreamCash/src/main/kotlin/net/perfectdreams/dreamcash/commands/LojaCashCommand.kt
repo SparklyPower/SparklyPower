@@ -126,16 +126,16 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             }
 
             // Blocos de Proteção
-            generateItemAt(0, 1, Material.DIRT, null, "§e8000 blocos de proteção", 50) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 8000")
+            generateItemAt(0, 1, Material.DIRT, null, "§e2500 blocos de proteção", 65) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 2500")
                 true
             }
-            generateItemAt(1, 1, Material.MYCELIUM, null, "§e16000 blocos de proteção", 100) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 16000")
+            generateItemAt(1, 1, Material.MYCELIUM, null, "§e5000 blocos de proteção", 125) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 5000")
                 true
             }
-            generateItemAt(2, 1, Material.GRASS_BLOCK, null, "§e24000 blocos de proteção", 150) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 24000")
+            generateItemAt(2, 1, Material.GRASS_BLOCK, null, "§e10000 blocos de proteção", 250) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "adjustbonusclaimblocks ${sender.name} 10000")
                 true
             }
 
