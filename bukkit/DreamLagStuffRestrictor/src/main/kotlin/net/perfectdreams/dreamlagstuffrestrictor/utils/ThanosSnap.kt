@@ -104,6 +104,8 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
         EntityType.PILLAGER to 10,
         EntityType.VILLAGER to 10,
         EntityType.MINECART_HOPPER to 16,
+        EntityType.SLIME to 16,
+        EntityType.MAGMA_CUBE to 16,
     )
 
     @EventHandler
