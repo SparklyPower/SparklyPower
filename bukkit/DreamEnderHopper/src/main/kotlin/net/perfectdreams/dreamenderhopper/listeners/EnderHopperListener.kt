@@ -42,7 +42,7 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
         val isAEnderHopper = e.itemInHand.itemMeta.persistentDataContainer.get(DreamEnderHopper.HOPPER_TELEPORTER)
 
         if (isAEnderHopper) {
-            val hopper = e.block.state as Hopper
+            val hopper = e.block.getState(false) as Hopper
             hopper.persistentDataContainer.set(DreamEnderHopper.HOPPER_TELEPORTER, true)
             hopper.update()
         }
@@ -50,7 +50,7 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onBreak(e: BlockBreakEvent) {
-        val hopper = e.block.state as? Hopper ?: return
+        val hopper = e.block.getState(false) as? Hopper ?: return
         val isAEnderHopper = hopper.persistentDataContainer.get(DreamEnderHopper.HOPPER_TELEPORTER)
 
         if (isAEnderHopper) {
@@ -74,7 +74,7 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
         val hopperSource = settingAHopperDestination[e.player]
         if (hopperSource != null && hopperSource.location != clickedBlock.location) {
             e.isCancelled = true
-            val state = clickedBlock.state
+            val state = clickedBlock.getState(false)
             if (state is Container) {
                 if (state.world != hopperSource.world) {
                     e.player.sendMessage("§cO destino precisa ser no mesmo mundo!")
@@ -209,7 +209,7 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
 
     private fun processHopperItems(inventory: Inventory, enderHopperInformation: EnderHopperInformation) {
         // Transfer all items from the source to the target inventory
-        val targetContainer = enderHopperInformation.enderHopperState.world.getBlockAt(enderHopperInformation.targetX, enderHopperInformation.targetY, enderHopperInformation.targetZ).state as? Container
+        val targetContainer = enderHopperInformation.enderHopperState.world.getBlockAt(enderHopperInformation.targetX, enderHopperInformation.targetY, enderHopperInformation.targetZ).getState(false) as? Container
         if (targetContainer == null) {
             // Unknown target, remove destination from the hopper state
             val state = enderHopperInformation.enderHopperState
@@ -277,7 +277,7 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
     private fun processHopperItem(item: ItemStack, enderHopperInformation: EnderHopperInformation): Boolean {
         // Transfer a single item to the hopper
         // This won't delete the "item" from the world!
-        val targetContainer = enderHopperInformation.enderHopperState.world.getBlockAt(enderHopperInformation.targetX, enderHopperInformation.targetY, enderHopperInformation.targetZ).state as? Container
+        val targetContainer = enderHopperInformation.enderHopperState.world.getBlockAt(enderHopperInformation.targetX, enderHopperInformation.targetY, enderHopperInformation.targetZ).getState(false) as? Container
         if (targetContainer == null) {
             // Unknown target, remove destination from the hopper state
             val state = enderHopperInformation.enderHopperState
@@ -375,7 +375,7 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
         if (block.type != Material.HOPPER)
             return NotAnEnderHopper
 
-        val holder = block.state
+        val holder = block.getState(false) // Not using snapshots gives a nice performance boost
         if (holder !is Hopper)
             return NotAnEnderHopper
 
