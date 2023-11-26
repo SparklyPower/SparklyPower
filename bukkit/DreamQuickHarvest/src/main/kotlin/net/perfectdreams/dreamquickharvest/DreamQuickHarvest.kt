@@ -422,29 +422,19 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (!block.chunk.isLoaded) // Se o chunk não está carregado, ignore, não vamos carregar ele apenas para fazer quick harvest
 			return false
 
-		val damage = block.data
+		if (block.type == Material.MELON || block.type == Material.PUMPKIN)
+			return true
 
-		val fullyGrown = when (block.type) {
-			Material.MELON -> true
-			Material.PUMPKIN -> true
-			Material.NETHER_WART -> damage == 3.toByte()
-			Material.BEETROOTS -> damage == 3.toByte()
-			else -> damage == 7.toByte()
-		}
-
-		return fullyGrown
+		val state = (block.blockData as Ageable)
+		return state.age == state.maximumAge
 	}
 
 	fun shouldCancelCocoaEvent(e: BlockBreakEvent, block: Block): Boolean {
 		if (!block.chunk.isLoaded) // Se o chunk não está carregado, ignore, não vamos carregar ele apenas para fazer quick harvest
 			return false
 
-		val stage = block.data and 12
-
-		if (stage != 8.toByte()) // CocoaPlant.class
-			return false
-
-		return true
+		val state = (block.blockData as Ageable)
+		return state.age == state.maximumAge
 	}
 
 	fun addMcMMOHerbalismXP(
@@ -544,14 +534,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			if (distance > 2304)
 				continue
 
-			val damage = block.data
-
-			val fullyGrown = when (type) {
-				Material.MELON -> true
-				Material.PUMPKIN -> true
-				Material.NETHER_WART -> damage == 3.toByte()
-				Material.BEETROOTS -> damage == 3.toByte()
-				else -> damage == 7.toByte()
+			val fullyGrown = if (block.type == Material.MELON || block.type == Material.PUMPKIN)
+				true
+			else {
+				val state = (block.blockData as Ageable)
+				state.age == state.maximumAge
 			}
 
 			if (!fullyGrown)
