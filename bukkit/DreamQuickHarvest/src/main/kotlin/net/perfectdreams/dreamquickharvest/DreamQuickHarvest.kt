@@ -199,6 +199,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
 					// Optimization: Get the current GriefPrevention claim of the clicked block, we are going to reuse it in the canBreak checks to avoid checking all claims
 					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
+					// Optimization: Send the particles in a separate thread AND after everything has been harvested (we do this because there is a performance impact, ~0.13ms per tick)
+					val harvestedBlocks = mutableListOf<Block>()
 					doQuickHarvestOnCrop(
 						e.block,
 						e.player,
@@ -209,6 +211,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						info,
 						AtomicBoolean(false),
 						mutableSetOf(),
+						harvestedBlocks,
 						executeDoubleDropsCheck,
 						randomChanceSkill,
 						claim
@@ -228,6 +231,19 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 						if (mochilaItem != null)
 							MochilaUtils.updateMochilaItemLore(inventoryTarget, mochilaItem)
+					}
+
+					onAsyncThread {
+						for (harvestedBlock in harvestedBlocks) {
+							harvestedBlock.world.spawnParticle(
+								Particle.VILLAGER_HAPPY,
+								harvestedBlock.location.add(0.5, 0.5, 0.5),
+								3,
+								0.5,
+								0.5,
+								0.5
+							)
+						}
 					}
 				}
 			}
@@ -255,7 +271,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
 					// Optimization: Get the current GriefPrevention claim of the clicked block, we are going to reuse it in the canBreak checks to avoid checking all claims
 					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
-					doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false), mutableSetOf(), executeDoubleDropsCheck, randomChanceSkill, claim)
+					// Optimization: Send the particles in a separate thread AND after everything has been harvested (we do this because there is a performance impact, ~0.13ms per tick)
+					val harvestedBlocks = mutableListOf<Block>()
+					doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false), mutableSetOf(), harvestedBlocks, executeDoubleDropsCheck, randomChanceSkill, claim)
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest cocoa!" }
 
@@ -270,6 +288,19 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 						if (mochilaItem != null)
 							MochilaUtils.updateMochilaItemLore(inventoryTarget, mochilaItem)
+					}
+
+					onAsyncThread {
+						for (harvestedBlock in harvestedBlocks) {
+							harvestedBlock.world.spawnParticle(
+								Particle.VILLAGER_HAPPY,
+								harvestedBlock.location.add(0.5, 0.5, 0.5),
+								3,
+								0.5,
+								0.5,
+								0.5
+							)
+						}
 					}
 				}
 			}
@@ -294,7 +325,9 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
 					// Optimization: Get the current GriefPrevention claim of the clicked block, we are going to reuse it in the canBreak checks to avoid checking all claims
 					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
-					doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false), executeDoubleDropsCheck, randomChanceSkill, claim)
+					// Optimization: Send the particles in a separate thread AND after everything has been harvested (we do this because there is a performance impact, ~0.13ms per tick)
+					val harvestedBlocks = mutableListOf<Block>()
+					doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false), harvestedBlocks, executeDoubleDropsCheck, randomChanceSkill, claim)
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest sugar canes!" }
 
@@ -309,6 +342,19 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 						if (mochilaItem != null)
 							MochilaUtils.updateMochilaItemLore(inventoryTarget, mochilaItem)
+					}
+
+					onAsyncThread {
+						for (harvestedBlock in harvestedBlocks) {
+							harvestedBlock.world.spawnParticle(
+								Particle.VILLAGER_HAPPY,
+								harvestedBlock.location.add(0.5, 0.5, 0.5),
+								3,
+								0.5,
+								0.5,
+								0.5
+							)
+						}
 					}
 				}
 			}
@@ -503,9 +549,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		info: PlayerQuickHarvestInfo,
 		playerHasBeenWarned: AtomicBoolean,
 		checkedBlocks: MutableSet<Block>,
+		harvestedBlocks: MutableList<Block>,
 		executeDoubleDropsCheck: Boolean,
 		randomChanceSkill: RandomChanceSkill,
-		cachedClaim: Claim?
+		cachedClaim: Claim?,
 	) {
 		// Optimization: Instead of being a recursive function, use a stack
 		val blocksToBeChecked = ArrayDeque<Block>(1024)
@@ -653,14 +700,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 			addMcMMOHerbalismXP(player, block, type, mcMMOXp) // mcMMO EXP
 
-			player.world.spawnParticle(
-				Particle.VILLAGER_HAPPY,
-				block.location.add(0.5, 0.5, 0.5),
-				3,
-				0.5,
-				0.5,
-				0.5
-			)
+			harvestedBlocks.add(block)
 
 			val blocksThatMustBeHarvestedLater = listOf(
 				block.getRelative(BlockFace.NORTH),
@@ -711,6 +751,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		info: PlayerQuickHarvestInfo,
 		playerHasBeenWarned: AtomicBoolean,
 		checkedBlocks: MutableSet<Block>,
+		harvestedBlocks: MutableList<Block>,
 		executeDoubleDropsCheck: Boolean,
 		randomChanceSkill: RandomChanceSkill,
 		cachedClaim: Claim?
@@ -771,7 +812,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		blockage.age = 0
 		block.blockData = blockage
 
-		player.world.spawnParticle(Particle.VILLAGER_HAPPY, block.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
+		harvestedBlocks.add(block)
 
 		val blocksThatMustBeHarvestedLater = listOf(
 			block.getRelative(BlockFace.NORTH),
@@ -802,6 +843,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				info,
 				playerHasBeenWarned,
 				checkedBlocks,
+				harvestedBlocks,
 				executeDoubleDropsCheck,
 				randomChanceSkill,
 				cachedClaim
@@ -817,6 +859,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		mcMMOXp: AtomicInteger,
 		info: PlayerQuickHarvestInfo,
 		playerHasBeenWarned: AtomicBoolean,
+		harvestedBlocks: MutableList<Block>,
 		executeDoubleDropsCheck: Boolean,
 		randomChanceSkill: RandomChanceSkill,
 		cachedClaim: Claim?
@@ -877,7 +920,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 			bottom.type = Material.AIR
 
-			player.world.spawnParticle(Particle.VILLAGER_HAPPY, bottom.location.add(0.5, 0.5, 0.5), 3, 0.5, 0.5, 0.5)
+			harvestedBlocks.add(bottom)
 
 			bottom = bottom.getRelative(BlockFace.DOWN)
 		}
@@ -912,6 +955,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				mcMMOXp,
 				info,
 				playerHasBeenWarned,
+				harvestedBlocks,
 				executeDoubleDropsCheck,
 				randomChanceSkill,
 				cachedClaim
