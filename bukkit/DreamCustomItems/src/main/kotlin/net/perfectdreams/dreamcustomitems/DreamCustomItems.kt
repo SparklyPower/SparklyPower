@@ -390,6 +390,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				CustomCraftingRecipe.RUBY_REMAP,
 				recipe = addRecipe(
 					"cuia_empty_lori_black",
 					CustomItems.CHIMARRAO_EMPTY_LORI_BLACK,
