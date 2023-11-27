@@ -136,7 +136,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				itemRemapper = {
-					when (it) {
+					when (it.type) {
 						Material.WHITE_WOOL -> {
 							CustomItems.RAINBOW_WOOL
 						}
