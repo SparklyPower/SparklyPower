@@ -22,20 +22,17 @@ class ChimarraoListener : Listener {
             if (!isChimarrao)
                 return
 
-            // Remove the eaten item (we don't cancel the event because setting to air already removes the effects)
-            e.setItem(ItemStack.empty())
+            // Remove the eaten item (we don't cancel the event because setting to something that doesn't have any eating effects already removes the effects)
+            e.setItem(
+                when (itemMeta.customModelData) {
+                    1 -> CustomItems.CHIMARRAO_EMPTY_BROWN
+                    2 -> CustomItems.CHIMARRAO_LORI_WHITE
+                    3 -> CustomItems.CHIMARRAO_LORI_BLACK
+                    else -> error("Unknown Chimarrão with ID " + itemMeta.customModelData)
+                }
+            )
             e.player.foodLevel += 6
             e.player.addPotionEffect(PotionEffect(PotionEffectType.LUCK, 1_200, 0, false))
-
-            // And add the empty cuia to the player!
-            val item = when (itemMeta.customModelData) {
-                1 -> CustomItems.CHIMARRAO_EMPTY_BROWN
-                2 -> CustomItems.CHIMARRAO_LORI_WHITE
-                3 -> CustomItems.CHIMARRAO_LORI_BLACK
-                else -> error("Unknown Chimarrão with ID " + itemMeta.customModelData)
-            }
-
-            e.player.inventory.addItem(item)
         }
     }
 }

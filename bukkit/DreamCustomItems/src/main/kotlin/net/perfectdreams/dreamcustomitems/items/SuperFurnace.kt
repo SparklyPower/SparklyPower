@@ -32,11 +32,11 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
             when(it) {
                 !in listOf(0, 1, 2, 3, 4, 5, 18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32) -> {
                     setItem(
-                            it,
-                            ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE).meta<ItemMeta> {
-                                setCustomModelData(1)
-                                setDisplayName("§f")
-                            }
+                        it,
+                        ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE).meta<ItemMeta> {
+                            setCustomModelData(1)
+                            setDisplayName("§f")
+                        }
                     )
                 }
             }
@@ -53,15 +53,15 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
             val seconds = (ticksRunning/20) % 60
 
             inventory.setItem(
-                    7,
-                    ItemStack(Material.GREEN_STAINED_GLASS_PANE)
-                            .rename("§a§lSuper Fornalha ligada §8[§7Falta ${minutes}m${seconds}s§8]")
+                7,
+                ItemStack(Material.GREEN_STAINED_GLASS_PANE)
+                    .rename("§a§lSuper Fornalha ligada §8[§7Falta ${minutes}m${seconds}s§8]")
             )
         } else {
             inventory.setItem(
-                    7,
-                    ItemStack(Material.RED_STAINED_GLASS_PANE)
-                            .rename("§a§lLigar a Super Fornalha")
+                7,
+                ItemStack(Material.RED_STAINED_GLASS_PANE)
+                    .rename("§a§lLigar a Super Fornalha")
             )
         }
     }
@@ -152,6 +152,9 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
                 updateInventory()
 
                 if (0 >= ticksRunning) {
+                    if (!running)
+                        break
+
                     playersNearSuperFurnace().forEach {
                         it.stopSound(Sound.BLOCK_FURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS)
                     }
@@ -160,7 +163,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
 
                     var canFinishSmelting = true
 
-                    listOf(18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32).forEach {
+                    listOf(18, 19, 20, 21, 22, 23, 27, 28, 29, 30, 31, 32).forEach {
                         if (inventory.getItem(it) != null) {
                             furnacePlayer?.sendMessage("§8[§6§lSuper Fornalha§8] §c§lSeus itens já estão prontos, mas não há espaço para eles! Tire os itens dos slots de saída da super fornalha e ligue ela novamente.")
                             updateInventory()

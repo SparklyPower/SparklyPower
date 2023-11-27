@@ -84,6 +84,8 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                     if (m.microwaves[microwaveDataModel.location] != null) {
                         val microwave = m.microwaves[microwaveDataModel.location] ?: return
 
+                        microwave.stop() // Stop the microwave when breaking
+
                         microwave.inventory.viewers.forEach {
                             it.closeInventory()
                         }
@@ -117,6 +119,8 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
 
                     if (m.superfurnaces[superfurnaceData.location] != null) {
                         val superfurnace = m.superfurnaces[superfurnaceData.location] ?: return
+
+                        superfurnace.stop() // Stop the super furnace when breaking
 
                         superfurnace.inventory.viewers.forEach {
                             it.closeInventory()

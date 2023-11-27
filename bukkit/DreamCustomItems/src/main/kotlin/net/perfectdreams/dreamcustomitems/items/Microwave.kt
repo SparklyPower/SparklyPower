@@ -111,6 +111,9 @@ class Microwave(val m: DreamCustomItems, val location: Location) {
                 updateInventory()
 
                 if (0 >= ticksRunning) {
+                    if (!running)
+                        break
+
                     playersNearMicrowave().forEach {
                         it.stopSound("perfectdreams.sfx.microwave.spin", SoundCategory.BLOCKS)
                     }
