@@ -9,6 +9,11 @@ import com.gmail.nossr50.util.Permissions
 import com.gmail.nossr50.util.player.UserManager
 import com.gmail.nossr50.util.random.RandomChanceSkill
 import com.gmail.nossr50.util.random.RandomChanceUtil
+import com.sk89q.worldedit.bukkit.BukkitAdapter
+import com.sk89q.worldedit.bukkit.BukkitWorld
+import com.sk89q.worldguard.WorldGuard
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin
+import com.sk89q.worldguard.protection.flags.Flags
 import dev.forst.exposed.insertOrUpdate
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -214,7 +219,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						harvestedBlocks,
 						executeDoubleDropsCheck,
 						randomChanceSkill,
-						claim
+						claim,
+						hasBypass(e.player, e.block.location) // Actually it only needs the world
 					)
 
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
@@ -273,7 +279,21 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
 					// Optimization: Send the particles in a separate thread AND after everything has been harvested (we do this because there is a performance impact, ~0.13ms per tick)
 					val harvestedBlocks = mutableListOf<Block>()
-					doQuickHarvestOnCocoa(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false), mutableSetOf(), harvestedBlocks, executeDoubleDropsCheck, randomChanceSkill, claim)
+					doQuickHarvestOnCocoa(
+						e,
+						e.player,
+						e.block,
+						inventoryTarget,
+						mcMMOXp,
+						info,
+						AtomicBoolean(false),
+						mutableSetOf(),
+						harvestedBlocks,
+						executeDoubleDropsCheck,
+						randomChanceSkill,
+						claim,
+						hasBypass(e.player, e.block.location) // Actually it only needs the world
+					)
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest cocoa!" }
 
@@ -327,7 +347,20 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
 					// Optimization: Send the particles in a separate thread AND after everything has been harvested (we do this because there is a performance impact, ~0.13ms per tick)
 					val harvestedBlocks = mutableListOf<Block>()
-					doQuickHarvestOnSugarCane(e, e.player, e.block, inventoryTarget, mcMMOXp, info, AtomicBoolean(false), harvestedBlocks, executeDoubleDropsCheck, randomChanceSkill, claim)
+					doQuickHarvestOnSugarCane(
+						e,
+						e.player,
+						e.block,
+						inventoryTarget,
+						mcMMOXp,
+						info,
+						AtomicBoolean(false),
+						harvestedBlocks,
+						executeDoubleDropsCheck,
+						randomChanceSkill,
+						claim,
+						hasBypass(e.player, e.block.location) // Actually it only needs the world
+					)
 					giveMcMMOHerbalismXP(e.player, mcMMOXp)
 					logger.info { "Took ${System.currentTimeMillis() - ttl}ms for ${e.player.name} to harvest sugar canes!" }
 
@@ -553,6 +586,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		executeDoubleDropsCheck: Boolean,
 		randomChanceSkill: RandomChanceSkill,
 		cachedClaim: Claim?,
+		hasWorldGuardBypass: Boolean
 	) {
 		// Optimization: Instead of being a recursive function, use a stack
 		val blocksToBeChecked = ArrayDeque<Block>(1024)
@@ -572,7 +606,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			if (block.type != type)
 				continue
 
-			if (!canBreakAt(block.location, player, type, cachedClaim))
+			if (!canBreakAt(block.location, player, type, cachedClaim, hasWorldGuardBypass))
 				continue
 
 			// A gente deixa na mesma altitude porque não tem problema se está tudo no mesmo chunk
@@ -754,7 +788,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		harvestedBlocks: MutableList<Block>,
 		executeDoubleDropsCheck: Boolean,
 		randomChanceSkill: RandomChanceSkill,
-		cachedClaim: Claim?
+		cachedClaim: Claim?,
+		hasWorldGuardBypass: Boolean
 	) {
 		// This block was already checked, so let's bail out
 		if (block in checkedBlocks)
@@ -771,7 +806,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (block.type != Material.COCOA)
 			return
 
-		if (!canBreakAt(block.location, player, block.type, cachedClaim))
+		if (!canBreakAt(block.location, player, block.type, cachedClaim, hasWorldGuardBypass))
 			return
 
 		// A gente deixa na mesma altitude porque não tem problema se está tudo no mesmo chunk
@@ -846,7 +881,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				harvestedBlocks,
 				executeDoubleDropsCheck,
 				randomChanceSkill,
-				cachedClaim
+				cachedClaim,
+				hasWorldGuardBypass
 			)
 		}
 	}
@@ -862,7 +898,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		harvestedBlocks: MutableList<Block>,
 		executeDoubleDropsCheck: Boolean,
 		randomChanceSkill: RandomChanceSkill,
-		cachedClaim: Claim?
+		cachedClaim: Claim?,
+		hasWorldGuardBypass: Boolean
 	) {
 		if (!player.isValid) // Se o player saiu, cancele o quick harvest
 			return
@@ -873,7 +910,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (block.type != Material.SUGAR_CANE)
 			return
 
-		if (!canBreakAt(block.location, player, block.type, cachedClaim))
+		if (!canBreakAt(block.location, player, block.type, cachedClaim, hasWorldGuardBypass))
 			return
 
 		// A gente deixa na mesma altitude porque não tem problema se está tudo no mesmo chunk
@@ -958,7 +995,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				harvestedBlocks,
 				executeDoubleDropsCheck,
 				randomChanceSkill,
-				cachedClaim
+				cachedClaim,
+				hasWorldGuardBypass
 			)
 		}
 	}
@@ -1022,7 +1060,10 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 	data class PlayerQuickHarvestInfo(var activeBlocks: Int)
 
-	fun canBreakAt(loc: Location, p: Player, m: Material, cachedClaim: Claim?): Boolean {
+	// This is from DreamCore, but we made some changes ;3
+	// - We now use GriefPrevention's "cachedClaim", which speeds up the checks
+	// - We pre cache the "hasBypass", because that's EXPENSIVE for some reason (0.35ms per tick, ouch)
+	private fun canBreakAt(loc: Location, p: Player, m: Material, cachedClaim: Claim?, hasWorldGuardBypass: Boolean): Boolean {
 		val claim = GriefPrevention.instance.dataStore.getClaimAt(loc, false, cachedClaim)
 		// Performance: https://github.com/TechFortress/GriefPrevention/issues/1438#issuecomment-872363793
 		var canBuildClaim = true
@@ -1030,6 +1071,22 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		if (claim != null) // The supplier can be "null"!
 			canBuildClaim = claim.checkPermission(p, ClaimPermission.Build, PlayerUtils.CompatBuildBreakEvent(m, true)) == null
 
-		return canBuildClaim && WorldGuardUtils.canBreakAt(loc, p)
+		return canBuildClaim && canBreakAt(loc, p, hasWorldGuardBypass)
+	}
+
+	private fun canBuildAt(l: Location, p: Player, hasWorldGuardBypass: Boolean): Boolean {
+		val query = WorldGuard.getInstance().platform.regionContainer.createQuery()
+		val loc = BukkitAdapter.adapt(l)
+		return if (!hasWorldGuardBypass) {
+			query.testState(loc, WorldGuardPlugin.inst().wrapPlayer(p), Flags.BUILD)
+		} else {
+			true
+		}
+	}
+
+	private fun canBreakAt(l: Location, p: Player, hasWorldGuardBypass: Boolean): Boolean = canBuildAt(l, p, hasWorldGuardBypass)
+
+	private fun hasBypass(p: Player, l: Location): Boolean {
+		return WorldGuard.getInstance().platform.sessionManager.hasBypass(WorldGuardPlugin.inst().wrapPlayer(p), BukkitWorld(l.world))
 	}
 }
