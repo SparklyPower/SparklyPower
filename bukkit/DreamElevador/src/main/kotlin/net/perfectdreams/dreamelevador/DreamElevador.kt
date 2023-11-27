@@ -63,7 +63,7 @@ class DreamElevador : KotlinPlugin(), Listener {
 
         scheduler().schedule(this) { // É necessário esperar 1 tick antes de atualizar
             waitFor(1)
-            updateStoryTrack(e.block.state as Sign)
+            updateStoryTrack(e.block.getState(false) as Sign)
         }
     }
 
@@ -79,7 +79,7 @@ class DreamElevador : KotlinPlugin(), Listener {
         if (!material.name.contains("SIGN"))
             return
 
-        val sign = clickedBlock.state as Sign
+        val sign = clickedBlock.getState(false) as Sign
 
         if (!isElevador(sign))
             return
@@ -104,7 +104,7 @@ class DreamElevador : KotlinPlugin(), Listener {
             if (!material.name.contains("SIGN"))
                 continue
 
-            val _sign = block.state as Sign
+            val _sign = block.getState(false) as Sign
 
             if (!isElevador(_sign))
                 continue
@@ -158,7 +158,7 @@ class DreamElevador : KotlinPlugin(), Listener {
             if (!material.name.contains("SIGN"))
                 continue
 
-            val _sign = block.state as Sign
+            val _sign = block.getState(false) as Sign
 
             if (!isElevador(_sign))
                 continue
@@ -177,7 +177,7 @@ class DreamElevador : KotlinPlugin(), Listener {
                 if (!material.name.contains("SIGN"))
                     continue
 
-                val __sign = block.state as Sign
+                val __sign = block.getState(false) as Sign
 
                 if (!isElevador(__sign))
                     continue
@@ -240,7 +240,7 @@ class DreamElevador : KotlinPlugin(), Listener {
             if (!material.name.contains("SIGN"))
                 continue
 
-            val _sign = block.state as Sign
+            val _sign = block.getState(false) as Sign
 
             if (!isElevador(_sign))
                 continue
@@ -258,7 +258,7 @@ class DreamElevador : KotlinPlugin(), Listener {
             if (!material.name.contains("SIGN"))
                 continue
 
-            val _sign = block.state as Sign
+            val _sign = block.getState(false) as Sign
 
             if (!isElevador(_sign))
                 continue
