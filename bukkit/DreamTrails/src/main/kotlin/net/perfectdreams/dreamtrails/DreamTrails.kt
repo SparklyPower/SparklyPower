@@ -8,6 +8,7 @@ import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamtrails.commands.TrailsCommand
 import net.perfectdreams.dreamtrails.listeners.MoveListener
 import net.perfectdreams.dreamtrails.utils.ColoredArmorData
@@ -78,7 +79,7 @@ class DreamTrails : KotlinPlugin() {
 			)
 		}
 
-		scheduler().schedule(this) {
+		launchMainThread {
 			while (true) {
 				val r = coloredArmorData.r.addAndGet()
 				val g = coloredArmorData.g.addAndGet()
@@ -98,11 +99,11 @@ class DreamTrails : KotlinPlugin() {
 					applyColoredLeatherEffectIfNeeded(it, boots, color)
 				}
 
-				waitFor(5L)
+				delayTicks(5L)
 			}
 		}
 
-		scheduler().schedule(this) {
+		launchMainThread {
 			while (true) {
 				val r = coloredHaloData.r.addAndGet()
 				val g = coloredHaloData.g.addAndGet()
@@ -113,40 +114,47 @@ class DreamTrails : KotlinPlugin() {
 					playerTrails.remove(it.uniqueId)
 				}
 
-				for (player in Bukkit.getOnlinePlayers().asSequence().filter { it.location.world.name != "Quiz" }.filter { it.hasPermission(USE_TRAILS_PERMISSION) }.filter { hasParticlesEnabled(it) }) {
-					val trailData = playerTrails[player.uniqueId] ?: continue
-					val activeHalo = trailData.activeHalo
-					if (activeHalo != null) {
-						for (it in 0 until 360 step 4) {
-							val asRadians = Math.toRadians(it.toDouble())
-							val sin = Math.sin(asRadians)
-							val cos = Math.cos(asRadians)
+				for (player in Bukkit.getOnlinePlayers()) {
+					if (!hasParticlesEnabled(player))
+						continue
 
-							val particleLocation = player.location.add(
-								sin * 0.3,
-								2.0,
-								cos * 0.3
-							)
+					if (player.hasPermission(USE_TRAILS_PERMISSION)) {
+						val trailData = playerTrails[player.uniqueId] ?: continue
+						val activeHalo = trailData.activeHalo
+						if (activeHalo != null) {
+							for (it in 0 until 360 step 4) {
+								val asRadians = Math.toRadians(it.toDouble())
+								val sin = Math.sin(asRadians)
+								val cos = Math.cos(asRadians)
 
-							val color = if (activeHalo == Halo.RAINBOW)
-								haloColor
-							else
-								activeHalo.color
+								val particleLocation = player.location.add(
+									sin * 0.3,
+									2.0,
+									cos * 0.3
+								)
 
-							val dustOptions = Particle.DustOptions(color, 0.3f)
-							player.world.spawnParticle(
-								Particle.REDSTONE,
-								particleLocation,
-								1,
-								0.0,
-								0.0,
-								0.0,
-								dustOptions
-							)
+								val color = if (activeHalo == Halo.RAINBOW)
+									haloColor
+								else
+									activeHalo.color
+
+								val dustOptions = Particle.DustOptions(color, 0.3f)
+								player.world.spawnParticle(
+									Particle.REDSTONE,
+									particleLocation,
+									1,
+									0.0,
+									0.0,
+									0.0,
+									dustOptions
+								)
+							}
 						}
+					} else {
+						playerTrails.remove(player.uniqueId)
 					}
 				}
-				waitFor(3L)
+				delayTicks(3L)
 			}
 		}
 	}
