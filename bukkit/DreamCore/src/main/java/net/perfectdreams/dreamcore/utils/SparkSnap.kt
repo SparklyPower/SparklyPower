@@ -1,26 +1,22 @@
 package net.perfectdreams.dreamcore.utils
 
 import com.github.luben.zstd.Zstd
-import com.google.common.collect.ImmutableSet
 import kotlinx.coroutines.delay
 import me.lucko.spark.bukkit.BukkitSparkPlugin
 import me.lucko.spark.common.SparkPlatform
 import me.lucko.spark.common.command.sender.CommandSender
 import me.lucko.spark.common.sampler.Sampler
-import me.lucko.spark.common.sampler.ThreadDumper
 import me.lucko.spark.common.sampler.node.MergeMode
 import me.lucko.spark.common.sampler.source.ClassSourceLookup
 import me.lucko.spark.common.util.MethodDisambiguator
-import mu.KotlinLogging
 import net.perfectdreams.dreamcore.DreamCore
-import org.bukkit.Bukkit
 import java.io.File
 import java.lang.invoke.MethodHandle
 import java.lang.invoke.MethodHandles
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.logging.Level
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
 
 class SparkSnap(val m: DreamCore, val spark: BukkitSparkPlugin) {
     companion object {
@@ -42,7 +38,11 @@ class SparkSnap(val m: DreamCore, val spark: BukkitSparkPlugin) {
             while (true) {
                 // We delay first because we don't want to create a snap right after the server started up
                 delay(1.hours)
-                snap()
+                try {
+                    snap()
+                } catch (e: Exception) {
+                    m.logger.log(Level.WARNING, e) { "Something went wrong while trying to save current spark profile to a file!" }
+                }
             }
         }
     }
