@@ -72,7 +72,7 @@ class BlockCraftListener(val m: DreamCustomItems) : Listener {
                 val valid = e.inventory.matrix
                     .filterNotNull()
                     .all {
-                        val remappedItem = customRecipe.itemRemapper.invoke(it.type)
+                        val remappedItem = customRecipe.itemRemapper.invoke(it)
 
                         var itemMetaCheck = remappedItem.hasItemMeta() == it.hasItemMeta()
                         if (remappedItem.hasItemMeta() && it.hasItemMeta()) {

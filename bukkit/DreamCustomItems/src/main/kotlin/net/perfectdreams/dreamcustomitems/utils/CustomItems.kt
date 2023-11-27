@@ -1,7 +1,6 @@
 package net.perfectdreams.dreamcustomitems.utils
 
 import com.destroystokyo.paper.profile.ProfileProperty
-import net.perfectdreams.dreamcore.utils.extensions.formatted
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -192,5 +191,41 @@ object CustomItems {
                 "",
                 "§6Pode atrair até §f8640 §6itens"
             )
+        }
+
+    val CHIMARRAO_EMPTY_BROWN = ItemStack(Material.PAPER)
+        .meta<ItemMeta> {
+            setCustomModelData(194)
+            setDisplayName("§fCuia")
+        }
+
+    val CHIMARRAO_EMPTY_LORI_WHITE = ItemStack(Material.PAPER)
+        .meta<ItemMeta> {
+            setCustomModelData(195)
+            setDisplayName("§fCuia")
+        }
+
+    val CHIMARRAO_EMPTY_LORI_BLACK = ItemStack(Material.PAPER)
+        .meta<ItemMeta> {
+            setCustomModelData(196)
+            setDisplayName("§fCuia")
+        }
+
+    val CHIMARRAO_BROWN = ItemStack(Material.MILK_BUCKET)
+        .meta<ItemMeta> {
+            setCustomModelData(1)
+            setDisplayName("§fChimarrão")
+        }
+
+    val CHIMARRAO_LORI_WHITE = ItemStack(Material.MILK_BUCKET)
+        .meta<ItemMeta> {
+            setCustomModelData(2)
+            setDisplayName("§fChimarrão")
+        }
+
+    val CHIMARRAO_LORI_BLACK = ItemStack(Material.MILK_BUCKET)
+        .meta<ItemMeta> {
+            setCustomModelData(3)
+            setDisplayName("§fChimarrão")
         }
 }

@@ -20,7 +20,7 @@ data class CustomTextualRecipe(
 
 data class CustomCraftingRecipe(
     override val plugin: Plugin,
-    val itemRemapper: (Material) -> (ItemStack) = { ItemStack(it) },
+    val itemRemapper: (ItemStack) -> (ItemStack) = { ItemStack(it) },
     val recipe: Recipe
 ) : CustomRecipe() {
     companion object {
@@ -33,9 +33,9 @@ data class CustomCraftingRecipe(
                 "§7dropar um rubi!"
             )
 
-        val RUBY_REMAP: (Material) -> (ItemStack) = {
-            if (it == Material.PRISMARINE_SHARD)
-                CustomCraftingRecipe.RUBY_WITH_RECIPE_DESCRIPTION
+        val RUBY_REMAP: (ItemStack) -> (ItemStack) = {
+            if (it.type == Material.PRISMARINE_SHARD)
+                RUBY_WITH_RECIPE_DESCRIPTION
             else ItemStack(it)
         }
     }

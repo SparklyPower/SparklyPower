@@ -56,7 +56,7 @@ class CustomItemRecipesExecutor(val m: DreamCustomItems) : SparklyCommandExecuto
                                             if (ingredient != null) {
                                                 recipeInventory.setItem(
                                                     inventoryIndex,
-                                                    customItemRecipeWrapper.itemRemapper.invoke(ingredient.type)
+                                                    customItemRecipeWrapper.itemRemapper.invoke(ingredient)
                                                 )
                                             }
 

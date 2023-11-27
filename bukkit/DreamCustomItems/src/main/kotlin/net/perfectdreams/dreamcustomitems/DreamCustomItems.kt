@@ -1,12 +1,14 @@
 package net.perfectdreams.dreamcustomitems
 
-import com.comphenix.protocol.ProtocolLibrary
 import com.google.common.collect.Sets
 import com.okkero.skedule.schedule
 import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
+import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.lore
 import net.perfectdreams.dreamcore.utils.registerEvents
+import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreamcustomitems.commands.declarations.CustomItemRecipesCommand
 import net.perfectdreams.dreamcustomitems.commands.declarations.DreamCustomItemsCommand
 import net.perfectdreams.dreamcustomitems.items.Microwave
@@ -19,6 +21,8 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.file.YamlConfiguration
 import org.bukkit.event.Listener
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
@@ -99,6 +103,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		registerEvents(RemoveDisabledPluginsRecipesListener(this))
 		registerEvents(MagnetListener(this))
 		registerEvents(ConvertLegacyItemsToCustomModelDataListener(this))
+		registerEvents(ChimarraoListener())
 
 		registerCommand(DreamCustomItemsCommand)
 		registerCommand(CustomItemRecipesCommand(this))
@@ -337,6 +342,147 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 					it.setIngredient('C', Material.GREEN_DYE)
 					it.setIngredient('P', Material.PAPER)
 					it.setIngredient('X', Material.GUNPOWDER)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				CustomCraftingRecipe.RUBY_REMAP,
+				recipe = addRecipe(
+					"cuia_empty_brown",
+					CustomItems.CHIMARRAO_EMPTY_BROWN,
+					listOf(
+						"CBC",
+						"CUC",
+						"CCC"
+					)
+				) {
+					it.setIngredient('C', Material.TERRACOTTA)
+					it.setIngredient('B', Material.BAMBOO)
+					it.setIngredient('U', Material.PRISMARINE_SHARD)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				CustomCraftingRecipe.RUBY_REMAP,
+				recipe = addRecipe(
+					"cuia_empty_lori_white",
+					CustomItems.CHIMARRAO_EMPTY_LORI_WHITE,
+					listOf(
+						"WBW",
+						"ZUZ",
+						"WWW"
+					)
+				) {
+					it.setIngredient('W', Material.WHITE_TERRACOTTA)
+					it.setIngredient('Z', Material.LIGHT_BLUE_WOOL)
+					it.setIngredient('B', Material.BAMBOO)
+					it.setIngredient('U', Material.PRISMARINE_SHARD)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				recipe = addRecipe(
+					"cuia_empty_lori_black",
+					CustomItems.CHIMARRAO_EMPTY_LORI_BLACK,
+					listOf(
+						"WBW",
+						"ZUZ",
+						"WWW"
+					)
+				) {
+					it.setIngredient('W', Material.BLACK_TERRACOTTA)
+					it.setIngredient('Z', Material.LIGHT_BLUE_WOOL)
+					it.setIngredient('B', Material.BAMBOO)
+					it.setIngredient('U', Material.PRISMARINE_SHARD)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				recipe = addRecipe(
+					"cuia_brown",
+					CustomItems.CHIMARRAO_BROWN,
+					listOf(
+						" S ",
+						" W ",
+						" C "
+					)
+				) {
+					it.setIngredient('S', Material.WHEAT_SEEDS)
+					it.setIngredient('W', Material.WATER_BUCKET)
+					it.setIngredient('C', CustomItems.CHIMARRAO_EMPTY_BROWN)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				recipe = addRecipe(
+					"cuia_lori_white",
+					CustomItems.CHIMARRAO_LORI_WHITE,
+					listOf(
+						" S ",
+						" W ",
+						" C "
+					)
+				) {
+					it.setIngredient('S', Material.WHEAT_SEEDS)
+					it.setIngredient('W', Material.WATER_BUCKET)
+					it.setIngredient('C', CustomItems.CHIMARRAO_EMPTY_LORI_WHITE)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				recipe = addRecipe(
+					"cuia_lori_black",
+					CustomItems.CHIMARRAO_LORI_BLACK,
+					listOf(
+						" S ",
+						" W ",
+						" C "
+					)
+				) {
+					it.setIngredient('S', Material.WHEAT_SEEDS)
+					it.setIngredient('W', Material.WATER_BUCKET)
+					it.setIngredient('C', CustomItems.CHIMARRAO_EMPTY_LORI_BLACK)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				recipe = addRecipe(
+					"crazygabii_plushie",
+					ItemStack(Material.PAPER)
+						.rename("§fCrazyGabii")
+						.lore("§7Ama tomar um chimas.")
+						.meta<ItemMeta> {
+							setCustomModelData(197)
+						},
+					listOf(
+						"CCC",
+						"CXC",
+						"CCC"
+					)
+				) {
+					it.setIngredient('X', Material.TOTEM_OF_UNDYING)
+					it.setIngredient('C', CustomItems.CHIMARRAO_BROWN)
 				}
 			)
 		)
