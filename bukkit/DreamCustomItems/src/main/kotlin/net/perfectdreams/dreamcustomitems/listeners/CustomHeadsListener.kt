@@ -18,6 +18,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
+import org.bukkit.block.Block
 import org.bukkit.block.Skull
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -25,7 +26,12 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockDropItemEvent
+import org.bukkit.event.block.BlockExplodeEvent
+import org.bukkit.event.block.BlockFromToEvent
+import org.bukkit.event.block.BlockPistonExtendEvent
 import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.entity.EntityExplodeEvent
+import org.bukkit.event.entity.ExplosionPrimeEvent
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
@@ -67,102 +73,164 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onCustomItemBreak(e: BlockFromToEvent) {
+        if (e.toBlock.type == Material.PLAYER_HEAD || e.toBlock.type == Material.PLAYER_WALL_HEAD) {
+            onCustomHeadBreak(null, e.toBlock) {
+                e.isCancelled = true
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onCustomItemBreak(e: BlockBreakEvent) {
         val clickedBlock = e.block
 
         if (clickedBlock.type == Material.PLAYER_HEAD || clickedBlock.type == Material.PLAYER_WALL_HEAD) {
-
-            val MICROWAVE = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.STRING)
-            val SUPERFURNACE = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING)
-            val TRASHCAN = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.STRING)
-
-            when {
-                MICROWAVE != null -> {
-                    val microwaveDataModel = DreamUtils.gson.fromJson(MICROWAVE, MicrowaveDataModel::class.java)
-                    val microwaveItems: ArrayList<ItemStack> = arrayListOf()
-
-                    if (m.microwaves[microwaveDataModel.location] != null) {
-                        val microwave = m.microwaves[microwaveDataModel.location] ?: return
-
-                        microwave.stop() // Stop the microwave when breaking
-
-                        microwave.inventory.viewers.forEach {
-                            it.closeInventory()
-                        }
-
-                        m.microwaves.remove(microwaveDataModel.location)
-
-                        for (i in 3..5) {
-                            val item = microwave.inventory.getItem(i)
-
-                            if (item != null) microwaveItems.add(item)
-                        }
-                    } else {
-                        microwaveDataModel.items?.forEach {
-                            if (it != null)
-                                microwaveItems.add(it.fromBase64Item())
-                        }
-                    }
-
-                    val drops = listOf(CustomItems.MICROWAVE.clone()) + microwaveItems
-                    clickedBlock.type = Material.AIR
-                    e.isCancelled = true
-
-                    drops.forEach { with (clickedBlock) { world.dropItemNaturally(location, it) } }
-
-                    Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, e.player, listOf()))
-                }
-
-                SUPERFURNACE != null -> {
-                    val superfurnaceData = DreamUtils.gson.fromJson(SUPERFURNACE, SuperfurnaceDataModel::class.java)
-                    val superFurnaceItems = arrayListOf<ItemStack>()
-
-                    if (m.superfurnaces[superfurnaceData.location] != null) {
-                        val superfurnace = m.superfurnaces[superfurnaceData.location] ?: return
-
-                        superfurnace.stop() // Stop the super furnace when breaking
-
-                        superfurnace.inventory.viewers.forEach {
-                            it.closeInventory()
-                        }
-
-                        m.superfurnaces.remove(superfurnaceData.location)
-
-                        val superFurnaceSlots = listOf(0, 1, 2, 3, 4, 5, 18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32)
-
-                        for (i in superFurnaceSlots) {
-                            val item = superfurnace.inventory.getItem(i)
-
-                            if (item != null) superFurnaceItems.add(item)
-                        }
-                    } else {
-                        superfurnaceData.items?.forEach {
-                            if (it != null)
-                                superFurnaceItems.add(it.fromBase64Item())
-                        }
-                    }
-
-                    val drops = listOf(CustomItems.SUPERFURNACE.clone()) + superFurnaceItems
-                    clickedBlock.type = Material.AIR
-                    e.isCancelled = true
-
-                    with (clickedBlock) { drops.forEach { world.dropItemNaturally(location, it) } }
-
-                    Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, e.player, listOf()))
-                }
-
-                TRASHCAN != null -> {
-                    val drops = listOf(CustomItems.TRASHCAN.clone())
-                    clickedBlock.type = Material.AIR
-                    e.isCancelled = true
-
-                    with (clickedBlock) { world.dropItemNaturally(location, drops.single()) }
-
-                    Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, e.player, listOf()))
-                }
-
-                else -> return
+            onCustomHeadBreak(e.player, clickedBlock) {
+                e.isCancelled = true
             }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onCustomItemBreak(e: BlockPistonExtendEvent) {
+        for (block in e.blocks) {
+            if (block.type == Material.PLAYER_HEAD || block.type == Material.PLAYER_WALL_HEAD) {
+                val MICROWAVE = (block.state as Skull).persistentDataContainer.get(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.STRING)
+                val SUPERFURNACE = (block.state as Skull).persistentDataContainer.get(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING)
+                val TRASHCAN = (block.state as Skull).persistentDataContainer.get(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.STRING)
+
+                if (MICROWAVE != null || SUPERFURNACE != null || TRASHCAN != null) {
+                    e.isCancelled = true
+                    return
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onCustomItemBreak(e: BlockExplodeEvent) {
+        e.blockList().removeIf { block ->
+            if (block.type == Material.PLAYER_HEAD || block.type == Material.PLAYER_WALL_HEAD) {
+                val MICROWAVE = (block.state as Skull).persistentDataContainer.get(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.STRING)
+                val SUPERFURNACE = (block.state as Skull).persistentDataContainer.get(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING)
+                val TRASHCAN = (block.state as Skull).persistentDataContainer.get(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.STRING)
+
+                MICROWAVE != null || SUPERFURNACE != null || TRASHCAN != null
+            } else false
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onCustomItemBreak(e: EntityExplodeEvent) {
+        e.blockList().removeIf { block ->
+            if (block.type == Material.PLAYER_HEAD || block.type == Material.PLAYER_WALL_HEAD) {
+                val MICROWAVE = (block.state as Skull).persistentDataContainer.get(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.STRING)
+                val SUPERFURNACE = (block.state as Skull).persistentDataContainer.get(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING)
+                val TRASHCAN = (block.state as Skull).persistentDataContainer.get(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.STRING)
+
+                MICROWAVE != null || SUPERFURNACE != null || TRASHCAN != null
+            } else false
+        }
+    }
+
+    private fun onCustomHeadBreak(player: Player?, clickedBlock: Block, cancelEvent: () -> (Unit)) {
+        val MICROWAVE = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_MICROWAVE_KEY, PersistentDataType.STRING)
+        val SUPERFURNACE = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING)
+        val TRASHCAN = (clickedBlock.state as Skull).persistentDataContainer.get(CustomItems.IS_TRASHCAN_KEY, PersistentDataType.STRING)
+
+        when {
+            MICROWAVE != null -> {
+                val microwaveDataModel = DreamUtils.gson.fromJson(MICROWAVE, MicrowaveDataModel::class.java)
+                val microwaveItems: ArrayList<ItemStack> = arrayListOf()
+
+                if (m.microwaves[microwaveDataModel.location] != null) {
+                    val microwave = m.microwaves[microwaveDataModel.location] ?: return
+
+                    microwave.stop() // Stop the microwave when breaking
+
+                    microwave.inventory.viewers.forEach {
+                        it.closeInventory()
+                    }
+
+                    m.microwaves.remove(microwaveDataModel.location)
+
+                    for (i in 3..5) {
+                        val item = microwave.inventory.getItem(i)
+
+                        if (item != null) microwaveItems.add(item)
+                    }
+                } else {
+                    microwaveDataModel.items?.forEach {
+                        if (it != null)
+                            microwaveItems.add(it.fromBase64Item())
+                    }
+                }
+
+                val drops = listOf(CustomItems.MICROWAVE.clone()) + microwaveItems
+                clickedBlock.type = Material.AIR
+                cancelEvent.invoke()
+
+                drops.forEach { with (clickedBlock) { world.dropItemNaturally(location, it) } }
+
+                // TODO: Why do we need to fake the block drop item?
+                if (player != null)
+                    Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, player, listOf()))
+            }
+
+            SUPERFURNACE != null -> {
+                val superfurnaceData = DreamUtils.gson.fromJson(SUPERFURNACE, SuperfurnaceDataModel::class.java)
+                val superFurnaceItems = arrayListOf<ItemStack>()
+
+                if (m.superfurnaces[superfurnaceData.location] != null) {
+                    val superfurnace = m.superfurnaces[superfurnaceData.location] ?: return
+
+                    superfurnace.stop() // Stop the super furnace when breaking
+
+                    superfurnace.inventory.viewers.forEach {
+                        it.closeInventory()
+                    }
+
+                    m.superfurnaces.remove(superfurnaceData.location)
+
+                    val superFurnaceSlots = listOf(0, 1, 2, 3, 4, 5, 18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32)
+
+                    for (i in superFurnaceSlots) {
+                        val item = superfurnace.inventory.getItem(i)
+
+                        if (item != null) superFurnaceItems.add(item)
+                    }
+                } else {
+                    superfurnaceData.items?.forEach {
+                        if (it != null)
+                            superFurnaceItems.add(it.fromBase64Item())
+                    }
+                }
+
+                val drops = listOf(CustomItems.SUPERFURNACE.clone()) + superFurnaceItems
+                clickedBlock.type = Material.AIR
+                cancelEvent.invoke()
+
+                with (clickedBlock) { drops.forEach { world.dropItemNaturally(location, it) } }
+
+                // TODO: Why do we need to fake the block drop item?
+                if (player != null)
+                    Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, player, listOf()))
+            }
+
+            TRASHCAN != null -> {
+                val drops = listOf(CustomItems.TRASHCAN.clone())
+                clickedBlock.type = Material.AIR
+                cancelEvent.invoke()
+
+                with (clickedBlock) { world.dropItemNaturally(location, drops.single()) }
+
+                // TODO: Why do we need to fake the block drop item?
+                if (player != null)
+                    Bukkit.getPluginManager().callEvent(BlockDropItemEvent(clickedBlock, clickedBlock.state, player, listOf()))
+            }
+
+            else -> return
         }
     }
 

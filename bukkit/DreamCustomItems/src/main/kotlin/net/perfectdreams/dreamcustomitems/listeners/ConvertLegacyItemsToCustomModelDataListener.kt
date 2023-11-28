@@ -346,6 +346,8 @@ class ConvertLegacyItemsToCustomModelDataListener(val m: DreamCustomItems) : Lis
     @EventHandler
     fun onInteract(e: PlayerInteractEvent) {
         val itemInMainHand = e.item ?: return
+        if (!itemInMainHand.hasItemMeta())
+            return
 
         if (!itemInMainHand.itemMeta.isUnbreakable)
             return
