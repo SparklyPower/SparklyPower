@@ -733,7 +733,7 @@ class ChatListener(val m: DreamChat) : Listener {
 		}
 
 		val calendar = LocalDateTime.now(TimeUtils.TIME_ZONE)
-		m.chatLog.appendText("[${String.format("%02d", calendar.dayOfMonth)}/${String.format("%02d", calendar.monthValue + 1)}/${String.format("%02d", calendar.year)} ${String.format("%02d", calendar.hour)}:${String.format("%02d", calendar.minute)}] ${player.name}: $message\n")
+		m.chatLog.appendText("[${String.format("%02d", calendar.dayOfMonth)}/${String.format("%02d", calendar.monthValue)}/${String.format("%02d", calendar.year)} ${String.format("%02d", calendar.hour)}:${String.format("%02d", calendar.minute)}] ${player.name}: $message\n")
 
 		// Tudo OK? Então vamos verificar se a mensagem tem algo de importante para nós respondermos
 		for (response in DreamChat.botResponses) {

@@ -341,7 +341,7 @@ object ChatUtils {
 
 		scheduler().schedule(DreamChat.INSTANCE, SynchronizationContext.ASYNC) {
 			val calendar = LocalDateTime.now(TimeUtils.TIME_ZONE)
-			val date = "${String.format("%02d", calendar.dayOfMonth)}/${String.format("%02d", calendar.monthValue + 1)}/${String.format("%02d", calendar.year)} ${String.format("%02d", calendar.hour)}:${String.format("%02d", calendar.minute)}"
+			val date = "${String.format("%02d", calendar.dayOfMonth)}/${String.format("%02d", calendar.monthValue)}/${String.format("%02d", calendar.year)} ${String.format("%02d", calendar.hour)}:${String.format("%02d", calendar.minute)}"
 			DreamChat.INSTANCE.pmLog.appendText("[$date] ${sender.name} -> ${receiver.name}: $message\n")
 
 			DreamChat.INSTANCE.tellMessagesQueue
