@@ -6,11 +6,14 @@ import com.sk89q.worldguard.WorldGuard
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin
 import com.sk89q.worldguard.protection.ApplicableRegionSet
 import com.sk89q.worldguard.protection.flags.Flags
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
 
 object WorldGuardUtils {
+	private val isWorldGuardEnabled by lazy { Bukkit.getPluginManager().isPluginEnabled("WorldGuard") }
+
 	fun isWithinRegion(block: Block, region: String): Boolean {
 		return isWithinRegion(block.location, region)
 	}
@@ -20,6 +23,9 @@ object WorldGuardUtils {
 	}
 
 	fun isWithinRegion(loc: Location, region: String): Boolean {
+		if (!isWorldGuardEnabled)
+			return false
+
 		val regionContainer = WorldGuard.getInstance().platform.regionContainer
 		val regionManager = regionContainer[BukkitAdapter.adapt(loc.world)] ?: return false
 		val set = regionManager.getApplicableRegions(BukkitAdapter.adapt(loc).toVector().toBlockPoint())
@@ -44,10 +50,16 @@ object WorldGuardUtils {
 	 * @see getRegionsAt
 	 */
 	fun getRegionIdsAt(loc: Location): List<String> {
+		if (!isWorldGuardEnabled)
+			return emptyList()
+
 		return getRegionsAt(loc).map { it.id }
 	}
 
 	fun canBuildAt(l: Location, p: Player): Boolean {
+		if (!isWorldGuardEnabled)
+			return true
+
 		val query = WorldGuard.getInstance().platform.regionContainer.createQuery()
 		val loc = BukkitAdapter.adapt(l)
 		return if (!hasBypass(p, l)) {
@@ -57,9 +69,12 @@ object WorldGuardUtils {
 		}
 	}
 
-	fun canBreakAt(l: Location, p: Player): Boolean  = canBuildAt(l, p)
+	fun canBreakAt(l: Location, p: Player): Boolean = canBuildAt(l, p)
 
 	fun hasBypass(p: Player, l: Location): Boolean {
+		if (!isWorldGuardEnabled)
+			return true
+
 		return WorldGuard.getInstance().platform.sessionManager.hasBypass(WorldGuardPlugin.inst().wrapPlayer(p), BukkitWorld(l.world))
 	}
 }

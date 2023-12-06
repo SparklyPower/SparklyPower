@@ -2,6 +2,7 @@ package net.perfectdreams.dreamcore.utils
 
 import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.attribute.Attribute
@@ -10,6 +11,8 @@ import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
 
 object PlayerUtils {
+	private val isGriefPreventionEnabled by lazy { Bukkit.getPluginManager().isPluginEnabled("GriefPrevention") }
+
 	/**
 	 * Deixa o jogador com a vida máxima possível e enche a barrinha de comida do jogdaor
 	 *
@@ -21,23 +24,27 @@ object PlayerUtils {
 	}
 
 	fun canBreakAt(loc: Location, p: Player, m: Material): Boolean {
-		val claim = GriefPrevention.instance.dataStore.getClaimAt(loc, false, null)
-		// Performance: https://github.com/TechFortress/GriefPrevention/issues/1438#issuecomment-872363793
 		var canBuildClaim = true
+		if (isGriefPreventionEnabled) {
+			val claim = GriefPrevention.instance.dataStore.getClaimAt(loc, false, null)
 
-		if (claim != null) // The supplier can be "null"!
-			canBuildClaim = claim.checkPermission(p, ClaimPermission.Build, CompatBuildBreakEvent(m, true)) == null
+			// Performance: https://github.com/TechFortress/GriefPrevention/issues/1438#issuecomment-872363793
+			if (claim != null) // The supplier can be "null"!
+				canBuildClaim = claim.checkPermission(p, ClaimPermission.Build, CompatBuildBreakEvent(m, true)) == null
+		}
 
 		return canBuildClaim && WorldGuardUtils.canBreakAt(loc, p)
 	}
 
 	fun canPlaceAt(loc: Location, p: Player, m: Material): Boolean {
-		val claim = GriefPrevention.instance.dataStore.getClaimAt(loc, false, null)
-		// Performance: https://github.com/TechFortress/GriefPrevention/issues/1438#issuecomment-872363793
 		var canBuildClaim = true
+		if (isGriefPreventionEnabled) {
+			val claim = GriefPrevention.instance.dataStore.getClaimAt(loc, false, null)
 
-		if (claim != null) // The supplier can be "null"!
-			canBuildClaim = claim.checkPermission(p, ClaimPermission.Build, CompatBuildBreakEvent(m, false)) == null
+			// Performance: https://github.com/TechFortress/GriefPrevention/issues/1438#issuecomment-872363793
+			if (claim != null) // The supplier can be "null"!
+				canBuildClaim = claim.checkPermission(p, ClaimPermission.Build, CompatBuildBreakEvent(m, false)) == null
+		}
 
 		return canBuildClaim && WorldGuardUtils.canBuildAt(loc, p)
 	}
