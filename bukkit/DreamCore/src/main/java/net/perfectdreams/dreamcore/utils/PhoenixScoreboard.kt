@@ -1,8 +1,10 @@
 package net.perfectdreams.dreamcore.utils
 
 import com.google.common.base.Splitter
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
+import org.bukkit.scoreboard.Criteria
 import org.bukkit.scoreboard.DisplaySlot
 import org.bukkit.scoreboard.Scoreboard
 
@@ -18,8 +20,8 @@ class PhoenixScoreboard(val scoreboard: Scoreboard) {
 	private val lineVisibility = mutableMapOf<Int, Boolean>()
 
 	init {
-		scoreboard.registerNewObjective("alphys", "dummy")
-		scoreboard.getObjective("alphys")!!.displaySlot = DisplaySlot.SIDEBAR
+		val objective = scoreboard.registerNewObjective("alphys", Criteria.DUMMY, null) // the display name must be null, if not 1.20.3 are able to see the objective
+		objective.displaySlot = DisplaySlot.SIDEBAR
 		scoreboard.registerNewTeam("line1")
 		scoreboard.getTeam("line1")!!.addEntry(getColorCodeForLine(1))
 		scoreboard.registerNewTeam("line2")
