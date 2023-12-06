@@ -13,7 +13,8 @@ data class DreamConfig(
     val blacklistedWorldsTeleport: List<String>,
     val blacklistedRegionsTeleport: List<String>,
     val allowedCommandsDuringEvents: List<String>,
-    val discord: DiscordConfig
+    val discord: DiscordConfig,
+    val features: FeaturesConfig
 ) {
     @Serializable
     data class Strings(
@@ -62,4 +63,9 @@ data class DreamConfig(
             val error: String
         )
     }
+
+    @Serializable
+    data class FeaturesConfig(
+        val sparklySkinsRestorer: Boolean
+    )
 }

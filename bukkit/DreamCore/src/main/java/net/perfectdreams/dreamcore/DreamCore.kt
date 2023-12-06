@@ -107,8 +107,10 @@ class DreamCore : KotlinPlugin() {
 		// sparklyCommandManager.register(TestCommand, HelloWorldCommandExecutor(), HelloLoriCommandExecutor(), HelloCommandExecutor(), DoYouLikeCommandExecutor(), TellExecutor())
 
 		// SparklySkinRestorer
-		Bukkit.getPluginManager().registerEvents(SkinsListener(this), this)
-		sparklyCommandManager.register(SkinCommand(this))
+		if (DreamCore.dreamConfig.features.sparklySkinsRestorer) {
+			Bukkit.getPluginManager().registerEvents(SkinsListener(this), this)
+			sparklyCommandManager.register(SkinCommand(this))
+		}
 
 		// Scoreboards
 		Bukkit.getPluginManager().registerEvents(SparklyScoreboardListener(this), this)
