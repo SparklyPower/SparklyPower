@@ -7,6 +7,7 @@ import net.perfectdreams.dreamcore.DreamCore
 import org.jetbrains.exposed.sql.DEFAULT_REPETITION_ATTEMPTS
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.DatabaseConfig
+import java.util.logging.Level
 
 object Databases {
 	private val DRIVER_CLASS_NAME = "org.postgresql.Driver"
@@ -39,12 +40,23 @@ object Databases {
 	val dataSource by lazy { HikariDataSource(hikariConfig) }
 
 	val databaseNetwork by lazy {
-		Database.connect(
-			HikariDataSource(dataSource),
-			databaseConfig = DatabaseConfig {
-				defaultRepetitionAttempts = DEFAULT_REPETITION_ATTEMPTS
-				defaultIsolationLevel = ISOLATION_LEVEL.levelId // Change our default isolation level
+		var i = 0
+		while (true) {
+			try {
+				return@lazy Database.connect(
+					HikariDataSource(dataSource),
+					databaseConfig = DatabaseConfig {
+						defaultRepetitionAttempts = DEFAULT_REPETITION_ATTEMPTS
+						defaultIsolationLevel = ISOLATION_LEVEL.levelId // Change our default isolation level
+					}
+				)
+			} catch (e: Exception) {
+				DreamCore.INSTANCE.logger.log(Level.WARNING, e) { "Failed to connect to database! Retrying... Current tries: $i" }
+				if (i == 30)
+					throw e
 			}
-		)
+			i++
+		}
+		throw RuntimeException("Something went wrong!") // IDEA says this is unreachable, but without this, the inferred type is "Any" instead of "Database"
 	}
 }
