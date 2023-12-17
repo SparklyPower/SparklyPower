@@ -56,15 +56,14 @@ class PingListener(private val m: SparklyNeonVelocity, private val server: Proxy
 
 
             bottom = if (currentDayOfTheWeek == DayOfWeek.FRIDAY) {
-                // The colored part is "este servidor é incrível!
                 TextUtils.getCenteredMessage(
                     "§5§l»§d§l» §x§d§5§d§6§1§0HOJE É SEXTA CAMBADA! VAMOS ANIMAR!!! §d§l«§5§l«",
                     128
                 )
             } else {
-                // The colored part is "este servidor é incrível!
+                // The colored part is "inesquecível"!
                 TextUtils.getCenteredMessage(
-                    "§5§l»§d§l» §fModéstia à parte, §x§f§f§8§0§8§0e§x§f§f§9§f§8§0s§x§f§f§b§f§8§0t§x§f§f§d§f§8§0e§x§f§f§f§f§8§0 §x§d§f§f§f§8§0s§x§b§f§f§f§8§0e§x§9§f§f§f§8§0r§x§8§0§f§f§8§0v§x§8§0§f§f§9§fi§x§8§0§f§f§b§fd§x§8§0§f§f§d§fo§x§8§0§f§f§f§fr§x§8§0§d§f§f§f §x§8§0§b§f§f§fé§x§8§0§9§f§f§f §x§8§0§8§0§f§fi§x§9§f§8§0§f§fn§x§b§f§8§0§f§fc§x§d§f§8§0§f§fr§x§f§f§8§0§f§fí§x§f§f§8§0§d§fv§x§f§f§8§0§b§fe§x§f§f§8§0§9§fl§f! §d§l«§5§l«",
+                    "§5§l»§d§l» §fSurvival de um jeito §x§F§F§8§0§8§0i§x§F§F§B§F§8§0n§x§F§F§F§F§8§0e§x§B§F§F§F§8§0s§x§8§0§F§F§8§0q§x§8§0§F§F§B§Fu§x§8§0§F§F§F§Fe§x§8§0§B§F§F§Fc§x§8§0§8§0§F§Fí§x§B§F§8§0§F§Fv§x§F§F§8§0§F§Fe§x§F§F§8§0§B§Fl§f! §d§l«§5§l«",
                     128
                 )
             }
@@ -75,7 +74,7 @@ class PingListener(private val m: SparklyNeonVelocity, private val server: Proxy
 
         builder.samplePlayers(
             createPlayerListMessage("§b✦§3§m                    §8[§4§lSparkly§b§lPower§8]§3§m                    §b✦"),
-            createPlayerListMessage("§6✧ §fModéstia a parte, este servidor é §a§lincrível§f! §6✧"),
+            createPlayerListMessage("§6✧ §fSurvival de um jeito §a§linesquecível§f! §6✧"),
             createPlayerListMessage(""),
             createPlayerListMessage("§b✦ §6$online§e Players Online! §b✦"),
             createPlayerListMessage("§b✦ §eUm §6Survival§e que você §6jamais§e viu antes! §b✦"),

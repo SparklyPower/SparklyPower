@@ -44,8 +44,8 @@ class PremiumCommand(val m: SparklyNeonVelocity) : SimpleCommand {
                     sender.disconnect("§eSua conta foi marcada como premium, sua conta está mais segura e você não irá precisar logar no servidor manualmente!\n\n§aApenas entre novamente no servidor e divirta-se!\n\n§aObrigado por suportar o desenvolvimento do Minecraft! §d^-^".fromLegacySectionToTextComponent())
                 }
             }
+            return
         }
-
 
         sender.showTitle(
             Title.title(
