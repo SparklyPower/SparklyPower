@@ -13,6 +13,7 @@ import net.perfectdreams.dreamcore.commands.declarations.MeninoCommand
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.eventmanager.DreamEventManager
 import net.perfectdreams.dreamcore.listeners.EntityListener
+import net.perfectdreams.dreamcore.listeners.PlayerLoginListener
 import net.perfectdreams.dreamcore.listeners.SkinsListener
 import net.perfectdreams.dreamcore.listeners.SocketListener
 import net.perfectdreams.dreamcore.network.socket.SocketServer
@@ -110,6 +111,12 @@ class DreamCore : KotlinPlugin() {
 		if (DreamCore.dreamConfig.features.sparklySkinsRestorer) {
 			Bukkit.getPluginManager().registerEvents(SkinsListener(this), this)
 			sparklyCommandManager.register(SkinCommand(this))
+		}
+
+		// This is not required for SparklyPower because the data is inserted on the proxy side (Velocity)
+		// But we have this as an option for easier development or for private servers without a proxy
+		if (DreamCore.dreamConfig.features.insertPlayerUsersDataOnLogin) {
+			Bukkit.getPluginManager().registerEvents(PlayerLoginListener(this), this)
 		}
 
 		// Scoreboards

@@ -14,6 +14,7 @@ import com.gmail.nossr50.util.player.UserManager
 import com.gmail.nossr50.util.random.RandomChanceUtil
 import com.gmail.nossr50.util.skills.SkillUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.SparklyNamespacedBooleanKey
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreampicaretamonstra.commands.PaMonstraCommand
 import net.perfectdreams.dreampicaretamonstra.commands.PicaretaMonstraCommand
@@ -53,6 +54,8 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 			Material.GRAVEL,
 			Material.CLAY
 		)
+
+		val IS_MONSTER_TOOL_KEY = SparklyNamespacedBooleanKey("is_monster_tool")
 	}
 
 	override fun softEnable() {

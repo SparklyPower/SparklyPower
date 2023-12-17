@@ -16,6 +16,7 @@ import kotlin.time.Duration.Companion.minutes
  */
 class SparklyUserNPCManager(val m: DreamCore) {
     val createdNPCs = mutableMapOf<Int, UserCreatedNPC>()
+    var configHasBeenLoaded = false
 
     fun spawn(data: UserCreatedNPCData) {
         val sparklyNPC = m.sparklyNPCManager.spawnFakePlayer(m, data.location.toBukkit(), data.name, skinTextures = data.skin?.textures)
@@ -59,13 +60,17 @@ class SparklyUserNPCManager(val m: DreamCore) {
                 spawn(it)
             }
         }
+        // Used to avoid saving an empty list if DreamCore for some reason shut down before the SparklyUserNPCManager had a chance to start
+        configHasBeenLoaded = true
     }
 
     fun save() {
-        m.logger.info { "Saving user created NPCs..." }
-        File(m.dataFolder, "user_npcs.json")
-            .writeText(
-                Json.encodeToString(createdNPCs.map { it.value.data })
-            )
+        if (configHasBeenLoaded) {
+            m.logger.info { "Saving user created NPCs..." }
+            File(m.dataFolder, "user_npcs.json")
+                .writeText(
+                    Json.encodeToString(createdNPCs.map { it.value.data })
+                )
+        }
     }
 }

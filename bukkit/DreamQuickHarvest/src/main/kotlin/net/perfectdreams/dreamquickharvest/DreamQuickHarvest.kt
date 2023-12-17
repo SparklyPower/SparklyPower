@@ -683,8 +683,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 							val newStemData = Bukkit.createBlockData(Material.PUMPKIN_STEM) as Ageable
 							newStemData.age = newStemData.maximumAge
 							possibleStemBlock.setBlockData(newStemData, false)
+							break
 						}
-						break
 					}
 
 					if (type == Material.MELON && possibleStemBlock.type == Material.ATTACHED_MELON_STEM) {
@@ -695,8 +695,8 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 							val newStemData = Bukkit.createBlockData(Material.MELON_STEM) as Ageable
 							newStemData.age = newStemData.maximumAge
 							possibleStemBlock.setBlockData(newStemData, false)
+							break
 						}
-						break
 					}
 				}
 			} else {

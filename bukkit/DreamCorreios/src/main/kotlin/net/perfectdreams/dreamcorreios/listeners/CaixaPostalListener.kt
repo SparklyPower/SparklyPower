@@ -1,6 +1,8 @@
 package net.perfectdreams.dreamcorreios.listeners
 
 import kotlinx.coroutines.delay
+import net.perfectdreams.dreamcore.utils.canHoldItem
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreamcorreios.utils.CaixaPostalHolder
@@ -14,6 +16,7 @@ import org.bukkit.event.inventory.InventoryAction
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 
 class CaixaPostalListener(val m: DreamCorreios) : Listener {
@@ -29,105 +32,33 @@ class CaixaPostalListener(val m: DreamCorreios) : Listener {
             return
 
         e.isCancelled = true
-        
+
         m.launchAsyncThread {
             val caixaPostal = m.retrieveCaixaPostalOfPlayerAndHold(e.player)
-            val inventory = m.createCaixaPostalInventoryOfPlayer(e.player, caixaPostal, 0)
+            if (caixaPostal.items.isEmpty()) {
+                e.player.sendMessage("§aSua caixa postal está vazia!")
+            } else {
+                onMainThread {
+                    val itemsThatCouldNotFit = mutableListOf<ItemStack>()
 
-            onMainThread {
-                e.player.openInventory(inventory)
-            }
-        }
-    }
-
-    @EventHandler
-    fun onClick(e: InventoryClickEvent) {
-        // TODO: Improve this
-        val holder = e.inventory.holder
-        if (holder !is CaixaPostalHolder)
-            return
-
-        val player = e.whoClicked as? Player ?: return
-
-        val clickedInventory = e.clickedInventory ?: return
-
-        if (clickedInventory.holder !is CaixaPostalHolder && e.action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-            // Block SHIFT click from inventory -> custom GUI
-            e.isCancelled = true
-        }
-
-        if (clickedInventory.holder is CaixaPostalHolder) {
-            // Items cannot be put inside a mailbox!
-            if (e.action.name.startsWith("PLACE_")) {
-                e.isCancelled = true
-                return
-            }
-
-            if (e.slot in DreamCorreios.SKIPPED_SLOTS) {
-                e.isCancelled = true
-
-                // While we DO have access to the caixa postal items, it is better to retrieve it again to ensure proper synchronization
-                if (e.slot == 8) {
-                    // Close the inventory to ensure that the changes will be persisted, to avoid issues
-                    // THIS IS NECESSARY TO AVOID A DUPLICATION ISSUE WHEN YOU TRY OPENING THE SAME PAGE WHILE THE PAGE IS OPEN
-                    e.whoClicked.closeInventory()
-
-                    // Open the mailbox on the next page, if possible
-                    m.launchAsyncThread {
-                        val caixaPostal = m.retrieveCaixaPostalOfPlayerAndHold(player)
-
-                        val inventory = m.createCaixaPostalInventoryOfPlayer(player, caixaPostal, holder.page - 1)
-
-                        onMainThread {
-                            player.openInventory(inventory)
+                    caixaPostal.items.forEach { itemStack ->
+                        if (e.player.inventory.canHoldItem(itemStack)) {
+                            e.player.inventory.addItem(itemStack)
+                        } else {
+                            itemsThatCouldNotFit.add(itemStack)
                         }
                     }
-                }
 
-                if (e.slot == 17) {
-                    // Close the inventory to ensure that the changes will be persisted, to avoid issues
-                    // THIS IS NECESSARY TO AVOID A DUPLICATION ISSUE WHEN YOU TRY OPENING THE SAME PAGE WHILE THE PAGE IS OPEN
-                    e.whoClicked.closeInventory()
-
-                    // Open the mailbox on the next page, if possible
-                    m.launchAsyncThread {
-                        val caixaPostal = m.retrieveCaixaPostalOfPlayerAndHold(player)
-
-                        val inventory = m.createCaixaPostalInventoryOfPlayer(player, caixaPostal, holder.page + 1)
-
-                        onMainThread {
-                            player.openInventory(inventory)
-                        }
+                    caixaPostal.items.clear()
+                    if (itemsThatCouldNotFit.isEmpty()) {
+                        e.player.sendMessage("§aVocê esvaziou a sua caixa postal!")
+                    } else {
+                        caixaPostal.items.addAll(itemsThatCouldNotFit)
+                        e.player.sendMessage("§aAinda tem ${itemsThatCouldNotFit.size} itens na sua caixa postal que não foram dados pois o seu inventário está cheio!")
                     }
                 }
-
-                if (e.slot == 53) {
-                    e.whoClicked.closeInventory()
-                }
-                return
             }
-        }
-    }
-
-    @EventHandler
-    fun onClose(e: InventoryCloseEvent) {
-        val holder = e.inventory.holder
-        if (holder !is CaixaPostalHolder)
-            return
-
-        val currentPage = holder.itemsPerPages[holder.page]
-        currentPage.clear()
-
-        val items = (0 until e.inventory.size).filter { it !in DreamCorreios.SKIPPED_SLOTS }.map {
-            e.inventory.getItem(it)
-        }.filterNotNull()
-        currentPage.addAll(items)
-
-        holder.caixaPostalAccessHolder.items.clear()
-        holder.caixaPostalAccessHolder.items.addAll(holder.itemsPerPages.flatten())
-
-        m.launchAsyncThread {
-            holder.caixaPostalAccessHolder.release()
+            caixaPostal.release()
         }
     }
 }

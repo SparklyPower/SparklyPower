@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.PrepareAnvilEvent
+import org.bukkit.inventory.meta.Damageable
 
 class RepairListener(val m: DreamPicaretaMonstra) : Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -29,7 +30,14 @@ class RepairListener(val m: DreamPicaretaMonstra) : Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onAnvilRepair(e: PrepareAnvilEvent) {
         val inventory = e.inventory
-        if (e.result?.getStoredMetadata("isMonsterPickaxe") == "true")
-            inventory.repairCost *= 16
+        val result = e.result
+        if (result?.getStoredMetadata("isMonsterPickaxe") == "true") {
+            val item = e.inventory.firstOrNull { it.getStoredMetadata("isMonsterPickaxe") == "true" }
+
+            if (item != null && e.result != null && item.hasItemMeta() && result.hasItemMeta() && (item.itemMeta as Damageable).damage != (result.itemMeta as Damageable).damage) {
+                // Only block repairs
+                inventory.repairCost *= 16
+            }
+        }
     }
 }

@@ -66,6 +66,7 @@ data class DreamConfig(
 
     @Serializable
     data class FeaturesConfig(
-        val sparklySkinsRestorer: Boolean
+        val sparklySkinsRestorer: Boolean,
+        val insertPlayerUsersDataOnLogin: Boolean,
     )
 }

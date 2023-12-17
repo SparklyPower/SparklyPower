@@ -33,7 +33,8 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
             return
         }
 
-        if (inHand.getStoredMetadata("isMonsterPickaxe") != "true")
+        val isMonsterTool = (inHand.hasItemMeta() && inHand.itemMeta.persistentDataContainer.get(DreamPicaretaMonstra.IS_MONSTER_TOOL_KEY)) || inHand.getStoredMetadata("isMonsterPickaxe") == "true"
+        if (!isMonsterTool)
             return
 
         val damageable = inHand.itemMeta as Damageable
