@@ -2,6 +2,8 @@ package net.perfectdreams.dreamloja
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.perfectdreams.dreamcore.utils.*
@@ -26,7 +28,9 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.io.File
 import java.time.Instant
 import java.time.ZoneId
 import java.util.*
@@ -55,12 +59,29 @@ class DreamLoja : KotlinPlugin() {
 	override fun softEnable() {
 		super.softEnable()
 
+		val hasMigratedFile = File(dataFolder, "has_migrated_items_to_new_item_serialization_format")
+
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
 				Shops,
 				UserShopVotes,
 				VoteSigns
 			)
+
+			// Convert mochilas to new ItemStack data
+			if (!hasMigratedFile.exists()) {
+				this@DreamLoja.logger.info("Migrating fancy icons...")
+				transaction(Databases.databaseNetwork) {
+					Shops.select { Shops.iconItemStack.isNotNull() }.forEach {
+						val deprecatedItem = it[Shops.iconItemStack]!!.fromBase64Item()
+
+						Shops.update({ Shops.id eq it[Shops.id] }) {
+							it[Shops.iconItemStack] = ItemUtils.serializeItemToBase64(deprecatedItem)
+						}
+					}
+				}
+				hasMigratedFile.createNewFile()
+			}
 		}
 
 		registerCommand(LojaCommand(this))

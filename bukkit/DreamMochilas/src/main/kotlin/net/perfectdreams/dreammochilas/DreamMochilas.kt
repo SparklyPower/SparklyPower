@@ -1,13 +1,12 @@
 package net.perfectdreams.dreammochilas
 
 import kotlinx.coroutines.delay
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.perfectdreams.dreambedrockintegrations.DreamBedrockIntegrations
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.CustomCraftingRecipe
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
@@ -27,7 +26,9 @@ import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.io.File
 
 class DreamMochilas : KotlinPlugin(), Listener {
@@ -84,10 +85,37 @@ class DreamMochilas : KotlinPlugin(), Listener {
 	override fun softEnable() {
 		super.softEnable()
 
+		val hasMigratedFile = File(dataFolder, "has_migrated_items_to_new_item_serialization_format")
+
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
 				Mochilas
 			)
+
+			// Convert mochilas to new ItemStack data
+			if (!hasMigratedFile.exists()) {
+				this@DreamMochilas.logger.info("Migrating Mochilas...")
+				transaction(Databases.databaseNetwork) {
+					Mochilas.selectAll().forEach {
+						try {
+							val deprecatedInventory = it[Mochilas.content].fromBase64Inventory()
+
+							val map = mutableMapOf<Int, String?>()
+
+							deprecatedInventory.contents.forEachIndexed { index, itemStack ->
+								map[index] = itemStack?.let { ItemUtils.serializeItemToBase64(it) }
+							}
+
+							Mochilas.update({ Mochilas.id eq it[Mochilas.id] }) {
+								it[Mochilas.content] = Json.encodeToString(map)
+							}
+						} catch (e: Exception) {
+							this@DreamMochilas.logger.warning("Failed to migrate mochila ${it[Mochilas.id]} (size:  ${it[Mochilas.size]})")
+						}
+					}
+				}
+				hasMigratedFile.createNewFile()
+			}
 		}
 
 		INSTANCE = this

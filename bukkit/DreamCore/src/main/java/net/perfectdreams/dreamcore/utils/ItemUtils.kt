@@ -3,18 +3,13 @@ package net.perfectdreams.dreamcore.utils
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.nbt.ListTag
 import net.minecraft.nbt.NbtIo
-import net.minecraft.nbt.Tag
 import net.perfectdreams.dreamcore.utils.extensions.getCompoundTag
 import net.perfectdreams.dreamcore.utils.extensions.setCompoundTag
 import net.perfectdreams.dreamcore.utils.tags.NbtTagsUtils
-import org.bukkit.Material
 import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
-import org.bukkit.util.io.BukkitObjectInputStream
-import org.bukkit.util.io.BukkitObjectOutputStream
-import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder
 import protocolsupport.api.TranslationAPI
 import java.io.*
 import java.math.BigInteger
@@ -74,6 +69,17 @@ object ItemUtils {
 			return itemStack.itemMeta.displayName
 		return TranslationAPI.getTranslationString(locale, MaterialUtils.getTranslationKey(itemStack.type))!!
 	}
+
+	fun serializeItemToBase64(itemStack: ItemStack): String {
+		// This is better and the deserialized item does go through data fixer upper
+		val byteArray = itemStack.serializeAsBytes()
+		return Base64.getEncoder().encodeToString(byteArray)
+	}
+
+	fun deserializeItemFromBase64(base64Item: String): ItemStack {
+		// This is better and the deserialized item does go through data fixer upper
+		return ItemStack.deserializeBytes(Base64.getDecoder().decode(base64Item))
+	}
 }
 
 fun ItemStack.rename(name: String): ItemStack {
@@ -121,6 +127,7 @@ fun ItemStack.getStorageData(key: UUID): String? {
 	return ItemUtils.getStoredMetadata(this, key.toString())
 }
 
+@Deprecated(message = "Please use ItemUtils.serializeItemToBase64()")
 fun ItemStack.toBase64(): String {
 	val outputStream = ByteArrayOutputStream();
 	val dataOutput = DataOutputStream(outputStream)
@@ -133,6 +140,7 @@ fun ItemStack.toBase64(): String {
 	return BigInteger(1, outputStream.toByteArray()).toString(32);
 }
 
+@Deprecated(message = "Please use ItemUtils.deserializeItemFromBase64()")
 fun String.fromBase64Item(): ItemStack {
 	val inputStream = ByteArrayInputStream(BigInteger(this, 32).toByteArray())
 	var nbtTagCompoundRoot: CompoundTag? = null
@@ -144,46 +152,4 @@ fun String.fromBase64Item(): ItemStack {
 
 	val nmsItem = net.minecraft.world.item.ItemStack.of(nbtTagCompoundRoot ?: error("NBT Tag Compound Root is null, why?"))
 	return CraftItemStack.asBukkitCopy(nmsItem)
-}
-
-fun Array<ItemStack>.toBase64(): String {
-	val outputStream = ByteArrayOutputStream()
-	try {
-		val dataOutput = BukkitObjectOutputStream(outputStream as OutputStream)
-		dataOutput.writeInt(this.size)
-		for ((index, itemStack) in this.withIndex()) {
-			if (itemStack != null && itemStack.type != Material.AIR) {
-				dataOutput.writeObject(itemStack.toBase64())
-			} else {
-				dataOutput.writeObject(null)
-			}
-			dataOutput.writeInt(index)
-		}
-		dataOutput.close()
-		return Base64Coder.encodeLines(outputStream.toByteArray())
-	} catch (e: Exception) {
-		throw IllegalStateException("Unable to save item stacks.", e)
-	}
-
-}
-
-fun String.fromBase64ItemList(): Array<ItemStack?> {
-	try {
-		val inputStream = ByteArrayInputStream(Base64Coder.decodeLines(this))
-		val dataInput = BukkitObjectInputStream(inputStream as InputStream)
-		val size = dataInput.readInt()
-		val list = arrayOfNulls<ItemStack>(size)
-		for (i in 0 until size) {
-			val utf = dataInput.readObject()
-			val slot = dataInput.readInt()
-			if (utf != null) {
-				list[slot] = (utf as String).fromBase64Item()
-			}
-		}
-		dataInput.close()
-		return list
-	} catch (e: Exception) {
-		throw IllegalStateException("Unable to load item stacks.", e)
-	}
-
 }

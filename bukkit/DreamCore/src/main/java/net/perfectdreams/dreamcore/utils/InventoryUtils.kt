@@ -71,32 +71,7 @@ fun Inventory.canHoldItem(stack: ItemStack?): Boolean {
 	return false
 }
 
-fun Inventory.toBase64(i: Int): String {
-	val outputStream = ByteArrayOutputStream()
-	try {
-		val dataOutput = BukkitObjectOutputStream(outputStream as OutputStream)
-		dataOutput.writeInt(i)
-		dataOutput.writeInt(this.size)
-		if (i == 1) {
-			dataOutput.writeUTF("???")
-		}
-		val contents = this.contents ?: error("Inventory contents is null!")
-		for ((index, itemStack) in contents.withIndex()) {
-			if (itemStack != null) {
-				dataOutput.writeObject(itemStack.toBase64())
-			} else {
-				dataOutput.writeObject(null)
-			}
-			dataOutput.writeInt(index)
-		}
-		dataOutput.close()
-		return Base64Coder.encodeLines(outputStream.toByteArray())
-	} catch (e: Exception) {
-		throw IllegalStateException("Unable to save item stacks.", e)
-	}
-
-}
-
+@Deprecated(message = "Store the items themselves on the database instead of binding to a \"Inventory\" instance")
 fun String.fromBase64Inventory(): Inventory {
 	try {
 		val inputStream = ByteArrayInputStream(Base64Coder.decodeLines(this))

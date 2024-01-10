@@ -378,7 +378,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                             Mochila.new {
                                 this.owner = e.player.uniqueId
                                 this.size = 27
-                                this.content = (newInventory.toBase64(1))
+                                this.content = MochilaUtils.serializeMochilaInventory(newInventory)
                                 this.type = item.itemMeta.customModelData
                                 this.funnyId = funnyId
                                 this.version = 1

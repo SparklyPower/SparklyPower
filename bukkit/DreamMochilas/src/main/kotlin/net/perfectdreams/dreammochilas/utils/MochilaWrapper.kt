@@ -2,12 +2,11 @@ package net.perfectdreams.dreammochilas.utils
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.DreamUtils
-import net.perfectdreams.dreamcore.utils.fromBase64Inventory
-import net.perfectdreams.dreamcore.utils.toBase64
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.dao.Mochila
 import org.bukkit.Bukkit
@@ -51,7 +50,7 @@ class MochilaWrapper(
         // We need to lock to avoid two threads loading the inventory at the same time, causing issues
         mochilaInventoryCreationLock.withLock {
             return cachedInventory ?: run {
-                val blahInventory = mochila.content.fromBase64Inventory() // Vamos pegar o inventário original
+                val itemIndexToBase64ItemStack = Json.decodeFromString<Map<Int, String?>>(mochila.content)
 
                 val mochilaSize = 54.coerceAtMost(mochila.size)
                 val guiTexture = when (mochilaSize) {
@@ -74,15 +73,9 @@ class MochilaWrapper(
                         )
                 )
 
-                val blahInventoryContents = blahInventory.contents
-                if (blahInventoryContents != null) {
-                    // When serializing, the items are stored as "ItemStack?" if it is AIR
-                    // So we are going to workaround this by replacing all null values with a AIR ItemStack!
-                    inventory.setContents(
-                        blahInventoryContents.map {
-                            it ?: ItemStack(Material.AIR)
-                        }.toTypedArray()
-                    )
+                for ((itemIndex, base64ItemStack) in itemIndexToBase64ItemStack) {
+                    if (base64ItemStack != null)
+                        inventory.setItem(itemIndex, ItemUtils.deserializeItemFromBase64(base64ItemStack))
                 }
 
                 cachedInventory = inventory
@@ -107,7 +100,7 @@ class MochilaWrapper(
             plugin.logger.info { "Saving backpack ${mochila.id.value} ($this) on database! Triggered by $triggerType" }
 
             transaction(Databases.databaseNetwork) {
-                mochila.content = cachedInventory.toBase64(1)
+                mochila.content = MochilaUtils.serializeMochilaInventory(cachedInventory)
             }
 
             plugin.logger.info { "Saved backpack ${mochila.id.value} ($this) on database! Triggered by $triggerType" }

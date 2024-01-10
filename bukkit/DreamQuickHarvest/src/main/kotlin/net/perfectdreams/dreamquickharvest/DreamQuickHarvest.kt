@@ -72,7 +72,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			Material.WHEAT to 2,
 			Material.POTATOES to 2,
 			Material.CARROTS to 2,
-			Material.BEETROOT to 2,
+			Material.BEETROOTS to 3,
 			Material.SUGAR_CANE to 3,
 			Material.MELON to 4,
 			Material.PUMPKIN to 4

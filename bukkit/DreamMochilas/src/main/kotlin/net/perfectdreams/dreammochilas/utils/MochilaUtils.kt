@@ -3,12 +3,15 @@ package net.perfectdreams.dreammochilas.utils
 import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamcore.utils.ItemUtils
 import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreammochilas.DreamMochilas
@@ -172,5 +175,15 @@ object MochilaUtils {
                     lore = this
                 }
         }
+    }
+
+    internal fun serializeMochilaInventory(mochilaInventory: Inventory): String {
+        val map = mutableMapOf<Int, String?>()
+
+        mochilaInventory.contents.forEachIndexed { index, itemStack ->
+            map[index] = itemStack?.let { ItemUtils.serializeItemToBase64(it) }
+        }
+
+        return Json.encodeToString(map)
     }
 }
