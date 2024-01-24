@@ -2,6 +2,7 @@ package net.perfectdreams.dreamloja.commands
 
 import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.ItemUtils
 import net.perfectdreams.dreamcore.utils.adventure.append
 import net.perfectdreams.dreamcore.utils.adventure.appendCommand
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
@@ -17,10 +18,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class SetLojaIconExecutor(m: DreamLoja) : LojaExecutorBase(m) {
     inner class Options : CommandOptions() {
-            val shopName = optionalGreedyString("shop_name")
-        }
+        val shopName = optionalGreedyString("shop_name")
+    }
 
-        override val options = Options()
+    override val options = Options()
 
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
@@ -54,14 +55,15 @@ class SetLojaIconExecutor(m: DreamLoja) : LojaExecutorBase(m) {
             }
 
             transaction(Databases.databaseNetwork) {
-                shop.iconItemStack = itemInHand.clone()
-                    .apply {
-                        if (!this.itemMeta.hasDisplayName())
-                            this.itemMeta = this.itemMeta.apply {
-                                this.setDisplayName("§a${shop.shopName}")
-                            }
-                    }
-                    .toBase64()
+                shop.iconItemStack = ItemUtils.serializeItemToBase64(
+                    itemInHand.clone()
+                        .apply {
+                            if (!this.itemMeta.hasDisplayName())
+                                this.itemMeta = this.itemMeta.apply {
+                                    this.setDisplayName("§a${shop.shopName}")
+                                }
+                        }
+                )
             }
 
             context.sendLojaMessage {
