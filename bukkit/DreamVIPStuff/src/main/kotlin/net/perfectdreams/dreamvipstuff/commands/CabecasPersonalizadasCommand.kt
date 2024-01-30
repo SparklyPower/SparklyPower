@@ -65,12 +65,8 @@ object CabecasPersonalizadasCommand : DSLCommandBase<DreamVIPStuff> {
 
                     val document = result.parse()
                     val uuidValue = document
-                        .selectFirst("#UUID-Value")!!
-                        .text()
-
-                    val uuidTextureUrl = document
-                        .selectFirst("#UUID-Skin")!!
-                        .text()
+                        .selectFirst("#Value")!!
+                        .`val`()
 
                     switchContext(SynchronizationContext.SYNC)
 
