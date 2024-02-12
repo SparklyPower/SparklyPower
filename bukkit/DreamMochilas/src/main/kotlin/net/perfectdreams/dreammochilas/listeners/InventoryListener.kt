@@ -98,7 +98,7 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 if (!areAllMochilasValid || !areAllRainbowWoolsValid)
                     e.isCancelled = true
                 else {
-                    val oldMochilaItem = e.inventory.matrix?.get(4) ?: return
+                    val oldMochilaItem = e.inventory.matrix[4] ?: return
                     val oldMeta = oldMochilaItem.itemMeta
 
                     e.currentItem?.meta<ItemMeta> {
