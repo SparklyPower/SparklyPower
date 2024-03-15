@@ -8,7 +8,7 @@ import net.perfectdreams.dreamcore.utils.extensions.getSafeDestination
 import net.perfectdreams.dreammini.DreamMini
 import org.bukkit.entity.Player
 
-class TpaAceitarCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpaceitar", "tpaccept", "tpaccept"), permission = "dreammini.tpaceitar") {
+class TpaAceitarCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpaceitar", "tpaccept", "tpaccept", "tpac"), permission = "dreammini.tpaceitar") {
 
 	@Subcommand
 	fun root(sender: Player) {
