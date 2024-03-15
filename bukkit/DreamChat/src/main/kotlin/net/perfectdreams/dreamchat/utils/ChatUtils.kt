@@ -39,8 +39,13 @@ object ChatUtils {
 			val regex = Regex("(\\b|@)${Regex.escape(player.name)}\\b", RegexOption.IGNORE_CASE)
 			if (regex.containsMatchIn(message)) {
 				message = message.replace(regex, Regex.escapeReplacement("§3${player.displayName}§f"))
-				player.playSound(player.location, "perfectdreams.sfx.msn", 1F, 1F)
-				player.sendActionBar("§3${sender.displayName}§a te mencionou no chat!")
+
+				val isIgnoringTheSender = DreamChat.INSTANCE.userData.getStringList("ignore.${player.uniqueId}").contains(sender.uniqueId.toString())
+				
+				if (!isIgnoringTheSender) {
+					player.playSound(player.location, "perfectdreams.sfx.msn", 1F, 1F)
+					player.sendActionBar("§3${sender.displayName}§a te mencionou no chat!")
+				}
 			}
 		}
 
