@@ -65,7 +65,7 @@ class TagListener(val m: DreamVote) : Listener {
 			e.tags.add(
 				PlayerTag(
 					"§c§lTVM",
-					"§c§lTop Votador Mensal",
+					"§c§lTVM", // "§c§lTop Votador Mensal", // This is too big, let's just use the small tag
 					listOf(
 						"§r§b${e.player.name}§r§7 é um dos top votadores deste Mês!",
 						"",
