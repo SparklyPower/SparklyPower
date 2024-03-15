@@ -26,8 +26,8 @@ class ChimarraoListener : Listener {
             e.setItem(
                 when (itemMeta.customModelData) {
                     1 -> CustomItems.CHIMARRAO_EMPTY_BROWN
-                    2 -> CustomItems.CHIMARRAO_LORI_WHITE
-                    3 -> CustomItems.CHIMARRAO_LORI_BLACK
+                    2 -> CustomItems.CHIMARRAO_EMPTY_LORI_WHITE
+                    3 -> CustomItems.CHIMARRAO_EMPTY_LORI_BLACK
                     else -> error("Unknown Chimarrão with ID " + itemMeta.customModelData)
                 }
             )
