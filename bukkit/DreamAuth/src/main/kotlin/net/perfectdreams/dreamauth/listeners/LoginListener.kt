@@ -143,7 +143,7 @@ class LoginListener(val m: DreamAuth) : Listener {
 			if (m.playerStatus[player] != PlayerStatus.LOGIN)
 				return@schedule
 
-			for (i in 60 downTo 0) {
+			for (i in 300  downTo 0) {
 				val playerStatus = m.playerStatus[player] ?: return@schedule
 				if (playerStatus != PlayerStatus.LOGIN)
 					return@schedule
