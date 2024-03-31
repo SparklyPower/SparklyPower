@@ -17,9 +17,7 @@ import net.perfectdreams.dreamloja.commands.declarations.LojaCommand
 import net.perfectdreams.dreamloja.dao.UserShopVote
 import net.perfectdreams.dreamloja.listeners.SignListener
 import net.perfectdreams.dreamloja.listeners.TagListener
-import net.perfectdreams.dreamloja.tables.Shops
-import net.perfectdreams.dreamloja.tables.UserShopVotes
-import net.perfectdreams.dreamloja.tables.VoteSigns
+import net.perfectdreams.dreamloja.tables.*
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -51,6 +49,12 @@ class DreamLoja : KotlinPlugin() {
                 color(NamedTextColor.DARK_GRAY)
             }
 		}
+
+		const val VIP_PLUS_PLUS_MAX_SLOTS = 7
+		const val VIP_PLUS_MAX_SLOTS = 5
+		const val VIP_MAX_SLOTS = 3
+		const val MEMBER_MAX_SLOTS = 1
+		const val MAX_SLOT_UPGRADE_SLOTS = 54 - VIP_PLUS_PLUS_MAX_SLOTS
 	}
 
 	var dreamMenu: Inventory? = null
@@ -65,7 +69,8 @@ class DreamLoja : KotlinPlugin() {
 			SchemaUtils.createMissingTablesAndColumns(
 				Shops,
 				UserShopVotes,
-				VoteSigns
+				VoteSigns,
+				ShopWarpUpgrades
 			)
 
 			// Convert mochilas to new ItemStack data

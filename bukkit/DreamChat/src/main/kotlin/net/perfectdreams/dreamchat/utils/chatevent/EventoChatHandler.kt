@@ -2,9 +2,9 @@ package net.perfectdreams.dreamchat.utils.chatevent
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
-import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.cash.NightmaresCashRegister
 import net.perfectdreams.dreamcore.eventmanager.ServerEvent
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.centralize
@@ -119,7 +119,7 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 				"Chat"
 			)
 			if (willGiveOutPesadelos)
-				Cash.giveCash(player, 1L, TransactionContext(type = TransactionType.EVENTS, extra = "Chat"))
+				NightmaresCashRegister.INSTANCE.giveCash(player, 1L, TransactionContext(type = TransactionType.EVENTS, extra = "Chat"))
 			DreamChat.INSTANCE.userData.save(DreamChat.INSTANCE.dataYaml)
 			event.postEndAsync(player, diff)
 		}

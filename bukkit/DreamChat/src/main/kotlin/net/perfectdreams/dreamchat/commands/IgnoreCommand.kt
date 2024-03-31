@@ -4,7 +4,6 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
-import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamcore.utils.generateCommandInfo
 import net.perfectdreams.dreamcore.utils.scheduler

@@ -12,6 +12,8 @@ import net.perfectdreams.dreamclubes.tables.ClubeHomeUpgrades
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamloja.DreamLoja
+import net.perfectdreams.dreamloja.tables.ShopWarpUpgrades
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -276,6 +278,72 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                                     sender.sendMessage("§aObrigado pela compra! ^-^")
 
                                     Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou §dslots adicionais para casas do clube§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
+                                }
+                            },
+                            afterDecline = {
+                                it.closeInventory()
+                                showShopMenu(sender)
+                            }
+                        )
+                    }
+                }
+            }
+
+            // ===[ LOJA ]===
+            this.slot(0, 3) {
+                item = ItemStack(Material.ARMOR_STAND)
+                    .rename("§aAumentar as warps da sua loja em +1 warp")
+                    .lore(
+                        "§aPermita que o seu clube tenha mais pessoas! (Máximo: ${DreamLoja.MEMBER_MAX_SLOTS} warps)",
+                        "§f",
+                        "§c250 pesadelos"
+                    )
+                    .meta<ItemMeta> {
+                        setCustomModelData(1)
+                    }
+
+                onClick {
+                    checkIfPlayerHasSufficientMoney(sender, 250) {
+                        InventoryUtils.askForConfirmation(
+                            sender,
+                            afterAccept = {
+                                sender.closeInventory()
+
+                                scheduler().schedule(m, SynchronizationContext.ASYNC) {
+                                    val count = transaction(Databases.databaseNetwork) {
+                                        ShopWarpUpgrades.select {
+                                            ShopWarpUpgrades.playerId eq sender.uniqueId
+                                        }.count()
+                                    }
+
+                                    switchContext(SynchronizationContext.SYNC)
+
+                                    if (count >= DreamLoja.MAX_SLOT_UPGRADE_SLOTS) {
+                                        sender.sendMessage("§cVocê já comprou todos os slots disponíveis!")
+                                        return@schedule
+                                    }
+
+                                    switchContext(SynchronizationContext.ASYNC)
+
+                                    transaction(Databases.databaseNetwork) {
+                                        try {
+                                            Cash.takeCash(sender, 250, TransactionContext(extra = "comprar `slots adicionais para a warps de loja` no `/lojacash`"))
+
+                                            ShopWarpUpgrades.insert {
+                                                it[ShopWarpUpgrades.playerId] = sender.uniqueId
+                                                it[ShopWarpUpgrades.boughtAt] = Instant.now()
+                                            }
+                                        } catch (e: IllegalArgumentException) {
+                                            sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
+                                            return@transaction
+                                        }
+                                    }
+
+                                    switchContext(SynchronizationContext.SYNC)
+
+                                    sender.sendMessage("§aObrigado pela compra! ^-^")
+
+                                    Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou §dslots adicionais para warps de loja§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
                                 }
                             },
                             afterDecline = {

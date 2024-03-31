@@ -8,6 +8,8 @@ import net.perfectdreams.dreambedrockintegrations.DreamBedrockIntegrations
 import net.perfectdreams.dreamcash.commands.DreamCashCommand
 import net.perfectdreams.dreamcash.commands.LojaCashCommand
 import net.perfectdreams.dreamcash.tables.Cashes
+import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamcore.cash.NightmaresCashRegister
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import org.bukkit.Bukkit
@@ -16,6 +18,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class DreamCash : KotlinPlugin() {
     override fun softEnable() {
+        NightmaresCashRegister.INSTANCE = Cash
         super.softEnable()
 
         registerCommand(DreamCashCommand(this))

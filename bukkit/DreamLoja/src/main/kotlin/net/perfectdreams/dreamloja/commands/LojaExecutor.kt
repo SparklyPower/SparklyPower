@@ -76,7 +76,7 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
 
                 if (playerShops.size > 1 && shopName == null) {
                     onMainThread {
-                        val menu = createMenu(9, "§a§lLojas de $ownerName") {
+                        val menu = createMenu(roundToNearestMultipleOfNine(playerShops.size).coerceAtLeast(9), "§a§lLojas de $ownerName") {
                             for ((index, shop) in playerShops.withIndex()) {
                                 slot(index, 0) {
                                     item = shop.iconItemStack?.let { ItemUtils.deserializeItemFromBase64(it) } ?: ItemStack(Material.DIAMOND_BLOCK)
@@ -156,6 +156,16 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
             }
         } else {
             m.openMenu(player)
+        }
+    }
+
+    // Thanks, ChatGPT xoxo
+    private fun roundToNearestMultipleOfNine(number: Int): Int {
+        val remainder = number % 9
+        return if (remainder == 0) {
+            number // No rounding needed
+        } else {
+            number + (9 - remainder) // Round up to the nearest multiple of 9
         }
     }
 }

@@ -41,7 +41,7 @@ object ChatUtils {
 				message = message.replace(regex, Regex.escapeReplacement("§3${player.displayName}§f"))
 
 				val isIgnoringTheSender = DreamChat.INSTANCE.userData.getStringList("ignore.${player.uniqueId}").contains(sender.uniqueId.toString())
-				
+
 				if (!isIgnoringTheSender) {
 					player.playSound(player.location, "perfectdreams.sfx.msn", 1F, 1F)
 					player.sendActionBar("§3${sender.displayName}§a te mencionou no chat!")

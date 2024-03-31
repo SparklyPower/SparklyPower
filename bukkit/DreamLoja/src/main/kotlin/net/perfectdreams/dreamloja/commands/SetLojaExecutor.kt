@@ -13,10 +13,12 @@ import net.perfectdreams.dreamcore.utils.extensions.isUnsafe
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamloja.DreamLoja
 import net.perfectdreams.dreamloja.dao.Shop
+import net.perfectdreams.dreamloja.tables.ShopWarpUpgrades
 import net.perfectdreams.dreamloja.tables.Shops
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
@@ -52,9 +54,9 @@ class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
         var createdNew = false
         var valid = true
 
-        val shopCountForPlayer = getMaxAllowedShops(player)
-
         m.launchAsyncThread {
+            val shopCountForPlayer = getMaxAllowedShops(player)
+
             transaction(Databases.databaseNetwork) {
                 val shop = Shop.find {
                     (Shops.owner eq player.uniqueId) and (Shops.shopName eq shopName)
@@ -132,7 +134,7 @@ class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
                     }
                 }
 
-                if (shopCountForPlayer != 1) {
+                if (shopCountForPlayer != 1L) {
                     context.sendLojaMessage {
                         color(NamedTextColor.YELLOW)
 
@@ -150,12 +152,20 @@ class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
     /**
      * Gets the max allowed homes for the [player]
      */
-    fun getMaxAllowedShops(player: Player): Int {
-        return when {
-            player.hasPermission("dreamloja.lojaplusplusplus") -> 7
-            player.hasPermission("dreamloja.lojaplusplus") -> 5
-            player.hasPermission("dreamloja.lojaplus") -> 3
-            else -> 1
+    suspend fun getMaxAllowedShops(player: Player): Long {
+        val baseSlots = when {
+            player.hasPermission("dreamloja.lojaplusplusplus") -> DreamLoja.VIP_PLUS_PLUS_MAX_SLOTS
+            player.hasPermission("dreamloja.lojaplusplus") -> DreamLoja.VIP_PLUS_MAX_SLOTS
+            player.hasPermission("dreamloja.lojaplus") -> DreamLoja.VIP_MAX_SLOTS
+            else -> DreamLoja.MEMBER_MAX_SLOTS
         }
+
+        val upgradeCount = transaction(Databases.databaseNetwork) {
+            ShopWarpUpgrades.select {
+                ShopWarpUpgrades.playerId eq player.uniqueId
+            }.count()
+        }
+
+        return baseSlots + upgradeCount
     }
 }
