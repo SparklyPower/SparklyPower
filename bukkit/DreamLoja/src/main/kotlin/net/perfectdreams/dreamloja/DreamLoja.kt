@@ -54,7 +54,18 @@ class DreamLoja : KotlinPlugin() {
 		const val VIP_PLUS_MAX_SLOTS = 5
 		const val VIP_MAX_SLOTS = 3
 		const val MEMBER_MAX_SLOTS = 1
-		const val MAX_SLOT_UPGRADE_SLOTS = 54 - VIP_PLUS_PLUS_MAX_SLOTS
+		const val MAX_SLOT_UPGRADE_SLOTS = 9 // 54 - VIP_PLUS_PLUS_MAX_SLOTS
+
+		val INVENTORY_POSITIONS_MAPS = mapOf(
+			2 to "___X_X___",
+			3 to "__X_X_X__",
+			4 to "_X_X_X_X_",
+			5 to "X_X_X_X_X",
+			6 to "XXX___XXX",
+			7 to "XXX_X_XXX",
+			8 to "XXXXXXXX_",
+			9 to "XXXXXXXXX",
+		)
 	}
 
 	var dreamMenu: Inventory? = null

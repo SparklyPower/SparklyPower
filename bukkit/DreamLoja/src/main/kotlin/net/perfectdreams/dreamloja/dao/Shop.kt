@@ -19,6 +19,7 @@ class Shop(id: EntityID<Long>) : LongEntity(id) {
 	var yaw by Shops.yaw
 	var pitch by Shops.pitch
 	var iconItemStack by Shops.iconItemStack
+	var order by Shops.order
 
 	fun getLocation(): Location {
 		return Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch)

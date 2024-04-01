@@ -23,11 +23,11 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class SetLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
     inner class Options : CommandOptions() {
-            // Needs to be a greedy string because Minecraft doesn't allow special characters on a optionalWord
-            val shopName = optionalGreedyString("shop_name")
-        }
+        // Needs to be a greedy string because Minecraft doesn't allow special characters on a optionalWord
+        val shopName = optionalGreedyString("shop_name")
+    }
 
-        override val options = Options()
+    override val options = Options()
 
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()

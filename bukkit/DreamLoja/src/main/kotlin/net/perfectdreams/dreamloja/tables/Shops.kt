@@ -16,4 +16,5 @@ object Shops : LongIdTable() {
 	val yaw = float("yaw")
 	val pitch = float("pitch")
 	val iconItemStack = text("icon_item_stack").nullable()
+	val order = integer("order").nullable()
 }

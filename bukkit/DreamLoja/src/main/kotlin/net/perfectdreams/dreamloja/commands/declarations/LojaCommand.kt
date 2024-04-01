@@ -24,6 +24,10 @@ class LojaCommand(val m: DreamLoja) : SparklyCommandDeclarationWrapper {
                 executor = LojaListExecutor(m)
             }
 
+            subcommand(listOf("order")) {
+                executor = LojaOrderExecutor(m)
+            }
+
             executor = LojaManageExecutor(m)
         }
 

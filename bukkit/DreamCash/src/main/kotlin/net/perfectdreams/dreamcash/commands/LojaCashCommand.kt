@@ -31,6 +31,13 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
     }
 
     fun showShopMenu(sender: Player) {
+        val lojaUpgradeCount = transaction(Databases.databaseNetwork) {
+            ShopWarpUpgrades.select {
+                ShopWarpUpgrades.playerId eq sender.uniqueId
+            }.count()
+        }
+        val lojaUpgradePrice = (lojaUpgradeCount + 1) * 400
+
         val menu = createMenu(54, "§fꈉ\ue261") {
             fun generateItemAt(x: Int, y: Int, type: Material, customModelData: Int? = null, name: String, quantity: Long, callback: () -> (Boolean)) {
                 slot(x, y) {
@@ -296,14 +303,14 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                     .lore(
                         "§aPermita que o seu clube tenha mais pessoas! (Máximo: ${DreamLoja.MEMBER_MAX_SLOTS} warps)",
                         "§f",
-                        "§c250 pesadelos"
+                        "§c${lojaUpgradePrice} pesadelos"
                     )
                     .meta<ItemMeta> {
                         setCustomModelData(1)
                     }
 
                 onClick {
-                    checkIfPlayerHasSufficientMoney(sender, 250) {
+                    checkIfPlayerHasSufficientMoney(sender, lojaUpgradePrice) {
                         InventoryUtils.askForConfirmation(
                             sender,
                             afterAccept = {
@@ -327,7 +334,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                                     transaction(Databases.databaseNetwork) {
                                         try {
-                                            Cash.takeCash(sender, 250, TransactionContext(extra = "comprar `slots adicionais para a warps de loja` no `/lojacash`"))
+                                            Cash.takeCash(sender, lojaUpgradePrice, TransactionContext(extra = "comprar `slots adicionais para a warps de loja` no `/lojacash`"))
 
                                             ShopWarpUpgrades.insert {
                                                 it[ShopWarpUpgrades.playerId] = sender.uniqueId

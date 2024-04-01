@@ -15,16 +15,20 @@ class LojaManageExecutor(m: DreamLoja) : LojaExecutorBase(m) {
         val player = context.requirePlayer()
         player.sendMessage("§8[ §9Minha Loja §8]".centralizeHeader())
         context.sendMessage {
-            appendCommand("/loja manage set")
+            appendCommand("/loja manage set <nome_da_loja>")
             append(" - Altera a posição da sua loja")
         }
         context.sendMessage {
-            appendCommand("/loja manage icon")
-            append(" - Altera o ícone da sua loja")
+            appendCommand("/loja manage icon <nome_da_loja>")
+            append(" - Altera o ícone da sua loja, deixe o item que você deseja que apareça no inventário na sua mão e use o comando!")
         }
         context.sendMessage {
-            appendCommand("/loja manage delete")
+            appendCommand("/loja manage delete <nome_da_loja>")
             append(" - Deleta a sua loja")
+        }
+        context.sendMessage {
+            appendCommand("/loja manage order <loja1 loja2 loja3...>")
+            append(" - Altera a ordem das suas lojas na lista de lojas")
         }
         context.sendMessage {
             appendCommand("/loja manage list")

@@ -72,21 +72,31 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
                 val playerShops = transaction(Databases.databaseNetwork) {
                     Shop.find { (Shops.owner eq user.id.value) }
                         .toList()
-                }
+                }.sortedBy { it.order ?: Int.MAX_VALUE }
 
                 if (playerShops.size > 1 && shopName == null) {
                     onMainThread {
                         val menu = createMenu(roundToNearestMultipleOfNine(playerShops.size).coerceAtLeast(9), "§a§lLojas de $ownerName") {
-                            for ((index, shop) in playerShops.withIndex()) {
-                                slot(index, 0) {
-                                    item = shop.iconItemStack?.let { ItemUtils.deserializeItemFromBase64(it) } ?: ItemStack(Material.DIAMOND_BLOCK)
-                                        .rename("§a${shop.shopName}")
+                            // Map it down to our inventory maps, split over to 9 first tho
+                            playerShops.chunked(9)
+                                .forEachIndexed { yIndex, shops ->
+                                    val charMap = DreamLoja.INVENTORY_POSITIONS_MAPS[shops.size] ?: "XXXXXXXXX" // fallback
 
-                                    onClick {
-                                        player.closeInventory()
-                                        Bukkit.dispatchCommand(player, "loja $ownerName ${shop.shopName}")
+                                    var shopIndex = 0
+                                    for ((xIndex, char) in charMap.withIndex()) {
+                                        if (char == 'X') {
+                                            val shop = shops.getOrNull(shopIndex++) ?: break // If there isn't enough shops, break out!
+                                            slot(xIndex, yIndex) {
+                                                item = shop.iconItemStack?.let { ItemUtils.deserializeItemFromBase64(it) } ?: ItemStack(Material.DIAMOND_BLOCK)
+                                                    .rename("§a${shop.shopName}")
+
+                                                onClick {
+                                                    player.closeInventory()
+                                                    Bukkit.dispatchCommand(player, "loja $ownerName ${shop.shopName}")
+                                                }
+                                            }
+                                        }
                                     }
-                                }
                             }
                         }
 
