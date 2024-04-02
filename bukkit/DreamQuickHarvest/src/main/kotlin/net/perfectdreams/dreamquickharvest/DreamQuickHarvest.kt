@@ -32,6 +32,7 @@ import net.perfectdreams.dreammochilas.utils.MochilaAccessHolder
 import net.perfectdreams.dreammochilas.utils.MochilaInventoryHolder
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
 import net.perfectdreams.dreamquickharvest.commands.declarations.ColheitaCommand
+import net.perfectdreams.dreamquickharvest.commands.declarations.DreamQuickHarvestCommand
 import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestData
 import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestUpgrades
 import org.bukkit.*
@@ -95,6 +96,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		registerEvents(this)
 		registerCommand(ColheitaCommand(this))
+		registerCommand(DreamQuickHarvestCommand(this))
 
 		launchAsyncThread {
 			while (true) {
