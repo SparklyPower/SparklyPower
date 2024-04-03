@@ -73,7 +73,7 @@ class SkinsListener(val m: DreamCore) : Listener {
                 // We will get the UUID from Ashcon's API, but we will get the skin from Mojang itself
                 // We do this because the Username to UUID API is VERY VERY VERY ratelimited
                 val mojangResponse = DreamUtils.http.get("https://sessionserver.mojang.com/session/minecraft/profile/${ashconResponse.uuid}?unsigned=false")
-                
+
                 val playerUniqueIdWithDashes: String
                 val playerTextureValue: String
                 val playerTextureSignature: String

@@ -190,6 +190,36 @@ class SkinCommand(val m: DreamCore) : SparklyCommandDeclarationWrapper {
 
                     val ashconResponse = JsonIgnoreUnknownKeys.decodeFromString<AshconEverythingResponse>(response.bodyAsText())
 
+                    // We will get the UUID from Ashcon's API, but we will get the skin from Mojang itself
+                    // We do this because the Username to UUID API is VERY VERY VERY ratelimited
+                    val mojangResponse = DreamUtils.http.get("https://sessionserver.mojang.com/session/minecraft/profile/${ashconResponse.uuid}?unsigned=false")
+
+                    val playerUniqueIdWithDashes: String
+                    val playerTextureValue: String
+                    val playerTextureSignature: String
+
+                    if (mojangResponse.status == HttpStatusCode.TooManyRequests) {
+                        // If we get rate limited, use Ashcon's response
+                        playerUniqueIdWithDashes = ashconResponse.uuid
+                        playerTextureValue = ashconResponse.textures.raw.value
+                        playerTextureSignature = ashconResponse.textures.raw.signature
+                    } else {
+                        // If we aren't rate limited, use Mojang's response
+                        val jsonObj = Json.parseToJsonElement(mojangResponse.bodyAsText())
+                            .jsonObject
+
+                        val mcTexturesObj = jsonObj["properties"]!!
+                            .jsonArray
+                            .first {
+                                it.jsonObject["name"]!!.jsonPrimitive.content == "textures"
+                            }
+                            .jsonObject
+
+                        playerUniqueIdWithDashes = m.skinUtils.convertNonDashedToUniqueID(jsonObj["id"]!!.jsonPrimitive.content).toString()
+                        playerTextureValue = mcTexturesObj["value"]!!.jsonPrimitive.content
+                        playerTextureSignature = mcTexturesObj["signature"]!!.jsonPrimitive.content
+                    }
+
                     // Set the current player's skin in the database
                     transaction(Databases.databaseNetwork) {
                         PlayerSkins.upsert(PlayerSkins.id) {
@@ -197,16 +227,16 @@ class SkinCommand(val m: DreamCore) : SparklyCommandDeclarationWrapper {
                             it[PlayerSkins.data] = Json.encodeToString<StoredDatabaseSkin>(
                                 when (data) {
                                     is StoredDatabaseSkin.CustomMojangSkin -> StoredDatabaseSkin.CustomMojangSkin(
-                                        ashconResponse.uuid,
+                                        playerUniqueIdWithDashes,
                                         Clock.System.now(),
-                                        ashconResponse.textures.raw.value,
-                                        ashconResponse.textures.raw.signature,
+                                        playerTextureValue,
+                                        playerTextureSignature
                                     )
                                     is StoredDatabaseSkin.SelfMojangSkin -> StoredDatabaseSkin.SelfMojangSkin(
-                                        ashconResponse.uuid,
+                                        playerUniqueIdWithDashes,
                                         Clock.System.now(),
-                                        ashconResponse.textures.raw.value,
-                                        ashconResponse.textures.raw.signature,
+                                        playerTextureValue,
+                                        playerTextureSignature
                                     )
                                 }
                             )
@@ -221,8 +251,8 @@ class SkinCommand(val m: DreamCore) : SparklyCommandDeclarationWrapper {
                         playerProfile.setProperty(
                             ProfileProperty(
                                 "textures",
-                                ashconResponse.textures.raw.value,
-                                ashconResponse.textures.raw.signature,
+                                playerTextureValue,
+                                playerTextureSignature
                             )
                         )
                         player.playerProfile = playerProfile
