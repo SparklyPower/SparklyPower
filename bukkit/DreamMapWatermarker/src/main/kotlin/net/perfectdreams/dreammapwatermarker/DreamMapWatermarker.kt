@@ -138,23 +138,27 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 		val jobs = mutableListOf<Job>()
 		val semaphore = Semaphore(32)
 
-		imageFolder.listFiles().forEach {
+		for (it in imageFolder.listFiles()) {
 			if (it.extension == "png") {
+				val mapId = it.nameWithoutExtension.toIntOrNull()
+				if (mapId == null) {
+					logger.warning { "Invalid Map ID ${it.nameWithoutExtension}! Skipping..." }
+					continue
+				}
+
+				// We read the map on the main thread to avoid concurrency issues
+				// While I don't think I ever had concurrency issues, I already had an issue where some maps just didn't *exist* on the server
+				// (as in, no image on the map, using vanilla map renderer)
+				// so let's switch this to the main thread just because this call DOES use a non-concurrent safe HashMap
+				val mapView = Bukkit.getMap(mapId)
+				if (mapView == null) {
+					logger.warning { "Map with ID $mapId does not exist! The map must exist/claimed before we are able to restore it! Skipping..." }
+					continue
+				}
+
 				jobs.add(
 					GlobalScope.launch(Dispatchers.IO) {
 						semaphore.withPermit {
-							val mapId = it.nameWithoutExtension.toIntOrNull()
-							if (mapId == null) {
-								logger.warning { "Invalid Map ID ${it.nameWithoutExtension}! Skipping..." }
-								return@launch
-							}
-
-							val mapView = Bukkit.getMap(mapId)
-							if (mapView == null) {
-								logger.warning { "Map with ID $mapId does not exist! The map must exist/claimed before we are able to restore it! Skipping..." }
-								return@launch
-							}
-
 							val image = ImageIO.read(it)
 
 							mapView.isLocked = true // Optimizes the map because the server doesn't attempt to get the world data when the player is holding the map in their hand

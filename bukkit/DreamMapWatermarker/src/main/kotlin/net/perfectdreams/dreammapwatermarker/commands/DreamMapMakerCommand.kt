@@ -37,6 +37,11 @@ class DreamMapMakerCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
             permissions = listOf("dreammapmaker.imagemap")
             executor = ImageMapExecutor()
         }
+
+        subcommand(listOf("dumprenderers")) {
+            permissions = listOf("dreammapmaker.dumprenderers")
+            executor = DumpRenderersExecutor()
+        }
     }
 
     inner class ImageMapExecutor : SparklyCommandExecutor() {
@@ -177,6 +182,44 @@ class DreamMapMakerCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
                         color(NamedTextColor.GREEN)
                         content("Imagem salva com sucesso!")
                     }
+                }
+            }
+        }
+    }
+
+    inner class DumpRenderersExecutor : SparklyCommandExecutor() {
+        override fun execute(context: CommandContext, args: CommandArguments) {
+            val player = context.requirePlayer()
+
+            val map = player.inventory.itemInMainHand
+            if (map.type != Material.FILLED_MAP) {
+                context.sendMessage {
+                    color(NamedTextColor.RED)
+                    content("Você precisa estar segurando um mapa na sua mão!")
+                }
+                return
+            }
+
+            val mapMeta = map.itemMeta as MapMeta
+
+            val mapView = mapMeta.mapView
+
+            if (mapView == null) {
+                context.sendMessage {
+                    color(NamedTextColor.RED)
+                    content("Mapa não tem um Map View!")
+                }
+                return
+            }
+
+            context.sendMessage {
+                color(NamedTextColor.AQUA)
+                content("Renderers do Mapa:")
+            }
+            mapView.renderers.forEach {
+                context.sendMessage {
+                    color(NamedTextColor.YELLOW)
+                    content("$it")
                 }
             }
         }
