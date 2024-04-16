@@ -107,7 +107,8 @@ class SparklyNeonVelocity @Inject constructor(private val server: ProxyServer, _
                     Warns,
                     GeoLocalizations,
                     ConnectionLogEntries,
-                    PremiumUsers
+                    PremiumUsers,
+                    BlockedASNs
                 )
             }
         }
