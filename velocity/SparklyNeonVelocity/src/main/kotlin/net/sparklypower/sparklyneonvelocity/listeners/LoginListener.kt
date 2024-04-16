@@ -311,7 +311,7 @@ class LoginListener(val m: SparklyNeonVelocity, val server: ProxyServer) {
 
             // Check if the ASN is blacklisted
             val asnBlacklisted = m.asnManager.isAsnBlacklisted(playerIp)
-            m.logger.info { "ASN check result for $playerIp: $asnBlacklisted; Quantity of triggered ASNs: ${m.asnManager.triggeredAsns.size}/${m.asnManager.asns.size}" }
+            m.logger.info { "ASN check result for $playerIp ($playerName): $asnBlacklisted; Quantity of triggered ASNs: ${m.asnManager.triggeredAsns.size}/${m.asnManager.asns.size}" }
 
             if (asnBlacklisted) {
                 event.result = ResultedEvent.ComponentResult.denied(
