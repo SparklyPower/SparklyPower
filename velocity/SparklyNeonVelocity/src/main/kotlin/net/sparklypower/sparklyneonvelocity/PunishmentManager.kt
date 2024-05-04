@@ -5,8 +5,10 @@ import club.minnced.discord.webhook.send.WebhookEmbedBuilder
 import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.ProxyServer
+import kotlinx.coroutines.runBlocking
 import net.sparklypower.common.utils.DateUtils
 import net.sparklypower.sparklyneonvelocity.dao.User
+import net.sparklypower.sparklyneonvelocity.tables.Users
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 import kotlin.jvm.optionals.getOrNull
@@ -21,8 +23,16 @@ class PunishmentManager(private val m: SparklyNeonVelocity, val server: ProxySer
     }
 
     fun getUniqueId(playerName: String): UUID {
-        // UUIDs podem ser diferentes... mas já que a gente é um offline mode boi, complicar pra quê?
-        return UUID.nameUUIDFromBytes("OfflinePlayer:$playerName".toByteArray(Charsets.UTF_8))
+        // Because we support premium users, we will check it using our user cache
+        // TODO: Should we really use runBlocking here?
+        return runBlocking {
+            m.pudding.transaction {
+                User.find { Users.username eq playerName }
+                    .firstOrNull()
+                    ?.id
+                    ?.value
+            }
+        } ?: UUID.nameUUIDFromBytes("OfflinePlayer:$playerName".toByteArray(Charsets.UTF_8)) // If not, we will fall back to the OfflinePlayer
     }
 
     suspend fun getUserNameByUniqueId(uniqueId: UUID): String? {
