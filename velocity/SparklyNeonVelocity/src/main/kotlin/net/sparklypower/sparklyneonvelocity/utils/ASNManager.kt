@@ -55,14 +55,19 @@ class ASNManager(val m: SparklyNeonVelocity) {
         }
     }
 
-    suspend fun isAsnBlacklisted(source: String): Boolean {
-        val asn = getAsnForIP(source) ?: return false
+    suspend fun isAsnBlacklisted(source: String): ASNBlockResult {
+        val asn = getAsnForIP(source) ?: return ASNBlockResult(false, null, null)
 
-        return m.pudding.transaction {
+        val blocked = m.pudding.transaction {
             BlockedASNs.select {
                 BlockedASNs.id eq asn.first
             }.count() != 0L
         }
+
+        return if (blocked)
+            ASNBlockResult(true, asn.first, asn.second)
+        else
+            ASNBlockResult(false, asn.first, asn.second)
     }
 
     fun getAsnForIP(source: String): Pair<Int, ASN>? {
@@ -94,8 +99,7 @@ class ASNManager(val m: SparklyNeonVelocity) {
     }
 
     data class ASN(
-        val name: String,
-        val x: String? = null
+        val name: String
     ) {
         val ranges = mutableListOf<IPWithBitmask>()
 
@@ -146,5 +150,11 @@ class ASNManager(val m: SparklyNeonVelocity) {
         val third: Int,
         val fourth: Int,
         val mask: Int
+    )
+
+    class ASNBlockResult(
+        val blocked: Boolean,
+        val asnId: Int?,
+        val asn: ASN?
     )
 }

@@ -151,6 +151,7 @@ class SparklyNeonVelocity @Inject constructor(private val server: ProxyServer, _
         server.commandManager.register("unban", UnbanCommand(this, this.server), "desbanir")
         server.commandManager.register("unwarn", UnwarnCommand(this, this.server))
         server.commandManager.register("warn", WarnCommand(this, this.server), "avisar")
+        server.commandManager.register("checkandkick", CheckAndKickCommand(this, this.server))
 
         // Register our custom listeners
         // THIS REQUIRES SPARKLYVELOCITY!!!

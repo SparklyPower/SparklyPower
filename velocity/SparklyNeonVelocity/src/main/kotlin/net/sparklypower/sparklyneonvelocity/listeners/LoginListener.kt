@@ -28,6 +28,7 @@ import net.sparklypower.sparklyneonvelocity.dao.GeoLocalization
 import net.sparklypower.sparklyneonvelocity.dao.IpBan
 import net.sparklypower.sparklyneonvelocity.dao.User
 import net.sparklypower.sparklyneonvelocity.tables.*
+import net.sparklypower.sparklyneonvelocity.utils.ASNManager
 import net.sparklypower.sparklyneonvelocity.utils.DreamNetwork
 import net.sparklypower.sparklyneonvelocity.utils.GeoUtils
 import net.sparklypower.sparklyneonvelocity.utils.LoginConnectionStatus
@@ -310,10 +311,10 @@ class LoginListener(val m: SparklyNeonVelocity, val server: ProxyServer) {
             val playerIp = event.player.remoteAddress.hostString
 
             // Check if the ASN is blacklisted
-            val asnBlacklisted = m.asnManager.isAsnBlacklisted(playerIp)
-            m.logger.info { "ASN check result for $playerIp ($playerName): $asnBlacklisted; Quantity of triggered ASNs: ${m.asnManager.triggeredAsns.size}/${m.asnManager.asns.size}" }
+            val result = m.asnManager.isAsnBlacklisted(playerIp)
+            m.logger.info { "ASN check result for $playerIp ($playerName): ${result.blocked} (${result.asnId} / ${result.asn?.name}); Quantity of triggered ASNs: ${m.asnManager.triggeredAsns.size}/${m.asnManager.asns.size}" }
 
-            if (asnBlacklisted) {
+            if (result.blocked) {
                 event.result = ResultedEvent.ComponentResult.denied(
                     """§cSeu IP está bloqueado, desative VPNs ou proxies ativos para poder jogar!"""".trimMargin().fromLegacySectionToTextComponent()
                 )
