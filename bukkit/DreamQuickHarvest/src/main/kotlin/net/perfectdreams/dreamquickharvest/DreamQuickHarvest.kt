@@ -14,7 +14,6 @@ import com.sk89q.worldedit.bukkit.BukkitWorld
 import com.sk89q.worldguard.WorldGuard
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin
 import com.sk89q.worldguard.protection.flags.Flags
-import dev.forst.exposed.insertOrUpdate
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
@@ -52,10 +51,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.sum
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -433,7 +429,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			// Update user data if needed
 			onAsyncThread {
 				transaction(Databases.databaseNetwork) {
-					PlayerQuickHarvestData.insertOrUpdate(PlayerQuickHarvestData.id) {
+					PlayerQuickHarvestData.upsert(PlayerQuickHarvestData.id) {
 						it[PlayerQuickHarvestData.id] = player.uniqueId
 						it[PlayerQuickHarvestData.energy] = newInfo.activeBlocks
 					}
@@ -462,7 +458,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			// Update user data if needed
 			onAsyncThread {
 				transaction(Databases.databaseNetwork) {
-					PlayerQuickHarvestData.insertOrUpdate(PlayerQuickHarvestData.id) {
+					PlayerQuickHarvestData.upsert(PlayerQuickHarvestData.id) {
 						it[PlayerQuickHarvestData.id] = player.uniqueId
 						it[PlayerQuickHarvestData.energy] = newInfo.activeBlocks
 					}

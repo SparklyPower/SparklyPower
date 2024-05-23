@@ -8,10 +8,10 @@ import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamchat.tables.ChatUsers
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.ExecutedCommandException
-import net.perfectdreams.dreamcore.utils.exposed.upsert
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.upsert
 
 class QueroTagCommand(val m: DreamChat) : SparklyCommand(arrayOf("querotag"), "dreamchat.querotag") {
 	@Subcommand

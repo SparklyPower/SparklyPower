@@ -49,9 +49,6 @@ dependencies {
     api("io.ktor:ktor-client-cio:2.1.3")
     api("io.ktor:ktor-server-netty:2.1.3")
 
-    api("net.perfectdreams.commands:command-framework-core:0.0.8")
-    api("net.perfectdreams.minecraftmojangapi:minecraft-mojang-api:0.0.4")
-
     kapt("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
 }
 

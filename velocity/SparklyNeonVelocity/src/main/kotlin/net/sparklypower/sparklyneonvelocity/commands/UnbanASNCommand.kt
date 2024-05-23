@@ -19,6 +19,7 @@ import net.sparklypower.sparklyneonvelocity.tables.ConnectionLogEntries
 import net.sparklypower.sparklyneonvelocity.tables.PremiumUsers
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -29,36 +30,24 @@ import java.time.ZoneId
 import java.util.*
 import kotlin.jvm.optionals.getOrNull
 
-class BanASNCommand(private val m: SparklyNeonVelocity, private val server: ProxyServer) : SimpleCommand {
+class UnbanASNCommand(private val m: SparklyNeonVelocity, private val server: ProxyServer) : SimpleCommand {
     override fun execute(invocation: SimpleCommand.Invocation) {
-        val asnId = invocation.arguments().getOrNull(0)?.toIntOrNull()
+        val asnId = invocation.arguments().getOrNull(0)
         if (asnId == null) {
-            invocation.source().sendMessage("§cUse /banasn asnid comentário".fromLegacySectionToTextComponent())
+            invocation.source().sendMessage("§cUse /unbanasn asnid".fromLegacySectionToTextComponent())
             return
         }
-        val reason = invocation.arguments().drop(1).joinToString(" ").ifEmpty { null }
 
-        val banned = m.pudding.transactionBlocking {
-            val count = BlockedASNs.select { BlockedASNs.id eq asnId }.count()
-            if (count == 1L)
-                return@transactionBlocking false
-
-            BlockedASNs.insert {
-                it[BlockedASNs.id] = asnId
-                it[BlockedASNs.comment] = reason
-                it[BlockedASNs.blockedAt] = Instant.now()
-            }
-
-            return@transactionBlocking true
+        val deleted = m.pudding.transactionBlocking {
+            BlockedASNs.deleteWhere { BlockedASNs.id eq asnId.toInt() }
         }
 
-        if (banned) {
-            invocation.source().sendMessage("§aASN §b${asnId}§a foi bloqueado com sucesso, yay!! ^-^ Lembrando que você ainda precisa usar §6/checkandkick§a para expulsar qualquer player que esteja conectado com o ASN banido!".fromLegacySectionToTextComponent())
+        if (deleted != 0) {
+            invocation.source().sendMessage("§aASN §b${asnId}§a foi desbanido com sucesso, yay!! ^-^".fromLegacySectionToTextComponent())
         } else {
-            invocation.source().sendMessage("§cASN §b${asnId}§c já está banido!".fromLegacySectionToTextComponent())
-
+            invocation.source().sendMessage("§cASN §b${asnId}§c não está banido!".fromLegacySectionToTextComponent())
         }
     }
 
-    override fun hasPermission(invocation: SimpleCommand.Invocation) = invocation.source().hasPermission("sparklyneonvelocity.banasn")
+    override fun hasPermission(invocation: SimpleCommand.Invocation) = invocation.source().hasPermission("sparklyneonvelocity.unbanasn")
 }

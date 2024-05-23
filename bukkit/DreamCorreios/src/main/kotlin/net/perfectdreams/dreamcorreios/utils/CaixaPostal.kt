@@ -1,6 +1,5 @@
 package net.perfectdreams.dreamcorreios.utils
 
-import dev.forst.exposed.insertOrUpdate
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -10,6 +9,7 @@ import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreamcorreios.tables.ContaCorreios
 import org.bukkit.inventory.ItemStack
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.upsert
 import java.util.*
 
 class CaixaPostal(
@@ -66,7 +66,7 @@ class CaixaPostal(
         m.logger.info { "Saving caixa postal $playerId to the database..." }
 
         transaction(Databases.databaseNetwork) {
-            ContaCorreios.insertOrUpdate(ContaCorreios.id) {
+            ContaCorreios.upsert(ContaCorreios.id) {
                 it[id] = playerId
                 it[items] = (this@CaixaPostal.items + pendingAddedItems).joinToString(";") { it.toBase64() }
             }

@@ -128,7 +128,12 @@ class Pudding(
     // This is a workaround because "Table.exists()" does not work for partitioned tables!
     private fun Transaction.checkIfTableExists(table: Table): Boolean {
         val tableScheme = table.tableName.substringBefore('.', "").takeIf { it.isNotEmpty() }
-        val schema = tableScheme?.inProperCase() ?: TransactionManager.current().connection.metadata { currentScheme }
+        val schema = tableScheme?.inProperCase() ?: TransactionManager.current().connection.metadata {
+            // TODO: I'm not sure how to correctly get the schema names, before we used "this.currentScheme" but that's has since been removed
+            // The result of "schemaNames" is [information_schema, pg_catalog, public]
+            // We could hardcode the "public" result, but let's throw an error if it isn't found
+            this.schemaNames.firstOrNull { it == "public" } ?: error("Missing \"public\" schema")
+        }
         val tableName = TransactionManager.current().identity(table) // Yes, because "Table.tableName" does not return the correct name...
 
         return exec("SELECT EXISTS (\n" +

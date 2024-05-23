@@ -32,6 +32,7 @@ class TpaAceitarCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpaceitar", 
 			m.tpaManager.requests.remove(tpaRequest)
 
 			requester.teleport(location)
+			m.logger.info("Player ${sender.name} (${sender.uniqueId}) accepted ${requester.name}'s (${requester.uniqueId}) teleport request to ${location.world.name} (${location.x}, ${location.y}, ${location.z})")
 			requester.sendMessage("§b${sender.displayName}§a aceitou o seu pedido de teletransporte!")
 			sender.sendMessage("§aVocê aceitou o pedido de teletransporte de §b${requester.displayName}§a!")
 		} else if (tpaHereRequest != null) {
@@ -51,6 +52,7 @@ class TpaAceitarCommand(val m: DreamMini) : SparklyCommand(arrayOf("tpaceitar", 
 			m.tpaManager.hereRequests.remove(tpaHereRequest)
 
 			requester.teleport(location)
+			m.logger.info("Player ${sender.name} (${sender.uniqueId}) accepted ${requester.name}'s (${requester.uniqueId}) teleport here request to ${location.world.name} (${location.x}, ${location.y}, ${location.z})")
 			requester.sendMessage("§b${sender.displayName}§a aceitou o seu pedido de teletransporte!")
 			sender.sendMessage("§aVocê aceitou o pedido de teletransporte de §b${requester.displayName}§a!")
 		} else {

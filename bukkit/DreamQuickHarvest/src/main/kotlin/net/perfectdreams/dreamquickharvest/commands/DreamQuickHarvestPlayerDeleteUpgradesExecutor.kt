@@ -13,6 +13,7 @@ import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamquickharvest.DreamQuickHarvest
 import net.perfectdreams.dreamquickharvest.tables.PlayerQuickHarvestUpgrades
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.select

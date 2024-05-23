@@ -6,6 +6,7 @@ import net.perfectdreams.dreamauth.dao.AuthInfo
 import net.perfectdreams.dreamauth.tables.AuthStorage
 import net.perfectdreams.dreamcore.utils.Databases
 import org.bukkit.command.CommandSender
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.lang.IllegalStateException

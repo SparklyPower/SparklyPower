@@ -29,11 +29,11 @@ import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamcore.utils.skins.AshconEverythingResponse
 import net.perfectdreams.dreamcore.utils.skins.SkinUtils
 import net.perfectdreams.dreamcore.utils.skins.StoredDatabaseSkin
-import net.perfectdreams.exposedpowerutils.sql.upsert
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.upsert
 import java.util.*
 
 class SkinCommand(val m: DreamCore) : SparklyCommandDeclarationWrapper {

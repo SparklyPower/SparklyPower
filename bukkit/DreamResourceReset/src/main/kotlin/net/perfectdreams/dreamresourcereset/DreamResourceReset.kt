@@ -36,6 +36,7 @@ import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.map.MapPalette
 import org.bukkit.map.MapView
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction

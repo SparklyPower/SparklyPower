@@ -61,6 +61,8 @@ class DreamMini : KotlinPlugin(), Listener {
 
 		INSTANCE = this
 
+		registerEvents(RandomLogsListener(this))
+
 		if (config.getBoolean("fancy-unknown-command")) {
 			registerEvents(UnknownCommandListener(this))
 		}

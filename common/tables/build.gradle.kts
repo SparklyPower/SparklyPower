@@ -10,15 +10,14 @@ repositories {
 
 dependencies {
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    api("org.jetbrains.exposed:exposed-core:0.38.2")
-    api("org.jetbrains.exposed:exposed-dao:0.38.2")
-    api("org.jetbrains.exposed:exposed-jdbc:0.38.2")
-    api("net.perfectdreams.exposedpowerutils:exposed-power-utils:1.1.0")
-    api("net.perfectdreams.exposedpowerutils:postgres-java-time:1.1.0")
-    api("net.perfectdreams.exposedpowerutils:postgres-power-utils:1.1.0")
-    api("dev.forst:exposed-upsert:1.2.0")
+    api("org.jetbrains.exposed:exposed-core:0.49.0")
+    api("org.jetbrains.exposed:exposed-dao:0.49.0")
+    api("org.jetbrains.exposed:exposed-jdbc:0.49.0")
+    api("net.perfectdreams.exposedpowerutils:exposed-power-utils:1.2.1")
+    api("net.perfectdreams.exposedpowerutils:postgres-java-time:1.2.1")
+    api("net.perfectdreams.exposedpowerutils:postgres-power-utils:1.2.1")
     api("com.zaxxer:HikariCP:5.0.1")
-    api("org.postgresql:postgresql:42.3.6")
+    api("org.postgresql:postgresql:42.7.3")
     api("com.michael-bull.kotlin-coroutines-jdbc:kotlin-coroutines-jdbc:1.0.2")
 }
 

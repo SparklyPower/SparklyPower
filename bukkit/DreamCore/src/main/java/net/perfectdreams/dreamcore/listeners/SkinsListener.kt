@@ -19,12 +19,12 @@ import net.perfectdreams.dreamcore.utils.JsonIgnoreUnknownKeys
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamcore.utils.skins.AshconEverythingResponse
 import net.perfectdreams.dreamcore.utils.skins.StoredDatabaseSkin
-import net.perfectdreams.exposedpowerutils.sql.upsert
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.upsert
 import kotlin.time.Duration.Companion.hours
 
 class SkinsListener(val m: DreamCore) : Listener {

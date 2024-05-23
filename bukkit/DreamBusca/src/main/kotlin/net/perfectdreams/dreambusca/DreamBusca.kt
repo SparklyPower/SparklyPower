@@ -206,6 +206,7 @@ class DreamBusca : KotlinPlugin(), Listener {
 			biomeMix.isBiomeOfKind(block.biome) &&
 					location.x !in blacklistedX &&
 					location.z !in blacklistedZ &&
+					location.world.worldBorder.isInside(location) &&
 					!location.worldGuardRegions.any { it.id.contains("survival") } &&
 					GriefPrevention.instance.dataStore.getClaimAt(location, false, null) == null
 		}.run {

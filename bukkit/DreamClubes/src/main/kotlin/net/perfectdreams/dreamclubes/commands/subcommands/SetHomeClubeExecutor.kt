@@ -10,10 +10,10 @@ import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
-import net.perfectdreams.exposedpowerutils.sql.upsert
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.upsert
 
 class SetHomeClubeExecutor(m: DreamClubes) : SparklyClubesCommandExecutor(m) {
     inner class Options : CommandOptions() {

@@ -34,7 +34,7 @@ class DreamWarps : KotlinPlugin(), Listener {
 					"§7Você pode proteger as suas coisas usando a pá de ouro",
 					"§7do §6/kit noob§7!",
 					"§7",
-					"§7Clique aqui para ir ao survival! (§6/warp survival§7)"
+					"§7Clique aqui para ir ao survival! (§6/warp survival1§7)"
 				)
 
 			onClick { clicker ->

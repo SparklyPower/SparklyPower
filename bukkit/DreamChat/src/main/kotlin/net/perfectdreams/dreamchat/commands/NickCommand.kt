@@ -8,10 +8,10 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.AbstractCommand
 import net.perfectdreams.dreamcore.utils.commands.ExecutedCommandException
 import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
-import net.perfectdreams.dreamcore.utils.exposed.upsert
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.upsert
 
 class NickCommand(val m: DreamChat) : AbstractCommand("nick", listOf("nickname"), "dreamchat.nick") {
 	@Subcommand

@@ -100,9 +100,9 @@ include(":bukkit:DreamSplegg")
 include(":bukkit:DreamSocial")
 
 // ===[ BUNGEE ]===
-include(":bungee:DreamCoreBungee")
-include(":bungee:DreamMOTDBungee")
-include(":bungee:DreamNetworkBans")
+// include(":bungee:DreamCoreBungee")
+// include(":bungee:DreamMOTDBungee")
+// include(":bungee:DreamNetworkBans")
 
 // ===[ VELOCITY ]===
 include(":velocity:SparklyNeonVelocity")

@@ -10,7 +10,6 @@ import net.perfectdreams.dreamcore.utils.adventure.*
 import net.perfectdreams.dreamcore.utils.commands.AbstractCommand
 import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
 import net.perfectdreams.dreamcore.utils.commands.annotation.SubcommandPermission
-import net.perfectdreams.dreamcore.utils.exposed.upsert
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamkits.DreamKits
 import net.perfectdreams.dreamkits.tables.Kits
@@ -19,6 +18,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.upsert
 
 class KitCommand(val m: DreamKits) : AbstractCommand("kits", listOf("kit")) {
 	@Subcommand
