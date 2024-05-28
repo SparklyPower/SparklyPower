@@ -10,6 +10,7 @@ import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import net.perfectdreams.dreamcore.utils.commands.options.CommandOptions
+import net.perfectdreams.dreamcore.utils.exposed.ilike
 import net.perfectdreams.dreamcore.utils.extensions.isUnsafe
 import net.perfectdreams.dreamcore.utils.extensions.teleportWithEffects
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
@@ -25,9 +26,6 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
-    class ILikeOp(expr1: Expression<*>, expr2: Expression<*>) : ComparisonOp(expr1, expr2, "ILIKE")
-    infix fun<T:String?> ExpressionWithColumnType<T>.ilike(pattern: String): Op<Boolean> = ILikeOp(this, QueryParameter(pattern, columnType))
-
     inner class Options : CommandOptions() {
         val playerName = optionalWord("player_name") { context, builder ->
             transaction(Databases.databaseNetwork) {

@@ -72,7 +72,6 @@ dependencies {
 
     implementation("com.github.luben:zstd-jni:1.5.5-7")
 
-    compileOnlyApi("com.greatmancode:craftconomy3:3.3.1")
     compileOnlyApi("me.lucko.luckperms:luckperms-api:4.3")
     // testCompileOnly(files("../../libs/paper_server.jar"))
     testCompileOnly("org.junit.jupiter:junit-jupiter-api:5.3.0-M1")

@@ -11,10 +11,9 @@ import com.github.salomonbrys.kotson.string
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.mcMMO
 import com.google.common.collect.Sets
-import com.greatmancode.craftconomy3.Common
-import com.greatmancode.craftconomy3.groups.WorldGroupsManager
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import net.citizensnpcs.api.CitizensAPI
 import net.citizensnpcs.api.npc.NPC
@@ -34,9 +33,11 @@ import net.perfectdreams.dreamchat.utils.bot.PantufaResponse
 import net.perfectdreams.dreamchat.utils.bot.responses.*
 import net.perfectdreams.dreamchat.utils.chatevent.EventoChatHandler
 import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
+import net.perfectdreams.dreamsonecas.tables.PlayerSonecas
 import org.bukkit.Bukkit
 import org.bukkit.Statistic
 import org.bukkit.configuration.file.YamlConfiguration
@@ -72,7 +73,7 @@ class DreamChat : KotlinPlugin() {
 
 	var pmLog = File(dataFolder, "privado.log")
 	var chatLog = File(dataFolder, "chat.log")
-	var topEntries = arrayOf("???", "???", "???")
+	var topEntries = arrayOf<UUID?>(null, null, null)
 	var topMcMMOPlayer: String? = null
 	var topPlayerSkills = mutableMapOf<PrimarySkillType, String?>()
 	var lockedTells = WeakHashMap<Player, String>()
@@ -181,11 +182,18 @@ class DreamChat : KotlinPlugin() {
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
 			while (true) {
 				// CRAFTCONOMY - TOP
-				val currency = Common.getInstance().currencyManager.defaultCurrency
-				val entries = Common.getInstance().storageHandler.storageEngine.getTopEntry(1, currency, WorldGroupsManager.DEFAULT_GROUP_NAME)
+				val topSonecas = transaction(Databases.databaseNetwork) {
+					val topSonecas = PlayerSonecas.innerJoin(Users, { PlayerSonecas.id }, { Users.id })
+						.selectAll()
+						.orderBy(PlayerSonecas.money, SortOrder.DESC)
+						.limit(3)
+						.toList()
 
-				for (idx in 0 until Math.min(3, entries.size)) {
-					topEntries[idx] = entries[idx].username
+					topSonecas
+				}
+
+				for (idx in 0 until 3) {
+					topEntries[idx] = topSonecas.getOrNull(idx)?.get(PlayerSonecas.id)?.value
 				}
 
 				// MCMMO - TOP

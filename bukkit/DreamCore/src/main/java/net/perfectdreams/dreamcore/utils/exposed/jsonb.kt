@@ -6,12 +6,13 @@ import org.jetbrains.exposed.sql.ColumnType
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.statements.api.PreparedStatementApi
 import org.postgresql.util.PGobject
-import java.sql.PreparedStatement
+import java.sql.ResultSet
+
 
 fun <T : Any> Table.jsonb(name: String, klass: Class<T>, jsonMapper: Gson): Column<T>
 		= registerColumn(name, Json(klass, jsonMapper))
 
-class Json<out T : Any>(private val klass: Class<T>, private val jsonMapper: Gson) : ColumnType() {
+class Json<T : Any>(private val klass: Class<T>, private val jsonMapper: Gson) : ColumnType<T>() {
 	override fun sqlType() = "jsonb"
 
 	override fun setParameter(stmt: PreparedStatementApi, index: Int, value: Any?) {
@@ -21,9 +22,9 @@ class Json<out T : Any>(private val klass: Class<T>, private val jsonMapper: Gso
 		stmt[index] = obj
 	}
 
-	override fun valueFromDB(value: Any): Any {
+	override fun valueFromDB(value: Any): T {
 		if (value !is PGobject)
-			return value
+			return value as T
 
 		return try {
 			jsonMapper.fromJson(value.value, klass)
@@ -33,11 +34,37 @@ class Json<out T : Any>(private val klass: Class<T>, private val jsonMapper: Gso
 		}
 	}
 
-	override fun notNullValueToDB(value: Any): Any {
+	override fun notNullValueToDB(value: T): Any {
 		if (value is String)
 			return value
 		return jsonMapper.toJson(value)
 	}
 
-	override fun nonNullValueToString(value: Any): String = "'${jsonMapper.toJson(value)}'"
+	override fun nonNullValueToString(value: T): String = "'${jsonMapper.toJson(value)}'"
 }
+
+// From ExposedPowerUtils but updated to work with Exposed 0.50.1
+class JsonBinary : ColumnType<String>() {
+	override fun sqlType() = "JSONB"
+
+	override fun valueFromDB(value: Any): String {
+		return when {
+			value is PGobject -> value.value!!
+			value is String -> value
+			else -> error("Unexpected value $value of type ${value::class.qualifiedName}")
+		}
+	}
+
+	override fun readObject(rs: ResultSet, index: Int): Any? {
+		return rs.getString(index)
+	}
+
+	override fun setParameter(stmt: PreparedStatementApi, index: Int, value: Any?) {
+		val obj = PGobject()
+		obj.type = "jsonb"
+		obj.value = value as String?
+		stmt[index] = obj
+	}
+}
+
+fun Table.jsonb(name: String): Column<String> = registerColumn(name, JsonBinary())

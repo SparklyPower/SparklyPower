@@ -375,7 +375,7 @@ class ChatListener(val m: DreamChat) : Listener {
 		val event = ApplyPlayerTagsEvent(player, mutableListOf())
 		Bukkit.getPluginManager().callEvent(event)
 
-		if (m.topEntries[0].equals(e.player.name, true)) {
+		if (m.topEntries[0] == e.player.uniqueId) {
 			event.tags.add(
 				PlayerTag(
 					"§2§lM",
@@ -391,7 +391,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			)
 		}
 
-		if (m.topEntries[1].equals(e.player.name, true)) {
+		if (m.topEntries[1] == e.player.uniqueId) {
 			event.tags.add(
 				PlayerTag(
 					"§2§lL",
@@ -407,7 +407,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			)
 		}
 
-		if (m.topEntries[2].equals(e.player.name, true)) {
+		if (m.topEntries[2] == e.player.uniqueId) {
 			event.tags.add(
 				PlayerTag(
 					"§2§lB",

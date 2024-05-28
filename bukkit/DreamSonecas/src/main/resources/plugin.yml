@@ -1,0 +1,5 @@
+name: DreamSonecas
+main: net.perfectdreams.dreamsonecas.DreamSonecas
+version: 1.0.0
+depend: ["DreamCore"]
+api-version: 1.13

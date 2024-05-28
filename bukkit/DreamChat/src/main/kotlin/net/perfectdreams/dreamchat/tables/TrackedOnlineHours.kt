@@ -2,7 +2,7 @@ package net.perfectdreams.dreamchat.tables
 
 import net.perfectdreams.dreamcore.DreamCore
 import org.jetbrains.exposed.dao.id.LongIdTable
-import net.perfectdreams.dreamchat.utils.exposed.timestampWithTimeZone
+import net.perfectdreams.exposedpowerutils.sql.javatime.timestampWithTimeZone
 
 object TrackedOnlineHours : LongIdTable() {
 	override val tableName: String

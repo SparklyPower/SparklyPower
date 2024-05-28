@@ -1,0 +1,4 @@
+POST http://localhost:9999/rpc
+Content-Type: application/json
+
+{"type":"net.sparklypower.rpc.SparklySurvivalRPCRequest.GetSonecasRequest","playerUniqueId":"af942f8e-a7ab-35fb-9800-5e8ab081d065"}

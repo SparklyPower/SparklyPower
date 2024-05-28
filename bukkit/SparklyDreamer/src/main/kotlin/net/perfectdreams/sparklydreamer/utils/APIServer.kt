@@ -1,17 +1,26 @@
 package net.perfectdreams.sparklydreamer.utils
 
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.prometheus.client.CollectorRegistry
-import io.prometheus.client.exporter.common.TextFormat
+import io.ktor.server.request.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamsonecas.SonecasUtils
+import net.perfectdreams.dreamsonecas.tables.PlayerSonecas
 import net.perfectdreams.sparklydreamer.SparklyDreamer
-import net.perfectdreams.sparklydreamer.utils.metrics.Prometheus
-import java.io.StringWriter
+import net.sparklypower.rpc.SparklySurvivalRPCRequest
+import net.sparklypower.rpc.SparklySurvivalRPCResponse
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.*
 
 class APIServer(private val plugin: SparklyDreamer) {
     private val logger = plugin.logger
@@ -25,33 +34,47 @@ class APIServer(private val plugin: SparklyDreamer) {
                     call.respondText("SparklyPower API Web Server")
                 }
 
-                get("/api/server/metrics") {
-                    // We can't use "onMainThread" here because the thread local variable isn't set, so don't use it!
-                    val deferred = plugin.launchMainThreadDeferred {
-                        // Collect Metrics
-                        Prometheus.metrics.forEach { it.doCollect() }
+                post("/rpc") {
+                    val jsonPayload = call.receiveText()
+                    logger.info { "${call.request.userAgent()} sent a RPC request: $jsonPayload" }
+
+                    val request = Json.decodeFromString<SparklySurvivalRPCRequest>(jsonPayload)
+
+                    val response = when (request) {
+                        is SparklySurvivalRPCRequest.GetSonecasRequest -> {
+                            val playerUniqueId = UUID.fromString(request.playerUniqueId)
+
+                            val (money, ranking) = net.perfectdreams.exposedpowerutils.sql.transaction(Dispatchers.IO, Databases.databaseNetwork) {
+                                val money = PlayerSonecas.selectAll()
+                                    .where { PlayerSonecas.id eq playerUniqueId }
+                                    .firstOrNull()
+                                    ?.get(PlayerSonecas.money)
+                                    ?.toDouble() ?: 0.0
+
+                                val ranking = if (money > 0.0) {
+                                    PlayerSonecas.selectAll().where { PlayerSonecas.money greaterEq money.toBigDecimal() }
+                                        .count()
+                                } else null
+
+                                Pair(money, ranking)
+                            }
+
+                            SparklySurvivalRPCResponse.GetSonecasResponse.Success(money, ranking)
+                        }
+
+                        is SparklySurvivalRPCRequest.TransferSonecasRequest -> TODO()
                     }
 
-                    deferred.await() // Await all metrics to be collected
-
-                    val writer = StringWriter()
-
-                    withContext(Dispatchers.IO) {
-                        // Gets all registered Prometheus Metrics and writes to the StringWriter
-                        TextFormat.write004(
-                            writer,
-                            CollectorRegistry.defaultRegistry.metricFamilySamples()
-                        )
-                    }
-
-                    call.respondText(writer.toString())
+                    call.respondText(
+                        Json.encodeToString<SparklySurvivalRPCResponse>(response),
+                        ContentType.Application.Json
+                    )
                 }
             }
         }
 
         // If set to "wait = true", the server hangs
         this.server = server.start(wait = false)
-        logger.info { "Successfully started HTTP Server!" }
     }
 
     fun stop() {

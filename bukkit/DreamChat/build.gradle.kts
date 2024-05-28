@@ -19,6 +19,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamClubes"))
     compileOnly(project(":bukkit:DreamVanish"))
     compileOnly(project(":bukkit:DreamBedrockIntegrations"))
+    compileOnly(project(":bukkit:DreamSonecas"))
     compileOnly(files("../../libs/mcMMO.jar"))
     compileOnly("net.luckperms:api:5.0")
     compileOnly("com.github.ChestShop-authors:ChestShop-3:3.12")

@@ -1,0 +1,4 @@
+package net.perfectdreams.loritta.morenitta.interactions.commands
+
+@DslMarker
+annotation class InteraKTionsUnleashedDsl

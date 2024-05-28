@@ -5,11 +5,11 @@ import com.okkero.skedule.schedule
 import net.perfectdreams.dreamauth.DreamAuth
 import net.perfectdreams.dreamauth.dao.AuthInfo
 import net.perfectdreams.dreamauth.tables.AuthStorage
-import net.perfectdreams.dreamauth.utils.ilike
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.commands.DSLCommandBase
+import net.perfectdreams.dreamcore.utils.exposed.ilike
 import net.perfectdreams.dreamcore.utils.generateCommandInfo
 import net.perfectdreams.dreamcore.utils.scheduler
 import org.jetbrains.exposed.sql.transactions.transaction

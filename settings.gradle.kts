@@ -98,6 +98,7 @@ include(":bukkit:DreamAjuda")
 include(":bukkit:DreamEnderHopper")
 include(":bukkit:DreamSplegg")
 include(":bukkit:DreamSocial")
+include(":bukkit:DreamSonecas")
 
 // ===[ BUNGEE ]===
 // include(":bungee:DreamCoreBungee")
@@ -106,3 +107,6 @@ include(":bukkit:DreamSocial")
 
 // ===[ VELOCITY ]===
 include(":velocity:SparklyNeonVelocity")
+
+// ===[ PANTUFA ]===
+include(":pantufa")
