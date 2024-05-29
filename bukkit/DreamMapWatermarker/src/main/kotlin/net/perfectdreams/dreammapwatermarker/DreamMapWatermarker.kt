@@ -1,16 +1,23 @@
 package net.perfectdreams.dreammapwatermarker
 
+import com.charleskorn.kaml.Yaml
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.serialization.decodeFromString
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.command
 import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreammapwatermarker.commands.DreamMapMakerCommand
+import net.perfectdreams.dreammapwatermarker.commands.LoriCoolCardsAdminCommand
+import net.perfectdreams.dreammapwatermarker.commands.LoriCoolCardsCommand
+import net.perfectdreams.dreammapwatermarker.loricoolcards.LoriCoolCardsHandler
 import net.perfectdreams.dreammapwatermarker.map.ImgRenderer
+import net.perfectdreams.dreammapwatermarker.tables.LoriCoolCardsClaimedAlbums
+import net.perfectdreams.dreammapwatermarker.tables.LoriCoolCardsGeneratedMaps
 import org.bukkit.Bukkit
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
@@ -25,6 +32,8 @@ import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.map.MapPalette
 import org.bukkit.map.MapRenderer
 import org.bukkit.persistence.PersistentDataType
+import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Image
 import java.awt.image.BufferedImage
 import java.io.File
@@ -46,16 +55,31 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 	}
 
 	val imageFolder = File(dataFolder, "img")
+	val loriCoolCardsHandler = LoriCoolCardsHandler(this)
+	lateinit var config: DreamMapWatermarkerConfig
 
 	override fun softEnable() {
 		super.softEnable()
+		config = Yaml.default.decodeFromString<DreamMapWatermarkerConfig>(this.getConfig().saveToString())
+
 		imageFolder.mkdirs()
 
 		registerCommand(DreamMapMakerCommand(this))
+		registerCommand(LoriCoolCardsCommand(this))
+		registerCommand(LoriCoolCardsAdminCommand(this))
 
 		registerEvents(this)
 
+		transaction(Databases.databaseNetwork) {
+			SchemaUtils.create(
+				LoriCoolCardsGeneratedMaps,
+				LoriCoolCardsClaimedAlbums
+			)
+		}
+
 		restoreMaps()
+
+		loriCoolCardsHandler.startLoriCoolCardsMapGenerator()
 		
 		registerCommand(
 			command("DreamWatermarkMap", listOf("watermarkmap")) {

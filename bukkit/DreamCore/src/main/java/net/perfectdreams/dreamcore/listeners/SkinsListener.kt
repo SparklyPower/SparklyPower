@@ -25,6 +25,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.upsert
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
 class SkinsListener(val m: DreamCore) : Listener {
@@ -43,8 +44,8 @@ class SkinsListener(val m: DreamCore) : Listener {
                 Json.decodeFromString<StoredDatabaseSkin>(playerSkin[PlayerSkins.data])
             }
 
-            // We only want to auto refresh the skin after 24 hours
-            val shouldRefresh = (data == null || (Clock.System.now() - data.configuredAt) >= 24.hours) && data !is StoredDatabaseSkin.CustomMojangSkin
+            // We only want to auto refresh the skin after 7 days
+            val shouldRefresh = (data == null || (Clock.System.now() - data.configuredAt) >= 7.days) && data !is StoredDatabaseSkin.CustomMojangSkin
 
             if (!shouldRefresh) {
                 if (data is StoredDatabaseSkin.MojangSkin) {

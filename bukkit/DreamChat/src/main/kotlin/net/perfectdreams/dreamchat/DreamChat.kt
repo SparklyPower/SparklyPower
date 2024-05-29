@@ -20,7 +20,6 @@ import net.citizensnpcs.api.npc.NPC
 import net.perfectdreams.dreamchat.commands.*
 import net.perfectdreams.dreamchat.commands.declarations.TellCommand
 import net.perfectdreams.dreamchat.dao.ChatUser
-import net.perfectdreams.dreamchat.dao.DiscordAccount
 import net.perfectdreams.dreamchat.dao.EventMessage
 import net.perfectdreams.dreamchat.listeners.CharacterBlockerListener
 import net.perfectdreams.dreamchat.listeners.ChatListener
@@ -122,7 +121,6 @@ class DreamChat : KotlinPlugin() {
 				ChatUsers,
 				EventMessages,
 				PremiumUsers,
-				DiscordAccounts,
 				TrackedOnlineHours
 			)
 		}

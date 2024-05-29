@@ -80,7 +80,8 @@ class DreamCore : KotlinPlugin() {
 				EventVictories,
 				Transactions,
 				PreferencesTable,
-				PlayerSkins
+				PlayerSkins,
+				DiscordAccounts
 			)
 		}
 

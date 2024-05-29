@@ -115,7 +115,8 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                         copyAttributeIfPresent(MochilaUtils.IS_MOCHILA_KEY, PersistentDataType.BYTE)
                         copyAttributeIfPresent(MochilaUtils.MOCHILA_ID_KEY, PersistentDataType.LONG)
                         copyAttributeIfPresent(MochilaUtils.IS_FULL_KEY, PersistentDataType.BYTE)
-                        copyAttributeIfPresent(MochilaUtils.HAS_MAGNET_KEY, PersistentDataType.BYTE)
+                        // This is unused by the magnet code (and let's be honest this should NOT be copied to a new backpack)
+                        // copyAttributeIfPresent(MochilaUtils.HAS_MAGNET_KEY, PersistentDataType.BYTE)
                     }
                 }
             }

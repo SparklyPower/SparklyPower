@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
+    kotlin("plugin.serialization")
     id("io.papermc.paperweight.userdev")
 }
 
@@ -13,6 +14,8 @@ repositories {
 dependencies {
     paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
+    compileOnly(project(":bukkit:DreamMochilas"))
+    compileOnly(project(":bukkit:DreamCorreios"))
 }
 
 tasks.withType<KotlinCompile> {

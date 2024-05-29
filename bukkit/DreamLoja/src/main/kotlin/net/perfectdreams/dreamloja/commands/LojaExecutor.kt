@@ -74,7 +74,7 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
 
                 if (playerShops.size > 1 && shopName == null) {
                     onMainThread {
-                        val menu = createMenu(roundToNearestMultipleOfNine(playerShops.size).coerceAtLeast(9), "§a§lLojas de $ownerName") {
+                        val menu = createMenu(InventoryUtils.roundToNearestMultipleOfNine(playerShops.size).coerceAtLeast(9), "§a§lLojas de $ownerName") {
                             // Map it down to our inventory maps, split over to 9 first tho
                             playerShops.chunked(9)
                                 .forEachIndexed { yIndex, shops ->
@@ -164,16 +164,6 @@ class LojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
             }
         } else {
             m.openMenu(player)
-        }
-    }
-
-    // Thanks, ChatGPT xoxo
-    private fun roundToNearestMultipleOfNine(number: Int): Int {
-        val remainder = number % 9
-        return if (remainder == 0) {
-            number // No rounding needed
-        } else {
-            number + (9 - remainder) // Round up to the nearest multiple of 9
         }
     }
 }

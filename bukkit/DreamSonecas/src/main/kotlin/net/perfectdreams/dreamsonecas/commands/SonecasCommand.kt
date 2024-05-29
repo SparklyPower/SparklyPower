@@ -28,10 +28,10 @@ import net.perfectdreams.dreamsonecas.tables.PlayerSonecas
 import org.bukkit.Bukkit
 import org.bukkit.SoundCategory
 import org.bukkit.entity.Player
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.innerJoin
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.math.BigDecimal
-import java.time.Instant
 import java.util.*
 
 class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
@@ -59,8 +59,12 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
         }
     }
 
-    override fun declaration() = sparklyCommand(listOf("sonecas", "money", "atm")) {
-        executor = SonecasBalanceExecutor(m)
+    override fun declaration() = sparklyCommand(listOf("sonecas", "money", "atm", "dinheiro")) {
+        executor = SonecasSelfBalanceExecutor(m, this@SonecasCommand)
+
+        subcommand(listOf("balance", "atm", "saldo", "ver", "olhar")) {
+            executor = SonecasBalanceExecutor(m, this@SonecasCommand)
+        }
 
         subcommand(listOf("pay", "pagar")) {
             executor = SonecasPayExecutor(m)
@@ -71,7 +75,126 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
         }
     }
 
-    class SonecasBalanceExecutor(val m: DreamSonecas) : SparklyCommandExecutor() {
+    fun showBalance(context: CommandContext, executorUniqueId: UUID?, queryType: QueryType, afterCallback: () -> (Unit)) {
+        m.launchAsyncThread {
+            val result = net.perfectdreams.exposedpowerutils.sql.transaction(Dispatchers.IO, Databases.databaseNetwork) {
+                val userData = Users.select(Users.id, Users.username)
+                    .where {
+                        when (queryType) {
+                            is QueryType.GetByCommandExecutor -> Users.id eq queryType.player.uniqueId
+                            is QueryType.GetByName -> Users.username eq queryType.playerName
+                        }
+                    }
+                    .firstOrNull()
+
+                if (userData == null)
+                    return@transaction Result.PlayerNotFound
+
+                val playerUniqueId = userData[Users.id].value
+                val playerName = userData[Users.username]
+
+                val money = PlayerSonecas.selectAll()
+                    .where { PlayerSonecas.id eq playerUniqueId }
+                    .firstOrNull()
+                    ?.get(PlayerSonecas.money)
+                    ?.toDouble() ?: 0.0
+
+                val ranking = if (money > 0.0) {
+                    PlayerSonecas.selectAll().where { PlayerSonecas.money greaterEq money.toBigDecimal() }
+                        .count()
+                } else null
+
+                return@transaction Result.Success(
+                    playerUniqueId == executorUniqueId,
+                    playerName,
+                    money,
+                    ranking
+                )
+            }
+
+            onMainThread {
+                when (result) {
+                    Result.PlayerNotFound -> {
+                        context.sendMessage {
+                            color(NamedTextColor.RED)
+                            append(prefix())
+                            appendSpace()
+
+                            append("Player não existe! Verifique se você colocou o nome do player corretamente.")
+                        }
+                    }
+                    is Result.Success -> {
+                        context.sendMessage {
+                            color(NamedTextColor.YELLOW)
+                            append(prefix())
+                            appendSpace()
+
+                            if (result.isSelf) {
+                                append("Você possui ")
+
+                                append(NamedTextColor.WHITE, "\uE283")
+                                appendSpace()
+
+                                append(
+                                    textComponent {
+                                        color(NamedTextColor.GREEN)
+                                        append(SonecasUtils.formatSonecasAmountWithCurrencyName(result.money))
+                                    }
+                                )
+
+                                append("!")
+
+                                if (result.sonecasRankPosition != null) {
+                                    appendSpace()
+
+                                    append("Você está em #${result.sonecasRankPosition} lugar do ranking, veja outros ostentadores com ")
+                                    appendCommand("/sonecas rank")
+                                    append("!")
+                                }
+                            } else {
+                                append(NamedTextColor.AQUA, result.playerName)
+                                append(" possui ")
+
+                                append(NamedTextColor.WHITE, "\uE283")
+                                appendSpace()
+
+                                append(
+                                    textComponent {
+                                        color(NamedTextColor.GREEN)
+                                        append(SonecasUtils.formatSonecasAmountWithCurrencyName(result.money))
+                                    }
+                                )
+
+                                append("!")
+
+                                if (result.sonecasRankPosition != null) {
+                                    appendSpace()
+
+                                    append("E você sabia que ")
+                                    append(NamedTextColor.AQUA, result.playerName)
+                                    append(" está em #${result.sonecasRankPosition} lugar do ranking? Veja outros ostentadores com ")
+                                    appendCommand("/sonecas rank")
+                                    append("!")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    sealed class QueryType {
+        data class GetByCommandExecutor(val player: Player) : QueryType()
+        data class GetByName(val playerName: String) : QueryType()
+    }
+
+    sealed class Result {
+        data object PlayerNotFound : Result()
+        data class Success(val isSelf: Boolean, val playerName: String, val money: Double, val sonecasRankPosition: Long?) : Result()
+    }
+
+    class SonecasBalanceExecutor(val m: DreamSonecas, val command: SonecasCommand) : SparklyCommandExecutor() {
         inner class Options : CommandOptions() {
             val playerName = optionalWord("player_name") { context, builder ->
                 transaction(Databases.databaseNetwork) {
@@ -94,122 +217,35 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
             val queryType = args[options.playerName]?.let { QueryType.GetByName(it) } ?: QueryType.GetByCommandExecutor(context.requirePlayer())
             val executorUniqueId = (context.sender as? Player)?.uniqueId
 
-            m.launchAsyncThread {
-                val result = net.perfectdreams.exposedpowerutils.sql.transaction(Dispatchers.IO, Databases.databaseNetwork) {
-                    val userData = Users.select(Users.id, Users.username)
-                        .where {
-                            when (queryType) {
-                                is QueryType.GetByCommandExecutor -> Users.id eq queryType.player.uniqueId
-                                is QueryType.GetByName -> Users.username eq queryType.playerName
-                            }
-                        }
-                        .firstOrNull()
+            command.showBalance(context, executorUniqueId, queryType) {}
+        }
+    }
 
-                    if (userData == null)
-                        return@transaction Result.PlayerNotFound
+    class SonecasSelfBalanceExecutor(val m: DreamSonecas, val command: SonecasCommand) : SparklyCommandExecutor() {
+        override fun execute(context: CommandContext, args: CommandArguments) {
+            val queryType = QueryType.GetByCommandExecutor(context.requirePlayer())
+            val executorUniqueId = (context.sender as? Player)?.uniqueId
 
-                    val playerUniqueId = userData[Users.id].value
-                    val playerName = userData[Users.username]
+            command.showBalance(context, executorUniqueId, queryType) {
 
-                    val money = PlayerSonecas.selectAll()
-                        .where { PlayerSonecas.id eq playerUniqueId }
-                        .firstOrNull()
-                        ?.get(PlayerSonecas.money)
-                        ?.toDouble() ?: 0.0
+                context.sendMessage {
+                    color(NamedTextColor.YELLOW)
+                    append(prefix())
+                    appendSpace()
 
-                    val ranking = if (money > 0.0) {
-                        PlayerSonecas.selectAll().where { PlayerSonecas.money greaterEq money.toBigDecimal() }
-                            .count()
-                    } else null
-
-                    return@transaction Result.Success(
-                        playerUniqueId == executorUniqueId,
-                        playerName,
-                        money,
-                        ranking
-                    )
+                    append("Veja as sonecas de outro jogador com ")
+                    appendCommand("/sonecas atm NomeDoJogador")
                 }
 
-                onMainThread {
-                    when (result) {
-                        Result.PlayerNotFound -> {
-                            context.sendMessage {
-                                color(NamedTextColor.RED)
-                                append(prefix())
-                                appendSpace()
+                context.sendMessage {
+                    color(NamedTextColor.YELLOW)
+                    append(prefix())
+                    appendSpace()
 
-                                append("Player não existe! Verifique se você colocou o nome do player corretamente.")
-                            }
-                        }
-                        is Result.Success -> {
-                            context.sendMessage {
-                                color(NamedTextColor.YELLOW)
-                                append(prefix())
-                                appendSpace()
-
-                                if (result.isSelf) {
-                                    append("Você possui ")
-
-                                    append(NamedTextColor.WHITE, "\uE283")
-                                    appendSpace()
-
-                                    append(
-                                        textComponent {
-                                            color(NamedTextColor.GREEN)
-                                            append(SonecasUtils.formatSonecasAmountWithCurrencyName(result.money))
-                                        }
-                                    )
-
-                                    append("!")
-
-                                    if (result.sonecasRankPosition != null) {
-                                        appendSpace()
-
-                                        append("Você está em #${result.sonecasRankPosition} lugar do ranking, veja outros ostentadores com ")
-                                        appendCommand("/sonecas rank")
-                                        append("!")
-                                    }
-                                } else {
-                                    append(NamedTextColor.AQUA, result.playerName)
-                                    append(" possui ")
-
-                                    append(NamedTextColor.WHITE, "\uE283")
-                                    appendSpace()
-
-                                    append(
-                                        textComponent {
-                                            color(NamedTextColor.GREEN)
-                                            append(SonecasUtils.formatSonecasAmountWithCurrencyName(result.money))
-                                        }
-                                    )
-
-                                    append("!")
-
-                                    if (result.sonecasRankPosition != null) {
-                                        appendSpace()
-
-                                        append("E você sabia que ")
-                                        append(NamedTextColor.AQUA, result.playerName)
-                                        append(" está em #${result.sonecasRankPosition} lugar do ranking? Veja outros ostentadores com ")
-                                        appendCommand("/sonecas rank")
-                                        append("!")
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    append("Envie sonecas para outro jogador com ")
+                    appendCommand("/sonecas pagar NomeDoJogador Quantidade")
                 }
             }
-        }
-
-        sealed class QueryType {
-            data class GetByCommandExecutor(val player: Player) : QueryType()
-            data class GetByName(val playerName: String) : QueryType()
-        }
-
-        sealed class Result {
-            data object PlayerNotFound : Result()
-            data class Success(val isSelf: Boolean, val playerName: String, val money: Double, val sonecasRankPosition: Long?) : Result()
         }
     }
 
@@ -346,6 +382,8 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
                                 )
                             }
 
+                            player.playSound(player.location, "sparklypower.sfx.money", SoundCategory.RECORDS, 1.0f, DreamUtils.random.nextFloat(0.9f, 1.1f))
+
                             // Is the player online?
                             val receiverPlayer = Bukkit.getPlayer(result.receiverName)
                             if (receiverPlayer != null) {
@@ -437,7 +475,7 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
                                     color(NamedTextColor.AQUA)
                                 }
                                 append(": ")
-                                append("${playerInfo[PlayerSonecas.money]} sonecas") {
+                                append(SonecasUtils.formatSonecasAmountWithCurrencyName(playerInfo[PlayerSonecas.money].toDouble())) {
                                     color(NamedTextColor.GREEN)
                                 }
                                 appendNewline()

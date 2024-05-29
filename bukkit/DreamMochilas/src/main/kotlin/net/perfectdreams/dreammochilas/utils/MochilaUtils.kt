@@ -7,12 +7,15 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import net.kyori.adventure.text.serializer.json.JSONComponentSerializer
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.md_5.bungee.api.ChatColor
-import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.DreamUtils
-import net.perfectdreams.dreamcore.utils.ItemUtils
-import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
+import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.adventure.appendTextComponent
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.dao.Mochila
@@ -21,7 +24,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -34,12 +36,14 @@ object MochilaUtils {
         .color(NamedTextColor.BLACK)
         .decoration(TextDecoration.ITALIC, false)
 
-    private val isMagnet: (ItemStack?) -> Boolean = { it?.type == Material.STONE_HOE && it.hasItemMeta() && it.itemMeta.hasCustomModelData() && it.itemMeta.customModelData in 1 .. 2 }
-    val HAS_MAGNET_KEY = SparklyNamespacedKey("has_magnet")
+    // This is unused by the magnet code
+    // private val isMagnet: (ItemStack?) -> Boolean = { it?.type == Material.STONE_HOE && it.hasItemMeta() && it.itemMeta.hasCustomModelData() && it.itemMeta.customModelData in 1 .. 2 }
+    // val HAS_MAGNET_KEY = SparklyNamespacedKey("has_magnet")
     val IS_FULL_KEY = SparklyNamespacedKey("is_backpack_full")
 
     val IS_MOCHILA_KEY = SparklyNamespacedKey("is_mochila")
     val MOCHILA_ID_KEY = SparklyNamespacedKey("mochila_id")
+    val ORIGINAL_MOCHILA_LORE_KEY = SparklyNamespacedKeyWithType(SparklyNamespacedKey("original_lore"), PersistentDataType.STRING)
 
     val loadedMochilas = ConcurrentHashMap<Long, MochilaWrapper>()
     private val plugin: DreamMochilas
@@ -131,53 +135,90 @@ object MochilaUtils {
      * Updates the [mochilaItem] metadata based on the [inventory]'s information
      */
     fun updateMochilaItemLore(inventory: Inventory, mochilaItem: ItemStack) {
+        val gsonSerializer = GsonComponentSerializer.gson()
+
         // Items can only be manipulated in the main thread, if else the server doesn't like it
         // (Race conditions where the server reads the ItemMeta while another thread is changing it, causing a full server crash)
         DreamUtils.assertMainThread(true)
         mochilaItem.meta<ItemMeta> {
-            if (hasLore())
-                with (lore!!) {
-                    if (size == 3) add("\n")
+            if (hasLore()) {
+                val currentItemLore = lore()!!
+                val persistentDataContainer = persistentDataContainer
+                var originalLore = persistentDataContainer.get(ORIGINAL_MOCHILA_LORE_KEY)?.let {
+                    it.lines().map { gsonSerializer.deserialize(it) }
+                }
 
-                    val usedSize = with (inventory) { count { it != null }.let { if (it == -1) size else it } }
-                    // Do a nice transition from green to red, depending on how many slots are used
-                    val totalSizeInPercentage = usedSize / inventory.size.toDouble()
-                    val color = ChatColor.of(Color(
-                        0 + (200 * totalSizeInPercentage).toInt(),
-                        255 - (255 * totalSizeInPercentage).toInt(),
-                        125 - (125 * totalSizeInPercentage).toInt()
-                    ))
-
-                    val usedSlotsLine = with (inventory.size) {
-                        "$color$usedSize/$this §7slots usados${if (usedSize == this) " §c§lCHEIA!" else ""}"
+                if (originalLore == null) {
+                    // Original lore not set in item!
+                    // This is a bit of a hack :(
+                    if (lore!!.contains("§7slots usados")) {
+                        persistentDataContainer.set(ORIGINAL_MOCHILA_LORE_KEY, currentItemLore.take(3).joinToString("\n") { gsonSerializer.serialize(it) })
+                    } else {
+                        persistentDataContainer.set(ORIGINAL_MOCHILA_LORE_KEY, currentItemLore.joinToString("\n") { gsonSerializer.serialize(it) })
                     }
 
-                    if (size == 4) add(usedSlotsLine) else set(4, usedSlotsLine)
+                    originalLore = persistentDataContainer.get(ORIGINAL_MOCHILA_LORE_KEY)!!.let {
+                        it.lines().map { gsonSerializer.deserialize(it) }
+                    }
+                }
 
-                    with (persistentDataContainer) {
-                        set(IS_FULL_KEY, PersistentDataType.BYTE, if (usedSize == inventory.size) 1 else 0)
+                val newLore = originalLore.toMutableList()
+                newLore.add(textComponent(""))
 
-                        inventory.firstOrNull(isMagnet)?.let {
-                            set(HAS_MAGNET_KEY, PersistentDataType.BYTE, 1)
-                            val magnetLastLine = it.lore!!.last()
+                val usedSize = with (inventory) { count { it != null }.let { if (it == -1) size else it } }
+                val totalSizeInPercentage = usedSize / inventory.size.toDouble()
 
-                            if (size == 5) {
-                                add("\n")
-                                add("§6Mochila magnetizada")
-                                add(magnetLastLine)
-                            } else set(7, magnetLastLine)
-                        } ?: run {
-                            set(HAS_MAGNET_KEY, PersistentDataType.BYTE, 0)
-                            if (size == 8) for (index in 7 downTo 5) removeAt(index)
+                newLore.add(
+                    textComponent {
+                        decoration(TextDecoration.ITALIC, false)
+                        // Do a nice transition from green to red, depending on how many slots are used
+                        color(
+                            TextColor.color(
+                                0 + (200 * totalSizeInPercentage).toInt(),
+                                255 - (255 * totalSizeInPercentage).toInt(),
+                                125 - (125 * totalSizeInPercentage).toInt()
+                            )
+                        )
+                        content("$usedSize/${inventory.size} ")
+                        appendTextComponent {
+                            color(NamedTextColor.GRAY)
+                            content("slots usados")
+                        }
+                        if (usedSize == inventory.size) {
+                            appendSpace()
+                            appendTextComponent {
+                                color(NamedTextColor.RED)
+                                decoration(TextDecoration.BOLD, true)
+                                decoration(TextDecoration.ITALIC, true)
+                                content("CHEIA!")
+                            }
                         }
                     }
+                )
 
-                    lore = this
-                }
+                // This is unused by the magnet code
+                /* with (persistentDataContainer) {
+                    set(IS_FULL_KEY, PersistentDataType.BYTE, if (usedSize == inventory.size) 1 else 0)
+
+                    inventory.firstOrNull(isMagnet)?.let {
+                        set(HAS_MAGNET_KEY, PersistentDataType.BYTE, 1)
+                        // TODO: What is this used for?
+                        // val magnetLastLine = it.lore!!.last()
+
+                        newLore.add(textComponent(""))
+                        newLore.add(LegacyComponentSerializer.legacySection().deserialize("§r§6Mochila magnetizada"))
+                        // newLore.add(LegacyComponentSerializer.legacySection().deserialize(magnetLastLine))
+                    } ?: run {
+                        set(HAS_MAGNET_KEY, PersistentDataType.BYTE, 0)
+                    }
+                } */
+
+                lore(newLore)
+            }
         }
     }
 
-    internal fun serializeMochilaInventory(mochilaInventory: Inventory): String {
+    fun serializeMochilaInventory(mochilaInventory: Inventory): String {
         val map = mutableMapOf<Int, String?>()
 
         mochilaInventory.contents.forEachIndexed { index, itemStack ->

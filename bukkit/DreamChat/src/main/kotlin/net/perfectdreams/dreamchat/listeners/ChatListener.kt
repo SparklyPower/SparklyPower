@@ -26,16 +26,16 @@ import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcasamentos.DreamCasamentos
 import net.perfectdreams.dreamchat.DreamChat
 import net.perfectdreams.dreamchat.dao.ChatUser
-import net.perfectdreams.dreamchat.dao.DiscordAccount
 import net.perfectdreams.dreamchat.events.ApplyPlayerTagsEvent
 import net.perfectdreams.dreamchat.tables.ChatUsers
-import net.perfectdreams.dreamchat.tables.DiscordAccounts
 import net.perfectdreams.dreamchat.tables.PremiumUsers
 import net.perfectdreams.dreamchat.utils.*
 import net.perfectdreams.dreamclubes.tables.PlayerDeaths
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamclubes.utils.KDWrapper
+import net.perfectdreams.dreamcore.dao.DiscordAccount
 import net.perfectdreams.dreamcore.network.DreamNetwork
+import net.perfectdreams.dreamcore.tables.DiscordAccounts
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.jsonParser
 import net.perfectdreams.dreamcore.utils.extensions.artigo
@@ -59,6 +59,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.*
 import org.bukkit.inventory.ItemStack
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.count
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
@@ -654,7 +655,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			}
 
 			val discordAccount = transaction(Databases.databaseNetwork) {
-				DiscordAccount.find { DiscordAccounts.minecraftId eq player.uniqueId }.firstOrNull()
+				DiscordAccount.find { DiscordAccounts.minecraftId eq player.uniqueId and (DiscordAccounts.isConnected eq true) }.firstOrNull()
 			}
 
 			if (discordAccount != null) {

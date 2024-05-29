@@ -1,6 +1,6 @@
-package net.perfectdreams.dreamchat.dao
+package net.perfectdreams.dreamcore.dao
 
-import net.perfectdreams.dreamchat.tables.DiscordAccounts
+import net.perfectdreams.dreamcore.tables.DiscordAccounts
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.LongEntity
 import org.jetbrains.exposed.dao.LongEntityClass

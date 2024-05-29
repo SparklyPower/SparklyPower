@@ -122,6 +122,12 @@ sealed class MochilaData(
     data object Birthday9BlackZum : MochilaData("Nono Aniversário Preta do Zum", 193) {
         override val displayName = "Mochila de Aniversário do Zum"
     }
+    data object StickerRarityCommon : MochilaData("Figurinha Comum", 198)
+    data object StickerRarityUncommon : MochilaData("Figurinha Incomum", 199)
+    data object StickerRarityRare : MochilaData("Figurinha Rara", 200)
+    data object StickerRarityEpic : MochilaData("Figurinha Épica", 201)
+    data object StickerRarityLegendary : MochilaData("Figurinha Lendária", 202)
+    data object StickerRaritySpecial : MochilaData("Figurinha Especial", 203)
 
     companion object {
         val list: List<MochilaData>
@@ -193,6 +199,12 @@ sealed class MochilaData(
                 Birthday9BlackTbag,
                 Birthday9BlackVegeta,
                 Birthday9BlackZum,
+                StickerRarityCommon,
+                StickerRarityUncommon,
+                StickerRarityRare,
+                StickerRarityEpic,
+                StickerRarityLegendary,
+                StickerRaritySpecial
             )
 
         val birthday9: List<MochilaData>

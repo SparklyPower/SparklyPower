@@ -51,6 +51,16 @@ object InventoryUtils {
 
 		menu.sendTo(sender)
 	}
+
+	// Thanks, ChatGPT xoxo
+	fun roundToNearestMultipleOfNine(number: Int): Int {
+		val remainder = number % 9
+		return if (remainder == 0) {
+			number // No rounding needed
+		} else {
+			number + (9 - remainder) // Round up to the nearest multiple of 9
+		}
+	}
 }
 
 fun Inventory.canHoldItem(stack: ItemStack?): Boolean {

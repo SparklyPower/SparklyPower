@@ -6,6 +6,7 @@ import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.VaultUtils
 import net.perfectdreams.dreamsonecas.commands.SonecasCommand
 import net.perfectdreams.dreamsonecas.commands.SonecasAdminCommand
+import net.perfectdreams.dreamsonecas.commands.SonecasPayCommand
 import net.perfectdreams.dreamsonecas.tables.PlayerSonecas
 import org.bukkit.Bukkit
 import org.bukkit.plugin.ServicePriority
@@ -23,6 +24,7 @@ class DreamSonecas : KotlinPlugin() {
         VaultUtils.setupEconomy()
         registerCommand(SonecasCommand(this))
         registerCommand(SonecasAdminCommand(this))
+        registerCommand(SonecasPayCommand(this))
 
         transaction(Databases.databaseNetwork) {
             SchemaUtils.createMissingTablesAndColumns(

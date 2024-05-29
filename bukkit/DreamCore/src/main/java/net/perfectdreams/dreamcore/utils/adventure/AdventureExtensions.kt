@@ -47,6 +47,11 @@ fun TextComponent.Builder.append(content: String, block: TextComponent.Builder.(
         .apply(block)
 )
 
+fun TextComponent.Builder.appendTextComponent(block: TextComponent.Builder.() -> (Unit) = {}) = append(
+    Component.text()
+        .apply(block)
+)
+
 fun TextComponent.Builder.suggestCommandOnClick(command: String) {
     clickEvent(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, command))
 }
