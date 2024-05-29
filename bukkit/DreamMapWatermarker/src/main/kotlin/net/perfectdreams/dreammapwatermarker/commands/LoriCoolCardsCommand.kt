@@ -207,7 +207,7 @@ class LoriCoolCardsCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
 
                                 m.launchAsyncThread {
                                     // *Technically* we don't need to recheck if the user has the album completed, because if it is already completed it probably SHOULDN'T be removed from the album list
-                                    val stickersOfThatAlbumResponse = DreamUtils.http.get("${m.config.lorittaInternalApiUrl.removeSuffix("/")}/sparklypower/loricoolcards/albums/${finishedAlbum.id}/stickers")
+                                    val stickersOfThatAlbumResponse = DreamUtils.http.get("${m.config.lorittaInternalApiUrl.removeSuffix("/")}/sparklypower/loricoolcards/albums/${finishedAlbum.album.id}/stickers")
 
                                     val stickers = Json.decodeFromString<List<LoriCoolCardsSticker>>(stickersOfThatAlbumResponse.bodyAsText())
                                         .sortedBy { it.fancyCardId }
@@ -218,8 +218,7 @@ class LoriCoolCardsCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
                                             .toList()
                                     }
 
-                                    val generatedMapIds =
-                                        mapsData.map { it[LoriCoolCardsGeneratedMaps.sticker] }.toSet()
+                                    val generatedMapIds = mapsData.map { it[LoriCoolCardsGeneratedMaps.sticker] }.toSet()
                                     if (generatedMapIds.size != stickers.size) {
                                         // Not fully generated yet!
                                         onMainThread {
@@ -238,7 +237,7 @@ class LoriCoolCardsCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
                                         val hasAlreadyClaimedTheAlbum =
                                             transaction(Dispatchers.IO, Databases.databaseNetwork) {
                                                 val hasAlreadyClaimedTheAlbum = LoriCoolCardsClaimedAlbums.selectAll()
-                                                    .where { LoriCoolCardsClaimedAlbums.finishedId eq finishedAlbum.id }
+                                                    .where { LoriCoolCardsClaimedAlbums.finishedId eq finishedAlbum.album.id }
                                                     .count() == 1L
 
                                                 if (hasAlreadyClaimedTheAlbum)
