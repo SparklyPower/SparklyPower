@@ -86,8 +86,17 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
 
         // This is per player! It is an entity ID to Entity UUID reference
         // We don't really *need* to store a SparklyNPC reference (it would be dead btw because we had removed the NPC), we just need this to send
-        // a remove player packet
+        // a remove player packet and to match other packets
         val spawnedNPCEntities = mutableMapOf<Int, UUID>()
+
+        nmsPlayer
+            .connection
+            .connection
+            .channel
+            .pipeline()
+            .forEach {
+                println(it.key + " - " + it.value)
+            }
 
         // Create Netty pipeline to intercept packets
         nmsPlayer
@@ -96,19 +105,39 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
             .channel
             .pipeline()
             .addBefore(
-                "bundler",
+                "packet_handler",
                 "sparklynpc-handler",
                 object: ChannelDuplexHandler() {
                     override fun write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise) {
                         // println(msg::class.java)
 
+                        // We need to intercept this because Minecraft 1.20.6 changed how set entity data packets are handled and now throws an error on client-side if the metadata does not
+                        // match the entity
+                        if (msg is ClientboundSetEntityDataPacket) {
+                            val npcUniqueId = spawnedNPCEntities[msg.id]
+
+                            // println("NPC data: ${npcData}")
+                            if (npcUniqueId != null) {
+                                m.m.logger.info { "Intercepted packet for entity ${npcUniqueId}! Replacing set entity packets..." }
+
+                                super.write(
+                                    ctx,
+                                    ClientboundSetEntityDataPacket(msg.id, listOf(SynchedEntityData.DataValue(17, EntityDataSerializers.BYTE, 127.toByte()))),
+                                    promise
+                                )
+                                return
+                            }
+                        }
+
                         if (msg is ClientboundBundlePacket) {
-                            /* println("Bundle Packet has...")
-                            msg.subPackets().forEach {
-                                println("> ${it::class.java}")
-                            } */
+                            // println("Bundle Packet has...")
+                            // msg.subPackets().forEach {
+                            //     println("> ${it::class.java}")
+                            // }
 
                             val newSubPackets = mutableListOf<Packet<in ClientGamePacketListener>>()
+
+                            // We need to check if this packet is related to our NPC or nah
                             for (subPacket in msg.subPackets()) {
                                 // It *seems* that vanilla entities are always sent in a bundle packet
                                 if (subPacket is ClientboundAddEntityPacket) {
@@ -117,6 +146,8 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
 
                                         // println("NPC data: ${npcData}")
                                         if (npcData != null) {
+                                            // Because Minecraft 1.20.6 changed things (we cannot send invalid metadata data) we need to write the metadata ourselves
+                                            // So we are 100% rejecting the original packets and writing them ourselves
                                             val gp = GameProfile(subPacket.uuid, npcData.fakePlayerName)
                                             m.m.logger.info { "Intercepted packet for entity ${subPacket.uuid}! (Game Profile: ${gp.id}) Replacing packets with fake player packets..." }
                                             val textures = npcData.textures
@@ -180,8 +211,16 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
                                             )
 
                                             spawnedNPCEntities[subPacket.id] = subPacket.uuid
+                                            break // Break because we have already set up all the necessary packets
                                         } else {
-                                            newSubPackets.add(subPacket)
+                                            // Bail out, this is just a normal entity...
+                                            // println("Bailing out, this is just a normal entity...")
+                                            super.write(
+                                                ctx,
+                                                msg,
+                                                promise
+                                            )
+                                            return
                                         }
                                     } else {
                                         newSubPackets.add(subPacket)
@@ -190,6 +229,11 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
                                     newSubPackets.add(subPacket)
                                 }
                             }
+
+                            // println("New Bundle...")
+                            // newSubPackets.forEach {
+                            //     println("> ${it::class.java}")
+                            // }
 
                             super.write(
                                 ctx,

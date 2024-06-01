@@ -19,7 +19,7 @@ object RegisterCommand : DSLCommandBase<DreamAuth> {
     override fun command(plugin: DreamAuth) = this.create(listOf("register", "registrar")) {
         executes {
             val password1 = args.getOrNull(0)
-            val password2 = args.getOrNull(0)
+            val password2 = args.getOrNull(1)
 
             if (password1 == null) {
                 player.sendMessage(

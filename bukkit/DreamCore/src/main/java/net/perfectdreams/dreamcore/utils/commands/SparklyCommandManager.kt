@@ -1,25 +1,20 @@
 package net.perfectdreams.dreamcore.utils.commands
 
+import com.mojang.brigadier.tree.LiteralCommandNode
+import io.papermc.paper.command.brigadier.Commands
+import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager
+import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
+import io.papermc.paper.command.brigadier.CommandSourceStack
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclaration
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclarationWrapper
-import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
-import net.perfectdreams.dreamcore.utils.registerEvents
-import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
 
 class SparklyCommandManager(val plugin: KotlinPlugin) {
     val declarations = mutableListOf<SparklyCommandDeclaration>()
-    var hasCommandListenerRegistered = false
 
     fun register(command: SparklyCommandDeclarationWrapper) {
-        // If we didn't register the command listener yet, then let's register it now!
-        if (!hasCommandListenerRegistered) {
-            plugin.logger.info { "Registering CommandListener for $plugin because it wasn't registered before..." }
-            plugin.registerEvents(CommandListener(this))
-            hasCommandListenerRegistered = true
-        }
-
         val declaration = command.declaration()
         plugin.logger.info { "Registering ${declaration.labels}..." }
         this.declarations.add(declaration)
@@ -33,8 +28,14 @@ class SparklyCommandManager(val plugin: KotlinPlugin) {
             )
         }
 
-        commandWrappers.forEach {
-            Bukkit.getCommandMap().register(plugin.name.lowercase(), it)
+        val manager: LifecycleEventManager<Plugin> = plugin.getLifecycleManager()
+        manager.registerEventHandler<ReloadableRegistrarEvent<Commands?>>(
+            LifecycleEvents.COMMANDS
+        ) { event: ReloadableRegistrarEvent<Commands?> ->
+            val commands: Commands = event.registrar()
+            commandWrappers.forEach {
+                commands.register(it.convertRootDeclarationToBrigadier(command.declaration()).build() as LiteralCommandNode<CommandSourceStack>)
+            }
         }
     }
 

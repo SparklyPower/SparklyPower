@@ -8,86 +8,32 @@ import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.builder.RequiredArgumentBuilder
-import com.mojang.brigadier.exceptions.CommandSyntaxException
 import com.mojang.brigadier.suggestion.Suggestions
-import net.minecraft.ChatFormatting
-import net.minecraft.commands.CommandSourceStack
+import io.papermc.paper.command.brigadier.CommandSourceStack
+import io.papermc.paper.command.brigadier.argument.ArgumentTypes
+import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.commands.arguments.selector.EntitySelector
-import net.minecraft.network.chat.ClickEvent
-import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.ComponentUtils
-import net.minecraft.network.chat.Style
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclaration
 import net.perfectdreams.dreamcore.utils.commands.exceptions.CommandException
 import net.perfectdreams.dreamcore.utils.commands.options.*
-import org.bukkit.command.Command
-import org.bukkit.command.CommandSender
-import org.bukkit.command.PluginIdentifiableCommand
-import org.bukkit.craftbukkit.command.VanillaCommandWrapper
 import java.util.concurrent.CompletableFuture
 
+// Once upon a time this was a real Bukkit command
+// But after Paper 1.20.6 introduced the Brigadier API, we don't need that anymore
+// But we still use this class to convert our declarations to Brigadier
 class SparklyBukkitBrigadierCommandWrapper(
     // Because the CommandRegisteredEvent is only triggered once, even if the command has multiple labels
     // We will create a new SparklyBukkitBrigadierCommandWrapper for each label
     // (And there isn't a way to register multiple cmds on a single CommandRegisteredEvent event)
-    label: String,
+    val label: String,
     val declaration: SparklyCommandDeclaration,
     private val plugin: KotlinPlugin,
     private val sparklyCommandManager: SparklyCommandManager,
-) : Command(label, "", "/${label}", listOf()), PluginIdentifiableCommand {
-    override fun execute(sender: CommandSender, commandLabel: String, args: Array<out String>): Boolean {
-        // We can't register the Brigadier command directly to the vanilla's command map, because this has a lot of disadvantages:
-        // * The permission is "minecraft.labelname", which is undesirable for us
-        // * The command is registered in the "minecraft" namespace
-        // So we are going to workaround this: We are going to create our own CommandDispatcher, register the Brigadier command to it and then execute it!
-        val dispatcher = CommandDispatcher<CommandSourceStack>()
-        val brigadierDeclaration = convertRootDeclarationToBrigadier(declaration)
-        dispatcher.register(brigadierDeclaration)
-
-        // Is this correct? I don't think so, but let's see what happens
-        // The "convertDeclarationToBrigadier" result always uses this command "label" argument, that's why we aren't using the "commandLabel" argument here!
-        val commandWithArguments = listOf(label, *args)
-        val commandListenerWrapper = VanillaCommandWrapper.getListener(sender)
-        try {
-            val r = dispatcher.execute((commandWithArguments.joinToString(" ")), commandListenerWrapper)
-        } catch (commandSyntaxException: CommandSyntaxException) {
-            // From Minecraft's Commands#performCommand function
-            commandListenerWrapper.sendFailure(ComponentUtils.fromMessage(commandSyntaxException.rawMessage))
-            if (commandSyntaxException.input != null && commandSyntaxException.cursor >= 0) {
-                val j: Int = Math.min(commandSyntaxException.input.length, commandSyntaxException.cursor)
-                val ichatmutablecomponent = Component.literal("").withStyle(ChatFormatting.GRAY).withStyle { chatmodifier: Style ->
-                        chatmodifier.withClickEvent(
-                            ClickEvent(
-                                ClickEvent.Action.SUGGEST_COMMAND,
-                                label
-                            )
-                        ) // CraftBukkit
-                    }
-                if (j > 10) {
-                    ichatmutablecomponent.append("...")
-                }
-                ichatmutablecomponent.append(commandSyntaxException.getInput().substring(Math.max(0, j - 10), j))
-                if (j < commandSyntaxException.getInput().length) {
-                    val ichatmutablecomponent1 = Component.literal(commandSyntaxException.getInput().substring(j))
-                        .withStyle(ChatFormatting.RED, ChatFormatting.UNDERLINE)
-                    ichatmutablecomponent.append(ichatmutablecomponent1 as Component)
-                }
-                ichatmutablecomponent.append(
-                    Component.translatable("command.context.here")
-                        .withStyle(ChatFormatting.RED, ChatFormatting.ITALIC) as Component
-                )
-                commandListenerWrapper.sendFailure(ichatmutablecomponent)
-            }
-        }
-        return true
-    }
-
-    override fun getPlugin() = plugin
-
+) {
     fun convertRootDeclarationToBrigadier(declaration: SparklyCommandDeclaration): LiteralArgumentBuilder<CommandSourceStack> {
         return LiteralArgumentBuilder.literal<CommandSourceStack>(label)
             .apply { transformStuff(declaration, this) }

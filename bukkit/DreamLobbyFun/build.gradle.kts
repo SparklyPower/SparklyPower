@@ -11,7 +11,6 @@ dependencies {
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamAuth"))
     compileOnly(files("../../libs/NoteBlockAPI.jar"))
-    implementation("me.filoghost.holographicdisplays:holographicdisplays-api:3.0.0")
 }
 
 kotlin {

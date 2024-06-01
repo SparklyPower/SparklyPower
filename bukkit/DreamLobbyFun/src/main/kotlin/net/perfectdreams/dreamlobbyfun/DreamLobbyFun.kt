@@ -11,7 +11,6 @@ import com.xxmicloxx.NoteBlockAPI.SoundCategory
 import kotlinx.coroutines.delay
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket
 import net.minecraft.world.level.saveddata.maps.MapId
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData
@@ -78,7 +77,6 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 	}
 	val songs = mutableListOf<Song>()
 	var songPlayer: RadioSongPlayer? = null
-	lateinit var holographicDisplaysAPI: HolographicDisplaysAPI
 	val lobbyImage = BufferedImage(8 * 128, 5 * 128, BufferedImage.TYPE_INT_RGB)
 	val lobbyImageGraphics = lobbyImage.createGraphics()
 		.apply {
@@ -160,7 +158,6 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 		super.softEnable()
 
 		lorittaSimulator.start()
-		holographicDisplaysAPI = HolographicDisplaysAPI.get(this)
 
 		launchAsyncThread {
 			var previousStateSnapshotCached: GameEntitiesSnapshot? = null
@@ -525,11 +522,11 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 	override fun softDisable() {
 		super.softDisable()
 
-		serverCitizens.forEach {
+		/* serverCitizens.forEach {
 			it.clickHereHologram?.delete()
 			it.playerCountHologram?.delete()
 			it.serverNameHologram?.delete()
-		}
+		} */
 	}
 
 	fun giveLobbyItems(player: Player, playerInfo: PlayerSettings) {

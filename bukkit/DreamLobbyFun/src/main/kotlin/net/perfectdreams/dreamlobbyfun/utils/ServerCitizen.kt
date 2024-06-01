@@ -1,11 +1,7 @@
 package net.perfectdreams.dreamlobbyfun.utils
 
 import kotlinx.coroutines.Job
-import me.filoghost.holographicdisplays.api.hologram.Hologram
-import me.filoghost.holographicdisplays.api.hologram.line.TextHologramLine
 import net.perfectdreams.dreamcore.utils.npc.SparklyNPC
-import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
-import net.perfectdreams.dreamcore.utils.translateColorCodes
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
 import kotlin.math.cos
 
@@ -14,9 +10,9 @@ class ServerCitizen(
 	val sparklyNPC: SparklyNPC,
 	val m: DreamLobbyFun
 ) {
-	var playerCountHologram: Hologram? = null
-	var serverNameHologram: Hologram? = null
-	var clickHereHologram: Hologram? = null
+	// var playerCountHologram: Hologram? = null
+	// var serverNameHologram: Hologram? = null
+	// var clickHereHologram: Hologram? = null
 
 	var easeTask: Job? = null
 	var animationTicks = 0
@@ -31,7 +27,7 @@ class ServerCitizen(
 
 		val holoLocation = sparklyNPC.initialLocation.clone().add(0.0, 3.1, 0.0)
 
-		if (playerCountHologram == null) {
+		/* if (playerCountHologram == null) {
 			playerCountHologram = m.holographicDisplaysAPI.createHologram(holoLocation.clone().add(0.0, -0.285, 0.0))
 				.apply {
 					this.lines.appendText("§7??? players online")
@@ -54,11 +50,11 @@ class ServerCitizen(
 
 		val playerCountHologram = playerCountHologram!!
 		val serverNameHologram = serverNameHologram!!
-		val clickHereHologram = clickHereHologram!!
+		val clickHereHologram = clickHereHologram!! */
 
 		val middle = holoLocation.clone().add(0.0, 0.5, 0.0)
 
-		if (easeTask == null) {
+		/* if (easeTask == null) {
 			easeTask = m.launchMainThread {
 				while (true) {
 					val newLocation = middle.clone()
@@ -80,11 +76,11 @@ class ServerCitizen(
 					delayTicks(2)
 				}
 			}
-		}
+		} */
 
 		val playerCount = DreamLobbyFun.SERVER_ONLINE_COUNT[data.serverName]
 
-		if (playerCount == null) {
+		/* if (playerCount == null) {
 			(playerCountHologram.lines.get(0) as TextHologramLine)
 				.text = "§7??? players online"
 		} else {
@@ -97,7 +93,7 @@ class ServerCitizen(
 				(playerCountHologram.lines.get(0) as TextHologramLine)
 					.text = "§7$playerCount players online"
 			}
-		}
+		} */
 	}
 
 	fun easeInOutSine(x: Double): Double {

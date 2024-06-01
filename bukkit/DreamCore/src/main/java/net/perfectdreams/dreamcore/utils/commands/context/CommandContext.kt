@@ -5,7 +5,7 @@ import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.TextColor
-import net.minecraft.commands.CommandSourceStack
+import io.papermc.paper.command.brigadier.CommandSourceStack
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.commands.exceptions.CommandException
 import org.bukkit.command.ConsoleCommandSender
@@ -21,7 +21,7 @@ class CommandContext(val nmsContext: CommandContext<CommandSourceStack>) {
         }
     }
 
-    val sender = nmsContext.source.bukkitSender
+    val sender = nmsContext.source.sender
 
     fun sendMessage(message: String) = sender.sendMessage(message)
     fun sendMessage(component: Component) = sender.sendMessage(component)
