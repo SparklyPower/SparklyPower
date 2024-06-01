@@ -336,7 +336,7 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                 if (e.slot in 3..5) {
                     if (holder.m.running) {
                         e.isCancelled = true
-                        holder.m.location.world.spawnParticle(Particle.VILLAGER_ANGRY, holder.m.location, 10, 1.0, 1.0, 1.0)
+                        holder.m.location.world.spawnParticle(Particle.ANGRY_VILLAGER, holder.m.location, 10, 1.0, 1.0, 1.0)
                         e.whoClicked.damage(1.0)
                         e.whoClicked.closeInventory()
                         e.whoClicked.sendMessage("§cSua mão queimou por você ter achado que seria uma brilhante ideia mexer em uma comida que está no micro-ondas...")
@@ -361,7 +361,7 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                 if (e.slot in 0..5 || e.slot in 18..23 || e.slot in 27..32) {
                     if (holder.m.running) {
                         e.isCancelled = true
-                        holder.m.location.world.spawnParticle(Particle.VILLAGER_ANGRY, holder.m.location, 10, 1.0, 1.0, 1.0)
+                        holder.m.location.world.spawnParticle(Particle.ANGRY_VILLAGER, holder.m.location, 10, 1.0, 1.0, 1.0)
                         e.whoClicked.damage(2.5*2)
                         e.whoClicked.closeInventory()
                         e.whoClicked.sendMessage("§cSua mão queimou por você ter achado que seria uma brilhante ideia mexer em uma super fornalha em funcionamento...")

@@ -2,13 +2,10 @@ package net.perfectdreams.dreamblockvipitems
 
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcore.utils.extensions.hasStoredMetadataWithKey
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.lore
 import net.perfectdreams.dreamcore.utils.registerEvents
 import org.bukkit.Material
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -39,13 +36,6 @@ class DreamBlockVIPItems : KotlinPlugin(), Listener {
 			e.isCancelled = true
 			e.player.sendMessage("§cVocê não tem poder para usar este item! Que tal comprar VIP para poder usar ele? ;)")
 		}
-	}
-
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	fun onAnvilRepair(e: PrepareAnvilEvent) {
-		val inventory = e.inventory
-		if (e.result?.getStoredMetadata("isMonsterPickaxe") == "true")
-			inventory.repairCost *= 16
 	}
 
 	@EventHandler(priority = EventPriority.LOWEST)
@@ -108,18 +98,6 @@ class DreamBlockVIPItems : KotlinPlugin(), Listener {
 
 	fun checkIfUserCanUseTheItem(player: Player, item: ItemStack): Boolean {
 		val owner = item.itemMeta?.persistentDataContainer?.get(ITEM_OWNER_KEY, PersistentDataType.STRING)
-
-		// Old owner item check
-		if (owner == null && item.hasStoredMetadataWithKey("itemOwner")) {
-			item.meta<ItemMeta> {
-				persistentDataContainer.set(
-					ITEM_OWNER_KEY,
-					PersistentDataType.STRING,
-					item.getStoredMetadata("itemOwner")!!
-				)
-			}
-			return checkIfUserCanUseTheItem(player, item)
-		}
 
 		val requiredPermission = when {
 			item.lore?.any { it.contains("§7Apenas §b§lVIPs§7") } == true -> "group.vip"

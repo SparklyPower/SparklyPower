@@ -8,8 +8,7 @@ import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.*
 import net.perfectdreams.dreamcore.utils.extensions.canPlaceAt
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamfusca.utils.CarHandlerPacketAdapter
 import net.perfectdreams.dreamfusca.utils.CarInfo
 import net.perfectdreams.dreamfusca.utils.CarType
@@ -27,13 +26,15 @@ import org.bukkit.event.vehicle.VehicleDestroyEvent
 import org.bukkit.event.vehicle.VehicleEnterEvent
 import org.bukkit.event.vehicle.VehicleExitEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 import java.io.File
 import java.util.*
 
 class DreamFusca : KotlinPlugin(), Listener {
 	companion object {
-		const val CAR_INFO_KEY = "DreamFusca"
-		const val FUSCA_CHECK_KEY = "isFusca"
+		val FUSCA_INFO_KEY = SparklyNamespacedKey("fusca_info", PersistentDataType.STRING)
+		val IS_FUSCA_CHECK_KEY = SparklyNamespacedBooleanKey("is_fusca")
 	}
 
 	val blocks = listOf(
@@ -100,8 +101,10 @@ class DreamFusca : KotlinPlugin(), Listener {
 				val itemStack = ItemStack(Material.MINECART)
 					.rename("§3§lFusca")
 					.lore("§7Fusca de §b${target?.name}")
-					.storeMetadata(CAR_INFO_KEY, DreamUtils.gson.toJson(carInfo))
-					.storeMetadata(FUSCA_CHECK_KEY, "true")
+					.meta<ItemMeta> {
+						persistentDataContainer.set(FUSCA_INFO_KEY, DreamUtils.gson.toJson(carInfo))
+						persistentDataContainer.set(IS_FUSCA_CHECK_KEY, true)
+					}
 
 				player.inventory.addItem(itemStack)
 			}
@@ -179,8 +182,10 @@ class DreamFusca : KotlinPlugin(), Listener {
 			val itemStack = ItemStack(Material.MINECART)
 				.rename("§3§lFusca")
 				.lore("§7Fusca de §b${carInfo.playerName}")
-				.storeMetadata(CAR_INFO_KEY, DreamUtils.gson.toJson(carInfo))
-				.storeMetadata(FUSCA_CHECK_KEY, "true")
+				.meta<ItemMeta> {
+					persistentDataContainer.set(FUSCA_INFO_KEY, DreamUtils.gson.toJson(carInfo))
+					persistentDataContainer.set(IS_FUSCA_CHECK_KEY, true)
+				}
 
 			attacker.world.dropItemNaturally(e.vehicle.location, itemStack)
 			cars.remove(e.vehicle.uniqueId)
@@ -195,8 +200,10 @@ class DreamFusca : KotlinPlugin(), Listener {
 				val itemStack = ItemStack(Material.MINECART)
 					.rename("§3§lFusca")
 					.lore("§7Fusca de §b${carInfo.playerName}")
-					.storeMetadata(CAR_INFO_KEY, DreamUtils.gson.toJson(carInfo))
-					.storeMetadata(FUSCA_CHECK_KEY, "true")
+					.meta<ItemMeta> {
+						persistentDataContainer.set(FUSCA_INFO_KEY, DreamUtils.gson.toJson(carInfo))
+						persistentDataContainer.set(IS_FUSCA_CHECK_KEY, true)
+					}
 
 				attacker.world.dropItemNaturally(e.vehicle.location, itemStack)
 				cars.remove(e.vehicle.uniqueId)
@@ -214,12 +221,14 @@ class DreamFusca : KotlinPlugin(), Listener {
 
 		val type = item.type
 
-		if (type != Material.MINECART)
+		if (type != Material.MINECART && !item.hasItemMeta())
 			return
 
-		val isFusca = item.getStoredMetadata(FUSCA_CHECK_KEY) ?: return
+		val isFusca = item.itemMeta.persistentDataContainer.get(IS_FUSCA_CHECK_KEY)
+		if (!isFusca)
+			return
 
-		val storedInfo = item.getStoredMetadata(CAR_INFO_KEY)?.let { DreamUtils.gson.fromJson<CarInfo>(it) }
+		val storedInfo = item.itemMeta.persistentDataContainer.get(FUSCA_INFO_KEY)?.let { DreamUtils.gson.fromJson<CarInfo>(it) }
 			?: CarInfo(
 				e.player.uniqueId,
 				e.player.name,
@@ -250,7 +259,9 @@ class DreamFusca : KotlinPlugin(), Listener {
 		if (cleanItemString == "Fusca") {
 			val itemStack = ItemStack(Material.MINECART)
 				.rename("§3§lFusca")
-				.storeMetadata(FUSCA_CHECK_KEY, "true")
+				.meta<ItemMeta> {
+					persistentDataContainer.set(IS_FUSCA_CHECK_KEY, true)
+				}
 
 			e.item = itemStack
 		}

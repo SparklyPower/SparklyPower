@@ -112,7 +112,7 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 		}
 
 		victim.world.spawnParticle(
-			Particle.BLOCK_CRACK,
+			Particle.BLOCK,
 			victim.location.add(0.0, 0.5, 0.0),
 			(e.finalDamage * 40).toInt(),
 			0.0,
@@ -170,7 +170,7 @@ class DreamPvPTweaks : KotlinPlugin(), Listener {
 		}
 
 		victim.world.spawnParticle(
-			Particle.BLOCK_CRACK,
+			Particle.BLOCK,
 			victim.location.add(0.0, 0.5, 0.0),
 			(e.finalDamage * 40).toInt(),
 			0.0,

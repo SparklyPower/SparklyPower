@@ -2,9 +2,9 @@ package net.perfectdreams.dreamreparar
 
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
+import net.perfectdreams.dreampicaretamonstra.DreamPicaretaMonstra
 import net.perfectdreams.dreamreparar.listeners.SignListener
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -194,7 +194,7 @@ class DreamReparar : KotlinPlugin(), Listener {
 			}
 		}
 
-		if (itemStack.getStoredMetadata("isMonsterPickaxe") == "true") { // Picareta Monstra
+		if (DreamPicaretaMonstra.isMonsterTool(itemStack)) { // Picareta Monstra
 			price *= 3.375f
 		}
 

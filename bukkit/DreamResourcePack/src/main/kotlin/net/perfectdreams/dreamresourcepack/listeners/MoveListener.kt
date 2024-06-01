@@ -49,6 +49,12 @@ class MoveListener(val m: DreamResourcePack) : Listener {
                 PlayerResourcePackStatusEvent.Status.ACCEPTED -> {
                     e.player.sendMessage("§aObrigado por aceitar a resource pack! Ela está sendo baixada e, ao terminar, ela será ativada automaticamente!")
                 }
+
+                // TODO - 1.20.6: Show other messages here?
+                PlayerResourcePackStatusEvent.Status.DOWNLOADED -> {}
+                PlayerResourcePackStatusEvent.Status.INVALID_URL -> {}
+                PlayerResourcePackStatusEvent.Status.FAILED_RELOAD -> {}
+                PlayerResourcePackStatusEvent.Status.DISCARDED -> {}
             }
         }
     }

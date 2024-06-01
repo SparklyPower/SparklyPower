@@ -3,8 +3,6 @@ package net.perfectdreams.dreambedrockintegrations
 import com.comphenix.protocol.ProtocolLibrary
 import com.github.salomonbrys.kotson.nullString
 import com.github.salomonbrys.kotson.obj
-import fr.neatmonster.nocheatplus.checks.CheckType
-import fr.neatmonster.nocheatplus.hooks.NCPHookManager
 import net.kyori.adventure.text.Component
 import net.perfectdreams.dreambedrockintegrations.packetlisteners.BedrockPacketListener
 import net.perfectdreams.dreamcore.network.socket.SocketReceivedEvent

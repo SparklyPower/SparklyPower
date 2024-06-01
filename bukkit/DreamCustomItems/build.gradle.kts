@@ -11,16 +11,20 @@ repositories {
 }
 
 dependencies {
-    paperDevBundle("1.20.2-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.20.6-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamMini"))
+    // TODO: This causes a circular dependency, how to fix it?
+    // compileOnly(project(":bukkit:DreamPicaretaMonstra"))
     // compileOnly(project(":bukkit:DreamMochilas"))
     compileOnly(files("../../libs/mcMMO.jar"))
     compileOnly("com.comphenix.protocol:ProtocolLib:4.8.0")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 tasks {

@@ -10,9 +10,5 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0-RC")
 }

@@ -2,8 +2,7 @@ package net.perfectdreams.dreamprivada
 
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.block.BlockFace
@@ -16,11 +15,16 @@ import org.bukkit.event.player.PlayerItemHeldEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.util.*
 
 class DreamPrivada : KotlinPlugin(), Listener {
+	companion object {
+		private val IS_POOP_KEY = SparklyNamespacedBooleanKey("is_poop")
+	}
+
 	val inToilet = Collections.newSetFromMap(WeakHashMap<Player, Boolean>())
 
 	override fun softEnable() {
@@ -50,23 +54,25 @@ class DreamPrivada : KotlinPlugin(), Listener {
 					if (!isInAPrivada(player) || !player.isSneaking) {
 						inToilet.remove(player)
 						player.sendMessage("§cSuas necessidades foram canceladas porque você se moveu!")
-						player.spawnParticle(Particle.VILLAGER_ANGRY, player.location.add(0.0, 0.5, 0.0), 30, 0.5, 0.5, 0.5)
+						player.spawnParticle(Particle.ANGRY_VILLAGER, player.location.add(0.0, 0.5, 0.0), 30, 0.5, 0.5, 0.5)
 						return@schedule
 					}
-					player.spawnParticle(Particle.VILLAGER_ANGRY, player.location.add(0.0, 1.62, 0.0), 1)
+					player.spawnParticle(Particle.ANGRY_VILLAGER, player.location.add(0.0, 1.62, 0.0), 1)
 					waitFor(20)
 				}
 
 				player.sendMessage("§aVocê se sente mais leve...")
-				player.spawnParticle(Particle.VILLAGER_HAPPY, player.location.add(0.0, 0.5, 0.0), 30, 0.5, 0.5, 0.5)
-				player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 600, 1))
+				player.spawnParticle(Particle.HAPPY_VILLAGER, player.location.add(0.0, 0.5, 0.0), 30, 0.5, 0.5, 0.5)
+				player.addPotionEffect(PotionEffect(PotionEffectType.JUMP_BOOST, 600, 1))
 				inToilet.remove(player)
 
 				val water = player.location.block.getRelative(BlockFace.DOWN)
 				val necessidades = ItemStack(Material.COCOA_BEANS, 1)
 					.rename("§8§lNecessidades")
 					.lore("§7Se eu fosse você, eu não", "§7cheirava isto...", "§7", "§7Necessidades de §b${player.displayName}")
-					.storeMetadata("poop", "true")
+					.meta<ItemMeta> {
+						persistentDataContainer.set(IS_POOP_KEY, true)
+					}
 
 				player.world.dropItem(water.location.add(0.5, -0.1, 0.5), necessidades)
 			}
@@ -119,12 +125,12 @@ class DreamPrivada : KotlinPlugin(), Listener {
 	fun onItemChange(e: PlayerItemHeldEvent) {
 		val item = e.player.inventory.getItem(e.newSlot)
 
-		if (item != null && item.type != Material.AIR) {
-			val data = item.getStoredMetadata("poop")
+		if (item != null && item.type != Material.AIR && item.hasItemMeta()) {
+			val isPoop = item.itemMeta.persistentDataContainer.get(IS_POOP_KEY)
 
-			if (data != null) {
-				e.player.removePotionEffect(PotionEffectType.CONFUSION)
-				e.player.addPotionEffect(PotionEffect(PotionEffectType.CONFUSION, 60, 0))
+			if (isPoop) {
+				e.player.removePotionEffect(PotionEffectType.NAUSEA)
+				e.player.addPotionEffect(PotionEffect(PotionEffectType.NAUSEA, 60, 0))
 				e.player.sendMessage("§3Parece que isto não está cheirando bem...")
 			}
 		}

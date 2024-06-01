@@ -6,8 +6,7 @@ import com.okkero.skedule.schedule
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.extensions.toItemStack
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -23,8 +22,17 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 
 class DreamMoverSpawners : KotlinPlugin(), Listener {
+    companion object {
+        val IS_MOVE_SPAWNERS_KEY = SparklyNamespacedBooleanKey("is_move_spawners_tool")
+        val SPAWNER_TYPE_KEY = SparklyNamespacedKey("spawner_type", PersistentDataType.STRING)
+
+        fun isMoveSpawnersTool(item: ItemStack) = item.hasItemMeta() && item.itemMeta.persistentDataContainer.get(IS_MOVE_SPAWNERS_KEY)
+    }
+
     val onlyInWorld = listOf("world")
     val onlyInNether = listOf("nether")
     val defaultBreakPermission = "dreammoverspawners.breakdefault"
@@ -87,9 +95,11 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
                         .lore("§7Querendo mover spawners para outros lugares?", "§7Então utilize a incrível picareta de mover spawners!", "§7", "§7Cuidado que ela quebra bem rápido!")
                         .apply {
                             this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
-                            this.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
+                            this.addUnsafeEnchantment(Enchantment.INFINITY, 1)
                         }
-                        .storeMetadata("isMoveSpawners", "true")
+                        .meta<ItemMeta> {
+                            this.persistentDataContainer.set(IS_MOVE_SPAWNERS_KEY, true)
+                        }
                 )
             }
         })
@@ -99,7 +109,7 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onRepair(e: McMMOPlayerRepairCheckEvent) {
-        if (e.repairedObject.getStoredMetadata("isMoveSpawners") == "true") {
+        if (isMoveSpawnersTool(e.repairedObject)) {
             e.isCancelled = true
             e.player.sendMessage("§cVocê não pode reparar uma picareta de mover spawners!")
         }
@@ -107,7 +117,7 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onSalvage(e: McMMOPlayerSalvageCheckEvent) {
-        if (e.salvageItem.getStoredMetadata("isMoveSpawners") == "true") {
+        if (isMoveSpawnersTool(e.salvageItem)) {
             e.isCancelled = true
             e.player.sendMessage("§cVocê não pode salvar uma picareta de mover spawners!")
         }
@@ -119,20 +129,20 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
             return
 
         val center = e.block.location.add(0.5, 0.5, 0.5)
-        val spawnerType = e.itemInHand.getStoredMetadata("spawnerType") ?: return
+        val spawnerType = e.itemInHand.itemMeta.persistentDataContainer.get(SPAWNER_TYPE_KEY) ?: return
         val mobType = EntityType.valueOf(spawnerType)
         val spawnerX = validSpawners.firstOrNull { it.type == mobType }
         if (spawnerX == null) {
             e.isCancelled = true
             e.player.sendMessage("§cDesculpe, mas o meu poder não permite você colocar esses tipos de spawners...")
-            center.world.spawnParticle(Particle.SPELL_WITCH, center, 1)
+            center.world.spawnParticle(Particle.WITCH, center, 1)
             return
         }
 
         if (!e.player.hasPermission(spawnerX.requiredPermission)) {
             e.isCancelled = true
             e.player.sendMessage("§cDesculpe, mas você não tem permissão para colocar esse spawner no chão... Ele é poderoso demais para você!")
-            center.world.spawnParticle(Particle.SPELL_WITCH, center, 1)
+            center.world.spawnParticle(Particle.WITCH, center, 1)
             return
         }
 
@@ -145,10 +155,10 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
     fun onBreak(e: BlockBreakEvent) {
         val inHand = e.player.inventory.itemInMainHand
 
-        if (e.player.inventory.itemInMainHand?.type != Material.GOLDEN_PICKAXE)
+        if (e.player.inventory.itemInMainHand.type != Material.GOLDEN_PICKAXE)
             return
 
-        if (inHand.getStoredMetadata("isMoveSpawners") != "true")
+        if (!isMoveSpawnersTool(inHand))
             return
 
         if (inHand.hasItemMeta() && !inHand.itemMeta.hasCustomModelData()) {
@@ -160,7 +170,7 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
         if (e.block.world.name == "MinaRecheada")
             return
 
-        for (enchantment in inHand.enchantments.filter { it.key != Enchantment.ARROW_INFINITE })
+        for (enchantment in inHand.enchantments.filter { it.key != Enchantment.INFINITY })
             inHand.removeEnchantment(enchantment.key)
 
         val broken = e.block
@@ -180,7 +190,7 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
 
             schedule {
                 repeat(10) {
-                    center.world.spawnParticle(Particle.VILLAGER_HAPPY, center, 1)
+                    center.world.spawnParticle(Particle.HAPPY_VILLAGER, center, 1)
                     waitFor(20L)
                 }
             }
@@ -188,13 +198,13 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
             val spawner = validSpawners.firstOrNull { it.type == type }
             if (spawner == null) {
                 e.player.sendMessage("§cDesculpe, mas o meu poder não permite quebrar esses tipos de spawners...")
-                center.world.spawnParticle(Particle.SPELL_WITCH, center, 1)
+                center.world.spawnParticle(Particle.WITCH, center, 1)
                 return
             }
 
             if (!e.player.hasPermission(spawner.requiredPermission)) {
                 e.player.sendMessage("§cDesculpe, mas você não tem permissão para quebrar esse spawner... Ele é poderoso demais para você!")
-                center.world.spawnParticle(Particle.SPELL_WITCH, center, 1)
+                center.world.spawnParticle(Particle.WITCH, center, 1)
                 return
             }
 
@@ -219,17 +229,21 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
                 e.player.sendMessage("§cSua picareta de mover spawners quebrou!")
             }
 
-            val drops = listOf(Material.SPAWNER.toItemStack()
-                .lore("§7Spawner de §a${type.name}")
-                .storeMetadata("spawnerType", type.toString()))
+            val drops = listOf(
+                Material.SPAWNER.toItemStack()
+                    .lore("§7Spawner de §a${type.name}")
+                    .meta<ItemMeta> {
+                        persistentDataContainer.set(SPAWNER_TYPE_KEY, type.toString())
+                    }
+            )
 
             e.block.type = Material.AIR // rip
 
             // Using "dropItemNaturally" is kinda bad because the item can stay inside of blocks
             e.block.world.dropItem(center, drops.first())
 
-            center.world.spawnParticle(Particle.VILLAGER_HAPPY, center, 8, 1.0, 1.0, 1.0)
-            center.world.spawnParticle(Particle.FIREWORKS_SPARK, center, 8, 1.0, 1.0, 1.0)
+            center.world.spawnParticle(Particle.HAPPY_VILLAGER, center, 8, 1.0, 1.0, 1.0)
+            center.world.spawnParticle(Particle.FIREWORK, center, 8, 1.0, 1.0, 1.0)
             e.player.playSound(center, Sound.BLOCK_ANVIL_LAND, 1f, 1f)
         } else {
             e.isCancelled = true

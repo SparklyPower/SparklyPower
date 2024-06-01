@@ -164,7 +164,7 @@ class DreamBusca : KotlinPlugin(), Listener {
 				e.player.sendTitle("§bBioma encontrado!", "", 0, 20, 10)
 				e.player.teleport(location) // Teletransportar player
 				e.player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 600, 1)) // Efeito de velocidade
-				e.player.addPotionEffect(PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 600, 3)) // Efeito de anti dano (para evitar mortes)
+				e.player.addPotionEffect(PotionEffect(PotionEffectType.RESISTANCE, 600, 3)) // Efeito de anti dano (para evitar mortes)
 			}
 		}
 	}
@@ -393,7 +393,7 @@ class DreamBusca : KotlinPlugin(), Listener {
 			// Efeito de anti dano (para evitar mortes)
 			e.player.addPotionEffect(
 				PotionEffect(
-					PotionEffectType.DAMAGE_RESISTANCE,
+					PotionEffectType.RESISTANCE,
 					600,
 					3
 				)

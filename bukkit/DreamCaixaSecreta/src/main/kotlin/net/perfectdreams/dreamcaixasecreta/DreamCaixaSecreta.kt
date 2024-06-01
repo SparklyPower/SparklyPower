@@ -10,8 +10,8 @@ import net.perfectdreams.dreamcaixasecreta.listeners.CraftListener
 import net.perfectdreams.dreamcaixasecreta.utils.RandomItem
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamcore.utils.extensions.toItemStack
+import net.perfectdreams.dreamjetpack.DreamJetpack
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
@@ -19,9 +19,15 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.ShapelessRecipe
 import org.bukkit.inventory.meta.EnchantmentStorageMeta
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 import java.io.File
 
 class DreamCaixaSecreta : KotlinPlugin() {
+	companion object {
+		val CAIXA_SECRETA_LEVEL_KEY = SparklyNamespacedKey("caixa_secreta_level", PersistentDataType.INTEGER)
+		val CAIXA_SECRETA_WORLD_KEY = SparklyNamespacedKey("caixa_secreta_world", PersistentDataType.STRING)
+	}
+
 	lateinit var itemReceived: Song
 	var prizes = mutableListOf<RandomItem>()
 
@@ -432,7 +438,7 @@ class DreamCaixaSecreta : KotlinPlugin() {
 		prizes.add(
 			RandomItem(
 				ItemStack(
-					Material.SCUTE
+					Material.TURTLE_SCUTE
 				), chance
 			)
 		)
@@ -443,7 +449,10 @@ class DreamCaixaSecreta : KotlinPlugin() {
 				ItemStack(
 					Material.CHAINMAIL_CHESTPLATE
 				).rename("§6§lJetpack")
-					.storeMetadata("isJetpack", "true")
+					.meta<ItemMeta> {
+						this.persistentDataContainer.set(DreamJetpack.IS_JETPACK_KEY, true)
+					}
+
 				, chance
 			)
 		)
@@ -922,9 +931,11 @@ class DreamCaixaSecreta : KotlinPlugin() {
 		}
 
 		caixa = caixa.lore("§7Mas... o que será que tem aqui dentro?", "§7", "§3Coloque no chão e descubra!", "§7", "§7Nível de raridade: ${rarityLevel}")
-		caixa = caixa.storeMetadata("caixaSecretaLevel", level.toString())
-		if (worldName != null)
-			caixa = caixa.storeMetadata("caixaSecretaWorld", worldName)
+		caixa = caixa.meta<ItemMeta> {
+			persistentDataContainer.set(CAIXA_SECRETA_LEVEL_KEY, level)
+			if (worldName != null)
+				persistentDataContainer.set(CAIXA_SECRETA_WORLD_KEY, worldName)
+		}
 
 		return caixa
 	}

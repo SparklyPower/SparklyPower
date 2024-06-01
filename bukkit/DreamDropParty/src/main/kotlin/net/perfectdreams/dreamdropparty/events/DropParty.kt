@@ -93,7 +93,7 @@ class DropParty(val m: DreamDropParty) : ServerEvent("Festa da Firma", "/droppar
 
                             dropLocation.world.dropItem(dropLocation, itemStack)
 
-                            dropLocation.world.spawnParticle(Particle.VILLAGER_HAPPY, dropLocation, 3, 1.0, 1.0, 1.0)
+                            dropLocation.world.spawnParticle(Particle.HAPPY_VILLAGER, dropLocation, 3, 1.0, 1.0, 1.0)
                             // If a item drops for the current player, move to the next player
                             continue@playerLoop
                         }
@@ -124,7 +124,7 @@ class DropParty(val m: DreamDropParty) : ServerEvent("Festa da Firma", "/droppar
                 it.teleportToServerSpawnWithEffects()
             }
 
-            world.entities.filter { it.type == EntityType.DROPPED_ITEM }.forEach {
+            world.entities.filter { it.type == EntityType.ITEM }.forEach {
                 it.remove()
             }
         }

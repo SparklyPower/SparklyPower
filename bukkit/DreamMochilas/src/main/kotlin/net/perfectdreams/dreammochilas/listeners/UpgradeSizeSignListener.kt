@@ -3,7 +3,6 @@ package net.perfectdreams.dreammochilas.listeners
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.TransactionContext
 import net.perfectdreams.dreamcore.utils.balance
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamcore.utils.withdraw
 import net.perfectdreams.dreammochilas.DreamMochilas

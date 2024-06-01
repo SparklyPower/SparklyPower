@@ -91,7 +91,7 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
         EntityType.SHEEP to 15,
         EntityType.PIG to 15,
         EntityType.COW to 15,
-        EntityType.MUSHROOM_COW to 15,
+        EntityType.MOOSHROOM to 15,
         EntityType.STRIDER to 15,
         EntityType.ZOMBIFIED_PIGLIN to 15,
         EntityType.FOX to 15,
@@ -103,7 +103,7 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
         EntityType.BEE to 15,
         EntityType.PILLAGER to 10,
         EntityType.VILLAGER to 10,
-        EntityType.MINECART_HOPPER to 16,
+        EntityType.HOPPER_MINECART to 16,
         EntityType.SLIME to 16,
         EntityType.MAGMA_CUBE to 16,
     )

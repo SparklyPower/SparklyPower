@@ -2,7 +2,6 @@ package net.perfectdreams.dreamwarps
 
 import com.github.salomonbrys.kotson.fromJson
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamwarps.commands.DreamWarpCommand
 import net.perfectdreams.dreamwarps.commands.WarpCommand
 import net.perfectdreams.dreamwarps.utils.Warp
@@ -295,26 +294,6 @@ class DreamWarps : KotlinPlugin(), Listener {
 		for (warp in warps) {
 			File(warpsFolder, "${warp.name}.json").writeText(DreamUtils.gson.toJson(warp))
 		}
-	}
-
-	@EventHandler
-	fun onClick(e: InventoryClickEvent) {
-		val holder = e.inventory.holder ?: return
-
-		if (holder !is WarpInventoryHolder)
-			return
-
-		e.isCancelled = true
-		val player = e.whoClicked as Player
-		player.closeInventory()
-
-		val currentItem = e.currentItem ?: return
-		if (currentItem.type == Material.AIR)
-			return
-
-		val data = e.currentItem?.getStoredMetadata("warpName") ?: return
-
-		player.performCommand("dwarps $data")
 	}
 
 	fun updateChunkTickets() {

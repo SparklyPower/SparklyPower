@@ -8,7 +8,6 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamraspadinha.DreamRaspadinha
 import net.perfectdreams.dreamcore.utils.DreamUtils.random
 import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamraspadinha.tables.Raspadinhas
 import net.perfectdreams.dreamraspadinha.utils.RaspadinhaHolder
 import org.bukkit.Bukkit
@@ -19,6 +18,7 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -30,6 +30,7 @@ class ScratchCardCommand(val m: DreamRaspadinha) : SparklyCommand(arrayOf("raspa
         const val DOKYO_COMBO = (375 * 3)
         const val GESSY_COMBO = (250  * 3)
         const val TOBIAS_COMBO = (130 * 3)
+        val RASPINHA_CHAR_KEY = SparklyNamespacedKey("raspadinha_char", PersistentDataType.STRING)
     }
 
     @Subcommand
@@ -89,10 +90,10 @@ class ScratchCardCommand(val m: DreamRaspadinha) : SparklyCommand(arrayOf("raspa
             return ItemStack(Material.GRAY_STAINED_GLASS_PANE)
                 .rename("§7§oClique para raspar!")
                 .apply {
-                    this.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
+                    this.addUnsafeEnchantment(Enchantment.INFINITY, 1)
                 }
-                .storeMetadata("raspadinhaChar", char.toString())
                 .meta<ItemMeta> {
+                    this.persistentDataContainer.set(RASPINHA_CHAR_KEY, char.toString())
                     this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
                 }
         }

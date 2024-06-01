@@ -2,11 +2,8 @@ package net.perfectdreams.dreamtrails.commands
 
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
-import net.perfectdreams.dreamcore.utils.DreamMenuSlotBuilder
-import net.perfectdreams.dreamcore.utils.createMenu
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import net.perfectdreams.dreamcore.utils.lore
-import net.perfectdreams.dreamcore.utils.rename
+import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamtrails.DreamTrails
 import net.perfectdreams.dreamtrails.trails.TrailData
 import net.perfectdreams.dreamtrails.utils.Halo
@@ -16,6 +13,7 @@ import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 
 class TrailsCommand(val m: DreamTrails) : SparklyCommand(arrayOf("trails", "trail", "rastro", "rastros"), permission = DreamTrails.USE_TRAILS_PERMISSION) {
     @Subcommand
@@ -61,7 +59,9 @@ class TrailsCommand(val m: DreamTrails) : SparklyCommand(arrayOf("trails", "trai
                                 .lore(
                                     "§7Seja §b§lVIP§e+§7, coloque no corpo e seja fashion amigxxx!"
                                 )
-                                .storeMetadata("fancyLeatherArmor", "true")
+                                .meta<ItemMeta> {
+                                    persistentDataContainer.set(DreamTrails.IS_FANCY_LEATHER_ARMOR_KEY, true)
+                                }
                         )
 
                     player.inventory
@@ -71,7 +71,9 @@ class TrailsCommand(val m: DreamTrails) : SparklyCommand(arrayOf("trails", "trai
                                 .lore(
                                     "§7Seja §b§lVIP§e+§7, coloque no corpo e seja fashion amigxxx!"
                                 )
-                                .storeMetadata("fancyLeatherArmor", "true")
+                                .meta<ItemMeta> {
+                                    persistentDataContainer.set(DreamTrails.IS_FANCY_LEATHER_ARMOR_KEY, true)
+                                }
                         )
 
                     player.inventory
@@ -81,7 +83,9 @@ class TrailsCommand(val m: DreamTrails) : SparklyCommand(arrayOf("trails", "trai
                                 .lore(
                                     "§7Seja §b§lVIP§e+§7, coloque nas calças e seja fashion amigxxx!"
                                 )
-                                .storeMetadata("fancyLeatherArmor", "true")
+                                .meta<ItemMeta> {
+                                    persistentDataContainer.set(DreamTrails.IS_FANCY_LEATHER_ARMOR_KEY, true)
+                                }
                         )
 
                     player.inventory
@@ -91,7 +95,9 @@ class TrailsCommand(val m: DreamTrails) : SparklyCommand(arrayOf("trails", "trai
                                 .lore(
                                     "§7Seja §b§lVIP§e+§7, coloque no pé e seja fashion amigxxx!"
                                 )
-                                .storeMetadata("fancyLeatherArmor", "true")
+                                .meta<ItemMeta> {
+                                    persistentDataContainer.set(DreamTrails.IS_FANCY_LEATHER_ARMOR_KEY, true)
+                                }
                         )
 
                     player.sendMessage("§aEu dei a armadura fashion, agora é só equipar e se divertir! ^-^")

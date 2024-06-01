@@ -4,34 +4,13 @@ import net.perfectdreams.dreamcore.utils.commands.AbstractCommand
 import net.perfectdreams.dreamcore.utils.commands.annotation.ArgumentType
 import net.perfectdreams.dreamcore.utils.commands.annotation.InjectArgument
 import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import net.perfectdreams.dreamcore.utils.rename
 import net.perfectdreams.dreamxizum.DreamXizum
-import net.perfectdreams.dreamxizum.utils.XizumInventoryHolder
 import net.perfectdreams.dreamxizum.utils.XizumRequest
-import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 
 class XizumCommand(val m: DreamXizum) : AbstractCommand("xizum", listOf("x1", "1v1")) {
 	@Subcommand
 	fun root(player: Player) {
-		// Uncomment this when the "request player" function works
-		/* val inventory = Bukkit.createInventory(XizumInventoryHolder(), 9)
-
-		val joinQueue = ItemStack(Material.DIAMOND)
-				.rename("§a§lEntrar na Fila")
-				.storeMetadata(DreamXizum.XIZUM_DATA_KEY, "joinQueue")
-
-		val requestPlayer = ItemStack(Material.MUSIC_DISC_11)
-				.rename("§a§lChamar um amigo")
-				.storeMetadata(DreamXizum.XIZUM_DATA_KEY, "invitePlayer")
-
-		inventory.setItem(0, joinQueue)
-		inventory.setItem(1, requestPlayer)
-
-		player.openInventory(inventory) */
 		player.performCommand("xizum fila")
 	}
 

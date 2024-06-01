@@ -13,13 +13,14 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI
 import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket
+import net.minecraft.world.level.saveddata.maps.MapId
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData
 import net.perfectdreams.dreamauth.DreamAuth
 import net.perfectdreams.dreamauth.utils.PlayerStatus
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.npc.SkinTexture
 import net.perfectdreams.dreamlobbyfun.commands.LobbyBypassCommand
 import net.perfectdreams.dreamlobbyfun.dao.PlayerSettings
@@ -34,12 +35,14 @@ import net.perfectdreams.dreamlobbyfun.utils.ServerCitizenData
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer
+import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.map.MapPalette
+import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Color
@@ -53,7 +56,7 @@ import javax.imageio.ImageIO
 
 class DreamLobbyFun : KotlinPlugin(), Listener {
 	companion object {
-		const val ITEM_INFO_KEY = "LobbyItemInfo"
+		val ITEM_INFO_KEY = SparklyNamespacedKey("lobby_item_info", PersistentDataType.STRING)
 		val SERVER_ONLINE_COUNT = ConcurrentHashMap<String, Int>()
 		const val RENDER_FPS = 15
 	}
@@ -380,7 +383,7 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 						// println("Map $mapId Info - mapStartX: $mapStartX, mapStartZ: $mapStartZ, mapWidth: $mapWidth, mapHeight: $mapHeight, length: ${mapData.size}")
 						packets.add(
 							ClientboundMapItemDataPacket(
-								mapId++,
+								MapId(mapId++),
 								4,
 								false,
 								null,
@@ -548,25 +551,31 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 				if (playerVisibility) {
 					ItemStack(Material.LIME_DYE, 1).rename("§a§lPlayers estão visíveis")
 						.lore("§7Cansado de aturar as outras pessoas?", "§7", "§7Então clique para deixar todas", "§7as outras pessoas invisíveis!")
-						.storeMetadata(ITEM_INFO_KEY, "setPlayerVisibility:false")
+						.meta<ItemMeta> {
+							this.persistentDataContainer.set(ITEM_INFO_KEY, "setPlayerVisibility:false")
+						}
 				} else {
 					ItemStack(Material.GRAY_DYE, 1, 8).rename("§c§lPlayers estão invisíveis")
 						.lore("§7Está se sentindo sozinho?", "§7", "§7Então clique para deixar todas", "§7as outras pessoas visíveis!")
-						.storeMetadata(ITEM_INFO_KEY, "setPlayerVisibility:true")
+						.meta<ItemMeta> {
+							this.persistentDataContainer.set(ITEM_INFO_KEY, "setPlayerVisibility:true")
+						}
 				}
 			)
 
 			this.setItem(4,
 				ItemStack(Material.COMPASS).rename("§a§lSelecionador de Servidores")
 					.lore("§7Clique para ver todos nossos servidores!")
-					.storeMetadata(ITEM_INFO_KEY, "serverSelector")
+					.meta<ItemMeta> {
+						this.persistentDataContainer.set(ITEM_INFO_KEY, "serverSelector")
+					}
 			)
 
 			this.setItem(8,
 				ItemStack(Material.BOW).rename("§e§lArco Teletransportador")
 					.lore("§7Com tédio?", "§7Esperando o seu servidor favorito reiniciar?", "§7", "§7Então que tal explorar o nosso", "§7lobby com este arco?")
 					.apply {
-						addEnchantment(Enchantment.ARROW_INFINITE, 1)
+						addEnchantment(Enchantment.INFINITY, 1)
 					}
 			)
 
@@ -600,7 +609,7 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 				.connection
 				.send(
 					ClientboundMapItemDataPacket(
-						mapId,
+						MapId(mapId),
 						4,
 						false,
 						null,

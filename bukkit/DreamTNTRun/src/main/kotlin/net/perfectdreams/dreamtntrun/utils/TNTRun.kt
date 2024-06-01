@@ -332,7 +332,7 @@ class TNTRun(val m: DreamTNTRun) {
             )
 
             blockBelowThem.world.spawnParticle(
-                Particle.SMOKE_NORMAL,
+                Particle.SMOKE,
                 blockBelowBelowThem.location,
                 5
             )

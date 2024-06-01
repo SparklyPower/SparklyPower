@@ -3,14 +3,13 @@ package net.perfectdreams.dreampicaretamonstra.listeners
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.minecraft.world.entity.item.ItemEntity
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcustomitems.listeners.canMineRubyFrom
 import net.perfectdreams.dreamcustomitems.utils.CustomItems
 import net.perfectdreams.dreampicaretamonstra.DreamPicaretaMonstra
 import org.bukkit.*
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftItem
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack
+import org.bukkit.craftbukkit.CraftWorld
+import org.bukkit.craftbukkit.entity.CraftItem
+import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ExperienceOrb
@@ -33,7 +32,7 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
             return
         }
 
-        val isMonsterTool = (inHand.hasItemMeta() && inHand.itemMeta.persistentDataContainer.get(DreamPicaretaMonstra.IS_MONSTER_TOOL_KEY)) || inHand.getStoredMetadata("isMonsterPickaxe") == "true"
+        val isMonsterTool = DreamPicaretaMonstra.isMonsterTool(inHand)
         if (!isMonsterTool)
             return
 
@@ -65,8 +64,8 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
             var enchantmentLevel = 0
             var efficiencyLevel = 0
             var isSilky = false
-            enchantmentLevel = inHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS)
-            efficiencyLevel = inHand.getEnchantmentLevel(Enchantment.DURABILITY)
+            enchantmentLevel = inHand.getEnchantmentLevel(Enchantment.FORTUNE)
+            efficiencyLevel = inHand.getEnchantmentLevel(Enchantment.UNBREAKING)
             isSilky = inHand.getEnchantmentLevel(Enchantment.SILK_TOUCH) > 0
             var below = false
             if (e.player.location.y > e.block.y) {
@@ -158,16 +157,16 @@ class MonstraBlockListener(val m: DreamPicaretaMonstra) : Listener {
                                 e.player.world.playSound(broken.location, Sound.ENTITY_PLAYER_LEVELUP, 0.15f, 1.25f)
                                 shouldPlay = false
                             }
-                            location.world.spawnParticle(Particle.VILLAGER_HAPPY, center, 1)
-                            location.world.spawnParticle(Particle.FIREWORKS_SPARK, center, 1)
+                            location.world.spawnParticle(Particle.HAPPY_VILLAGER, center, 1)
+                            location.world.spawnParticle(Particle.FIREWORK, center, 1)
                         } else {
-                            location.world.spawnParticle(Particle.SPELL_WITCH, center, 1)
+                            location.world.spawnParticle(Particle.WITCH, center, 1)
                         }
                     } else {
                         if (location.block.type === Material.AIR) {
                             continue
                         }
-                        location.world.spawnParticle(Particle.VILLAGER_ANGRY, center, 1)
+                        location.world.spawnParticle(Particle.ANGRY_VILLAGER, center, 1)
                     }
                 }
             }

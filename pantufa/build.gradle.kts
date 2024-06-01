@@ -28,8 +28,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-hocon:1.4.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0-RC")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-hocon:1.6.3")
 
     // Remove this after everything has been migrated to InteraKTions Unleashed
     implementation("dev.kord:kord-rest:0.8.x-lori-fork-20221109.172532-14")
@@ -86,7 +86,7 @@ jib {
     }
 
     from {
-        image = "openjdk:17-slim-bullseye"
+        image = "openjdk:21-slim-bullseye"
     }
 }
 
@@ -96,11 +96,6 @@ tasks.test {
     testLogging {
         showStandardStreams = true
     }
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks.withType<KotlinCompile> {

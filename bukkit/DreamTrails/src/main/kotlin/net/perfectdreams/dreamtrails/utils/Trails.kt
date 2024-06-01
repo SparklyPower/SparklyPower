@@ -9,7 +9,7 @@ object Trails {
         TrailData(
             "§cto pistola grrr",
             Material.EMERALD,
-            Particle.VILLAGER_ANGRY,
+            Particle.ANGRY_VILLAGER,
             offsetX = 0.0,
             offsetY = 0.0,
             offsetZ = 0.0,
@@ -62,7 +62,7 @@ object Trails {
         TrailData(
             "§7Estrelinhas",
             Material.FIREWORK_ROCKET,
-            Particle.FIREWORKS_SPARK,
+            Particle.FIREWORK,
             0,
             0.0,
             0.1,
@@ -98,7 +98,7 @@ object Trails {
         TrailData(
             "§aTotem",
             Material.TOTEM_OF_UNDYING,
-            Particle.TOTEM,
+            Particle.TOTEM_OF_UNDYING,
             0,
             0.0,
             0.1,
@@ -118,7 +118,7 @@ object Trails {
         TrailData(
             "§fEfeito de Dano Crítico com §nmagia§f, wow!",
             Material.DIAMOND_SWORD,
-            Particle.CRIT_MAGIC
+            Particle.ENCHANTED_HIT
         ),
         TrailData(
             "§fDamage Indicator",
@@ -138,7 +138,7 @@ object Trails {
         TrailData(
             "§bÁgua²",
             Material.WATER_BUCKET,
-            Particle.WATER_SPLASH
+            Particle.DRIPPING_WATER
         ),
         TrailData(
             "§cLava",
@@ -163,7 +163,7 @@ object Trails {
         TrailData(
             "§7Mesa de Encantamento",
             Material.ENCHANTING_TABLE,
-            Particle.ENCHANTMENT_TABLE
+            Particle.ENCHANT
         ),
         TrailData(
             "§1Nautilus",
@@ -183,43 +183,45 @@ object Trails {
         TrailData(
             "§aSlime",
             Material.SLIME_BLOCK,
-            Particle.SLIME
+            Particle.ITEM_SLIME
         ),
         TrailData(
             "§fNeve",
             Material.SNOW_BLOCK,
-            Particle.SNOW_SHOVEL
+            Particle.SNOWFLAKE
         ),
         TrailData(
             "§cMagia",
             Material.EXPERIENCE_BOTTLE,
-            Particle.SPELL
+            Particle.EFFECT
         ),
         TrailData(
             "§aMagia²",
             Material.EXPERIENCE_BOTTLE,
-            Particle.SPELL_INSTANT
+            Particle.INSTANT_EFFECT
         ),
         TrailData(
             "§aMagia³",
             Material.EXPERIENCE_BOTTLE,
-            Particle.SPELL_MOB
+            Particle.ENTITY_EFFECT
         ),
-        TrailData(
+        // TODO - 1.20.6: Fix this! (actually this entire list should be rechecked)
+        /* TrailData(
             "§aMagia³+¹",
             Material.EXPERIENCE_BOTTLE,
             Particle.SPELL_MOB_AMBIENT
-        ),
+        ), */
         TrailData(
             "§aMagia³+2",
             Material.EXPERIENCE_BOTTLE,
-            Particle.SPELL_WITCH
+            Particle.WITCH
         ),
-        TrailData(
+        // TODO - 1.20.6: Fix this! (actually this entire list should be rechecked)
+        /* TrailData(
             "§cTown Aura",
             Material.JUNGLE_WOOD,
             Particle.TOWN_AURA
-        ),
+        ), */
         TrailData(
             "§bAlma",
             Material.SOUL_LANTERN,

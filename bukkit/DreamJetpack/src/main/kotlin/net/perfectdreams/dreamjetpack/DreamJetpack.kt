@@ -1,17 +1,16 @@
 package net.perfectdreams.dreamjetpack
 
 import com.okkero.skedule.schedule
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
-import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.extensions.hasStoredMetadataWithKey
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
 import net.perfectdreams.dreamcore.utils.preferences.sendMessage
-import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamcore.utils.rename
-import net.perfectdreams.dreamcore.utils.scheduler
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -32,6 +31,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 		lateinit var INSTANCE: DreamJetpack
 		val PREFIX = "§8[§a§lJetpack§8]§e"
 		const val TAKE_DAMAGE_EVERY = 180
+		val IS_JETPACK_KEY = SparklyNamespacedBooleanKey("is_jetpack")
 	}
 
 	val flyingPlayers = mutableSetOf<Player>()
@@ -61,8 +61,16 @@ class DreamJetpack : KotlinPlugin(), Listener {
 			fun root(sender: Player) {
 				sender.inventory.addItem(
 					ItemStack(Material.CHAINMAIL_CHESTPLATE)
-						.rename("§6§lJetpack")
-						.storeMetadata("isJetpack", "true")
+						.meta<ItemMeta> {
+							displayNameWithoutDecorations {
+								color(NamedTextColor.GOLD)
+								decorate(TextDecoration.BOLD)
+								content("Jetpack")
+							}
+
+							persistentDataContainer.set(IS_JETPACK_KEY, true)
+						}
+
 				)
 				sender.sendMessage("§aVocê recebeu uma Jetpack!")
 			}
@@ -185,7 +193,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 						}
 					}
 
-					player.world.spawnParticle(Particle.SMOKE_NORMAL, player.location, 20, 1.0, 1.0, 1.0)
+					player.world.spawnParticle(Particle.SMOKE, player.location, 20, 1.0, 1.0, 1.0)
 
 					chestplate.itemMeta = meta as ItemMeta
 				}
@@ -239,13 +247,18 @@ class DreamJetpack : KotlinPlugin(), Listener {
 	fun isJetpack(player: Player, chestplate: ItemStack?): Boolean {
 		if (chestplate == null)
 			return false
-		var isJetpack = chestplate.hasStoredMetadataWithKey("isJetpack")
 
-		if (!isJetpack && chestplate.itemMeta.displayName == "§6§lJetpack") {
-			player.inventory.chestplate = chestplate.storeMetadata("isJetpack", "true")
-			isJetpack = true
+		if (chestplate.hasItemMeta()) {
+			val itemMeta = chestplate.itemMeta
+			if (itemMeta.persistentDataContainer.get(IS_JETPACK_KEY))
+				return true
+
+			if (chestplate.itemMeta.displayName == "§6§lJetpack") {
+				itemMeta.persistentDataContainer.set(IS_JETPACK_KEY, true)
+				return true
+			}
 		}
 
-		return isJetpack
+		return false
 	}
 }

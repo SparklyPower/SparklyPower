@@ -1,21 +1,11 @@
 package net.perfectdreams.dreamcore.utils.extensions
 
-import com.comphenix.protocol.wrappers.nbt.NbtCompound
-import net.minecraft.nbt.CompoundTag
 import net.perfectdreams.dreamcore.utils.ItemUtils
-import net.perfectdreams.dreamcore.utils.tags.NbtTagsUtils
-import net.perfectdreams.dreamcore.utils.toBaseComponent
-import net.perfectdreams.dreamcore.utils.toTextComponent
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
-fun ItemStack.getCompoundTag() = NbtTagsUtils.getCompoundTag(this)
-fun ItemStack.setCompoundTag(tag: NbtCompound) = NbtTagsUtils.setCompoundTag(this, tag)
-fun ItemStack.getStoredMetadata(key: String) = ItemUtils.getStoredMetadata(this, key)
-fun ItemStack.storeMetadata(key: String, value: String) = ItemUtils.storeMetadata(this, key, value)
-fun ItemStack.hasStoredMetadataWithKey(key: String) = ItemUtils.hasStoredMetadataWithKey(this, key)
 fun ItemStack.getTranslatedDisplayName(player: Player) =  ItemUtils.getTranslatedDisplayName(this, player)
 fun ItemStack.getTranslatedDisplayName(locale: String) =  ItemUtils.getTranslatedDisplayName(this, locale)
 fun ItemStack.removeAllEnchantments() = enchantments.keys.forEach { removeEnchantment(it) }
@@ -28,7 +18,3 @@ inline fun <reified T> ItemStack.meta(block: T.() -> Unit): ItemStack {
 	this.itemMeta = itemMeta as ItemMeta
 	return this
 }
-
-fun ItemStack.toTextComponent() = arrayOf(
-	net.minecraft.world.item.ItemStack.fromBukkitCopy(this).save(CompoundTag()).toString().toTextComponent()
-)

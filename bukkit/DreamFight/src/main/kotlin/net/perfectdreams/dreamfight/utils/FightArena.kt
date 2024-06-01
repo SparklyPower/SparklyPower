@@ -351,7 +351,7 @@ class FightArena(var m: DreamFight) {
                 .rename("§6✪ §a§lSuper Hamburger da Casa do João §6✪")
                 .lore("§7Ele voltou.")
                 .apply {
-                    this.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 5)
+                    this.addUnsafeEnchantment(Enchantment.SHARPNESS, 5)
                 }
         }
         p.removeAllPotionEffects()
@@ -366,8 +366,8 @@ class FightArena(var m: DreamFight) {
             p.inventory.addItem(
                 ItemStack(Material.BOW)
                     .apply {
-                        this.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
-                        this.addUnsafeEnchantment(Enchantment.ARROW_DAMAGE, 1)
+                        this.addUnsafeEnchantment(Enchantment.INFINITY, 1)
+                        this.addUnsafeEnchantment(Enchantment.POWER, 1)
                     }
             )
 
@@ -378,14 +378,14 @@ class FightArena(var m: DreamFight) {
         if (modifiers.contains(FightModifier.DAMAGE_POTION)) {
             p.inventory.addItem(
                 ItemStack(Material.SPLASH_POTION).meta<PotionMeta> {
-                    this.addCustomEffect(PotionEffect(PotionEffectType.HARM, 20 * 5, 0), true)
+                    this.addCustomEffect(PotionEffect(PotionEffectType.INSTANT_DAMAGE, 20 * 5, 0), true)
                 }
             )
         }
         if (modifiers.contains(FightModifier.HEAL_POTION)) {
             p.inventory.addItem(
                 ItemStack(Material.SPLASH_POTION).meta<PotionMeta> {
-                    this.addCustomEffect(PotionEffect(PotionEffectType.HEAL, 20 * 15, 0), true)
+                    this.addCustomEffect(PotionEffect(PotionEffectType.INSTANT_HEALTH, 20 * 15, 0), true)
                 }
             )
         }
@@ -400,10 +400,10 @@ class FightArena(var m: DreamFight) {
             p.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 1000000, 2))
 
         if (modifiers.contains(FightModifier.HIGH_JUMP))
-            p.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 1000000, 2))
+            p.addPotionEffect(PotionEffect(PotionEffectType.JUMP_BOOST, 1000000, 2))
 
         if (modifiers.contains(FightModifier.SLOWNESS))
-            p.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 1000000, 2))
+            p.addPotionEffect(PotionEffect(PotionEffectType.SLOWNESS, 1000000, 2))
 
         if (modifiers.contains(FightModifier.ONE_HIT_KILL)) {
             p.health = 2.0

@@ -208,7 +208,7 @@ abstract class SpecialEnchantmentTable {
                             heldItem.addEnchantment(enchantment, level)
                             player.level = (player.level - levelCost)
                             player.sendMessage("§aO seu item foi encantado com sucesso!")
-                            player.world.spawnParticle(Particle.VILLAGER_HAPPY, player.location, 20, 1.0, 1.0, 1.0)
+                            player.world.spawnParticle(Particle.HAPPY_VILLAGER, player.location, 20, 1.0, 1.0, 1.0)
                             player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f)
                         }
                     }

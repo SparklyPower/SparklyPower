@@ -2,12 +2,9 @@ package net.perfectdreams.dreamtrails
 
 import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.schedule
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.gson
-import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.registerEvents
-import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamtrails.commands.TrailsCommand
 import net.perfectdreams.dreamtrails.listeners.MoveListener
@@ -32,6 +29,7 @@ class DreamTrails : KotlinPlugin() {
 		const val USE_FASHION_ARMOR_PERMISSION = "dreamtrails.fashion"
 		const val USE_HALO_PERMISSION = "dreamtrails.halo"
 		const val USE_MOVE_TRAIL_PERMISSION = "dreamtrails.move"
+		val IS_FANCY_LEATHER_ARMOR_KEY = SparklyNamespacedBooleanKey("is_fancy_leather_armor_key")
 	}
 
 	val coloredArmorData = ColoredArmorData(
@@ -51,12 +49,15 @@ class DreamTrails : KotlinPlugin() {
 		if (itemStack == null)
 			return
 
+		if (itemStack.hasItemMeta())
+			return
+
 		val type = itemStack.type
 
 		if (type != Material.LEATHER_HELMET && type != Material.LEATHER_CHESTPLATE && type != Material.LEATHER_LEGGINGS && type != Material.LEATHER_BOOTS)
 			return
 
-		if (itemStack.getStoredMetadata("fancyLeatherArmor") != "true")
+		if (!itemStack.itemMeta.persistentDataContainer.get(IS_FANCY_LEATHER_ARMOR_KEY))
 			return
 
 		itemStack.meta<LeatherArmorMeta> {
@@ -140,7 +141,7 @@ class DreamTrails : KotlinPlugin() {
 
 								val dustOptions = Particle.DustOptions(color, 0.3f)
 								player.world.spawnParticle(
-									Particle.REDSTONE,
+									Particle.DUST,
 									particleLocation,
 									1,
 									0.0,

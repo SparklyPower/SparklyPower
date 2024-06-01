@@ -63,7 +63,7 @@ class DreamEnderHopper : KotlinPlugin(), Listener {
 		.lore("§7Funil que teletransporta itens para outros lugares")
 		.meta<ItemMeta> {
 			persistentDataContainer.set(HOPPER_TELEPORTER, true)
-			addEnchant(Enchantment.DURABILITY, 1, true)
+			addEnchant(Enchantment.UNBREAKING, 1, true)
 			addItemFlags(ItemFlag.HIDE_ENCHANTS)
 		}
 }

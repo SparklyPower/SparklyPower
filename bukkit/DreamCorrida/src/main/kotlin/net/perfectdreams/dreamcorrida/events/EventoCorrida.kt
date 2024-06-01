@@ -113,11 +113,11 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
         player.activePotionEffects.filter {
             (
                     if (isPreStart)
-                    { it.type != PotionEffectType.SLOW }
+                    { it.type != PotionEffectType.SLOWNESS }
                     else
                     { it.type != PotionEffectType.SPEED && it.amplifier != 0 }
                     )
-                    && (it.type != PotionEffectType.JUMP && it.amplifier != 0)
+                    && (it.type != PotionEffectType.JUMP_BOOST && it.amplifier != 0)
                     && (it.type != PotionEffectType.NIGHT_VISION)
                     && (it.type != PotionEffectType.INVISIBILITY)
         }.forEach { effect ->
@@ -125,11 +125,11 @@ class EventoCorrida(val m: DreamCorrida) : ServerEvent("Corrida", "/corrida") {
         }
 
         if (isPreStart) {
-            player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
+            player.addPotionEffect(PotionEffect(PotionEffectType.SLOWNESS, 300, 1, true, false))
         } else {
             player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 1_200, 0, false, false))
         }
-        player.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 1_200, 0, false, false))
+        player.addPotionEffect(PotionEffect(PotionEffectType.JUMP_BOOST, 1_200, 0, false, false))
         player.addPotionEffect(PotionEffect(PotionEffectType.NIGHT_VISION, 1_200, 0, false, false))
         player.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 1_200, 0, false, false))
 

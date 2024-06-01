@@ -146,7 +146,7 @@ class PlayerListener(val m: DreamTreeAssist) : Listener {
 
             if (blockToBeDestroyed.type in logs) {
                 // Only damage if it is a log, damaging due to leaves is kinda meh
-                val efficiencyLevel = heldItem.getEnchantmentLevel(Enchantment.DURABILITY)
+                val efficiencyLevel = heldItem.getEnchantmentLevel(Enchantment.UNBREAKING)
 
                 if (chance(100.0 / (efficiencyLevel + 1))) {
                     val damageable = heldItem.itemMeta as Damageable

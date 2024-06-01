@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    paperDevBundle("1.20.2-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.20.6-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamCasamentos"))
     compileOnly(project(":bukkit:DreamCash"))
@@ -25,8 +25,10 @@ dependencies {
     compileOnly("net.skinsrestorer:skinsrestorer-api:14.2.8")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 tasks {

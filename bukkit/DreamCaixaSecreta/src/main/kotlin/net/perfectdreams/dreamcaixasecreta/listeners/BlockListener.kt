@@ -6,7 +6,6 @@ import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer
 import net.perfectdreams.dreamcaixasecreta.DreamCaixaSecreta
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
@@ -22,6 +21,10 @@ import java.time.ZoneId
 class BlockListener(val m: DreamCaixaSecreta) : Listener {
 	companion object {
 		private const val DISCORD_COLOR = "§x§7§2§8§9§d§a"
+
+		// TODO: We should add DreamPicaretaMonstra as a dependency, but that creates a cyclic dependency...
+		//  So we do this crappy hack instead, maybe we should move DreamPicaretaMonstra to DreamCustomItems
+		val IS_MONSTER_TOOL_KEY = SparklyNamespacedBooleanKey("is_monster_tool")
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -29,11 +32,15 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 		if (e.action != Action.RIGHT_CLICK_BLOCK)
 			return
 
-		if (e.item?.type != Material.CHEST)
+		val item = e.item
+		if (item?.type != Material.CHEST)
 			return
 
-		val data = e.item!!.getStoredMetadata("caixaSecretaLevel") ?: return
-		val caixaSecretaWorld = e.item!!.getStoredMetadata("caixaSecretaWorld")
+		if (!item.hasItemMeta())
+			return
+
+		val data = item.itemMeta.persistentDataContainer.get(DreamCaixaSecreta.CAIXA_SECRETA_LEVEL_KEY) ?: return
+		val caixaSecretaWorld = item.itemMeta.persistentDataContainer.get(DreamCaixaSecreta.CAIXA_SECRETA_WORLD_KEY)
 
 		val level = data.toInt()
 
@@ -134,7 +141,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 			InstantFirework.spawn(location, FireworkEffect.builder().withColor(Color.GREEN).flicker(true).trail(true).withFade(Color.YELLOW).with(FireworkEffect.Type.STAR).build())
 			e.player.sendTitle("§aParabéns!", "§aVocê ganhou §9" + amount + " ite" + (if (items.size == 1) "m" else "ns") + "§a!", 10, 100, 10)
 		} else {
-			e.player.world.spawnParticle(Particle.VILLAGER_ANGRY, location, 5, 0.5, 0.5, 0.5);
+			e.player.world.spawnParticle(Particle.ANGRY_VILLAGER, location, 5, 0.5, 0.5, 0.5);
 			e.player.sendTitle("§cQue pena...", "§cVocê não ganhou nada...", 10, 100, 10);
 		}
 	}
@@ -148,7 +155,7 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 			return
 
 		// Do not drop if it is a monster pickaxe
-		if (e.player.inventory.itemInMainHand.getStoredMetadata("isMonsterPickaxe") == "true")
+		if (e.player.inventory.itemInMainHand.hasItemMeta() && e.player.inventory.itemInMainHand.itemMeta.persistentDataContainer.get(IS_MONSTER_TOOL_KEY))
 			return
 
 		val chance = 0.8

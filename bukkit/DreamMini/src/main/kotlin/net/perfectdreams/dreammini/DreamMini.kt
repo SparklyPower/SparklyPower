@@ -7,7 +7,6 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.AbstractCommand
 import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
 import net.perfectdreams.dreamcore.utils.commands.annotation.SubcommandPermission
-import net.perfectdreams.dreamcore.utils.extensions.hasStoredMetadataWithKey
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
 import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.dreamcorreios.DreamCorreios
@@ -37,6 +36,8 @@ import java.util.*
 class DreamMini : KotlinPlugin(), Listener {
 	companion object {
 		lateinit var INSTANCE: DreamMini
+
+		val DISALLOW_CRAFTING_KEY = SparklyNamespacedBooleanKey("disallow_crafting")
 	}
 
 	val joined = mutableSetOf<Player>()
@@ -362,7 +363,7 @@ class DreamMini : KotlinPlugin(), Listener {
 					.with(FireworkEffect.Type.values()[DreamUtils.random.nextInt(0, FireworkEffect.Type.values().size)])
 					.build()
 
-			val firework = e.player.world.spawnEntity(e.player.location, EntityType.FIREWORK) as Firework
+			val firework = e.player.world.spawnEntity(e.player.location, EntityType.FIREWORK_ROCKET) as Firework
 			val fireworkMeta = firework.fireworkMeta
 
 			fireworkMeta.power = 1
@@ -438,10 +439,10 @@ class DreamMini : KotlinPlugin(), Listener {
 									}
 								}
 								if (rewarded) {
-									e.itemDrop.location.world.spawnParticle(Particle.VILLAGER_HAPPY, e.itemDrop.location, 5, 0.5, 0.5, 0.5)
+									e.itemDrop.location.world.spawnParticle(Particle.HAPPY_VILLAGER, e.itemDrop.location, 5, 0.5, 0.5, 0.5)
 								} else {
 									e.player.sendMessage("§cQue pena, pelo visto você não ganhou nada...")
-									e.itemDrop.location.world.spawnParticle(Particle.VILLAGER_ANGRY, e.itemDrop.location, 5, 0.5, 0.5, 0.5)
+									e.itemDrop.location.world.spawnParticle(Particle.ANGRY_VILLAGER, e.itemDrop.location, 5, 0.5, 0.5, 0.5)
 								}
 								e.itemDrop.remove()
 								return@schedule
@@ -458,7 +459,7 @@ class DreamMini : KotlinPlugin(), Listener {
 	@EventHandler
 	fun onCraft(e: CraftItemEvent) {
 		for (item in e.inventory) {
-			if (item != null && item.hasStoredMetadataWithKey("disallowCrafting"))
+			if (item != null && item.hasItemMeta() && item.itemMeta.persistentDataContainer.get(DISALLOW_CRAFTING_KEY))
 				e.isCancelled = true
 		}
 	}

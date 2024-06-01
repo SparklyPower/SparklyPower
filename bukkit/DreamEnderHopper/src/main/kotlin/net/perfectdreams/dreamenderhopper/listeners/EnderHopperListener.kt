@@ -337,7 +337,7 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
         )
 
         block.world.spawnParticle(
-            Particle.EXPLOSION_LARGE,
+            Particle.EXPLOSION,
             block.location.add(0.5, 0.0, 0.5),
             5,
             0.5,

@@ -332,30 +332,6 @@ class InventoryListener(val m: DreamMochilas) : Listener {
                 return
 
             if (mochilaId == null) { // Criar mochila, caso ainda não tenha um ID associado a ela
-                // Old mochila item check, we will convert them
-                if (!MochilaUtils.isMochila(item) && item.hasStoredMetadataWithKey("isMochila")) {
-                    item.meta<ItemMeta> {
-                        persistentDataContainer.set(
-                            MochilaUtils.IS_MOCHILA_KEY,
-                            PersistentDataType.BYTE,
-                            1
-                        )
-
-                        val oldMochilaId = item.getStoredMetadata("mochilaId")
-
-                        if (oldMochilaId != null) {
-                            persistentDataContainer.set(
-                                MochilaUtils.MOCHILA_ID_KEY,
-                                PersistentDataType.LONG,
-                                oldMochilaId.toLong()
-                            )
-                        }
-                    }
-
-                    // Call the open method again
-                    return onOpen(e)
-                }
-
                 m.launchAsyncThread {
                     MochilaUtils.mochilaCreationMutex.withLock {
                         val newInventory = Bukkit.createInventory(null, 27, "Mochila")

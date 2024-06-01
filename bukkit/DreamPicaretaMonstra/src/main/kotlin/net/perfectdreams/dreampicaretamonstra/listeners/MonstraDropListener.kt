@@ -1,6 +1,5 @@
 package net.perfectdreams.dreampicaretamonstra.listeners
 
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreampicaretamonstra.DreamPicaretaMonstra
 import org.bukkit.Bukkit
 import org.bukkit.Sound
@@ -20,7 +19,7 @@ class MonstraDropListener(val m: DreamPicaretaMonstra) : Listener {
         // Because some people are DUMB AS FUCC
         val droppedItem = e.itemDrop.itemStack
 
-        if (droppedItem.getStoredMetadata("isMonsterPickaxe") != "true")
+        if (!DreamPicaretaMonstra.isMonsterTool(droppedItem))
             return
 
         e.itemDrop.setMetadata(
@@ -53,7 +52,7 @@ class MonstraDropListener(val m: DreamPicaretaMonstra) : Listener {
     fun onPlayerDropItemEvent(e: ItemDespawnEvent) {
         // Because some people are DUMB AS FUCC
         val droppedItem = e.entity.itemStack
-        if (droppedItem.getStoredMetadata("isMonsterPickaxe") != "true")
+        if (!DreamPicaretaMonstra.isMonsterTool(droppedItem))
             return
 
         val metadata = e.entity.getMetadata("owner")
@@ -91,7 +90,7 @@ class MonstraDropListener(val m: DreamPicaretaMonstra) : Listener {
     fun onPlayerDropItemEvent(e: PlayerItemBreakEvent) {
         // Because some people are DUMB AS FUCC
         val brokenItem = e.brokenItem
-        if (brokenItem.getStoredMetadata("isMonsterPickaxe") != "true")
+        if (!DreamPicaretaMonstra.isMonsterTool(brokenItem))
             return
 
         m.logger.info("Picareta Monstra broke at ${e.player.location.world.name} ${e.player.location.x}, ${e.player.location.y}, ${e.player.location.z}")

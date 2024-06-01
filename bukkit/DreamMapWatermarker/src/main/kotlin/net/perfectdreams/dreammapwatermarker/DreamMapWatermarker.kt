@@ -9,7 +9,6 @@ import kotlinx.coroutines.sync.withPermit
 import kotlinx.serialization.decodeFromString
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.command
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreammapwatermarker.commands.DreamMapMakerCommand
 import net.perfectdreams.dreammapwatermarker.commands.LoriCoolCardsAdminCommand
@@ -106,7 +105,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 								"§7",
 								"§7Mapa feito para §a${playerName} §e(◠‿◠✿)"
 							).apply {
-								this.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
+								this.addUnsafeEnchantment(Enchantment.INFINITY, 1)
 								this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
 								this.meta<ItemMeta> {
 									this.persistentDataContainer.set(LOCK_MAP_CRAFT_KEY, PersistentDataType.BYTE, 1)
@@ -129,7 +128,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 		val inventoryMatrix = event.inventory.matrix ?: return
 
 		val hasCustomMap = inventoryMatrix.filterNotNull().any {
-			it.getStoredMetadata("customMapOwner") != null || it.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^" || it.itemMeta?.displayName?.endsWith("Players Online!") == true || it.itemMeta?.persistentDataContainer?.has(LOCK_MAP_CRAFT_KEY, PersistentDataType.BYTE) == true
+			it.itemMeta?.persistentDataContainer?.get(MAP_CUSTOM_OWNER_KEY, PersistentDataType.STRING) != null || it.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^" || it.itemMeta?.displayName?.endsWith("Players Online!") == true || it.itemMeta?.persistentDataContainer?.has(LOCK_MAP_CRAFT_KEY, PersistentDataType.BYTE) == true
 		}
 
 		if (hasCustomMap)
@@ -145,7 +144,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 		if (clickedInventory.type != InventoryType.CARTOGRAPHY) // el gambiarra
 			return
 
-		if (currentItem.getStoredMetadata("customMapOwner") != null || currentItem.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^" || currentItem.itemMeta?.displayName?.endsWith("Players Online!") == true || currentItem.itemMeta?.persistentDataContainer?.has(LOCK_MAP_CRAFT_KEY, PersistentDataType.BYTE) == true) {
+		if (currentItem.itemMeta?.persistentDataContainer?.get(MAP_CUSTOM_OWNER_KEY, PersistentDataType.STRING) != null || currentItem.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^" || currentItem.itemMeta?.displayName?.endsWith("Players Online!") == true || currentItem.itemMeta?.persistentDataContainer?.has(LOCK_MAP_CRAFT_KEY, PersistentDataType.BYTE) == true) {
 			event.isCancelled = true
 		}
 

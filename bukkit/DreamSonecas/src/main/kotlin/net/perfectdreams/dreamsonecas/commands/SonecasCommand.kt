@@ -29,6 +29,7 @@ import org.bukkit.Bukkit
 import org.bukkit.SoundCategory
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.innerJoin
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -42,6 +43,8 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
             "\ue281",
             "\ue282"
         )
+
+        private const val AUTOCOMPLETE_PLAYER_NAME_TARGET = 10
 
         fun prefix() = textComponent {
             append("[") {
@@ -178,6 +181,8 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
                                 }
                             }
                         }
+
+                        afterCallback.invoke()
                     }
                 }
             }
@@ -197,16 +202,31 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
     class SonecasBalanceExecutor(val m: DreamSonecas, val command: SonecasCommand) : SparklyCommandExecutor() {
         inner class Options : CommandOptions() {
             val playerName = optionalWord("player_name") { context, builder ->
-                transaction(Databases.databaseNetwork) {
+                // Yes, accessing Bukkit.getOnlinePlayers() here is thread safe
+                // We can't change the autocomplete order sadly, so to make "online" priority, we need to be a bit tricky with it
+                val onlinePlayers = Bukkit.getOnlinePlayers().map { it.name }
+
+                val onlinePlayersThatMatchTheQuery = onlinePlayers.filter { it.startsWith(builder.remaining, true) }
+
+                if (onlinePlayersThatMatchTheQuery.isNotEmpty()) {
+                    onlinePlayersThatMatchTheQuery.forEach {
+                        builder.suggest(it)
+                    }
+                    return@optionalWord
+                }
+
+                val databasePlayers = transaction(Databases.databaseNetwork) {
                     PlayerSonecas.innerJoin(Users, { PlayerSonecas.id }, { Users.id })
                         .select(Users.username)
                         .where { Users.username ilike builder.remaining.replace("%", "") + "%" }
                         .limit(10)
                         .map { it[Users.username] }
                         .distinct()
-                        .forEach {
-                            builder.suggest(it)
-                        }
+                }
+
+                // Then we recheck it here again...
+                databasePlayers.forEach {
+                    builder.suggest(it)
                 }
             }
         }
@@ -227,7 +247,6 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
             val executorUniqueId = (context.sender as? Player)?.uniqueId
 
             command.showBalance(context, executorUniqueId, queryType) {
-
                 context.sendMessage {
                     color(NamedTextColor.YELLOW)
                     append(prefix())
@@ -252,16 +271,31 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
     class SonecasPayExecutor(val m: DreamSonecas) : SparklyCommandExecutor() {
         inner class Options : CommandOptions() {
             val playerName = word("player_name") { context, builder ->
-                transaction(Databases.databaseNetwork) {
+                // Yes, accessing Bukkit.getOnlinePlayers() here is thread safe
+                // We can't change the autocomplete order sadly, so to make "online" priority, we need to be a bit tricky with it
+                val onlinePlayers = Bukkit.getOnlinePlayers().map { it.name }
+
+                val onlinePlayersThatMatchTheQuery = onlinePlayers.filter { it.startsWith(builder.remaining, true) }
+
+                if (onlinePlayersThatMatchTheQuery.isNotEmpty()) {
+                    onlinePlayersThatMatchTheQuery.forEach {
+                        builder.suggest(it)
+                    }
+                    return@word
+                }
+
+                val databasePlayers = transaction(Databases.databaseNetwork) {
                     PlayerSonecas.innerJoin(Users, { PlayerSonecas.id }, { Users.id })
                         .select(Users.username)
                         .where { Users.username ilike builder.remaining.replace("%", "") + "%" }
                         .limit(10)
                         .map { it[Users.username] }
                         .distinct()
-                        .forEach {
-                            builder.suggest(it)
-                        }
+                }
+
+                // Then we recheck it here again...
+                databasePlayers.forEach {
+                    builder.suggest(it)
                 }
             }
 

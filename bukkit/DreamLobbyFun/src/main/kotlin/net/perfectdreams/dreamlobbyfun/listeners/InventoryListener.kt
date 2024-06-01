@@ -5,8 +5,7 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
 import net.perfectdreams.dreamlobbyfun.tables.UserSettings
 import net.perfectdreams.dreamlobbyfun.utils.CycleGlass
@@ -25,6 +24,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
@@ -42,7 +42,7 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 			e.isCancelled = true
 
 		if (e.clickedInventory?.holder is ServerSelectorHolder) { // Clicou dentro do server selector
-			val info = e.currentItem?.getStoredMetadata(DreamLobbyFun.ITEM_INFO_KEY) ?: return
+			val info = e.currentItem?.itemMeta?.persistentDataContainer?.get(DreamLobbyFun.ITEM_INFO_KEY) ?: return
 
 			val split = info.split(":")
 			val arg0 = split.getOrNull(0)
@@ -55,11 +55,11 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 				e.whoClicked.closeInventory()
 				// player.sendTitle("§eTransferindo...", "", 10, 60, 10)
 				DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(
-						jsonObject(
-								"type" to "transferPlayer",
-								"player" to e.whoClicked.name,
-								"bungeeServer" to arg1
-						)
+					jsonObject(
+						"type" to "transferPlayer",
+						"player" to e.whoClicked.name,
+						"bungeeServer" to arg1
+					)
 				)
 			}
 		}
@@ -89,7 +89,7 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 	fun onClick(e: PlayerInteractEvent) {
 		val clicker = e.player
 
-		val info = e.item?.getStoredMetadata(DreamLobbyFun.ITEM_INFO_KEY) ?: return
+		val info = e.item?.itemMeta?.persistentDataContainer?.get(DreamLobbyFun.ITEM_INFO_KEY) ?: return
 
 		e.isCancelled = true
 
@@ -104,30 +104,30 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 			val inventory = Bukkit.createInventory(ServerSelectorHolder(), 45, "§a§lEscolha um Servidor!")
 
 			val outline = listOf(
-					0,
-					9,
-					18,
-					27,
-					36,
-					37,
-					38,
-					39,
-					40,
-					41,
-					42,
-					43,
-					44,
-					35,
-					26,
-					17,
-					8,
-					7,
-					6,
-					5,
-					4,
-					3,
-					2,
-					1
+				0,
+				9,
+				18,
+				27,
+				36,
+				37,
+				38,
+				39,
+				40,
+				41,
+				42,
+				43,
+				44,
+				35,
+				26,
+				17,
+				8,
+				7,
+				6,
+				5,
+				4,
+				3,
+				2,
+				1
 			)
 
 			var lastCycle: CycleGlass? = null
@@ -172,7 +172,7 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 
 					run {
 						var survival = ItemStack(Material.DIAMOND_PICKAXE)
-						survival.addEnchantment(Enchantment.DURABILITY, 1)
+						survival.addEnchantment(Enchantment.EFFICIENCY, 1)
 						survival.addFlag(ItemFlag.HIDE_ENCHANTS)
 						survival.rename("§6✪ §a§lSparklyPower Survival §6✪")
 
@@ -197,7 +197,9 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 						// }
 
 						survival = survival.addFlag(ItemFlag.HIDE_ATTRIBUTES)
-								.storeMetadata(DreamLobbyFun.ITEM_INFO_KEY, "transferTo:sparklypower_survival")
+							.meta<ItemMeta> {
+								this.persistentDataContainer.set(DreamLobbyFun.ITEM_INFO_KEY, "transferTo:sparklypower_survival")
+							}
 
 						inventory.setItem(22, survival)
 					}
@@ -227,15 +229,19 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 			}
 
 			clicker.inventory.setItem(0,
-					if (bool) {
-						ItemStack(Material.LIME_DYE, 1, 10).rename("§a§lPlayers estão visíveis")
-								.lore("§7Cansado de aturar as outras pessoas?", "§7", "§7Então clique para deixar todas", "§7as outras pessoas invisíveis!")
-								.storeMetadata(DreamLobbyFun.ITEM_INFO_KEY, "setPlayerVisibility:false")
-					} else {
-						ItemStack(Material.GRAY_DYE, 1, 8).rename("§c§lPlayers estão invisíveis")
-								.lore("§7Está se sentindo sozinho?", "§7", "§7Então clique para deixar todas", "§7as outras pessoas visíveis!")
-								.storeMetadata(DreamLobbyFun.ITEM_INFO_KEY, "setPlayerVisibility:true")
-					}
+				if (bool) {
+					ItemStack(Material.LIME_DYE, 1, 10).rename("§a§lPlayers estão visíveis")
+						.lore("§7Cansado de aturar as outras pessoas?", "§7", "§7Então clique para deixar todas", "§7as outras pessoas invisíveis!")
+						.meta<ItemMeta> {
+							this.persistentDataContainer.set(DreamLobbyFun.ITEM_INFO_KEY, "setPlayerVisibility:false")
+						}
+				} else {
+					ItemStack(Material.GRAY_DYE, 1, 8).rename("§c§lPlayers estão invisíveis")
+						.lore("§7Está se sentindo sozinho?", "§7", "§7Então clique para deixar todas", "§7as outras pessoas visíveis!")
+						.meta<ItemMeta> {
+							this.persistentDataContainer.set(DreamLobbyFun.ITEM_INFO_KEY, "setPlayerVisibility:true")
+						}
+				}
 			)
 
 			scheduler().schedule(m, SynchronizationContext.ASYNC) {

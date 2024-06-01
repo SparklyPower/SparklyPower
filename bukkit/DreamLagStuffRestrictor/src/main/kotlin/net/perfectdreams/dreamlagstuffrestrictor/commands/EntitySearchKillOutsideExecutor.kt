@@ -13,7 +13,7 @@ class EntitySearchKillOutsideExecutor : SparklyCommandExecutor() {
             EntityType.PIG,
             EntityType.SHEEP,
             EntityType.COW,
-            EntityType.MUSHROOM_COW,
+            EntityType.MOOSHROOM,
             EntityType.GOAT,
             EntityType.CHICKEN,
             EntityType.FROG,

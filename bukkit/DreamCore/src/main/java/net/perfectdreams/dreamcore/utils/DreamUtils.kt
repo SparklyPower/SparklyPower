@@ -12,7 +12,6 @@ import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import org.bukkit.*
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarFlag
@@ -190,11 +189,13 @@ object DreamUtils {
 						itemStack.itemMeta = meta
 					}
 
-					if (attributes != null) {
-						for ((key, element) in attributes.entrySet()) {
-							itemStack = itemStack.storeMetadata(key, element.string)
-						}
-					}
+					// TODO - 1.20.6: Fix this!
+					//  (we don't really need to fix this, but we need to check if all of our serialized items are using PDC)
+					// if (attributes != null) {
+					// 	for ((key, element) in attributes.entrySet()) {
+					// 		itemStack = itemStack.storeMetadata(key, element.string)
+					// 	}
+					// }
 
 					if (persistentDataContainer != null) {
 						itemStack.meta<ItemMeta> {

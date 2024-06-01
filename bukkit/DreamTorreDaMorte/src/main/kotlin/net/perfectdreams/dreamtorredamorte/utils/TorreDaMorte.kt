@@ -154,7 +154,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
                     .rename("§c§lO Poder do Vieirinha")
                     .apply {
                         this.addUnsafeEnchantment(Enchantment.KNOCKBACK, 1)
-                        this.addUnsafeEnchantment(Enchantment.DAMAGE_ALL, 2)
+                        this.addUnsafeEnchantment(Enchantment.SHARPNESS, 2)
                     }
             )
         }

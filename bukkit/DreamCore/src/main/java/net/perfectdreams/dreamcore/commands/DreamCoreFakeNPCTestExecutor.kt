@@ -1,15 +1,12 @@
 package net.perfectdreams.dreamcore.commands
 
-import net.minecraft.tags.FluidTags
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecutor
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld
 import org.bukkit.entity.EntityType
-import kotlin.time.measureTime
 
 class DreamCoreFakeNPCTestExecutor(val plugin: DreamCore) : SparklyCommandExecutor() {
     override fun execute(context: CommandContext, args: CommandArguments) {

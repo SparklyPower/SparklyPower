@@ -60,7 +60,7 @@ class DreamAssinaturas : KotlinPlugin(), Listener {
 							// Não é mais uma placa! Iremos remover...
 							if (location.block.type.name.contains("SIGN")) {
 								location.world.spawnParticle(
-									Particle.VILLAGER_HAPPY,
+									Particle.HAPPY_VILLAGER,
 									location.add(0.5, 0.5, 0.5),
 									1,
 									0.25,

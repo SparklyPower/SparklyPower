@@ -54,7 +54,7 @@ class EstalinhoListener(val m: DreamCustomItems) : Listener {
             )
 
             clickedBlock.world.spawnParticle(
-                Particle.REDSTONE,
+                Particle.DUST,
                 particleSpawnLocation,
                 5,
                 0.3,

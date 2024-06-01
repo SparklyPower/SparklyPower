@@ -29,7 +29,7 @@ class DreamEnchant : KotlinPlugin() {
 
 	fun createSpecialEnchantmentTableItemStack(credits: Int) = ItemStack(Material.ENCHANTING_TABLE)
 		.meta<ItemMeta> {
-			addEnchant(Enchantment.ARROW_INFINITE, 1, true)
+			addEnchant(Enchantment.INFINITY, 1, true)
 			displayName(
 				Component.text("Super Mesa de Encantamento")
 					.color(TextColor.color(147, 101, 204))

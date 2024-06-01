@@ -28,7 +28,7 @@ import kotlin.math.sqrt
 class InteractListener(val m: DreamResourceReset) : Listener {
     companion object {
         private const val FIVE_MINUTES_IN_TICKS = (5 * 60) * 20
-        private val QUICK_RESOURCES_TELEPORT_TORCH_KEY = SparklyNamespacedKey("is_quick_resources_teleport")
+        val QUICK_RESOURCES_TELEPORT_TORCH_KEY = SparklyNamespacedKey("is_quick_resources_teleport")
         private val QUICK_RESOURCES_TELEPORT_PREVIOUS_WORLD_LOCATION_KEY = SparklyNamespacedKey("quick_resources_teleport_world_location")
         private val QUICK_RESOURCES_TELEPORT_PREVIOUS_RESOURCES_LOCATION_KEY = SparklyNamespacedKey("quick_resources_teleport_resources_location")
         private val QUICK_RESOURCES_TELEPORT_LAST_RESET_KEY = SparklyNamespacedKey("quick_resources_teleport_last_reset")
@@ -43,18 +43,6 @@ class InteractListener(val m: DreamResourceReset) : Listener {
 
         if (item.type != Material.REDSTONE_TORCH)
             return
-
-        // TODO: Remove this hack after the "/kit noob" is updated with the new metadata key
-        if (item.hasItemMeta() && !item.itemMeta.persistentDataContainer.has(QUICK_RESOURCES_TELEPORT_TORCH_KEY, PersistentDataType.BYTE) && item.hasStoredMetadataWithKey("quickTeleport")) {
-            item.meta<ItemMeta> {
-                persistentDataContainer.set(
-                    QUICK_RESOURCES_TELEPORT_TORCH_KEY,
-                    PersistentDataType.BYTE,
-                    1
-                )
-            }
-            return onTorchInteract(e)
-        }
 
         if (item.hasItemMeta() && item.itemMeta.persistentDataContainer.has(QUICK_RESOURCES_TELEPORT_TORCH_KEY, PersistentDataType.BYTE)) {
             e.setUseItemInHand(Event.Result.DENY)
@@ -251,7 +239,7 @@ class InteractListener(val m: DreamResourceReset) : Listener {
             e.player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 600, 1)) // Efeito de velocidade
             e.player.addPotionEffect(
                 PotionEffect(
-                    PotionEffectType.DAMAGE_RESISTANCE,
+                    PotionEffectType.RESISTANCE,
                     600,
                     3
                 )

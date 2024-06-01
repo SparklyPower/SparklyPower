@@ -15,7 +15,7 @@ import net.minecraft.world.level.GameType
 import net.perfectdreams.dreamcore.event.PlayerScoreboardCreatedEvent
 import net.perfectdreams.dreamcore.utils.JVMUnsafeUtils
 import net.perfectdreams.dreamcore.utils.get
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer
+import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -108,7 +108,7 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
                                 println("> ${it::class.java}")
                             } */
 
-                            val newSubPackets = mutableListOf<Packet<ClientGamePacketListener>>()
+                            val newSubPackets = mutableListOf<Packet<in ClientGamePacketListener>>()
                             for (subPacket in msg.subPackets()) {
                                 // It *seems* that vanilla entities are always sent in a bundle packet
                                 if (subPacket is ClientboundAddEntityPacket) {

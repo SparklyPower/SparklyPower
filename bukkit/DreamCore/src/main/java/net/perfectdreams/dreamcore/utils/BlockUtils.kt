@@ -7,10 +7,10 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.Sign
-import org.bukkit.craftbukkit.v1_20_R2.CraftWorld
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_20_R2.util.CraftMagicNumbers
+import org.bukkit.craftbukkit.CraftWorld
+import org.bukkit.craftbukkit.entity.CraftEntity
+import org.bukkit.craftbukkit.inventory.CraftItemStack
+import org.bukkit.craftbukkit.util.CraftMagicNumbers
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Entity
 import org.bukkit.inventory.ItemStack
@@ -49,7 +49,7 @@ object BlockUtils {
 
 	@Deprecated("NMS now uses ItemStacks")
 	fun getExpCount(block: Block, fortuneLevel: Int): Int {
-		return getExpCount(block, ItemStack(Material.DIAMOND_PICKAXE).apply { this.addUnsafeEnchantment(Enchantment.LOOT_BONUS_BLOCKS, fortuneLevel) })
+		return getExpCount(block, ItemStack(Material.DIAMOND_PICKAXE).apply { this.addUnsafeEnchantment(Enchantment.FORTUNE, fortuneLevel) })
 	}
 
 	fun getExpCount(block: Block, itemStack: ItemStack): Int {

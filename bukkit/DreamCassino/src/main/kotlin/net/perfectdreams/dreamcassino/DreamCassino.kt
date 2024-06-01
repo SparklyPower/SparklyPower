@@ -159,13 +159,13 @@ class DreamCassino : KotlinPlugin(), Listener {
 				if (icon == value1 && icon == value2 && icon == value3) {
 					player.sendMessage("${PREFIX} §aSortudo! Você conseguiu §2${payout} Sonecas§a! Que tal ir novamente? ʕ•ᴥ•ʔ")
 					player.deposit(payout.toDouble(), TransactionContext(type = TransactionType.BETTING, extra = "no `cassino`"))
-					player.world.spawnParticle(Particle.VILLAGER_HAPPY, position, 25, 0.5, 0.5, 0.5)
+					player.world.spawnParticle(Particle.HAPPY_VILLAGER, position, 25, 0.5, 0.5, 0.5)
 					return@schedule
 				}
 			}
 
 			player.sendMessage("${PREFIX} §cQue pena, você não acertou nenhum... Que tal ir novamente? ʕ•ᴥ•ʔ")
-			player.world.spawnParticle(Particle.VILLAGER_ANGRY, position, 25, 0.5, 0.5, 0.5)
+			player.world.spawnParticle(Particle.ANGRY_VILLAGER, position, 25, 0.5, 0.5, 0.5)
 		}
 	}
 

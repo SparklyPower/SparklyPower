@@ -54,6 +54,8 @@ fun renderPreferencesMenu(plugin: DreamSocial, preferencesEntity: PreferencesEnt
                     plugin.schedule(SynchronizationContext.ASYNC) {
                         preferencesEntity.flip(broadcastType)
 
+                        waitFor(20 * 5)
+
                         switchContext(SynchronizationContext.SYNC)
 
                         isActivated = !isActivated

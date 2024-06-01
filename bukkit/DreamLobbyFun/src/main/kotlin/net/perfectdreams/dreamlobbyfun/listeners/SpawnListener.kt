@@ -2,18 +2,15 @@ package net.perfectdreams.dreamlobbyfun.listeners
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
-import net.minecraft.network.protocol.game.ClientboundMapItemDataPacket
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData
 import net.perfectdreams.dreamauth.events.PlayerLoggedInEvent
 import net.perfectdreams.dreamauth.utils.PlayerStatus
 import net.perfectdreams.dreamcore.DreamCore
-import net.perfectdreams.dreamcore.DreamCore.Companion.dreamConfig
-import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.extensions.displaced
-import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawn
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcore.utils.extensions.worldGuardRegions
-import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
+import net.perfectdreams.dreamcore.utils.scheduler
 import net.perfectdreams.dreamlobbyfun.DreamLobbyFun
 import net.perfectdreams.dreamlobbyfun.dao.PlayerSettings
 import net.perfectdreams.dreamlobbyfun.tables.UserSettings
@@ -21,7 +18,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.FireworkEffect
 import org.bukkit.Location
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Firework
 import org.bukkit.entity.Player
@@ -31,7 +27,6 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerRespawnEvent
-import org.bukkit.map.MapPalette
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -114,7 +109,7 @@ class SpawnListener(val m: DreamLobbyFun) : Listener {
 			.with(FireworkEffect.Type.values()[DreamUtils.random.nextInt(0, FireworkEffect.Type.values().size)])
 			.build()
 
-		val firework = player.world.spawnEntity(player.location, EntityType.FIREWORK) as Firework
+		val firework = player.world.spawnEntity(player.location, EntityType.FIREWORK_ROCKET) as Firework
 		val fireworkMeta = firework.fireworkMeta
 
 		fireworkMeta.power = 1

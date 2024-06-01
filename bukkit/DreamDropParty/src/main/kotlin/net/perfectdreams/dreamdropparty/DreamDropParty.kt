@@ -1,17 +1,22 @@
 package net.perfectdreams.dreamdropparty
 
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
-import net.perfectdreams.dreamcore.utils.rename
+import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
+import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.set
 import net.perfectdreams.dreamdropparty.commands.DropPartyCommand
 import net.perfectdreams.dreamdropparty.events.DropParty
 import net.perfectdreams.dreamdropparty.utils.LocationWrapper
 import net.perfectdreams.dreamdropparty.utils.RandomItem
+import net.perfectdreams.dreamjetpack.DreamJetpack
 import org.bukkit.inventory.ItemStack
 import java.io.File
 import org.bukkit.Material
+import org.bukkit.inventory.meta.ItemMeta
 
 
 class DreamDropParty : KotlinPlugin() {
@@ -283,10 +288,16 @@ class DreamDropParty : KotlinPlugin() {
         chance = 2.0
         prizes.add(
             RandomItem(
-                ItemStack(
-                    Material.CHAINMAIL_CHESTPLATE
-                ).rename("§6§lJetpack")
-                    .storeMetadata("isJetpack", "true")
+                ItemStack(Material.CHAINMAIL_CHESTPLATE)
+                    .meta<ItemMeta> {
+                        displayNameWithoutDecorations {
+                            color(NamedTextColor.GOLD)
+                            decorate(TextDecoration.BOLD)
+                            content("Jetpack")
+                        }
+
+                        persistentDataContainer.set(DreamJetpack.IS_JETPACK_KEY, true)
+                    }
                 , chance
             )
         )

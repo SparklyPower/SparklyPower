@@ -13,7 +13,6 @@ import net.perfectdreams.dreamcore.utils.adventure.append
 import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
 import net.perfectdreams.dreamcore.utils.commands.command
 import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
@@ -35,6 +34,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.map.MapPalette
 import org.bukkit.map.MapView
+import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
@@ -47,6 +47,7 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 	companion object {
 		val IS_DEATH_CHEST = SparklyNamespacedKey("is_death_chest")
 		val DEATH_CHEST_ID = SparklyNamespacedKey("death_chest_id")
+		val IS_QUICK_TELEPORT_KEY = SparklyNamespacedBooleanKey("is_quick_teleport")
 	}
 
 	val cachedInhabitedChunkTimers = mutableMapOf<Long, Long>()
@@ -161,7 +162,9 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 					player.inventory.addItem(
 						ItemStack(Material.REDSTONE_TORCH)
 							.rename("§c§lTeletransporte Rápido")
-							.storeMetadata("quickTeleport", "true")
+							.meta<ItemMeta> {
+								this.persistentDataContainer.set(InteractListener.QUICK_RESOURCES_TELEPORT_TORCH_KEY, PersistentDataType.BYTE, 1)
+							}
 					)
 				}
 			}

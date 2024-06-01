@@ -81,6 +81,13 @@ class LoriCoolCardsCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
         override fun execute(context: CommandContext, args: CommandArguments) {
             val player = context.requirePlayer()
 
+            context.sendMessage {
+                color(NamedTextColor.YELLOW)
+                append(prefix())
+                appendSpace()
+                append("Pegando informações sobre quais álbuns você já completou das Figurittas da Loritta...")
+            }
+
             m.launchAsyncThread {
                 // Do we have a Discord account?
                 val discordAccount = transaction(Dispatchers.IO, Databases.databaseNetwork) {
@@ -176,7 +183,7 @@ class LoriCoolCardsCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
             }
         }
 
-        fun openSelectBackpackMenu(context: CommandContext, player: Player, finishedAlbums: List<LoriCoolCardsFinishedAlbum>, finishedAlbum: LoriCoolCardsFinishedAlbum) {
+        private fun openSelectBackpackMenu(context: CommandContext, player: Player, finishedAlbums: List<LoriCoolCardsFinishedAlbum>, finishedAlbum: LoriCoolCardsFinishedAlbum) {
             // Open a NEW menu asking what backpack the user wants to redeem
             val backpacks = listOf(
                 MochilaDataWithRarity(MochilaData.StickerRarityCommon, CardRarity.COMMON),
@@ -204,6 +211,13 @@ class LoriCoolCardsCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
 
                             onClick {
                                 it.closeInventory()
+
+                                context.sendMessage {
+                                    color(NamedTextColor.YELLOW)
+                                    append(prefix())
+                                    appendSpace()
+                                    append("Empacotando todas as figurinhas para te dar dentro de mochilas...")
+                                }
 
                                 m.launchAsyncThread {
                                     // *Technically* we don't need to recheck if the user has the album completed, because if it is already completed it probably SHOULDN'T be removed from the album list
@@ -237,7 +251,7 @@ class LoriCoolCardsCommand(val m: DreamMapWatermarker) : SparklyCommandDeclarati
                                         val hasAlreadyClaimedTheAlbum =
                                             transaction(Dispatchers.IO, Databases.databaseNetwork) {
                                                 val hasAlreadyClaimedTheAlbum = LoriCoolCardsClaimedAlbums.selectAll()
-                                                    .where { LoriCoolCardsClaimedAlbums.finishedId eq finishedAlbum.album.id }
+                                                    .where { LoriCoolCardsClaimedAlbums.finishedId eq finishedAlbum.id }
                                                     .count() == 1L
 
                                                 if (hasAlreadyClaimedTheAlbum)

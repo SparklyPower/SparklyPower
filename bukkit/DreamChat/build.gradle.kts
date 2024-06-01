@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    paperDevBundle("1.20.2-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.20.6-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamCorreios"))
     compileOnly(project(":bukkit:DreamCasamentos"))
@@ -26,8 +26,10 @@ dependencies {
     compileOnly("net.citizensnpcs:citizens-main:2.0.30-SNAPSHOT")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 tasks {

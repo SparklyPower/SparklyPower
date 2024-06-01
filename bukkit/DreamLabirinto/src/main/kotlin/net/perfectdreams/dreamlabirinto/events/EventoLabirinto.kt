@@ -179,7 +179,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
         player.activePotionEffects.filter {
             (
                     if (isPreStart)
-                    { it.type != PotionEffectType.SLOW }
+                    { it.type != PotionEffectType.SLOWNESS }
                     else
                     { it.type != PotionEffectType.SPEED && it.amplifier != 0 }
                     )
@@ -190,7 +190,7 @@ class EventoLabirinto(val plugin: DreamLabirinto) : ServerEvent("Labirinto", "/l
             }
 
         if (isPreStart) {
-            player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 300, 1, true, false))
+            player.addPotionEffect(PotionEffect(PotionEffectType.SLOWNESS, 300, 1, true, false))
         } else {
             player.addPotionEffect(PotionEffect(PotionEffectType.SPEED, 200, 0, false, false))
         }

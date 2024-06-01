@@ -95,7 +95,7 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			e.player.sendMessage("§cVocê não pode construir aqui!")
-			e.player.world.spawnParticle(Particle.VILLAGER_ANGRY, e.block.location.add(0.5, 0.0, 0.5), 20, 0.5, 0.5, 0.5)
+			e.player.world.spawnParticle(Particle.ANGRY_VILLAGER, e.block.location.add(0.5, 0.0, 0.5), 20, 0.5, 0.5, 0.5)
 		}
 	}
 
@@ -107,7 +107,7 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 		if (e.block.type == Material.BLACK_CONCRETE) {
 			e.isCancelled = true
 			e.player.sendMessage("§cVocê não pode usar blocos de concreto preto!")
-			e.player.world.spawnParticle(Particle.VILLAGER_ANGRY, e.block.location.add(0.5, 0.0, 0.5), 20, 0.5, 0.5, 0.5)
+			e.player.world.spawnParticle(Particle.ANGRY_VILLAGER, e.block.location.add(0.5, 0.0, 0.5), 20, 0.5, 0.5, 0.5)
 			return
 		}
 
@@ -117,7 +117,7 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			e.player.sendMessage("§cVocê não pode construir aqui!")
-			e.player.world.spawnParticle(Particle.VILLAGER_ANGRY, e.block.location.add(0.5, 0.0, 0.5), 20, 0.5, 0.5, 0.5)
+			e.player.world.spawnParticle(Particle.ANGRY_VILLAGER, e.block.location.add(0.5, 0.0, 0.5), 20, 0.5, 0.5, 0.5)
 		}
 	}
 

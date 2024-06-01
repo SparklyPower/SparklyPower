@@ -1,9 +1,11 @@
 package net.perfectdreams.dreammochilas.listeners
 
 import com.Acrobot.ChestShop.Events.ItemParseEvent
-import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
+import net.perfectdreams.dreamcore.utils.SparklyNamespacedBooleanKey
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.lore
 import net.perfectdreams.dreamcore.utils.rename
+import net.perfectdreams.dreamcore.utils.set
 import net.perfectdreams.dreammochilas.DreamMochilas
 import net.perfectdreams.dreammochilas.utils.MochilaData
 import org.bukkit.ChatColor
@@ -14,8 +16,14 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.ItemMeta
 
 class ChestShopListener : Listener {
+    companion object {
+        // TODO: Remove this from here, it should be in another plugin
+        private val IS_MOVE_SPAWNERS_KEY = SparklyNamespacedBooleanKey("is_move_spawners_tool")
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     fun onClick(e: ItemParseEvent) {
         val cleanItemString = ChatColor.stripColor(e.itemString)!!
@@ -39,9 +47,11 @@ class ChestShopListener : Listener {
                 .lore("§7Querendo mover spawners para outros lugares?", "§7Então utilize a incrível picareta de mover spawners!", "§7", "§7Cuidado que ela quebra bem rápido!")
                 .apply {
                     this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
-                    this.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1)
+                    this.addUnsafeEnchantment(Enchantment.INFINITY, 1)
                 }
-                .storeMetadata("isMoveSpawners", "true")
+                .meta<ItemMeta> {
+                    persistentDataContainer.set(IS_MOVE_SPAWNERS_KEY, true)
+                }
         }
     }
 }

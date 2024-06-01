@@ -76,8 +76,8 @@ class ArenaXizum(val m: DreamXizum, val data: ArenaXizumData) {
 		player2.walkSpeed = 0f
 		player1.removeAllPotionEffects()
 		player2.removeAllPotionEffects()
-		player1.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 100, -5))
-		player2.addPotionEffect(PotionEffect(PotionEffectType.JUMP, 100, -5))
+		player1.addPotionEffect(PotionEffect(PotionEffectType.JUMP_BOOST, 100, -5))
+		player2.addPotionEffect(PotionEffect(PotionEffectType.JUMP_BOOST, 100, -5))
 
 		scheduler().schedule(m) {
 			isCountingDown = true

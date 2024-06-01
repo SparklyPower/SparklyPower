@@ -5,8 +5,8 @@ plugins {
     kotlin("jvm")
     kotlin("kapt") // Required for Velocity Annotations
     `java-library`
-    id("com.github.johnrengelman.shadow") version "5.2.0"
-    kotlin("plugin.serialization")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
+    kotlin("plugin.serialization") version "2.0.0"
 }
 
 repositories {
@@ -36,9 +36,9 @@ dependencies {
     api(project(":common:tables"))
     api(project(":common:rpc-payloads"))
 
-    api("org.jetbrains.kotlinx:kotlinx-serialization-hocon:1.6.0")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.0")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-hocon:1.6.3")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.0-RC")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.0-RC")
 
     api(Dependencies.DISCORD_WEBHOOKS)
 
@@ -46,15 +46,12 @@ dependencies {
 
     api("com.github.kevinsawicki:http-request:6.0")
 
-    api("io.ktor:ktor-client-cio:2.1.3")
-    api("io.ktor:ktor-server-netty:2.1.3")
+    api("io.ktor:ktor-client-cio:2.3.11")
+    api("io.ktor:ktor-server-netty:2.3.11")
 
     kapt("com.velocitypowered:velocity-api:3.2.0-SNAPSHOT")
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
-}
 
 tasks {
     val shadowJar = named<ShadowJar>("shadowJar") {

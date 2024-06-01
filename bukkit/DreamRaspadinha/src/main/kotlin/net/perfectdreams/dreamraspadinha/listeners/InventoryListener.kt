@@ -4,7 +4,6 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamraspadinha.DreamRaspadinha
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.extensions.getStoredMetadata
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamraspadinha.commands.ScratchCardCommand
 import net.perfectdreams.dreamraspadinha.tables.Raspadinhas
@@ -35,9 +34,12 @@ class InventoryListener(val m: DreamRaspadinha) : Listener {
         if (item == null || item.type == Material.AIR)
             return
 
+        if (!item.hasItemMeta())
+            return
+
         e.isCancelled = true
 
-        val raspadinhaChar = item.getStoredMetadata("raspadinhaChar") ?: return
+        val raspadinhaChar = item.itemMeta.persistentDataContainer.get(ScratchCardCommand.RASPINHA_CHAR_KEY) ?: return
 
         fun transformToItemStack(char: Char): ItemStack {
             return when (char) {

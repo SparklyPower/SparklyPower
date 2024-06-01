@@ -235,7 +235,7 @@ class DreamBrisa : KotlinPlugin(), Listener {
 
 			val randomStory = STORIES.random()
 
-			player.addPotionEffect(PotionEffect(PotionEffectType.CONFUSION, ((randomStory.size * 6) * 20) + (8 * 20), 1))
+			player.addPotionEffect(PotionEffect(PotionEffectType.NAUSEA, ((randomStory.size * 6) * 20) + (8 * 20), 1))
 
 			for (line in randomStory) {
 				waitFor(6 * 20)
@@ -247,7 +247,7 @@ class DreamBrisa : KotlinPlugin(), Listener {
 			player.sendMessage(PREFIX + "§2§k|||§a§k|||§f §eEntão... você §4§lmorre§e. §2§k|||§a§k|||§f")
 			waitFor(4 * 20)
 
-			player.removePotionEffect(PotionEffectType.CONFUSION)
+			player.removePotionEffect(PotionEffectType.NAUSEA)
 			player.removeMetadata("isBrisado", this.plugin)
 			player.sendTitle("§aLembre-se...", "§eVencedores não usam drogas!", 20, 80, 20)
 			player.playSound(player.location, "perfectdreams.sfx.proerd", 1f, 1f)

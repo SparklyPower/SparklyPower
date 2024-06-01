@@ -20,7 +20,3 @@ dependencies {
     api("org.postgresql:postgresql:42.7.3")
     api("com.michael-bull.kotlin-coroutines-jdbc:kotlin-coroutines-jdbc:1.0.2")
 }
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
-}

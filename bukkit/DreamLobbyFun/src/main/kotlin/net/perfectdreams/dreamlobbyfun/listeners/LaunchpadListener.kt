@@ -82,8 +82,8 @@ class LaunchpadListener(val m: DreamLobbyFun) : Listener {
 				waitFor(5)
 				while (player.isValid && !player.isOnGround) {
 					val dustOptions = Particle.DustOptions(Color.TEAL, 3f)
-					player.world.spawnParticle(Particle.FIREWORKS_SPARK, player.location, 1, 0.0, 0.0, 0.0, 0.1)
-					player.world.spawnParticle(Particle.REDSTONE, player.location, 1, 0.0, 0.0, 0.0, 0.1, dustOptions)
+					player.world.spawnParticle(Particle.FIREWORK, player.location, 1, 0.0, 0.0, 0.0, 0.1)
+					player.world.spawnParticle(Particle.DUST, player.location, 1, 0.0, 0.0, 0.0, 0.1, dustOptions)
 					waitFor(1)
 				}
 			}

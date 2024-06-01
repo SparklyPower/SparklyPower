@@ -12,6 +12,7 @@ import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.kyori.adventure.text.serializer.json.JSONComponentSerializer
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import net.md_5.bungee.api.ChatColor
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.adventure.appendTextComponent
@@ -151,7 +152,7 @@ object MochilaUtils {
                 if (originalLore == null) {
                     // Original lore not set in item!
                     // This is a bit of a hack :(
-                    if (lore!!.contains("§7slots usados")) {
+                    if (lore!!.joinToString("\n").contains("§7slots usados")) {
                         persistentDataContainer.set(ORIGINAL_MOCHILA_LORE_KEY, currentItemLore.take(3).joinToString("\n") { gsonSerializer.serialize(it) })
                     } else {
                         persistentDataContainer.set(ORIGINAL_MOCHILA_LORE_KEY, currentItemLore.joinToString("\n") { gsonSerializer.serialize(it) })
@@ -160,6 +161,12 @@ object MochilaUtils {
                     originalLore = persistentDataContainer.get(ORIGINAL_MOCHILA_LORE_KEY)!!.let {
                         it.lines().map { gsonSerializer.deserialize(it) }
                     }
+                }
+
+                if (originalLore.joinToString("\n") { PlainTextComponentSerializer.plainText().serialize(it) }.contains("slots usados")) {
+                    // Whoops, another fucky wucky...
+                    persistentDataContainer.set(ORIGINAL_MOCHILA_LORE_KEY, originalLore.take(3).joinToString("\n") { gsonSerializer.serialize(it) })
+                    originalLore = originalLore.take(3)
                 }
 
                 val newLore = originalLore.toMutableList()

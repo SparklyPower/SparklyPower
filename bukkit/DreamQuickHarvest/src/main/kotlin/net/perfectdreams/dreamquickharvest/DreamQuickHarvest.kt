@@ -40,7 +40,7 @@ import org.bukkit.block.BlockFace
 import org.bukkit.block.BlockState
 import org.bukkit.block.data.Ageable
 import org.bukkit.block.data.Directional
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftInventoryPlayer
+import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -208,7 +208,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						e.block,
 						e.player,
 						e.block.type,
-						e.player.inventory.itemInMainHand.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS),
+						e.player.inventory.itemInMainHand.getEnchantmentLevel(Enchantment.FORTUNE),
 						inventoryTarget,
 						mcMMOXp,
 						info,
@@ -240,7 +240,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					onAsyncThread {
 						for (harvestedBlock in harvestedBlocks) {
 							harvestedBlock.world.spawnParticle(
-								Particle.VILLAGER_HAPPY,
+								Particle.HAPPY_VILLAGER,
 								harvestedBlock.location.add(0.5, 0.5, 0.5),
 								3,
 								0.5,
@@ -311,7 +311,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					onAsyncThread {
 						for (harvestedBlock in harvestedBlocks) {
 							harvestedBlock.world.spawnParticle(
-								Particle.VILLAGER_HAPPY,
+								Particle.HAPPY_VILLAGER,
 								harvestedBlock.location.add(0.5, 0.5, 0.5),
 								3,
 								0.5,
@@ -378,7 +378,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					onAsyncThread {
 						for (harvestedBlock in harvestedBlocks) {
 							harvestedBlock.world.spawnParticle(
-								Particle.VILLAGER_HAPPY,
+								Particle.HAPPY_VILLAGER,
 								harvestedBlock.location.add(0.5, 0.5, 0.5),
 								3,
 								0.5,

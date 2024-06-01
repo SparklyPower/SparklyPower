@@ -39,7 +39,7 @@ class SignListener(val m: DreamReparar) : Listener {
                 e.isCancelled = true
                 if (p.itemInHand.type == Material.AIR) {
                     p.sendMessage("§8[§d§lReparar§8] §cVoc\u00ea §4n\u00e3o pode reparar§c a sua m\u00e3o, bobinho :3")
-                    p.world.spawnParticle(Particle.VILLAGER_ANGRY, l, 100, 1.5, 1.0, 1.0)
+                    p.world.spawnParticle(Particle.ANGRY_VILLAGER, l, 100, 1.5, 1.0, 1.0)
                     return
                 }
 
@@ -53,13 +53,13 @@ class SignListener(val m: DreamReparar) : Listener {
 
                         if (!m.canRepair(itemReparar)) {
                             p.sendMessage("§8[§d§lReparar§8] §cVocê §4não pode§c reparar isto!")
-                            p.world.spawnParticle(Particle.VILLAGER_ANGRY, l, 100, 1.5, 1.0, 1.0)
+                            p.world.spawnParticle(Particle.ANGRY_VILLAGER, l, 100, 1.5, 1.0, 1.0)
                             return
                         }
 
                         if (durability == 0) {
                             p.sendMessage("§8[§d§lReparar§8] §cVoc\u00ea §4n\u00e3o precisa§c reparar isto!")
-                            p.world.spawnParticle(Particle.VILLAGER_ANGRY, l, 100, 1.5, 1.0, 1.0)
+                            p.world.spawnParticle(Particle.ANGRY_VILLAGER, l, 100, 1.5, 1.0, 1.0)
                             return
                         }
 
@@ -78,13 +78,13 @@ class SignListener(val m: DreamReparar) : Listener {
                                 lines[2] = "reparar!"
                                 lines[3] = ""
                                 p.sendSignChange(sign.location, lines)
-                                p.world.spawnParticle(Particle.VILLAGER_HAPPY, l, 100, 1.5, 1.0, 1.0)
+                                p.world.spawnParticle(Particle.HAPPY_VILLAGER, l, 100, 1.5, 1.0, 1.0)
                             }
                             return
                         }
 
                         p.sendMessage("§8[§d§lReparar§8] §cVoc\u00ea n\u00e3o tem §4dinheiro suficiente§c para fazer isto!")
-                        p.world.spawnParticle(Particle.VILLAGER_ANGRY, l, 100, 1.5, 1.0, 1.0)
+                        p.world.spawnParticle(Particle.ANGRY_VILLAGER, l, 100, 1.5, 1.0, 1.0)
                     }
                 }
             }
