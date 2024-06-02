@@ -419,7 +419,7 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
                             player.playSound(player.location, "sparklypower.sfx.money", SoundCategory.RECORDS, 1.0f, DreamUtils.random.nextFloat(0.9f, 1.1f))
 
                             // Is the player online?
-                            val receiverPlayer = Bukkit.getPlayer(result.receiverName)
+                            val receiverPlayer = Bukkit.getPlayerExact(result.receiverName)
                             if (receiverPlayer != null) {
                                 receiverPlayer.sendMessage(
                                     textComponent {

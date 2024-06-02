@@ -36,7 +36,8 @@ class SparklyNPCManager(val m: DreamCore) {
             val lookup: MethodHandles.Lookup = MethodHandles.lookup()
             val clazz = ClientboundAddEntityPacket::class.java
 
-            val f = clazz.getDeclaredField("f")
+            // Requires mojmap JAR!
+            val f = clazz.getDeclaredField("type")
 
             // Allow access to private fields
             f.isAccessible = true
@@ -48,7 +49,9 @@ class SparklyNPCManager(val m: DreamCore) {
         val getAddEntityPacketYRotFieldHandler: MethodHandle by lazy {
             val lookup: MethodHandles.Lookup = MethodHandles.lookup()
             val clazz = ClientboundAddEntityPacket::class.java
-            val f = clazz.getDeclaredField("n")
+
+            // Requires mojmap JAR!
+            val f = clazz.getDeclaredField("yRot")
 
             // Allow access to private fields
             f.isAccessible = true
@@ -60,7 +63,9 @@ class SparklyNPCManager(val m: DreamCore) {
         val setRotateHeadPacketSetEntityIdFieldHandler: MethodHandle by lazy {
             val lookup: MethodHandles.Lookup = MethodHandles.lookup()
             val clazz = ClientboundRotateHeadPacket::class.java
-            val f = clazz.getDeclaredField("b")
+
+            // Requires mojmap JAR!
+            val f = clazz.getDeclaredField("entityId")
 
             // Allow access to private fields
             f.isAccessible = true
@@ -72,7 +77,9 @@ class SparklyNPCManager(val m: DreamCore) {
         val setRotateHeadPacketSetYHeadRotFieldHandler: MethodHandle by lazy {
             val lookup: MethodHandles.Lookup = MethodHandles.lookup()
             val clazz = ClientboundRotateHeadPacket::class.java
-            val f = clazz.getDeclaredField("c")
+
+            // Requires mojmap JAR!
+            val f = clazz.getDeclaredField("yHeadRot")
 
             // Allow access to private fields
             f.isAccessible = true
