@@ -88,7 +88,7 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 				DeathChestsInformation.selectAll()
 					.forEach {
 						val oldItems = it[DeathChestsInformation.items]
-						val itemStacks = oldItems.split(";").map { ItemUtils.deserializeItemFromBase64(it)  }
+						val itemStacks = oldItems.split(";").map { it.fromBase64Item()  }
 
 						// Now we insert it using the PROPER way
 						val newItems = itemStacks.map { ItemUtils.serializeItemToBase64(it) }.joinToString(";")
