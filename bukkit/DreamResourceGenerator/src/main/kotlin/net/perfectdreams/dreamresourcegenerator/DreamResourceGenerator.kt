@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamresourcegenerator
 
+import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
@@ -17,6 +18,11 @@ import java.io.File
 class DreamResourceGenerator : KotlinPlugin(), Listener {
 	override fun softEnable() {
 		super.softEnable()
+		if (DreamCore.dreamConfig.serverName != "SparklyPower Survival Generator Resources") {
+			// Let's avoid a BIG disaster, shall we?
+			error("Running DreamResourceGenerator in a server that isn't named \"SparklyPower Survival Generator Resources\", erroring out to avoid a big disaster...")
+		}
+
 		registerEvents(this)
 	}
 

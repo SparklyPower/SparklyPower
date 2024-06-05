@@ -3,17 +3,14 @@ package net.perfectdreams.dreamresourcereset.listeners
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.perfectdreams.dreamcore.tables.Users
-import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.adventure.append
 import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
 import net.perfectdreams.dreamcore.utils.adventure.lore
-import net.perfectdreams.dreamcore.utils.createMenu
 import net.perfectdreams.dreamcore.utils.extensions.canBreakAt
 import net.perfectdreams.dreamcore.utils.extensions.getSafeDestination
 import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.fromBase64Item
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
-import net.perfectdreams.dreamcore.utils.toBase64
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
 import net.perfectdreams.dreamresourcereset.DreamResourceReset
@@ -102,7 +99,7 @@ class PlayerListener(val m: DreamResourceReset) : Listener {
             state.update()
 
             val droppedExp = e.droppedExp
-            val items = e.drops.joinToString(";") { it.toBase64() }
+            val items = e.drops.joinToString(";") { ItemUtils.serializeItemToBase64(it) }
 
             e.drops.clear()
             e.droppedExp = 0
@@ -343,7 +340,7 @@ class PlayerListener(val m: DreamResourceReset) : Listener {
                         player.giveExp(deathDroppedXp)
                         player.playSound(player.location, Sound.ENTITY_PLAYER_LEVELUP, 1f, 0.7f)
 
-                        val items = itemsAsBase64.split(";").filter { it.isNotEmpty() }.map { it.fromBase64Item() }
+                        val items = itemsAsBase64.split(";").filter { it.isNotEmpty() }.map { ItemUtils.deserializeItemFromBase64(it) }
                         val whereItemsShouldBeDropped = clickedBlock.location.add(0.0, 0.5, 0.0)
 
                         for (item in items) {
@@ -402,7 +399,7 @@ class PlayerListener(val m: DreamResourceReset) : Listener {
 
                 clickedBlock.type = Material.AIR
 
-                val items = itemsAsBase64.split(";").filter { it.isNotEmpty() }.map { it.fromBase64Item() }
+                val items = itemsAsBase64.split(";").filter { it.isNotEmpty() }.map { ItemUtils.deserializeItemFromBase64(it) }
 
                 DreamCorreios.getInstance().addItem(playerId, *items.toTypedArray())
 

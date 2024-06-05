@@ -4,6 +4,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.ItemUtils
 import net.perfectdreams.dreamcore.utils.toBase64
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreamcorreios.tables.ContaCorreios
@@ -68,7 +69,7 @@ class CaixaPostal(
         transaction(Databases.databaseNetwork) {
             ContaCorreios.upsert(ContaCorreios.id) {
                 it[id] = playerId
-                it[items] = (this@CaixaPostal.items + pendingAddedItems).joinToString(";") { it.toBase64() }
+                it[items] = (this@CaixaPostal.items + pendingAddedItems).joinToString(";") { ItemUtils.serializeItemToBase64(it) }
             }
         }
     }

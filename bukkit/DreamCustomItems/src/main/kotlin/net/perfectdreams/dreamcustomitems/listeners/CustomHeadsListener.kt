@@ -1,11 +1,8 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
 import me.ryanhamshire.GriefPrevention.GriefPrevention
-import net.perfectdreams.dreamcore.utils.DreamMenu
-import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
-import net.perfectdreams.dreamcore.utils.fromBase64Item
-import net.perfectdreams.dreamcore.utils.toBase64
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.holders.CustomItemRecipeHolder
 import net.perfectdreams.dreamcustomitems.holders.MicrowaveHolder
@@ -37,6 +34,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
+import java.util.logging.Level
 
 class CustomHeadsListener(val m: DreamCustomItems) : Listener {
 
@@ -162,8 +160,12 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                     }
                 } else {
                     microwaveDataModel.items?.forEach {
-                        if (it != null)
-                            microwaveItems.add(it.fromBase64Item())
+                        if (it != null) {
+                            val deserialized = deserializeItemFromBase64OrFallbackToNullIfInvalid(it)
+
+                            if (deserialized != null)
+                                microwaveItems.add(deserialized)
+                        }
                     }
                 }
 
@@ -202,8 +204,13 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                     }
                 } else {
                     superfurnaceData.items?.forEach {
-                        if (it != null)
-                            superFurnaceItems.add(it.fromBase64Item())
+                        if (it != null) {
+                            val deserialized = deserializeItemFromBase64OrFallbackToNullIfInvalid(it)
+
+                            if (deserialized != null) {
+                                superFurnaceItems.add(deserialized)
+                            }
+                        }
                     }
                 }
 
@@ -262,9 +269,9 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
 
                         if (m.microwaves[microwaveDataModel.location] == null) {
                             val newMicrowave = Microwave(m, microwaveDataModel.location)
-                            newMicrowave.inventory.setItem(3, microwaveDataModel.items?.get(0)?.fromBase64Item())
-                            newMicrowave.inventory.setItem(4, microwaveDataModel.items?.get(1)?.fromBase64Item())
-                            newMicrowave.inventory.setItem(5, microwaveDataModel.items?.get(2)?.fromBase64Item())
+                            newMicrowave.inventory.setItem(3, microwaveDataModel.items?.get(0)?.let { deserializeItemFromBase64OrFallbackToNullIfInvalid(it) })
+                            newMicrowave.inventory.setItem(4, microwaveDataModel.items?.get(1)?.let { deserializeItemFromBase64OrFallbackToNullIfInvalid(it) })
+                            newMicrowave.inventory.setItem(5, microwaveDataModel.items?.get(2)?.let { deserializeItemFromBase64OrFallbackToNullIfInvalid(it) })
 
                             m.microwaves[microwaveDataModel.location] = newMicrowave
                         }
@@ -284,7 +291,7 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
 
                             for ((index, slot) in superFurnaceSlots.withIndex()) {
                                 if (superfurnaceData.items?.get(index) != null)
-                                    newSuperFurnace.inventory.setItem(slot, superfurnaceData.items[index]?.fromBase64Item())
+                                    newSuperFurnace.inventory.setItem(slot, superfurnaceData.items[index]?.let { deserializeItemFromBase64OrFallbackToNullIfInvalid(it) })
                             }
 
                             m.superfurnaces[superfurnaceData.location] = newSuperFurnace
@@ -393,9 +400,9 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
         when(holder) {
             is MicrowaveHolder -> {
                 val items = arrayOf(
-                    e.inventory.getItem(3)?.toBase64(),
-                    e.inventory.getItem(4)?.toBase64(),
-                    e.inventory.getItem(5)?.toBase64()
+                    e.inventory.getItem(3)?.let { ItemUtils.serializeItemToBase64(it) },
+                    e.inventory.getItem(4)?.let { ItemUtils.serializeItemToBase64(it) },
+                    e.inventory.getItem(5)?.let { ItemUtils.serializeItemToBase64(it) }
                 )
 
                 val microwave = holder.m.location.block.state as Skull
@@ -421,6 +428,16 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                 superfurnace.persistentDataContainer.set(CustomItems.IS_SUPERFURNACE_KEY, PersistentDataType.STRING, superfurnaceDataModelJson)
                 superfurnace.update()
             }
+        }
+    }
+
+    // This is used because some items may have the old unsupported method of serializing items
+    private fun deserializeItemFromBase64OrFallbackToNullIfInvalid(base64: String): ItemStack? {
+        try {
+            return ItemUtils.deserializeItemFromBase64(base64)
+        } catch (e: Exception) {
+            m.logger.log(Level.WARNING, e) { "Failed to deserialize item $base64" }
+            return null
         }
     }
 }
