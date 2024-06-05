@@ -35,12 +35,15 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
             // Is this an NPC?
             if (entity.persistentDataContainer.get(m.npcKey)) {
                 // Is the entity's unique ID present in the NPC Entities list?
-                if (!m.npcEntities.containsKey(entity.uniqueId)) {
+                val npcData = m.npcEntities[entity.uniqueId]
+                if (npcData == null) {
                     // If not, we are going to delete it!
                     m.m.logger.warning("Deleting entity ${entity.uniqueId} because their ID isn't present in the NPC list!")
 
                     // Bail out!
                     entity.remove()
+                } else {
+                    npcData.updateEntity(entity)
                 }
             }
         }

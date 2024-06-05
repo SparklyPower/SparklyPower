@@ -36,6 +36,11 @@ class DreamCoreCommand(val plugin: DreamCore) : SparklyCommandDeclarationWrapper
             permissions = listOf("dreamcore.setup")
         }
 
+        subcommand(listOf("legacyconverter")) {
+            executor = DreamCoreLegacyConverterExecutor(plugin)
+            permissions = listOf("dreamcore.setup")
+        }
+
         executor = DreamCoreExecutor()
         permissions = listOf("dreamcore.setup")
     }

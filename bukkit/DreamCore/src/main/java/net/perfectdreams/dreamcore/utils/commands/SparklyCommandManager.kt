@@ -6,6 +6,7 @@ import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager
 import io.papermc.paper.plugin.lifecycle.event.registrar.ReloadableRegistrarEvent
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import io.papermc.paper.command.brigadier.CommandSourceStack
+import io.papermc.paper.command.brigadier.bukkit.BukkitBrigForwardingMap
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclaration
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclarationWrapper
@@ -32,6 +33,7 @@ class SparklyCommandManager(val plugin: KotlinPlugin) {
         manager.registerEventHandler<ReloadableRegistrarEvent<Commands?>>(
             LifecycleEvents.COMMANDS
         ) { event: ReloadableRegistrarEvent<Commands?> ->
+            // println("LifecycleEvents.COMMANDS for ${plugin.name}")
             val commands: Commands = event.registrar()
             commandWrappers.forEach {
                 commands.register(it.convertRootDeclarationToBrigadier(command.declaration()).build() as LiteralCommandNode<CommandSourceStack>)

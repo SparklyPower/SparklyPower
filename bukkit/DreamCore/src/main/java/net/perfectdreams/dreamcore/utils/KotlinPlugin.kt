@@ -54,7 +54,12 @@ open class KotlinPlugin : JavaPlugin() {
 	}
 
 	override fun onDisable() {
-		softDisable()
+		try {
+			softDisable()
+		} catch (e: Error) {
+			// ExceptionInInitializerErrors extends error, that's why we catch error
+			logger.log(Level.WARNING, e) { "Error occurred while *soft* disabling ${this.name}, the exception has been suppressed to avoid the KotlinPlugin clean up code not being run" }
+		}
 
 		// Primeiro nós iremos desregistrar todos os comandos deste plugin
 		commandList.forEach {

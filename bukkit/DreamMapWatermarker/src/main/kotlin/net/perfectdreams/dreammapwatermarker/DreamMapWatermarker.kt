@@ -64,8 +64,10 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 		imageFolder.mkdirs()
 
 		registerCommand(DreamMapMakerCommand(this))
-		registerCommand(LoriCoolCardsCommand(this))
-		registerCommand(LoriCoolCardsAdminCommand(this))
+		if (config.generateLorittaFigurittas) {
+			registerCommand(LoriCoolCardsCommand(this))
+			registerCommand(LoriCoolCardsAdminCommand(this))
+		}
 
 		registerEvents(this)
 
@@ -78,8 +80,10 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 
 		restoreMaps()
 
-		loriCoolCardsHandler.startLoriCoolCardsMapGenerator()
-		
+		if (config.generateLorittaFigurittas) {
+			loriCoolCardsHandler.startLoriCoolCardsMapGenerator()
+		}
+
 		registerCommand(
 			command("DreamWatermarkMap", listOf("watermarkmap")) {
 				permission = "dreamwatermarkmap.watermark"

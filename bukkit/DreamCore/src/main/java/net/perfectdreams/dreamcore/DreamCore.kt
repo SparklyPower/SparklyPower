@@ -5,7 +5,6 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.serialization.decodeFromString
 import me.lucko.spark.bukkit.BukkitSparkPlugin
-import mu.KotlinLogging
 import net.perfectdreams.dreamcore.commands.SkinCommand
 import net.perfectdreams.dreamcore.commands.declarations.DreamCoreCommand
 import net.perfectdreams.dreamcore.commands.declarations.MeninaCommand
@@ -19,6 +18,9 @@ import net.perfectdreams.dreamcore.listeners.SocketListener
 import net.perfectdreams.dreamcore.network.socket.SocketServer
 import net.perfectdreams.dreamcore.tables.*
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.displays.SparklyDisplayManager
+import net.perfectdreams.dreamcore.utils.displays.user.SparklyDisplayCommand
+import net.perfectdreams.dreamcore.utils.displays.user.SparklyUserDisplayManager
 import net.perfectdreams.dreamcore.utils.extensions.*
 import net.perfectdreams.dreamcore.utils.npc.SparklyNPCManager
 import net.perfectdreams.dreamcore.utils.npc.user.SparklyNPCCommand
@@ -56,6 +58,8 @@ class DreamCore : KotlinPlugin() {
 	val dreamEventManager = DreamEventManager()
 	val sparklyNPCManager = SparklyNPCManager(this)
 	val sparklyUserNPCManager = SparklyUserNPCManager(this)
+	val sparklyDisplayManager = SparklyDisplayManager(this)
+	val sparklyUserDisplayManager = SparklyUserDisplayManager(this)
 	val scoreboardManager = SparklyScoreboardManager(this)
 	val skinUtils = SkinUtils(this)
 	val rpc = RPCUtils(this)
@@ -128,6 +132,11 @@ class DreamCore : KotlinPlugin() {
 		sparklyUserNPCManager.start()
 		registerCommand(SparklyNPCCommand(this))
 
+		// SparklyDisplays
+		sparklyDisplayManager.start()
+		sparklyUserDisplayManager.start()
+		registerCommand(SparklyDisplayCommand(this))
+
 		val scheduler = Bukkit.getScheduler()
 
 		scheduler.schedule(this, SynchronizationContext.ASYNC) {
@@ -173,8 +182,10 @@ class DreamCore : KotlinPlugin() {
 		logger.info { "Bungee Server Name: ${dreamConfig.bungeeName}" }
 	}
 
-	override fun onDisable() {
+	// We SHOULD NOT override onDisable here to avoid our async tasks not being cancelled (not a HUGE deal but it helps during dev)
+	override fun softDisable() {
 		sparklyUserNPCManager.save()
 		playerInventories.keys.forEach { it.restoreInventory() }
+		Databases.dataSource.close()
 	}
 }

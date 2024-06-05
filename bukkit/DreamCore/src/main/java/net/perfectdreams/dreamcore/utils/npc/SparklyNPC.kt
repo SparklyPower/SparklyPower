@@ -1,8 +1,9 @@
 package net.perfectdreams.dreamcore.utils.npc
 
-import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.entity.Entity
+import org.bukkit.entity.Husk
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.bukkit.scoreboard.Scoreboard
@@ -22,6 +23,7 @@ class SparklyNPC(
     internal var onLeftClickCallback: ((Player) -> (Unit))? = null
     internal var onRightClickCallback: ((Player) -> (Unit))? = null
     var lookClose = false
+    var location: Location = initialLocation
 
     /**
      * Gets the NPC entity, this may be null if the entity is unloaded
@@ -40,7 +42,9 @@ class SparklyNPC(
      * Teleports the NPC to the new [location]
      */
     fun teleport(location: Location) {
-        getEntity()?.teleport(location)
+        this.location = location
+
+        getAndUpdateEntity()
     }
 
     /**
@@ -92,5 +96,16 @@ class SparklyNPC(
 
         // "Identifiers for the entities in this team. For players, this is their username; for other entities, it is their UUID." - wiki.vg
         t.addEntry(fakePlayerName)
+    }
+
+    private fun getAndUpdateEntity() {
+        val entity = getEntity() ?: return
+        updateEntity(entity)
+    }
+
+    fun updateEntity(entity: Entity) {
+        val husk = entity as? Husk ?: error("Entity ${entity.uniqueId} is not a NPC!")
+
+        husk.teleport(this.location)
     }
 }

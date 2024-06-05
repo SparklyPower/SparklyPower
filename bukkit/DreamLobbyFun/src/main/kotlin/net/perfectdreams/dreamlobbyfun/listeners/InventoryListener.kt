@@ -3,6 +3,7 @@ package net.perfectdreams.dreamlobbyfun.listeners
 import com.github.salomonbrys.kotson.jsonObject
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import io.papermc.paper.event.player.PlayerItemFrameChangeEvent
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.meta
@@ -80,6 +81,13 @@ class InventoryListener(val m: DreamLobbyFun) : Listener {
 		if (e.rightClicked.type != EntityType.PLAYER)
 			return
 
+		if (!m.unlockedPlayers.contains(e.player)) {
+			e.isCancelled = true
+		}
+	}
+
+	@EventHandler
+	fun onInteract(e: PlayerItemFrameChangeEvent) {
 		if (!m.unlockedPlayers.contains(e.player)) {
 			e.isCancelled = true
 		}

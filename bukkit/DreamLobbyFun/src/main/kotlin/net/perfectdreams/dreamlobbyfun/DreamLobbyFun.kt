@@ -521,12 +521,6 @@ class DreamLobbyFun : KotlinPlugin(), Listener {
 
 	override fun softDisable() {
 		super.softDisable()
-
-		/* serverCitizens.forEach {
-			it.clickHereHologram?.delete()
-			it.playerCountHologram?.delete()
-			it.serverNameHologram?.delete()
-		} */
 	}
 
 	fun giveLobbyItems(player: Player, playerInfo: PlayerSettings) {
