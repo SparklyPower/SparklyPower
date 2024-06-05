@@ -21,6 +21,7 @@ object PaMonstraCommand : DSLCommandBase<DreamPicaretaMonstra> {
                 .rename("§6§lPá Monstra")
                 .lore("§6Tá saindo da jaula o monstro!")
                 .meta<ItemMeta> {
+                    setCustomModelData(1)
                     this.persistentDataContainer.set(DreamPicaretaMonstra.IS_MONSTER_TOOL_KEY, true)
                 }
 

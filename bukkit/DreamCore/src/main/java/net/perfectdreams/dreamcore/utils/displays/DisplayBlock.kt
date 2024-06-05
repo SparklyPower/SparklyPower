@@ -44,8 +44,8 @@ sealed class DisplayBlock {
         itemStack: ItemStack,
         // We can't (and shouldn't!) store the entity reference, since the reference may change when the entity is despawned!
         // So we store the unique ID
-        var textDisplayUniqueId: UUID,
-        var itemDropUniqueId: UUID
+        var textDisplayUniqueId: UUID?,
+        var itemDropUniqueId: UUID?
     ) : DisplayBlock() {
         override fun getHeight() = 0.7
         var isRemoved = false
@@ -65,8 +65,8 @@ sealed class DisplayBlock {
             getItemDropEntity()?.remove()
         }
 
-        fun getTextDisplayEntity() = Bukkit.getEntity(textDisplayUniqueId)
-        fun getItemDropEntity() = Bukkit.getEntity(itemDropUniqueId)
+        fun getTextDisplayEntity() = textDisplayUniqueId?.let { Bukkit.getEntity(it) }
+        fun getItemDropEntity() = itemDropUniqueId?.let { Bukkit.getEntity(it) }
         override fun areWeTheOwnerOfThisEntity(entity: Entity) = entity.uniqueId == textDisplayUniqueId || entity.uniqueId == itemDropUniqueId
 
         fun updateEntity(textDisplayEntity: Entity, itemDropEntity: Entity) {
@@ -80,7 +80,8 @@ sealed class DisplayBlock {
 
             textDisplayEntity.teleport(
                 this.parent
-                    .location
+                    .locationReference
+                    .toBukkit()
                     .clone()
                     .apply {
                         // we need to add the transformation scale y offset because holograms are offsetted by the "bottom" not the "top"
@@ -97,7 +98,7 @@ sealed class DisplayBlock {
         val parent: SparklyDisplay,
         // We can't (and shouldn't!) store the entity reference, since the reference may change when the entity is despawned!
         // So we store the unique ID
-        var uniqueId: UUID
+        var uniqueId: UUID?
     ) : DisplayBlock() {
         var currentText: Component? = null
             private set
@@ -138,7 +139,7 @@ sealed class DisplayBlock {
         var lineWidth = Int.MAX_VALUE
             private set
 
-        fun getEntity() = Bukkit.getEntity(uniqueId)
+        fun getEntity() = uniqueId?.let { Bukkit.getEntity(it) }
         override fun areWeTheOwnerOfThisEntity(entity: Entity) = entity.uniqueId == uniqueId
 
         override fun remove() {
@@ -166,7 +167,8 @@ sealed class DisplayBlock {
 
             textDisplay.teleport(
                 this.parent
-                    .location
+                    .locationReference
+                    .toBukkit()
                     .clone()
                     .apply {
                         // we need to add the transformation scale y offset because holograms are offsetted by the "bottom" not the "top"

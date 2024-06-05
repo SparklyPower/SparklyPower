@@ -2,13 +2,13 @@ package net.perfectdreams.dreamquickharvest
 
 import com.gmail.nossr50.datatypes.experience.XPGainReason
 import com.gmail.nossr50.datatypes.experience.XPGainSource
+import com.gmail.nossr50.datatypes.player.McMMOPlayer
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.datatypes.skills.SubSkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.Permissions
 import com.gmail.nossr50.util.player.UserManager
-import com.gmail.nossr50.util.random.RandomChanceSkill
-import com.gmail.nossr50.util.random.RandomChanceUtil
+import com.gmail.nossr50.util.random.ProbabilityUtil
 import com.sk89q.worldedit.bukkit.BukkitAdapter
 import com.sk89q.worldedit.bukkit.BukkitWorld
 import com.sk89q.worldguard.WorldGuard
@@ -199,7 +199,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					// Optimization: This is from McMMO's com.gmail.nossr50.util.BlockUtils.checkDoubleDrops, but we have "inlined" the getDoubleDropsEnabled and isSubSkillEnabled check for when the player attempts to harvest something, this way we avoid multiple repeating checks
 					val executeDoubleDropsCheck = mcMMO.p.generalConfig.getDoubleDropsEnabled(PrimarySkillType.HERBALISM, e.block.type) && Permissions.isSubSkillEnabled(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS)
 					// Optimization: Create a RandomChanceSkill only once
-					val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
+					// (mcMMO refactored their code so we did the best alternative)
+					val mmoPlayer = UserManager.getPlayer(e.player)
+					if (mmoPlayer == null)
+						return@lockAndRun
+					// val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
 					// Optimization: Get the current GriefPrevention claim of the clicked block, we are going to reuse it in the canBreak checks to avoid checking all claims
 					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
 					// Optimization: Send the particles in a separate thread AND after everything has been harvested (we do this because there is a performance impact, ~0.13ms per tick)
@@ -207,6 +211,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					doQuickHarvestOnCrop(
 						e.block,
 						e.player,
+						mmoPlayer,
 						e.block.type,
 						e.player.inventory.itemInMainHand.getEnchantmentLevel(Enchantment.FORTUNE),
 						inventoryTarget,
@@ -216,7 +221,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						mutableSetOf(),
 						harvestedBlocks,
 						executeDoubleDropsCheck,
-						randomChanceSkill,
+						// randomChanceSkill,
 						claim,
 						hasBypass(e.player, e.block.location) // Actually it only needs the world
 					)
@@ -272,7 +277,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					// Optimization: This is from McMMO's com.gmail.nossr50.util.BlockUtils.checkDoubleDrops, but we have "inlined" the getDoubleDropsEnabled and isSubSkillEnabled check for when the player attempts to harvest something, this way we avoid multiple repeating checks
 					val executeDoubleDropsCheck = mcMMO.p.generalConfig.getDoubleDropsEnabled(PrimarySkillType.HERBALISM, e.block.type) && Permissions.isSubSkillEnabled(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS)
 					// Optimization: Create a RandomChanceSkill only once
-					val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
+					// (mcMMO refactored their code so we did the best alternative)
+					val mmoPlayer = UserManager.getPlayer(e.player)
+					if (mmoPlayer == null)
+						return@lockAndRun
+					// val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
 					// Optimization: Get the current GriefPrevention claim of the clicked block, we are going to reuse it in the canBreak checks to avoid checking all claims
 					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
 					// Optimization: Send the particles in a separate thread AND after everything has been harvested (we do this because there is a performance impact, ~0.13ms per tick)
@@ -280,6 +289,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					doQuickHarvestOnCocoa(
 						e,
 						e.player,
+						mmoPlayer,
 						e.block,
 						inventoryTarget,
 						mcMMOXp,
@@ -288,7 +298,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						mutableSetOf(),
 						harvestedBlocks,
 						executeDoubleDropsCheck,
-						randomChanceSkill,
 						claim,
 						hasBypass(e.player, e.block.location) // Actually it only needs the world
 					)
@@ -340,7 +349,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					// Optimization: This is from McMMO's com.gmail.nossr50.util.BlockUtils.checkDoubleDrops, but we have "inlined" the getDoubleDropsEnabled and isSubSkillEnabled check for when the player attempts to harvest something, this way we avoid multiple repeating checks
 					val executeDoubleDropsCheck = mcMMO.p.generalConfig.getDoubleDropsEnabled(PrimarySkillType.HERBALISM, e.block.type) && Permissions.isSubSkillEnabled(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS)
 					// Optimization: Create a RandomChanceSkill only once
-					val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
+					// (mcMMO refactored their code so we did the best alternative)
+					val mmoPlayer = UserManager.getPlayer(e.player)
+					if (mmoPlayer == null)
+						return@lockAndRun
+					// val randomChanceSkill = RandomChanceSkill(e.player, SubSkillType.HERBALISM_DOUBLE_DROPS, true)
 					// Optimization: Get the current GriefPrevention claim of the clicked block, we are going to reuse it in the canBreak checks to avoid checking all claims
 					val claim = GriefPrevention.instance.dataStore.getClaimAt(e.block.location, false, null)
 					// Optimization: Send the particles in a separate thread AND after everything has been harvested (we do this because there is a performance impact, ~0.13ms per tick)
@@ -348,6 +361,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 					doQuickHarvestOnSugarCane(
 						e,
 						e.player,
+						mmoPlayer,
 						e.block,
 						inventoryTarget,
 						mcMMOXp,
@@ -355,7 +369,6 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						AtomicBoolean(false),
 						harvestedBlocks,
 						executeDoubleDropsCheck,
-						randomChanceSkill,
 						claim,
 						hasBypass(e.player, e.block.location) // Actually it only needs the world
 					)
@@ -516,6 +529,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 	fun addMcMMOHerbalismXP(
 		player: Player,
+		mmoPlayer: McMMOPlayer,
 		block: Block,
 		material: Material? = null,
 		mcMMOXp: AtomicInteger
@@ -573,6 +587,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	fun doQuickHarvestOnCrop(
 		startingBlock: Block,
 		player: Player,
+		mmoPlayer: McMMOPlayer,
 		type: Material,
 		fortuneLevel: Int,
 		inventory: Inventory,
@@ -582,7 +597,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		checkedBlocks: MutableSet<Block>,
 		harvestedBlocks: MutableList<Block>,
 		executeDoubleDropsCheck: Boolean,
-		randomChanceSkill: RandomChanceSkill,
+		// randomChanceSkill: RandomChanceSkill,
 		cachedClaim: Claim?,
 		hasWorldGuardBypass: Boolean
 	) {
@@ -634,6 +649,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				},
 				getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
 					player,
+					mmoPlayer,
 					block.state,
 					when (type) {
 						Material.WHEAT -> 1
@@ -643,8 +659,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 						Material.BEETROOTS -> 1
 						else -> 1
 					},
-					executeDoubleDropsCheck,
-					randomChanceSkill
+					executeDoubleDropsCheck
 				)
 			)
 
@@ -706,10 +721,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			if (type == Material.WHEAT) { // Trigo dropa seeds junto com a wheat, então vamos dropar algumas seeds aleatórias
 				val seed = getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
 					player,
+					mmoPlayer,
 					block.state,
 					DreamUtils.random.nextInt(0, 4),
 					executeDoubleDropsCheck,
-					randomChanceSkill
+					// randomChanceSkill
 				)
 
 				if (seed != 0) {
@@ -730,7 +746,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				}
 			}
 
-			addMcMMOHerbalismXP(player, block, type, mcMMOXp) // mcMMO EXP
+			addMcMMOHerbalismXP(player, mmoPlayer, block, type, mcMMOXp) // mcMMO EXP
 
 			harvestedBlocks.add(block)
 
@@ -777,6 +793,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	private fun doQuickHarvestOnCocoa(
 		e: BlockBreakEvent,
 		player: Player,
+		mmoPlayer: McMMOPlayer,
 		block: Block,
 		inventory: Inventory,
 		mcMMOXp: AtomicInteger,
@@ -785,7 +802,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		checkedBlocks: MutableSet<Block>,
 		harvestedBlocks: MutableList<Block>,
 		executeDoubleDropsCheck: Boolean,
-		randomChanceSkill: RandomChanceSkill,
+		// randomChanceSkill: RandomChanceSkill,
 		cachedClaim: Claim?,
 		hasWorldGuardBypass: Boolean
 	) {
@@ -823,10 +840,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			Material.COCOA_BEANS,
 			getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
 				player,
+				mmoPlayer,
 				block.state,
 				DreamUtils.random.nextInt(2, 4),
 				executeDoubleDropsCheck,
-				randomChanceSkill
+				// randomChanceSkill
 			)
 		)
 
@@ -840,7 +858,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 		inventory.addItem(itemStack)
 
-		addMcMMOHerbalismXP(player, block, mcMMOXp = mcMMOXp) // mcMMO EXP
+		addMcMMOHerbalismXP(player, mmoPlayer, block, mcMMOXp = mcMMOXp) // mcMMO EXP
 
 		blockage.age = 0
 		block.blockData = blockage
@@ -870,6 +888,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			doQuickHarvestOnCocoa(
 				e,
 				player,
+				mmoPlayer,
 				it,
 				inventory,
 				mcMMOXp,
@@ -878,7 +897,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				checkedBlocks,
 				harvestedBlocks,
 				executeDoubleDropsCheck,
-				randomChanceSkill,
+				// randomChanceSkill,
 				cachedClaim,
 				hasWorldGuardBypass
 			)
@@ -888,6 +907,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 	private fun doQuickHarvestOnSugarCane(
 		e: BlockBreakEvent,
 		player: Player,
+		mmoPlayer: McMMOPlayer,
 		block: Block,
 		inventory: Inventory,
 		mcMMOXp: AtomicInteger,
@@ -895,7 +915,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 		playerHasBeenWarned: AtomicBoolean,
 		harvestedBlocks: MutableList<Block>,
 		executeDoubleDropsCheck: Boolean,
-		randomChanceSkill: RandomChanceSkill,
+		// randomChanceSkill: RandomChanceSkill,
 		cachedClaim: Claim?,
 		hasWorldGuardBypass: Boolean
 	) {
@@ -934,10 +954,11 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				Material.SUGAR_CANE,
 				getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
 					player,
+					mmoPlayer,
 					block.state,
 					1,
 					executeDoubleDropsCheck,
-					randomChanceSkill
+					// randomChanceSkill
 				)
 			)
 
@@ -951,7 +972,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 			inventory.addItem(itemStack)
 
-			addMcMMOHerbalismXP(player, bottom, mcMMOXp = mcMMOXp) // mcMMO EXP
+			addMcMMOHerbalismXP(player, mmoPlayer, bottom, mcMMOXp = mcMMOXp) // mcMMO EXP
 
 			bottom.type = Material.AIR
 
@@ -985,6 +1006,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 			doQuickHarvestOnSugarCane(
 				e,
 				player,
+				mmoPlayer,
 				it,
 				inventory,
 				mcMMOXp,
@@ -992,7 +1014,7 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 				playerHasBeenWarned,
 				harvestedBlocks,
 				executeDoubleDropsCheck,
-				randomChanceSkill,
+				// randomChanceSkill,
 				cachedClaim,
 				hasWorldGuardBypass
 			)
@@ -1036,17 +1058,21 @@ class DreamQuickHarvest : KotlinPlugin(), Listener {
 
 	private fun getOriginalStackCountOrDoubleIfUserHasHerbalismDoubleDropsChance(
 		player: Player,
+		mmoPlayer: McMMOPlayer,
 		blockState: BlockState,
 		stackCount: Int,
 		executeDoubleDropsCheck: Boolean,
-		randomChanceSkill: RandomChanceSkill
+		// randomChanceSkill: RandomChanceSkill
 	): Int {
 		return if (!executeDoubleDropsCheck || mcMMO.getPlaceStore().isTrue(blockState)) {
 			// User placed the block
 			stackCount
 		} else {
 			// Optimization: This is from McMMO's com.gmail.nossr50.util.BlockUtils.checkDoubleDrops, but we have "inlined" the getDoubleDropsEnabled and isSubSkillEnabled check for when the player attempts to harvest something, this way we avoid multiple repeating checks
-			val hasDoubleDrops = RandomChanceUtil.checkRandomChanceExecutionSuccess(randomChanceSkill)
+			val hasDoubleDrops = ProbabilityUtil.isSkillRNGSuccessful(
+				SubSkillType.HERBALISM_DOUBLE_DROPS,
+				mmoPlayer
+			)
 
 			if (hasDoubleDrops) {
 				stackCount * 2

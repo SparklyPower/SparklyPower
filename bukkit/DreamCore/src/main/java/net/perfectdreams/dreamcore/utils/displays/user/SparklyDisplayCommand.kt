@@ -3,6 +3,7 @@ package net.perfectdreams.dreamcore.utils.displays.user
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.utils.LocationReference
 import net.perfectdreams.dreamcore.utils.adventure.append
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
@@ -616,7 +617,7 @@ class SparklyDisplayCommand(val m: DreamCore) : SparklyCommandDeclarationWrapper
                 return
             }
 
-            hologramData.sparklyDisplay.location = player.location
+            hologramData.sparklyDisplay.locationReference = LocationReference.fromBukkit(player.location)
             hologramData.sparklyDisplay.synchronizeBlocks()
 
             context.sendMessage {
@@ -966,11 +967,13 @@ class SparklyDisplayCommand(val m: DreamCore) : SparklyCommandDeclarationWrapper
                 return
             }
 
-            hologramData.sparklyDisplay.location = (
-                    hologramData.sparklyDisplay.location
-                        .clone()
-                        .toCenterLocation()
-                    )
+            hologramData.sparklyDisplay.locationReference = LocationReference.fromBukkit(
+                hologramData.sparklyDisplay
+                    .locationReference
+                    .toBukkit()
+                    .toCenterLocation()
+            )
+
 
             hologramData.sparklyDisplay.synchronizeBlocks()
 
@@ -1010,10 +1013,10 @@ class SparklyDisplayCommand(val m: DreamCore) : SparklyCommandDeclarationWrapper
                 return
             }
 
-            val referenceHologramLocation = referenceHologramData.sparklyDisplay.location
-            val hologramToAlignLocation = hologramToAlignData.sparklyDisplay.location
+            val referenceHologramLocation = referenceHologramData.sparklyDisplay.locationReference.toBukkit()
+            val hologramToAlignLocation = hologramToAlignData.sparklyDisplay.locationReference.toBukkit()
 
-            hologramToAlignData.sparklyDisplay.location = (
+            hologramToAlignData.sparklyDisplay.locationReference = LocationReference.fromBukkit(
                     hologramToAlignLocation.clone().apply {
                         for (char in alignment) {
                             if (char == 'x')
@@ -1062,8 +1065,8 @@ class SparklyDisplayCommand(val m: DreamCore) : SparklyCommandDeclarationWrapper
                 return
             }
 
-            hologramToMoveData.sparklyDisplay.location = (
-                    hologramToMoveData.sparklyDisplay.location.clone().apply {
+            hologramToMoveData.sparklyDisplay.locationReference = LocationReference.fromBukkit(
+                    hologramToMoveData.sparklyDisplay.locationReference.toBukkit().apply {
                         for (char in axis) {
                             if (char == 'x')
                                 x += quantity
@@ -1126,11 +1129,11 @@ class SparklyDisplayCommand(val m: DreamCore) : SparklyCommandDeclarationWrapper
             val powedDistance = distance * distance
 
             val hologramsNearMe = m.sparklyUserDisplayManager.createdTextDisplays.filter {
-                val bukkitLocation = it.value.sparklyDisplay.location
+                val bukkitLocation = it.value.sparklyDisplay.locationReference.toBukkit()
                 if (bukkitLocation.world != player.world)
                     false
                 else
-                    powedDistance > it.value.sparklyDisplay.location.distanceSquared(player.location)
+                    powedDistance > it.value.sparklyDisplay.locationReference.toBukkit().distanceSquared(player.location)
             }
 
             if (hologramsNearMe.isEmpty()) {

@@ -50,7 +50,7 @@ class SparklyUserDisplayManager(val m: DreamCore) {
         if (userNPCsFile.exists()) {
             val npcDatas = Json.decodeFromString<List<UserCreatedSparklyDisplayData>>(userNPCsFile.readText())
             npcDatas.forEach {
-                val sparklyDisplay = m.sparklyDisplayManager.spawnDisplay(m, it.location.toBukkit())
+                val sparklyDisplay = m.sparklyDisplayManager.spawnDisplay(m, it.location)
                 m.sparklyUserDisplayManager.createdTextDisplays[it.id] = UserCreatedSparklyDisplay(it.id, sparklyDisplay)
 
                 for (block in it.blocks) {
@@ -58,6 +58,7 @@ class SparklyUserDisplayManager(val m: DreamCore) {
                         is UserCreatedSparklyDisplayData.UserCreatedDisplayBlock.UserCreatedItemDropDisplayBlock -> {
                             sparklyDisplay.addItemDropDisplayBlock(ItemStack.deserializeBytes(block.itemStack))
                         }
+
                         is UserCreatedSparklyDisplayData.UserCreatedDisplayBlock.UserCreatedTextDisplayBlock -> {
                             val newBlock = sparklyDisplay.addDisplayBlock()
                             newBlock.text(block.text?.let { MiniMessage.miniMessage().deserialize(it) })
@@ -111,7 +112,7 @@ class SparklyUserDisplayManager(val m: DreamCore) {
                             // println("hologram ${display.key} has ${display.value.sparklyDisplay.blocks.size} blocks")
                             UserCreatedSparklyDisplayData(
                                 display.key,
-                                LocationReference.fromBukkit(display.value.sparklyDisplay.location),
+                                display.value.sparklyDisplay.locationReference,
                                 display.value.sparklyDisplay.blocks.map {
                                     when (it) {
                                         is DisplayBlock.TextDisplayBlock -> {

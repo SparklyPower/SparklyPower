@@ -11,7 +11,7 @@ import com.gmail.nossr50.skills.mining.MiningManager
 import com.gmail.nossr50.util.BlockUtils
 import com.gmail.nossr50.util.Permissions
 import com.gmail.nossr50.util.player.UserManager
-import com.gmail.nossr50.util.random.RandomChanceUtil
+import com.gmail.nossr50.util.random.ProbabilityUtil
 import com.gmail.nossr50.util.skills.SkillUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.SparklyNamespacedBooleanKey
@@ -147,10 +147,9 @@ class DreamPicaretaMonstra : KotlinPlugin(), Listener {
 				) && miningManager.canDoubleDrop()
 			) {
 				if (!heldItemHasSilkTouch || mcMMO.p.advancedConfig.doubleDropSilkTouchEnabled) {
-					if (RandomChanceUtil.checkRandomChanceExecutionSuccess(
-							player,
+					if (ProbabilityUtil.isSkillRNGSuccessful(
 							SubSkillType.MINING_DOUBLE_DROPS,
-							true
+							mmoPlayer
 						)
 					) {
 						val useTriple = mmoPlayer.getAbilityMode(mcMMO.p.skillTools.getSuperAbility(skillType)) && mcMMO.p.advancedConfig.allowMiningTripleDrops

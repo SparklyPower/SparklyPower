@@ -2,7 +2,7 @@ package net.perfectdreams.dreamsocial.gui.profile.helper
 
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 
-val alphabeticallySortedList = PrimarySkillType.values().sortedBy(PrimarySkillType::localizedName)
+val alphabeticallySortedList = PrimarySkillType.entries.sortedBy(PrimarySkillType::localizedName)
 
 val PrimarySkillType.localizedName get() = when(this) {
     PrimarySkillType.ACROBATICS -> "Acrobacia"
@@ -20,4 +20,7 @@ val PrimarySkillType.localizedName get() = when(this) {
     PrimarySkillType.TAMING -> "Adestramento"
     PrimarySkillType.UNARMED -> "Desarmado"
     PrimarySkillType.WOODCUTTING -> "Lenhador"
+    PrimarySkillType.CROSSBOWS -> "Crossbows"
+    PrimarySkillType.MACES -> "Maces"
+    PrimarySkillType.TRIDENTS -> "Tridents"
 }

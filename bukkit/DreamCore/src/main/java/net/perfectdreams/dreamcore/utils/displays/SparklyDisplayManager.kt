@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamcore.utils.displays
 
 import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.utils.LocationReference
 import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
 import net.perfectdreams.dreamcore.utils.get
 import net.perfectdreams.dreamcore.utils.registerEvents
@@ -46,6 +47,13 @@ class SparklyDisplayManager(val m: DreamCore) {
     fun spawnDisplay(
         owner: Plugin,
         location: Location
+    ): SparklyDisplay {
+        return spawnDisplay(owner, LocationReference.fromBukkit(location))
+    }
+
+    fun spawnDisplay(
+        owner: Plugin,
+        location: LocationReference
     ): SparklyDisplay {
         val displayId = UUID.randomUUID()
         val sparklyDisplay = SparklyDisplay(

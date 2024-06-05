@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcore.utils.displays
 
+import net.perfectdreams.dreamcore.utils.LocationReference
 import net.perfectdreams.dreamcore.utils.set
 import org.bukkit.Location
 import org.bukkit.entity.Entity
@@ -17,9 +18,13 @@ class SparklyDisplay(
     val owner: Plugin,
     // THIS IS NOT AN ENTITY ID!!!
     val uniqueId: UUID,
-    var location: Location
+    var locationReference: LocationReference,
 ) {
     val blocks = mutableListOf<DisplayBlock>()
+
+    fun getSparklyDisplayUserId(): String? = m.m.sparklyUserDisplayManager.createdTextDisplays.values.firstOrNull {
+        it.sparklyDisplay == this@SparklyDisplay
+    }?.id
 
     fun getOwnerOfThisEntity(entity: Entity): DisplayBlock? {
         return blocks.firstOrNull { it.areWeTheOwnerOfThisEntity(entity) }
@@ -40,7 +45,7 @@ class SparklyDisplay(
     }
 
     fun getYLocationOfBlock(blockToBeChecked: DisplayBlock): Double {
-        var currentY = location.y
+        var currentY = locationReference.toBukkit().y
 
         for (block in blocks) {
             if (blockToBeChecked == block)
@@ -66,12 +71,18 @@ class SparklyDisplay(
         return DisplayBlock.TextDisplayBlock(
             m,
             this,
-            textDisplay.uniqueId
+            textDisplay?.uniqueId
         )
     }
 
-    private fun spawnDisplayBlock(): TextDisplay {
+    private fun spawnDisplayBlock(): Entity? {
         // Now THIS TIME we need to create a UUID for it
+        val location = locationReference.toBukkit()
+        if (!location.isWorldLoaded) {
+            m.m.logger.warning("Tried spawning display block for SparklyDisplay $uniqueId (${getSparklyDisplayUserId()}), but the world isn't loaded! Ignoring...")
+            return null
+        }
+
         val textDisplay = location.world.spawnEntity(location, EntityType.TEXT_DISPLAY) as TextDisplay
         textDisplay.persistentDataContainer.set(m.handledBySparklyDisplay, uniqueId.toString())
 
@@ -85,8 +96,8 @@ class SparklyDisplay(
             m,
             this,
             itemStack,
-            textDisplay.uniqueId,
-            item.uniqueId
+            textDisplay?.uniqueId,
+            item?.uniqueId
         )
 
         return newBlock
@@ -100,7 +111,13 @@ class SparklyDisplay(
         return newBlock
     }
 
-    private fun spawnItemDropDisplayBlock(itemStack: ItemStack): Pair<TextDisplay, Item> {
+    private fun spawnItemDropDisplayBlock(itemStack: ItemStack): Pair<Entity?, Entity?> {
+        val location = locationReference.toBukkit()
+        if (!location.isWorldLoaded) {
+            m.m.logger.warning("Tried spawning item drop display block for SparklyDisplay $uniqueId (${getSparklyDisplayUserId()}), but the world isn't loaded! Ignoring...")
+            return Pair(null, null)
+        }
+
         val textDisplay = location.world.spawnEntity(location, EntityType.TEXT_DISPLAY) as TextDisplay
         textDisplay.persistentDataContainer.set(m.handledBySparklyDisplay, uniqueId.toString())
 
@@ -130,6 +147,12 @@ class SparklyDisplay(
     }
 
     fun synchronizeBlocks() {
+        val location = locationReference.toBukkit()
+        if (location.world == null) {
+            m.m.logger.info("Not synchronizing SparklyDisplay ${uniqueId} (${getSparklyDisplayUserId()}) because the location world is null!")
+            return
+        }
+
         // No need to synchronize blocks if the chunk ain't loaded (avoids spam with "Recreating entity" when the display's chunk is not loaded)
         // Blocks in unloaded chunks will be synchronized when the EntitiesLoadEvent is called
         if (!location.isChunkLoaded)
@@ -150,7 +173,7 @@ class SparklyDisplay(
                     m.m.logger.info("Recreating the TextDisplayBlock entity")
 
                     // Null, recreate the entity!
-                    val textDisplay = spawnDisplayBlock()
+                    val textDisplay = spawnDisplayBlock() ?: return
                     entity = textDisplay
                 }
 
@@ -170,8 +193,8 @@ class SparklyDisplay(
                     m.m.logger.info("Recreating the ItemDropDisplayBlock entities")
 
                     val newEntities = spawnItemDropDisplayBlock(block.itemStack)
-                    textDisplayEntity = newEntities.first
-                    itemDropEntity = newEntities.second
+                    textDisplayEntity = newEntities.first ?: return
+                    itemDropEntity = newEntities.second ?: return
                 }
 
                 block.updateEntity(textDisplayEntity, itemDropEntity)

@@ -255,6 +255,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 
 			if (chestplate.itemMeta.displayName == "§6§lJetpack") {
 				itemMeta.persistentDataContainer.set(IS_JETPACK_KEY, true)
+				chestplate.itemMeta = itemMeta
 				return true
 			}
 		}

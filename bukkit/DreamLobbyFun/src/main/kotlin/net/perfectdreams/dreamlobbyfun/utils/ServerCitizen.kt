@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.utils.LocationReference
 import net.perfectdreams.dreamcore.utils.adventure.appendTextComponent
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.displays.DisplayBlock
@@ -109,14 +110,16 @@ class ServerCitizen(
 					val newLocation = middle.clone()
 					val mod = animationTicks % 32
 
-					clickHereHologram.sparklyDisplay.location = newLocation.add(
-						0.0,
-						if (mod > 16) {
-							-0.285 + easeInOutSine((mod - 16) / 16.0) * 0.285
-						} else {
-							easeInOutSine(mod / 16.0) * -0.285
-						},
-						0.0
+					clickHereHologram.sparklyDisplay.locationReference = LocationReference.fromBukkit(
+						newLocation.add(
+							0.0,
+							if (mod > 16) {
+								-0.285 + easeInOutSine((mod - 16) / 16.0) * 0.285
+							} else {
+								easeInOutSine(mod / 16.0) * -0.285
+							},
+							0.0
+						)
 					)
 					clickHereHologram.sparklyDisplay.synchronizeBlocks()
 

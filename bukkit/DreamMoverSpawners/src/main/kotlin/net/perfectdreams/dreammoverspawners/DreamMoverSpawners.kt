@@ -99,6 +99,7 @@ class DreamMoverSpawners : KotlinPlugin(), Listener {
                         }
                         .meta<ItemMeta> {
                             this.persistentDataContainer.set(IS_MOVE_SPAWNERS_KEY, true)
+                            this.setCustomModelData(1)
                         }
                 )
             }

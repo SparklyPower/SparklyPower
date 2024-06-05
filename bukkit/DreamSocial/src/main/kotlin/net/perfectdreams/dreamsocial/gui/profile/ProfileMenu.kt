@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamsocial.gui.profile
 
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.skills.SkillTools
 import kotlinx.coroutines.runBlocking
@@ -331,8 +332,12 @@ fun renderProfileMenu(plugin: DreamSocial, targetUUID: UUID, profileLayout: Prof
         val mcMMOPlayerProfile = mcMMO.getDatabaseManager().loadPlayerProfile(targetUUID)
         var powerLevel = 0
 
-        val colors = Array(18) {
-            val c = Color.getHSBColor(it.toFloat() / 17, .4F, .95F)
+        val skillCount = PrimarySkillType.entries.size
+        // Because of the display name AND title AND the subtitle (fuck me I spent so much time looking at this)
+        val skillCountPlusTwo = skillCount + 3
+
+        val colors = Array(skillCountPlusTwo) {
+            val c = Color.getHSBColor(it.toFloat() / skillCount, .4F, .95F)
             TextColor.color(c.red, c.blue, c.green)
         }.toMutableList()
 
