@@ -41,9 +41,15 @@ jobs:
         path: "common/*/build/libs/*.jar"
 
     - uses: actions/upload-artifact@v2
-      name: "Upload Bukkit Plugins"
+      name: "Upload Bukkit Plugins (Mojang Mappings)"
       with:
-        name: SparklyPower Bukkit Plugins
+        name: SparklyPower Bukkit Plugins - Mojang Mappings
+        path: "bukkit/*/build/libs/*-dev*.jar"
+
+    - uses: actions/upload-artifact@v2
+      name: "Upload Bukkit Plugins (Spigot Mappings)"
+      with:
+        name: SparklyPower Bukkit Plugins - Spigot Mappings
         path: "bukkit/*/build/libs/*-reobf.jar"
 
     - uses: actions/upload-artifact@v2
