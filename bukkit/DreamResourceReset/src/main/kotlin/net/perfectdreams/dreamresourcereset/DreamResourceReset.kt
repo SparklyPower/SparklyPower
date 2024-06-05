@@ -88,14 +88,18 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 				DeathChestsInformation.selectAll()
 					.forEach {
 						val oldItems = it[DeathChestsInformation.items]
-						val itemStacks = oldItems.split(";").map { it.fromBase64Item()  }
+						if (oldItems.isNotEmpty()) {
+							val itemStacks = oldItems.split(";").map { it.fromBase64Item()  }
+								// Air cannot be serialized
+								.filter { it.type != Material.AIR }
 
-						// Now we insert it using the PROPER way
-						val newItems = itemStacks.map { ItemUtils.serializeItemToBase64(it) }.joinToString(";")
+							// Now we insert it using the PROPER way
+							val newItems = itemStacks.map { ItemUtils.serializeItemToBase64(it) }.joinToString(";")
 
-						// And now update!
-						DeathChestsInformation.update({ DeathChestsInformation.id eq it[DeathChestsInformation.id] }) {
-							it[DeathChestsInformation.items] = newItems
+							// And now update!
+							DeathChestsInformation.update({ DeathChestsInformation.id eq it[DeathChestsInformation.id] }) {
+								it[DeathChestsInformation.items] = newItems
+							}
 						}
 					}
 				logger.info("Updated Death Chests!")

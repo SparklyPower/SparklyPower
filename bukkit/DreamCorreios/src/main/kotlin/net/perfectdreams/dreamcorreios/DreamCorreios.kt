@@ -91,16 +91,22 @@ class DreamCorreios : KotlinPlugin(), Listener {
 				ContaCorreios.selectAll()
 					.forEach {
 						val oldItems = it[ContaCorreios.items]
-						val itemStacks = oldItems.split(";").map { it.fromBase64Item()  }
 
-						// Now we insert it using the PROPER way
-						val newItems = itemStacks.map { ItemUtils.serializeItemToBase64(it) }.joinToString(";")
+						if (oldItems.isNotEmpty()) {
+							val itemStacks = oldItems.split(";").mapNotNull { item ->
+								item.fromBase64Item()
+							}
 
-						// And now update!
-						ContaCorreios.update({ ContaCorreios.id eq it[ContaCorreios.id] }) {
-							it[ContaCorreios.items] = newItems
+							// Now we insert it using the PROPER way
+							val newItems = itemStacks.map { ItemUtils.serializeItemToBase64(it) }.joinToString(";")
+
+							// And now update!
+							ContaCorreios.update({ ContaCorreios.id eq it[ContaCorreios.id] }) {
+								it[ContaCorreios.items] = newItems
+							}
 						}
 					}
+
 				logger.info("Updated Correios!")
 				hasMigratedFile.createNewFile()
 			}
