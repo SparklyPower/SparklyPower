@@ -17,6 +17,7 @@ import net.perfectdreams.dreamcore.utils.extensions.storeMetadata
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
+import net.perfectdreams.dreamcorreios.tables.ContaCorreios
 import net.perfectdreams.dreamhome.tables.Homes
 import net.perfectdreams.dreamresourcereset.listeners.ChunkListener
 import net.perfectdreams.dreamresourcereset.listeners.InteractListener
@@ -35,10 +36,8 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.map.MapPalette
 import org.bukkit.map.MapView
-import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import javax.imageio.ImageIO
@@ -78,6 +77,28 @@ class DreamResourceReset : KotlinPlugin(), Listener {
 				DeathChestsInformation,
 				DeathChestMaps
 			)
+
+			val hasMigratedFile = File(dataFolder, "has_migrated_items_to_new_item_serialization_format")
+
+			// Convert death chests to new ItemStack data
+			if (!hasMigratedFile.exists()) {
+				logger.info("Updating Death Chests...")
+				DeathChestsInformation.selectAll()
+					.forEach {
+						val oldItems = it[DeathChestsInformation.items]
+						val itemStacks = oldItems.split(";").map { ItemUtils.deserializeItemFromBase64(it)  }
+
+						// Now we insert it using the PROPER way
+						val newItems = itemStacks.map { ItemUtils.serializeItemToBase64(it) }.joinToString(";")
+
+						// And now update!
+						DeathChestsInformation.update({ DeathChestsInformation.id eq it[DeathChestsInformation.id] }) {
+							it[DeathChestsInformation.items] = newItems
+						}
+					}
+				logger.info("Updated Death Chests!")
+				hasMigratedFile.createNewFile()
+			}
 		}
 
 		loadInhabitedChunkTimers()

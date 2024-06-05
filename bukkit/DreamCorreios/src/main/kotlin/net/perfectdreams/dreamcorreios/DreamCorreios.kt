@@ -35,7 +35,10 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
+import java.io.File
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -73,11 +76,34 @@ class DreamCorreios : KotlinPlugin(), Listener {
 
 	override fun softEnable() {
 		super.softEnable()
+		dataFolder.mkdirs()
+
+		val hasMigratedFile = File(dataFolder, "has_migrated_items_to_new_item_serialization_format")
 
 		transaction(Databases.databaseNetwork) {
 			SchemaUtils.createMissingTablesAndColumns(
 				ContaCorreios
 			)
+
+			// Convert Correios to new ItemStack data
+			if (!hasMigratedFile.exists()) {
+				logger.info("Updating Correios...")
+				ContaCorreios.selectAll()
+					.forEach {
+						val oldItems = it[ContaCorreios.items]
+						val itemStacks = oldItems.split(";").map { ItemUtils.deserializeItemFromBase64(it)  }
+
+						// Now we insert it using the PROPER way
+						val newItems = itemStacks.map { ItemUtils.serializeItemToBase64(it) }.joinToString(";")
+
+						// And now update!
+						ContaCorreios.update({ ContaCorreios.id eq it[ContaCorreios.id] }) {
+							it[ContaCorreios.items] = newItems
+						}
+					}
+				logger.info("Updated Correios!")
+				hasMigratedFile.createNewFile()
+			}
 		}
 
 		registerEvents(CaixaPostalListener(this))
@@ -202,7 +228,7 @@ class DreamCorreios : KotlinPlugin(), Listener {
 				mutableListOf()
 			else
 				itemsInBase64.split(";")
-					.map { it.fromBase64Item() }
+					.map { ItemUtils.deserializeItemFromBase64(it) }
 					.toMutableList()
 
 			return CaixaPostal(this, playerId, items)
