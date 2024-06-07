@@ -45,7 +45,7 @@ open class KotlinPlugin : JavaPlugin() {
 		softEnable()
 
 		registerEvents(RegisterRecipesOnReloadListener(this))
-		
+
 		Bukkit.getScheduler().runTask(
 			this,
 			Runnable {
