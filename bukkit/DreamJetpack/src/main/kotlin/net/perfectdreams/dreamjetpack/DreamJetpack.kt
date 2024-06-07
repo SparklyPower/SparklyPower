@@ -8,6 +8,7 @@ import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
 import net.perfectdreams.dreamcore.utils.preferences.sendMessage
@@ -230,7 +231,12 @@ class DreamJetpack : KotlinPlugin(), Listener {
 
 					flyingPlayers.add(e.player)
 
-					e.player.sendMessage("$PREFIX §eWoosh! Sua Jetpack foi ativada e está pronta para uso!", BroadcastType.JETPACK_MESSAGE)
+					e.player.sendActionBar(
+						textComponent {
+							color(NamedTextColor.GREEN)
+							content("Woosh! Você ativou a sua Jetpack!")
+						}
+					)
 				} else {
 					e.player.allowFlight = false
 
@@ -238,7 +244,12 @@ class DreamJetpack : KotlinPlugin(), Listener {
 					bossBars[e.player]?.removeAll()
 					bossBars.remove(e.player)
 
-					e.player.sendMessage("$PREFIX §eSua Jetpack foi desativada!", BroadcastType.JETPACK_MESSAGE)
+					e.player.sendActionBar(
+						textComponent {
+							color(NamedTextColor.GREEN)
+							content("Você desativou a sua Jetpack!")
+						}
+					)
 				}
 			}
 		}

@@ -93,6 +93,9 @@ class DreamCore : KotlinPlugin() {
 		TranslationUtils.loadLocale(dataFolder, "en_us")
 		TranslationUtils.loadLocale(dataFolder, "pt_br")
 
+		logger.info { "Creating average colors of materials..." }
+		MaterialColors.initialize(this)
+
 		if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null)
 			SignGUIUtils.registerSignGUIListener()
 

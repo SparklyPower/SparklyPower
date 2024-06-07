@@ -552,7 +552,7 @@ class FightArena(var m: DreamFight) {
     fun restoreInventoryOf(player: Player?) {
         if (player != null) {
             val inventory = inventories[player] ?: return
-            player.inventory.setContents(inventory.filterNotNull().toTypedArray())
+            player.inventory.contents = inventory
         }
     }
 

@@ -38,12 +38,14 @@ open class KotlinPlugin : JavaPlugin() {
 	val sparklyCommandManager by lazy { SparklyCommandManager(this) }
 	val serverEvents = mutableListOf<ServerEvent>()
 	private val activeJobs = ConcurrentLinkedQueue<Job>()
-	private val recipes = mutableListOf<NamespacedKey>()
+	internal val recipes = mutableMapOf<NamespacedKey, Recipe>()
 	private val pendingTasks = ConcurrentLinkedQueue<Job>()
 
 	override fun onEnable() {
 		softEnable()
 
+		registerEvents(RegisterRecipesOnReloadListener(this))
+		
 		Bukkit.getScheduler().runTask(
 			this,
 			Runnable {
@@ -78,7 +80,7 @@ open class KotlinPlugin : JavaPlugin() {
 			unregisterServerEvent(serverEvent)
 
 		recipes.forEach {
-			Bukkit.removeRecipe(it)
+			Bukkit.removeRecipe(it.key)
 		}
 		recipes.clear()
 
@@ -225,7 +227,7 @@ open class KotlinPlugin : JavaPlugin() {
 	}
 
 	fun addRecipe(key: NamespacedKey, recipe: Recipe): Recipe {
-		recipes += key
+		recipes[key] = recipe
 		Bukkit.addRecipe(recipe)
 		return recipe
 	}

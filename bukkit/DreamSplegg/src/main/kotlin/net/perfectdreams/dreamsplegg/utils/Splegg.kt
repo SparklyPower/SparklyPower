@@ -312,7 +312,7 @@ class Splegg(val m: DreamSplegg) {
         // Restaurar o inventário do player
         val storedInventory = storedPlayerInventory[player]
         if (storedInventory != null)
-            player.inventory.contents = storedInventory.filterNotNull().toTypedArray()
+            player.inventory.contents = storedInventory
 
         player.gameMode = GameMode.SURVIVAL
 

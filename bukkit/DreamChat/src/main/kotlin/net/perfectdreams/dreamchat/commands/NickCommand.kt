@@ -10,7 +10,10 @@ import net.perfectdreams.dreamcore.utils.commands.ExecutedCommandException
 import net.perfectdreams.dreamcore.utils.commands.annotation.Subcommand
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import org.jetbrains.exposed.sql.upsert
 
 class NickCommand(val m: DreamChat) : AbstractCommand("nick", listOf("nickname"), "dreamchat.nick") {
@@ -29,8 +32,10 @@ class NickCommand(val m: DreamChat) : AbstractCommand("nick", listOf("nickname")
 
 			scheduler().schedule(m, SynchronizationContext.ASYNC) {
 				transaction {
-					ChatUsers.upsert(ChatUsers.id) {
-						it[nickname] = null
+					// Upsert was causing issues with the entire field being replaced
+					ChatUsers.update({ ChatUsers.id eq sender.uniqueId }) {
+						it[ChatUsers._id] = sender.uniqueId
+						it[ChatUsers.nickname] = null
 					}
 				}
 			}
@@ -50,9 +55,17 @@ class NickCommand(val m: DreamChat) : AbstractCommand("nick", listOf("nickname")
 
 		scheduler().schedule(m, SynchronizationContext.ASYNC) {
 			transaction {
-				ChatUsers.upsert(ChatUsers.id) {
+				// Upsert was causing issues with the entire field being replaced
+				val updatedRows = ChatUsers.update({ ChatUsers.id eq sender.uniqueId }) {
 					it[ChatUsers._id] = sender.uniqueId
-					it[nickname] = sender.displayName
+					it[ChatUsers.nickname] = sender.displayName
+				}
+
+				if (updatedRows == 0) {
+					ChatUsers.insert {
+						it[ChatUsers.id] = sender.uniqueId
+						it[ChatUsers.nickname] = sender.displayName
+					}
 				}
 			}
 		}

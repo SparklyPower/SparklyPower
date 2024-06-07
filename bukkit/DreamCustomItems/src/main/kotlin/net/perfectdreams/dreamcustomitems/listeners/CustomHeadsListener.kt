@@ -418,7 +418,7 @@ class CustomHeadsListener(val m: DreamCustomItems) : Listener {
                 val items = arrayListOf<String?>()
 
                 for(slot in superFurnaceSlots) {
-                    items.add(e.inventory.getItem(slot)?.toBase64())
+                    items.add(e.inventory.getItem(slot)?.let { ItemUtils.serializeItemToBase64(it) })
                 }
 
                 val superfurnace = holder.m.location.block.state as Skull

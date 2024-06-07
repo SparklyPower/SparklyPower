@@ -7,6 +7,8 @@ import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.string
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.content.*
@@ -633,6 +635,8 @@ class ChatListener(val m: DreamChat) : Listener {
 
 			// The runBlocking is required for the getPlayerKD call
 			// Because this is called async, I don't think there is any issues in blocking
+			val viaVersion = Via.getAPI()
+			val playerVersion = ProtocolVersion.getProtocol(viaVersion.getPlayerVersion(e.player)).name
 			val aboutLines = runBlocking {
 				val numberFormat = NumberFormat.getInstance(Locale.forLanguageTag("pt"))
 				mutableListOf(
@@ -648,9 +652,10 @@ class ChatListener(val m: DreamChat) : Listener {
 					"§eGrana: §6${numberFormat.format(player.balance)} Sonecas",
 					"§eKDR: §6${numberFormat.format(ClubeAPI.getPlayerKD(e.player.uniqueId).getRatio())}",
 					"§eOnline no SparklyPower Survival por §6$numberOfDays dias§e, §6$numberOfHours horas §ee §6$numberOfMinutes minutos§e!",
-					"§eUsando a Resource Pack? $rpStatus",
-					"§eMinecraft Original? $mcPremiumStatus",
-					"§eMinecraft: Bedrock Edition? $mcBedrockEditionStatus"
+					"§eVersão do Minecraft:§6 ${if (e.player.isBedrockClient) { "Minecraft: Bedrock Edition (emulando $playerVersion)" } else { "Minecraft $playerVersion" }}",
+					"§eUsando a Resource Pack: $rpStatus",
+					"§eMinecraft Original: $mcPremiumStatus",
+					"§eMinecraft: Bedrock Edition: $mcBedrockEditionStatus",
 				)
 			}
 

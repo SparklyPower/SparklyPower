@@ -44,6 +44,10 @@ class SkinsListener(val m: DreamCore) : Listener {
                 Json.decodeFromString<StoredDatabaseSkin>(playerSkin[PlayerSkins.data])
             }
 
+            // No skin configured, bail out!
+            if (data is StoredDatabaseSkin.NoSkin)
+                return@launchAsyncThread
+
             // We only want to auto refresh the skin after 7 days
             val shouldRefresh = (data == null || (Clock.System.now() - data.configuredAt) >= 7.days) && data !is StoredDatabaseSkin.CustomMojangSkin
 

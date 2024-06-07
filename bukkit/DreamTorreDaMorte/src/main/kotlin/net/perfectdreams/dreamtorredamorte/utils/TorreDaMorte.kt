@@ -297,7 +297,7 @@ class TorreDaMorte(val m: DreamTorreDaMorte) {
         // Restaurar o inventário do player
         val storedInventory = storedPlayerInventory[player]
         if (storedInventory != null)
-            player.inventory.setContents(storedInventory.filterNotNull().toTypedArray())
+            player.inventory.contents = storedInventory
 
         val killer = lastHits[player]
         m.logger.info { "${killer?.name} killed ${player.name}!" }
