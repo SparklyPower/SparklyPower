@@ -1,15 +1,11 @@
 package net.perfectdreams.dreamblockparty.listeners
 
-import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamblockparty.DreamBlockParty
+import net.perfectdreams.dreamblockparty.utils.BlockParty
 import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcore.utils.extensions.teleportToServerSpawnWithEffects
 import net.perfectdreams.dreamcorreios.events.CorreiosItemReceivingEvent
-import net.perfectdreams.dreamblockparty.DreamBlockParty
-import net.perfectdreams.dreamblockparty.utils.BlockParty
-import org.bukkit.Material
-import org.bukkit.Sound
 import org.bukkit.block.BlockFace
-import org.bukkit.entity.Egg
 import org.bukkit.entity.EntityType
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -17,15 +13,14 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntitySpawnEvent
 import org.bukkit.event.entity.EntityToggleGlideEvent
 import org.bukkit.event.entity.FoodLevelChangeEvent
-import org.bukkit.event.entity.ProjectileHitEvent
 import org.bukkit.event.player.*
 
 class PlayerListener(val m: DreamBlockParty) : Listener {
-    /* @EventHandler
+    @EventHandler
     fun onCorreiosItemReceive(event: CorreiosItemReceivingEvent) {
         if (event.player in m.blockParty.players)
             event.result = CorreiosItemReceivingEvent.PlayerInEventResult
-    } */
+    }
 
     @EventHandler
     fun onQuit(event: PlayerQuitEvent) {
