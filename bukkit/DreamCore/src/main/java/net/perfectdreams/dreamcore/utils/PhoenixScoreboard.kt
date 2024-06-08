@@ -1,6 +1,7 @@
 package net.perfectdreams.dreamcore.utils
 
 import com.google.common.base.Splitter
+import io.papermc.paper.scoreboard.numbers.NumberFormat
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
@@ -90,6 +91,7 @@ class PhoenixScoreboard(val scoreboard: Scoreboard) {
 		if (!isVisible) {
 			val currentScore = scoreboard.getObjective("alphys")!!.getScore(getColorCodeForLine(line))
 			currentScore.score = line
+			currentScore.numberFormat(NumberFormat.blank())
 
 			lineVisibility[line] = true
 		}
