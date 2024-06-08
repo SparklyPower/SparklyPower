@@ -152,7 +152,7 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
 
                                     append("Você está em #${result.sonecasRankPosition} lugar do ranking, veja outros ostentadores com ")
                                     appendCommand("/sonecas rank")
-                                    append("! yippee yippee yippee yippee")
+                                    append("!")
                                 }
                             } else {
                                 append(NamedTextColor.AQUA, result.playerName)
