@@ -18,8 +18,8 @@ class WarpCommand(val m: DreamWarps) : SparklyCommandDeclarationWrapper {
 
 	class WarpExecutor(val m: DreamWarps) : SparklyCommandExecutor() {
 		inner class Options : CommandOptions() {
-			val warpName = optionalGreedyString("warp_names") { context, builder ->
-				for (warp in m.warps) {
+			val warpName = optionalGreedyString("warp_name") { context, builder ->
+				for (warp in m.warps.filter { context.sender.hasPermission("dreamwarps.warp.${it.name}") }) {
 					builder.suggest(warp.name)
 				}
 			}
