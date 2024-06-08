@@ -35,6 +35,23 @@ class SkinPlateRenderer(private val blockParty: BlockParty) {
                 playerPlates.add(PlayerPlate(playerName))
 
                 try {
+                    onMainThread {
+                        var x = 0
+                        var y = 0
+                        repeat(8 * 8) {
+                            world.getBlockAt(
+                                basePlayerSkinPlateX - (skinPlateX * 8) - x,
+                                basePlayerSkinPlateY + skinPlateY,
+                                basePlayerSkinPlateZ - (skinPlateZ * 8) - y
+                            ).type = Material.WHITE_CONCRETE
+                            x++
+                            if (x == 8) {
+                                x = 0
+                                y++
+                            }
+                        }
+                    }
+
                     val image = ImageIO.read(URI("https://sparklypower.net/api/v1/render/avatar?name=$playerName").toURL())
 
                     val materialsToBeUsed = mutableListOf<Material>()

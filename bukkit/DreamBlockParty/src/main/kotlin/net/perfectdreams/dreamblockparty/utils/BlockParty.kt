@@ -63,35 +63,40 @@ class BlockParty(val m: DreamBlockParty) {
     private val colors = listOf(
         createGameColor(Material.BLACK_TERRACOTTA, "PRETO"),
         createGameColor(Material.RED_TERRACOTTA, "VERMELHO"),
-        createGameColor(Material.LIGHT_BLUE_TERRACOTTA, "AZUL"),
+        createGameColor(Material.BLUE_TERRACOTTA, "AZUL"),
         createGameColor(Material.CYAN_TERRACOTTA, "CIANO"),
         createGameColor(Material.PURPLE_TERRACOTTA, "ROXO"),
-        createGameColor(Material.MAGENTA_TERRACOTTA, "MAGENTA"),
         createGameColor(Material.PINK_TERRACOTTA, "ROSA"),
         createGameColor(Material.WHITE_TERRACOTTA, "BRANCO"),
         createGameColor(Material.GREEN_TERRACOTTA, "VERDE"),
         createGameColor(Material.YELLOW_TERRACOTTA, "AMARELO"),
         createGameColor(Material.ORANGE_TERRACOTTA, "LARANJA"),
-        createGameColor(Material.GRAY_TERRACOTTA, "CINZA"),
+        createGameColor(Material.GRAY_TERRACOTTA, "CINZA")
     )
-    private val colorDisplayTextDisplays = listOf(
+    private val sparklyDisplays = listOf(
         DreamCore.INSTANCE.sparklyDisplayManager.spawnDisplay(
             m,
-            Location(world, 49.0, 86.0, -24.0, 90f, 0f)
-        ).addDisplayBlock(),
+            Location(world, 49.0, 87.0, -24.0, 90f, 0f)
+        ),
         DreamCore.INSTANCE.sparklyDisplayManager.spawnDisplay(
             m,
-            Location(world, 25.0, 86.0, 0.0, 180f, 0f)
-        ).addDisplayBlock(),
+            Location(world, 25.0, 87.0, 0.0, 180f, 0f)
+        ),
         DreamCore.INSTANCE.sparklyDisplayManager.spawnDisplay(
             m,
-            Location(world, 1.0, 86.0, -23.0, -90f, 0f)
-        ).addDisplayBlock(),
+            Location(world, 1.0, 87.0, -23.0, -90f, 0f)
+        ),
         DreamCore.INSTANCE.sparklyDisplayManager.spawnDisplay(
             m,
-            Location(world, 24.0, 86.0, -48.0, 0f, 0f)
-        ).addDisplayBlock()
+            Location(world, 24.0, 87.0, -48.0, 0f, 0f)
+        )
     )
+    private val colorDisplayTextDisplays = sparklyDisplays.map {
+        it.addDisplayBlock()
+    }
+    private val additionalInfoTextDisplays = sparklyDisplays.map {
+        it.addDisplayBlock()
+    }
     private val songsQueue = mutableListOf<Song>()
     val playersThatProbablyAlreadyLost = mutableListOf<Player>()
     private val skinPlateRenderer = SkinPlateRenderer(this)
@@ -165,6 +170,30 @@ class BlockParty(val m: DreamBlockParty) {
                     12f,
                     12f,
                     12f
+                ),
+                it.transformation.rightRotation
+            )
+
+            it.billboard = Display.Billboard.FIXED
+            it.isShadowed = true
+        }
+
+        additionalInfoTextDisplays.forEach {
+            it.text(
+                textComponent {
+                    color(NamedTextColor.GOLD)
+                    decorate(TextDecoration.BOLD)
+                    content("0 players")
+                }
+            )
+
+            it.transformation = Transformation(
+                it.transformation.translation,
+                it.transformation.leftRotation,
+                Vector3f(
+                    8f,
+                    8f,
+                    8f
                 ),
                 it.transformation.rightRotation
             )
@@ -336,6 +365,7 @@ class BlockParty(val m: DreamBlockParty) {
                     continue
                 }
 
+                playersThatProbablyAlreadyLost.clear()
                 val plates = mutableListOf<GamePlate>()
                 repeat(144) {
                     // To make it fair, we will get always the least used color
@@ -367,6 +397,10 @@ class BlockParty(val m: DreamBlockParty) {
                 // Update display
                 colorDisplayTextDisplays.forEach {
                     it.text(targetColor.name)
+                }
+
+                additionalInfoTextDisplays.forEach {
+                    it.text(null)
                 }
 
                 // Debugging stuff
@@ -466,14 +500,14 @@ class BlockParty(val m: DreamBlockParty) {
                                     basePlateZ + (plateZ * 4) + blockOffsetZ
                                 ).type = Material.AIR
 
-                                /* world.spawnParticle(
+                                world.spawnParticle(
                                     Particle.BLOCK,
                                     (basePlateX + (plateX * 4) + blockOffsetX).toDouble(),
                                     basePlateY.toDouble(),
                                     (basePlateZ + (plateZ * 4) + blockOffsetZ).toDouble(),
                                     4,
                                     plate.color.type.createBlockData()
-                                ) */
+                                )
                             }
                         }
                     }
@@ -525,7 +559,16 @@ class BlockParty(val m: DreamBlockParty) {
                     )
                 }
 
-                delayTicks(20)
+                delayTicks(5)
+
+                for (player in players) {
+                    if (player.y == basePlateY.toDouble() && player in playersThatProbablyAlreadyLost) {
+                        m.logger.info("Player ${player.name} (${player.uniqueId}) got kicked out from the event because they were floating in the air and they probably already lost")
+                        removeFromGame(player, skipFinishCheck = false) // Player is still floating, kick them out!
+                    }
+                }
+
+                delayTicks(15)
 
                 val winSoundToBeUsed = funnyWinSounds.random()
                 for (player in players) {
@@ -537,7 +580,7 @@ class BlockParty(val m: DreamBlockParty) {
 
                 // Rinse and repeat until there is one player left
                 currentRound++
-                currentDelayBetweenRounds = (currentDelayBetweenRounds - 5).coerceAtLeast(20)
+                currentDelayBetweenRounds = (currentDelayBetweenRounds - 3).coerceAtLeast(20)
             }
         }
     }
@@ -672,6 +715,15 @@ class BlockParty(val m: DreamBlockParty) {
         player.teleport(queueSpawn)
         playersInQueue.add(player)
         skinPlateRenderer.addToRenderQueue(player.name)
+        additionalInfoTextDisplays.forEach {
+            it.text(
+                textComponent {
+                    color(NamedTextColor.GOLD)
+                    decorate(TextDecoration.BOLD)
+                    content("${playersInQueue.size} players")
+                }
+            )
+        }
     }
 
     private fun resetGamePlates(world: World) {
