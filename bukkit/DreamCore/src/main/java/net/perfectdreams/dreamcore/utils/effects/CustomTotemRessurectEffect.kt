@@ -1,9 +1,13 @@
 package net.perfectdreams.dreamcore.utils.effects
 
 import com.comphenix.packetwrapper.WrapperPlayServerSetSlot
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import org.bukkit.EntityEffect
 import org.bukkit.Material
+import org.bukkit.craftbukkit.entity.CraftPlayer
+import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
@@ -39,11 +43,15 @@ object CustomTotemRessurectEffect {
         if (itemStack.type != Material.TOTEM_OF_UNDYING)
             throw IllegalArgumentException("ItemStack $itemStack isn't a Totem of Undying!")
 
-        val wpsss = WrapperPlayServerSetSlot()
-        wpsss.slot = 45
-        wpsss.windowId = 0
-        wpsss.slotData = itemStack
-        wpsss.sendPacket(player)
+        val packet = ClientboundContainerSetSlotPacket(
+            0,
+            0,
+            45,
+            CraftItemStack.unwrap(itemStack)
+        )
+
+        (player as CraftPlayer).handle.connection.send(packet)
+
         player.playEffect(EntityEffect.TOTEM_RESURRECT)
         player.updateInventory()
     }
