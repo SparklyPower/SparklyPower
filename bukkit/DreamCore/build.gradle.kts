@@ -33,7 +33,7 @@ dependencies {
     api(project(":common:KotlinRuntime"))
     api(project(":common:rpc-payloads"))
 
-    paperweight.paperDevBundle("1.20.6-R0.1-SNAPSHOT")
+    paperweight.devBundle("net.sparklypower.sparklypaper", "1.20.6-R0.1-SNAPSHOT")
     compileOnlyApi("com.comphenix.protocol:ProtocolLib:4.8.0")
     compileOnlyApi(files("../../libs/WorldEdit.jar"))
     compileOnlyApi(files("../../libs/WorldGuard.jar"))
@@ -74,7 +74,9 @@ dependencies {
     api("io.ktor:ktor-client-cio:${Versions.KTOR}")
     api("com.charleskorn.kaml:kaml:0.49.0")
 
-    api("com.viaversion:viaversion-api:4.1.1") // Used for packet manipulation
+    // We use the lib JAR directly because the API artifact is outdated and doesn't have the chunktype classes in the right package
+    // compileOnlyApi("com.viaversion:viaversion-api:4.4.1") // Used for packet manipulation
+    compileOnlyApi(files("../../libs/ViaVersion.jar")) // Used for packet manipulation
 
     implementation("com.github.luben:zstd-jni:1.5.5-7")
 

@@ -7,7 +7,7 @@ plugins {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.20.6-R0.1-SNAPSHOT")
+    paperweight.devBundle("net.sparklypower.sparklypaper", "1.20.6-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamSonecas"))
 }

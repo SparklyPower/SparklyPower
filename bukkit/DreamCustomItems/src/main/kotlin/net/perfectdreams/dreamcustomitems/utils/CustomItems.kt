@@ -1,7 +1,11 @@
 package net.perfectdreams.dreamcustomitems.utils
 
 import com.destroystokyo.paper.profile.ProfileProperty
+import net.kyori.adventure.text.format.NamedTextColor
+import net.perfectdreams.dreamcore.utils.SparklyNamespacedKey
+import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.set
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -13,6 +17,7 @@ import org.bukkit.persistence.PersistentDataType
 import java.util.*
 
 object CustomItems {
+    val CUSTOM_ITEM_KEY = SparklyNamespacedKey("custom_item", PersistentDataType.STRING)
     val IS_MICROWAVE_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_microwave")
     val IS_SUPERFURNACE_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_superfurnace")
     val IS_TRASHCAN_KEY = NamespacedKey(Bukkit.getPluginManager().getPlugin("DreamCustomItems")!!, "is_trashcan")
@@ -136,10 +141,48 @@ object CustomItems {
 
     val RAINBOW_WOOL = ItemStack(Material.WHITE_WOOL)
         .meta<ItemMeta> {
+            persistentDataContainer.set(CUSTOM_ITEM_KEY, "rainbow_wool")
             setCustomModelData(1)
             // Lã Arco-Íris
             setDisplayName("§x§f§f§0§0§0§0L§x§f§f§8§0§0§0ã§x§f§f§f§f§0§0 §x§8§0§f§f§0§0A§x§0§0§f§f§0§0r§x§0§0§f§f§8§0c§x§0§0§f§f§f§fo§x§0§0§8§0§f§f-§x§0§0§0§0§f§fÍ§x§7§f§0§0§f§fr§x§f§f§0§0§f§fi§x§f§f§0§0§8§0s")
             lore = listOf("§7Também conhecido como \"Lã Gamer\"")
+        }
+
+    val RAINBOW_CONCRETE = ItemStack(Material.WHITE_CONCRETE)
+        .meta<ItemMeta> {
+            persistentDataContainer.set(CUSTOM_ITEM_KEY, "rainbow_concrete")
+            setCustomModelData(1)
+            // Concreto Arco-Íris
+            setDisplayName("§x§f§f§0§0§0§0C§x§f§f§5§5§0§0o§x§f§f§a§a§0§0n§x§f§f§f§f§0§0c§x§a§a§f§f§0§0r§x§5§5§f§f§0§0e§x§0§0§f§f§0§0t§x§0§0§f§f§5§5o§x§0§0§f§f§a§a §x§0§0§f§f§f§fA§x§0§0§a§a§f§fr§x§0§0§5§5§f§fc§x§0§0§0§0§f§fo§x§5§5§0§0§f§f-§x§a§a§0§0§f§fÍ§x§f§f§0§0§f§fr§x§f§f§0§0§a§ai§x§f§f§0§0§5§5s")
+            lore = listOf("§7Também conhecido como \"Concreto Gamer\"")
+        }
+
+    val RAINBOW_TERRACOTTA = ItemStack(Material.WHITE_TERRACOTTA)
+        .meta<ItemMeta> {
+            persistentDataContainer.set(CUSTOM_ITEM_KEY, "rainbow_terracotta")
+            setCustomModelData(1)
+            // Terracota Arco-Íris
+            setDisplayName("§x§f§f§0§0§0§0T§x§f§f§5§1§0§0e§x§f§f§a§1§0§0r§x§f§f§f§2§0§0r§x§b§c§f§f§0§0a§x§6§b§f§f§0§0c§x§1§b§f§f§0§0o§x§0§0§f§f§3§6t§x§0§0§f§f§8§6a§x§0§0§f§f§d§7 §x§0§0§d§7§f§fA§x§0§0§8§6§f§fr§x§0§0§3§6§f§fc§x§1§b§0§0§f§fo§x§6§b§0§0§f§f-§x§b§c§0§0§f§fÍ§x§f§f§0§0§f§2r§x§f§f§0§0§a§1i§x§f§f§0§0§5§1s")
+            lore = listOf("§7Também conhecido como \"Terracota Gamer\"")
+        }
+
+    val ASPHALT_SERVER = ItemStack(Material.BLACK_CONCRETE)
+        .meta<ItemMeta> {
+            persistentDataContainer.set(CUSTOM_ITEM_KEY, "asphalt_server")
+            setCustomModelData(1)
+            displayNameWithoutDecorations {
+                color(NamedTextColor.RED)
+                content("Asfalto (Servidor)")
+            }
+        }
+
+    val ASPHALT_PLAYER = ItemStack(Material.BLACK_CONCRETE)
+        .meta<ItemMeta> {
+            persistentDataContainer.set(CUSTOM_ITEM_KEY, "asphalt_player")
+            setCustomModelData(1)
+            displayNameWithoutDecorations {
+                content("Asfalto")
+            }
         }
 
     val TRASHCAN = ItemStack(Material.PLAYER_HEAD).meta<SkullMeta> {

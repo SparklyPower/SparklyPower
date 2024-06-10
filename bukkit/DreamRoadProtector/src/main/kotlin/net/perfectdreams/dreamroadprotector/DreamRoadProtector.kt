@@ -3,6 +3,7 @@ package net.perfectdreams.dreamroadprotector
 import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.displaced
+import net.perfectdreams.dreamcustomitems.utils.CustomBlocks
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -152,8 +153,11 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 					val block = location.world.getBlockAt(currentX, currentY, currentZ)
 
 					val isConcrete = block.type == Material.BLACK_CONCRETE
-
 					if (isConcrete)
+						return true
+
+					val customBlock = CustomBlocks.getCustomBlockOfBlock(block)
+					if (customBlock == CustomBlocks.ASPHALT_SERVER)
 						return true
 				}
 			}

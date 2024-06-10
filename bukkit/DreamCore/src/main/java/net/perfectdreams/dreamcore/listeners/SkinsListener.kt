@@ -45,8 +45,15 @@ class SkinsListener(val m: DreamCore) : Listener {
             }
 
             // No skin configured, bail out!
-            if (data is StoredDatabaseSkin.NoSkin)
+            if (data is StoredDatabaseSkin.NoSkin) {
+                // But before we bail, we need to remove the player's profile
+                onMainThread {
+                    val playerProfile = player.playerProfile
+                    playerProfile.removeProperty("textures")
+                    player.playerProfile = playerProfile
+                }
                 return@launchAsyncThread
+            }
 
             // We only want to auto refresh the skin after 7 days
             val shouldRefresh = (data == null || (Clock.System.now() - data.configuredAt) >= 7.days) && data !is StoredDatabaseSkin.CustomMojangSkin

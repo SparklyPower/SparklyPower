@@ -184,7 +184,7 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
                                             )
 
                                             // Change the spawn type to a player
-                                            SparklyNPCManager.setAddEntityPacketSetEntityTypeFieldHandler.invoke(subPacket, EntityType.PLAYER)
+                                            subPacket.type = EntityType.PLAYER
 
                                             // Creates the player itself
                                             newSubPackets.add(subPacket)
@@ -193,24 +193,13 @@ class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
                                             newSubPackets.add(ClientboundSetEntityDataPacket(subPacket.id, listOf(SynchedEntityData.DataValue(17, EntityDataSerializers.BYTE, 127.toByte()))))
 
                                             // Set the yaw and pitch because, for some reason, player entities do not have the yaw correctly set when they are spawned
-                                            // VERY HACKY because ClientboundRotateHeadPacket does not have an option to just provide the ID
-                                            // TODO: Maybe add it in SparklyPaper?
                                             newSubPackets.add(
-                                                JVMUnsafeUtils.unsafe.allocateInstance(ClientboundRotateHeadPacket::class.java)
-                                                    .let { it as ClientboundRotateHeadPacket }
-                                                    .apply {
-                                                        SparklyNPCManager.setRotateHeadPacketSetEntityIdFieldHandler.invoke(
-                                                            this,
-                                                            subPacket.id
-                                                        )
-
-                                                        // This is a bit hacky, since we are accessing the entity's current location
-                                                        SparklyNPCManager.setRotateHeadPacketSetYHeadRotFieldHandler.invoke(
-                                                            this,
-                                                            // Yes, the head yaw is controlled by the y rot... I don't know why
-                                                            SparklyNPCManager.getAddEntityPacketYRotFieldHandler.invoke(subPacket) as Byte
-                                                        )
-                                                    }
+                                                ClientboundRotateHeadPacket(
+                                                    subPacket.id,
+                                                    // This is a bit hacky, since we are accessing the entity's current location
+                                                    // Yes, the head yaw is controlled by the y rot... I don't know why
+                                                    subPacket.yRotRaw
+                                                )
                                             )
 
                                             spawnedNPCEntities[subPacket.id] = subPacket.uuid

@@ -108,7 +108,8 @@ class BlockParty(val m: DreamBlockParty) {
     val funnyFailSounds = listOf(
         "perfectdreams.sfx.errou",
         "sparklypower:general.lego_yoda_death",
-        "sparklypower:general.xiii"
+        "sparklypower:general.xiii",
+        "sparklypower:general.haipo_uque"
     )
     val funnyEpicRecoverySounds = listOf(
         "sparklypower:general.oh_my_god",

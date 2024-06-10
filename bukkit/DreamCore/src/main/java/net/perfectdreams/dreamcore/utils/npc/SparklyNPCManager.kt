@@ -31,62 +31,6 @@ class SparklyNPCManager(val m: DreamCore) {
     companion object {
         fun getTeamName(uuid: UUID) = "SparklyNPC-$uuid"
         private val chatColors = ChatColor.values()
-
-        val setAddEntityPacketSetEntityTypeFieldHandler: MethodHandle by lazy {
-            val lookup: MethodHandles.Lookup = MethodHandles.lookup()
-            val clazz = ClientboundAddEntityPacket::class.java
-
-            // Requires mojmap JAR!
-            val f = clazz.getDeclaredField("type")
-
-            // Allow access to private fields
-            f.isAccessible = true
-
-            // Get a MethodHandle for the field
-            lookup.unreflectSetter(f)
-        }
-
-        val getAddEntityPacketYRotFieldHandler: MethodHandle by lazy {
-            val lookup: MethodHandles.Lookup = MethodHandles.lookup()
-            val clazz = ClientboundAddEntityPacket::class.java
-
-            // Requires mojmap JAR!
-            val f = clazz.getDeclaredField("yRot")
-
-            // Allow access to private fields
-            f.isAccessible = true
-
-            // Get a MethodHandle for the field
-            lookup.unreflectGetter(f)
-        }
-
-        val setRotateHeadPacketSetEntityIdFieldHandler: MethodHandle by lazy {
-            val lookup: MethodHandles.Lookup = MethodHandles.lookup()
-            val clazz = ClientboundRotateHeadPacket::class.java
-
-            // Requires mojmap JAR!
-            val f = clazz.getDeclaredField("entityId")
-
-            // Allow access to private fields
-            f.isAccessible = true
-
-            // Get a MethodHandle for the field
-            lookup.unreflectSetter(f)
-        }
-
-        val setRotateHeadPacketSetYHeadRotFieldHandler: MethodHandle by lazy {
-            val lookup: MethodHandles.Lookup = MethodHandles.lookup()
-            val clazz = ClientboundRotateHeadPacket::class.java
-
-            // Requires mojmap JAR!
-            val f = clazz.getDeclaredField("yHeadRot")
-
-            // Allow access to private fields
-            f.isAccessible = true
-
-            // Get a MethodHandle for the field
-            lookup.unreflectSetter(f)
-        }
     }
 
     val npcKey = SparklyNamespacedBooleanKey("npc")

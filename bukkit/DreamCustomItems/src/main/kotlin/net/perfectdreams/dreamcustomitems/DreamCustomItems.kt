@@ -98,15 +98,21 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		registerEvents(CustomHeadsListener(this))
 		registerEvents(BlockCraftListener(this))
 		registerEvents(RubyDropListener(this))
-		registerEvents(CustomBlocksListener(this))
+		registerEvents(LegacyCustomBlocksListener(this))
 		registerEvents(EstalinhoListener(this))
 		registerEvents(RemoveDisabledPluginsRecipesListener(this))
 		registerEvents(MagnetListener(this))
 		registerEvents(ConvertLegacyItemsToCustomModelDataListener(this))
 		registerEvents(ChimarraoListener())
+		registerEvents(CustomBlocksListener(this))
 
 		registerCommand(DreamCustomItemsCommand)
 		registerCommand(CustomItemRecipesCommand(this))
+
+		// https://gist.github.com/aadnk/8119275
+		/* val protocolManager = ProtocolLibrary.getProtocolManager()
+		protocolManager
+			.addPacketListener(BlockPacketAdapter(this)) */
 
 		customRecipes.add(
 			CustomCraftingRecipe(
@@ -302,7 +308,46 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 				) {
 					it.setIngredient('W', Material.WHITE_WOOL)
 					it.setIngredient('R', Material.REDSTONE_BLOCK)
-					// TODO: Filter
+					it.setIngredient('U', Material.PRISMARINE_SHARD)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				CustomCraftingRecipe.RUBY_REMAP,
+				recipe = addRecipe(
+					"rainbow_concrete",
+					CustomItems.RAINBOW_CONCRETE,
+					listOf(
+						"RWR",
+						"WUW",
+						"RWR"
+					)
+				) {
+					it.setIngredient('W', Material.WHITE_CONCRETE)
+					it.setIngredient('R', Material.REDSTONE_BLOCK)
+					it.setIngredient('U', Material.PRISMARINE_SHARD)
+				}
+			)
+		)
+
+		customRecipes.add(
+			CustomCraftingRecipe(
+				this,
+				CustomCraftingRecipe.RUBY_REMAP,
+				recipe = addRecipe(
+					"rainbow_terracotta",
+					CustomItems.RAINBOW_TERRACOTTA,
+					listOf(
+						"RWR",
+						"WUW",
+						"RWR"
+					)
+				) {
+					it.setIngredient('W', Material.WHITE_TERRACOTTA)
+					it.setIngredient('R', Material.REDSTONE_BLOCK)
 					it.setIngredient('U', Material.PRISMARINE_SHARD)
 				}
 			)
