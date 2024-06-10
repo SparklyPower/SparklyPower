@@ -24,6 +24,7 @@ dependencies {
     compileOnly("net.luckperms:api:5.0")
     compileOnly("com.github.ChestShop-authors:ChestShop-3:3.12")
     compileOnly("net.citizensnpcs:citizens-main:2.0.30-SNAPSHOT")
+    compileOnly(files("../../libs/ViaVersion.jar")) // Used to get the player's version
 }
 
 kotlin {
