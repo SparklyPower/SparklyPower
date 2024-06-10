@@ -1,9 +1,12 @@
 package net.perfectdreams.dreambrisa
 
 import com.okkero.skedule.schedule
-import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.KotlinPlugin
+import net.perfectdreams.dreamcore.utils.canHoldItem
+import net.perfectdreams.dreamcore.utils.chance
 import net.perfectdreams.dreamcore.utils.effects.CustomTotemRessurectEffect
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.registerEvents
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Sound
@@ -209,12 +212,12 @@ class DreamBrisa : KotlinPlugin(), Listener {
 			return
 		}
 
-		player.inventory.itemInMainHand.amount -= 1
-
 		if (player.hasMetadata("isBrisado")) {
 			player.sendMessage("$PREFIX§cVocê já está brisado demais para comer outra folha de maconha.")
 			return
 		}
+
+		player.inventory.itemInMainHand.amount -= 1
 
 		if (chance(25.0)) {
 			player.sendMessage("$PREFIX§cAo observar a folha mais atentamente, você percebe que ela é uma folha de grama.")
@@ -253,7 +256,7 @@ class DreamBrisa : KotlinPlugin(), Listener {
 			player.playSound(player.location, "perfectdreams.sfx.proerd", 1f, 1f)
 
 			val map = ItemStack(Material.FILLED_MAP).meta<MapMeta> {
-				this.mapId = if (chance(5.0)) 98 else 97
+				this.mapId = if (chance(5.0)) 98 else 48673
 			}
 
 			if (player.inventory.canHoldItem(map)) {
