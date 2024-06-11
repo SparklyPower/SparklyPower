@@ -4,12 +4,16 @@ import com.okkero.skedule.schedule
 import com.viaversion.viaversion.api.minecraft.chunks.PaletteType
 import com.viaversion.viaversion.api.type.types.chunk.ChunkSectionType1_18
 import io.netty.buffer.Unpooled
+import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap
+import it.unimi.dsi.fastutil.shorts.Short2ObjectMap
+import it.unimi.dsi.fastutil.shorts.ShortSet
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.state.BlockState
 import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcore.utils.get
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
@@ -178,7 +182,6 @@ class CustomBlocksListener(
             val isBedrockClient = player.isBedrockClient
 
             if (packet is ClientboundLevelChunkWithLightPacket) {
-                // println("ClientboundLevelChunkWithLightPacket for $player is in ${Thread.currentThread()}")
                 // println("Map chunk packet")
                 // This is actually pretty weird
                 // there is actually a "nested" (?) packet
@@ -283,21 +286,25 @@ class CustomBlocksListener(
                 return
             }
 
+            // ATTENTION! ClientboundBlockUpdatePacket and ClientboundSectionBlocksUpdatePacket reuse packets
+            // To properly send them downstream
             if (packet is ClientboundBlockUpdatePacket) {
                 // println("ClientboundBlockUpdatePacket for $player is in ${Thread.currentThread()}")
-                val updatePacket = packet as ClientboundBlockUpdatePacket
+                val updatePacket = packet
+                // println("ClientboundBlockUpdatePacket for $player is $packet in ${Thread.currentThread()}, isBedrockClient? $isBedrockClient")
 
                 // println("WrapperPlayServerBlockChange for ${updatePacket.pos.x}, ${updatePacket.pos.y}, ${updatePacket.pos.z} - ${updatePacket.blockState.bukkitMaterial}")
 
                 // If it is a target block, we need to sync it to 0 power
                 if (updatePacket.blockState.bukkitMaterial == Material.TARGET) {
-                    // Oh no, NMS!!!
-                    updatePacket.blockState = TARGET_BLOCK_DEFAULT_STATE // This requires SparklyPaper's "Helpful NMS packet changes"
-                }
-
-                if (updatePacket.blockState.bukkitMaterial == Material.CHISELED_BOOKSHELF) {
-                    val blockInWorld = playerWorld.getBlockAt(updatePacket.pos.x, updatePacket.pos.y, updatePacket.pos.z)
-                        .state as ChiseledBookshelf
+                    // We create a new packet here because the server resends the same packet to multiple players
+                    // This is not a specific issue about us mind you, ProtocolLib has the same issue https://github.com/dmulloy2/ProtocolLib/issues/929
+                    event.packet = ClientboundBlockUpdatePacket(
+                        updatePacket.pos,
+                        TARGET_BLOCK_DEFAULT_STATE
+                    )
+                } else if (updatePacket.blockState.bukkitMaterial == Material.CHISELED_BOOKSHELF) {
+                    val blockInWorld = playerWorld.getBlockAt(updatePacket.pos.x, updatePacket.pos.y, updatePacket.pos.z).state as ChiseledBookshelf
                     val customBlockKey = blockInWorld.persistentDataContainer.get(CustomBlocks.CUSTOM_BLOCK_KEY)
 
                     if (customBlockKey != null) {
@@ -306,7 +313,10 @@ class CustomBlocksListener(
                         val customBlock = CustomBlocks.getCustomBlockById(customBlockKey)
                         if (customBlock != null) {
                             // Oh no, NMS!!!
-                            packet.blockState = if (isBedrockClient) customBlock.fallbackBlockStateNMS else customBlock.targetBlockStateNMS // This requires SparklyPaper's "Helpful NMS packet changes"
+                            event.packet = ClientboundBlockUpdatePacket(
+                                updatePacket.pos,
+                                if (isBedrockClient) customBlock.fallbackBlockStateNMS else customBlock.targetBlockStateNMS
+                            )
                         } else {
                             m.logger.warning("I don't know any Sparkly Custom Block with ID \"$customBlockKey\"! Skipping...")
                         }
@@ -320,6 +330,7 @@ class CustomBlocksListener(
                 // println("Multi block change")
                 // This is the CHUNK SECTION POSITION
                 val sectionBlocksUpdatePacket = packet
+                // println("ClientboundSectionBlocksUpdatePacket for $player is $packet in ${Thread.currentThread()}, isBedrockClient? $isBedrockClient")
 
                 val sectionPos = sectionBlocksUpdatePacket.sectionPos
                 val origin = sectionPos.origin()
@@ -342,16 +353,13 @@ class CustomBlocksListener(
                 if (changedBlocks.all { it.bukkitMaterial != Material.CHISELED_BOOKSHELF && it.bukkitMaterial != Material.TARGET })
                     return
 
-                // If there's any note blocks in this packet...
-                changedBlocks.forEachIndexed { index, it ->
-                    // println(it.handle)
-                    // println(it.handle::class.java)
+                val newChangedBlockStatesWithPosition = Short2ObjectArrayMap<BlockState>(shorts.size)
 
-                    // println("$index. ${it.bukkitMaterial}")
+                for ((index, originalBlockState) in changedBlocks.withIndex()) {
                     // TODO: Refactor this, maybe merge with the single block update code?
-                    if (it.bukkitMaterial == Material.TARGET) {
-                        changedBlocks[index] = TARGET_BLOCK_DEFAULT_STATE
-                    } else if (it.bukkitMaterial == Material.CHISELED_BOOKSHELF) {
+                    if (originalBlockState.bukkitMaterial == Material.TARGET) {
+                        newChangedBlockStatesWithPosition.put(shorts[index], TARGET_BLOCK_DEFAULT_STATE)
+                    } else if (originalBlockState.bukkitMaterial == Material.CHISELED_BOOKSHELF) {
                         val blockPositionRelativeToTheSection = shorts[index]
 
                         val x = (blockPositionRelativeToTheSection.toInt() ushr 8 and 15) + origin.x
@@ -367,13 +375,18 @@ class CustomBlocksListener(
                             val customBlock = CustomBlocks.getCustomBlockById(customBlockKey)
                             if (customBlock != null) {
                                 // Oh no, NMS!!!
-                                changedBlocks[index] = if (isBedrockClient) customBlock.fallbackBlockStateNMS else customBlock.targetBlockStateNMS
+                                newChangedBlockStatesWithPosition.put(shorts[index], if (isBedrockClient) customBlock.fallbackBlockStateNMS else customBlock.targetBlockStateNMS)
                             } else {
                                 m.logger.warning("I don't know any Sparkly Custom Block with ID \"$customBlockKey\"! Skipping...")
                             }
                         }
-                    }
+                    } else newChangedBlockStatesWithPosition.put(shorts[index], originalBlockState) // add the block state as is to the list
                 }
+
+                event.packet = ClientboundSectionBlocksUpdatePacket(
+                    sectionPos,
+                    newChangedBlockStatesWithPosition
+                )
                 return
             }
         }
