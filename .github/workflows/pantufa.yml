@@ -30,11 +30,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v3
         with:
           arguments: ":pantufa:build"
 
       - name: Publish to Docker
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v3
         with:
           arguments: ":pantufa:jib"

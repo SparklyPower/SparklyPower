@@ -29,30 +29,30 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build with Gradle
-      uses: gradle/gradle-build-action@v2
+      uses: gradle/actions/setup-gradle@v3
       with:
         arguments: build
 
     # Upload Artifacts to GitHub
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       name: "Upload Common Plugins"
       with:
         name: SparklyPower Common Plugins
         path: "common/*/build/libs/*.jar"
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       name: "Upload Bukkit Plugins (Mojang Mappings)"
       with:
         name: SparklyPower Bukkit Plugins - Mojang Mappings
         path: "bukkit/*/build/libs/*-dev*.jar"
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       name: "Upload Bukkit Plugins (Spigot Mappings)"
       with:
         name: SparklyPower Bukkit Plugins - Spigot Mappings
         path: "bukkit/*/build/libs/*-reobf.jar"
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       name: "Upload Velocity Plugins"
       with:
         name: SparklyPower Velocity Plugins
