@@ -19,6 +19,12 @@ kotlin {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        cacheChangingModulesFor(60, TimeUnit.SECONDS)
+    }
+}
+
 allprojects {
     repositories {
         mavenCentral()
