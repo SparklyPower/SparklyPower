@@ -219,7 +219,8 @@ class CustomBlocksListener(
                     // Quick fail: Only edit if the palette contains chiseled bookshelfs
                     val hasCustomBlockSourceOrBlockTargetInPalette = (0 until blockPalette.size()).any {
                         val blockId = blockPalette.idByIndex(it)
-                        Block.BLOCK_STATE_REGISTRY.byId(blockId)?.bukkitMaterial == Material.CHISELED_BOOKSHELF || Block.BLOCK_STATE_REGISTRY.byId(blockId)?.bukkitMaterial == Material.TARGET
+                        val nmsBlockState = Block.BLOCK_STATE_REGISTRY.byId(blockId)
+                        nmsBlockState?.bukkitMaterial == Material.CHISELED_BOOKSHELF || nmsBlockState?.bukkitMaterial == Material.TARGET
                     }
 
                     // Does not have any custom block sources in the block palette...
