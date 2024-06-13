@@ -5,6 +5,7 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.extensions.displaced
 import net.perfectdreams.dreamcustomitems.utils.CustomBlocks
 import org.bukkit.*
+import org.bukkit.block.ChiseledBookshelf
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -15,6 +16,7 @@ import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.player.PlayerTeleportEvent
+import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import java.util.*
@@ -22,6 +24,8 @@ import java.util.*
 class DreamRoadProtector : KotlinPlugin(), Listener {
 	val lastLocations = WeakHashMap<Player, Location>()
 	val walkingOnRoadWithSpeed = SparklyNamespacedBooleanKey("is_on_road_with_speed")
+	val migratedToTheNewRoad = SparklyNamespacedBooleanKey("migrated_to_the_new_road")
+	val migratedToTheNewNewRoad = SparklyNamespacedBooleanKey("migrated_to_the_new_new_road")
 
 	override fun softEnable() {
 		super.softEnable()
@@ -69,9 +73,42 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 	}
 
 	@EventHandler
+	fun onChunkLoad(e: ChunkLoadEvent) {
+		// TODO: Migrate this ONCE AGAIN!
+		if (e.world.name == "Survival2") { // For now only on survival2
+			if (!e.chunk.persistentDataContainer.get(migratedToTheNewNewRoad)) {
+				val hasMigratedToBookshelfs = e.chunk.persistentDataContainer.get(migratedToTheNewRoad)
+
+				for (x in 0 until 16) {
+					for (z in 0 until 16) {
+						for (y in e.world.minHeight until e.world.maxHeight) {
+							val block = e.chunk.getBlock(x, y, z)
+							if (hasMigratedToBookshelfs) {
+								if (block.type == Material.CHISELED_BOOKSHELF) {
+									val state = block.state as ChiseledBookshelf
+									if (state.persistentDataContainer.get(CustomBlocks.CUSTOM_BLOCK_KEY) == CustomBlocks.ASPHALT_SERVER.id)
+										block.type = Material.SPARKLYPOWER_ASPHALT_SERVER
+								}
+							} else {
+								if (block.type == Material.BLACK_CONCRETE) {
+									block.type = Material.SPARKLYPOWER_ASPHALT_SERVER
+								}
+							}
+						}
+					}
+				}
+				logger.info("Migrated black concrete blocks in chunk ${e.chunk.x} ${e.chunk.z} in world ${e.world.name} (NEW VERSION)")
+				// set both
+				e.chunk.persistentDataContainer.set(migratedToTheNewRoad, true)
+				e.chunk.persistentDataContainer.set(migratedToTheNewNewRoad, true)
+			}
+		}
+	}
+
+	@EventHandler
 	fun onTeleport(e: PlayerTeleportEvent) {
 		val player = e.player
-		
+
 		// Automatically reset the speed if they teleport
 		if (player.persistentDataContainer.get(walkingOnRoadWithSpeed)) {
 			player.persistentDataContainer.remove(walkingOnRoadWithSpeed)
@@ -105,6 +142,8 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 		if (e.player.hasPermission("dreamroadprotector.bypass"))
 			return
 
+		val fullyUsesNewRoadBlocks = e.block.world.name == "Survival2"
+		// TODO: We can allow black concrete in Survival2, but let's not do that for now
 		if (e.block.type == Material.BLACK_CONCRETE) {
 			e.isCancelled = true
 			e.player.sendMessage("§cVocê não pode usar blocos de concreto preto!")
@@ -143,6 +182,8 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 		if (location.world.name != "world" && location.world.name != "Survival2")
 			return false
 
+		val fullyUsesNewRoadBlocks = location.world.name == "Survival2"
+
 		val x = location.blockX
 		val y = location.blockY
 		val z = location.blockZ
@@ -153,11 +194,11 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 					val block = location.world.getBlockAt(currentX, currentY, currentZ)
 
 					val isConcrete = block.type == Material.BLACK_CONCRETE
-					if (isConcrete)
+					if (!fullyUsesNewRoadBlocks && isConcrete)
 						return true
 
-					val customBlock = CustomBlocks.getCustomBlockOfBlock(block)
-					if (customBlock == CustomBlocks.ASPHALT_SERVER)
+					val isServerAsphalt = block.type == Material.SPARKLYPOWER_ASPHALT_SERVER || block.type == Material.SPARKLYPOWER_ASPHALT_SERVER_SLAB
+					if (isServerAsphalt)
 						return true
 				}
 			}
