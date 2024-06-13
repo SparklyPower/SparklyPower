@@ -16,7 +16,7 @@ object MaterialColors {
 
     fun initialize(m: DreamCore) {
         val materialsToBeAveraged = Material.entries.filter {
-            it.name.endsWith("_CONCRETE") || (!it.name.contains("GLAZED") && it.name.endsWith("_TERRACOTTA")) || it == Material.TERRACOTTA || it == Material.QUARTZ_BLOCK || it.name.endsWith("_WOOL")
+            !it.name.startsWith("SPARKLYPOWER_") && (it.name.endsWith("_CONCRETE") || (!it.name.contains("GLAZED") && it.name.endsWith("_TERRACOTTA")) || it == Material.TERRACOTTA || it == Material.QUARTZ_BLOCK || it.name.endsWith("_WOOL"))
         }
 
         for (material in materialsToBeAveraged) {
