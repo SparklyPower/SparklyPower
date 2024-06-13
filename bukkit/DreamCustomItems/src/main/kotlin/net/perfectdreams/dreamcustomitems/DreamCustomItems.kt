@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcustomitems
 
+import com.comphenix.protocol.ProtocolLibrary
 import com.google.common.collect.Sets
 import com.okkero.skedule.schedule
 import net.kyori.adventure.text.format.NamedTextColor
@@ -57,6 +58,22 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 	override fun softEnable() {
 		super.softEnable()
 
+		// This is here just to throw an error if CustomBlocks fail to initialize
+		logger.info("There are ${CustomBlocks.allCustomBlocks.size} custom blocks!")
+
+		CustomBlocks.allCustomBlocks.forEach {
+			logger.info("${it.id}:")
+			for ((index, blockState) in it.blockStates.withIndex()) {
+				logger.info("STATE $index:")
+				logger.info("> Source: ${blockState.sourceBlockStateNMS} (${blockState.sourceBlockStateId})")
+				logger.info("> Target: ${blockState.targetBlockStateNMS} (${blockState.targetBlockStateId})")
+				logger.info("> Fallback: ${blockState.fallbackBlockStateNMS} (${blockState.fallbackBlockStateId})")
+			}
+		}
+
+		logger.info(VanillaBlockStateRemapper.stateIdToBlockState[26687]?.toString())
+		logger.info(CustomBlocks.stateIdToBlockState[26687]?.toString())
+
 		dataFolder.mkdirs()
 		customBlocksFolder.mkdirs()
 
@@ -108,11 +125,6 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 
 		registerCommand(DreamCustomItemsCommand)
 		registerCommand(CustomItemRecipesCommand(this))
-
-		// https://gist.github.com/aadnk/8119275
-		/* val protocolManager = ProtocolLibrary.getProtocolManager()
-		protocolManager
-			.addPacketListener(BlockPacketAdapter(this)) */
 
 		customRecipes.add(
 			CustomCraftingRecipe(
@@ -299,7 +311,9 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 				CustomCraftingRecipe.RUBY_REMAP,
 				recipe = addRecipe(
 					"rainbow_wool",
-					CustomItems.RAINBOW_WOOL,
+					CustomItems.RAINBOW_WOOL.clone().apply {
+						amount = 8
+					},
 					listOf(
 						"RWR",
 						"WUW",
@@ -319,7 +333,9 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 				CustomCraftingRecipe.RUBY_REMAP,
 				recipe = addRecipe(
 					"rainbow_concrete",
-					CustomItems.RAINBOW_CONCRETE,
+					CustomItems.RAINBOW_CONCRETE.apply {
+						amount = 8
+					},
 					listOf(
 						"RWR",
 						"WUW",
@@ -339,7 +355,9 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 				CustomCraftingRecipe.RUBY_REMAP,
 				recipe = addRecipe(
 					"rainbow_terracotta",
-					CustomItems.RAINBOW_TERRACOTTA,
+					CustomItems.RAINBOW_TERRACOTTA.apply {
+						amount = 8
+					},
 					listOf(
 						"RWR",
 						"WUW",
