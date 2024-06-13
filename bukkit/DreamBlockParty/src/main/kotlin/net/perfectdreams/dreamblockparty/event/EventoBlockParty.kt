@@ -5,7 +5,7 @@ import net.perfectdreams.dreamblockparty.DreamBlockParty
 
 class EventoBlockParty(val m: DreamBlockParty) : ServerEvent("Block Party", "/blockparty") {
     init {
-        this.requiredPlayers = 55
+        this.requiredPlayers = 20
         this.delayBetween = 30 * 60 * 1_000 // 20 minutos entre cada evento
         this.command = "/blockparty"
     }

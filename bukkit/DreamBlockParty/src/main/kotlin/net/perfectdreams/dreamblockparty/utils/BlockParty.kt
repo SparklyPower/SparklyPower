@@ -223,11 +223,6 @@ class BlockParty(val m: DreamBlockParty) {
                             append("O Evento Block Party começará em $i segundos! Use ")
                             appendCommand("/blockparty")
                             append(" para entrar!")
-                            appendSpace()
-                            appendTextComponent {
-                                color(NamedTextColor.RED)
-                                content("(GUARDE OS ITENS ANTES DE ENTRAR! Vai se dá problema)")
-                            }
                         }
                     )
                 }
