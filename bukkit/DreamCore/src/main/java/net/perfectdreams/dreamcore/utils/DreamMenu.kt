@@ -101,6 +101,11 @@ class DreamMenuListener : Listener {
 		if (dreamMenu.cancelItemMovement)
 			e.isCancelled = true
 
+		// Are we clicking on the menu? If not, bail out!
+		// This avoids bugs with users clicking on their inventory triggering actions on the menu
+		if (e.clickedInventory?.holder != targetInventoryHolder)
+			return
+
 		val clickedSlot = e.slot
 		val slot = dreamMenu.slots.firstOrNull { it.position == clickedSlot }
 
