@@ -1,36 +1,113 @@
 package net.perfectdreams.loritta.morenitta.interactions.commands
 
-import dev.kord.common.Locale
 import dev.minn.jda.ktx.interactions.commands.*
-import net.dv8tion.jda.api.entities.IMentionable
-import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.entities.Role
+import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.User
-import net.dv8tion.jda.api.entities.channel.Channel
-import net.dv8tion.jda.api.interactions.DiscordLocale
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions
-import net.dv8tion.jda.api.interactions.commands.build.CommandData
-import net.dv8tion.jda.api.interactions.commands.build.Commands
-import net.dv8tion.jda.api.interactions.commands.build.OptionData
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData
-import net.perfectdreams.discordinteraktions.common.commands.ApplicationCommandDeclaration
-import net.perfectdreams.discordinteraktions.common.commands.MessageCommandDeclaration
-import net.perfectdreams.discordinteraktions.common.commands.SlashCommandGroupDeclaration
-import net.perfectdreams.discordinteraktions.common.commands.UserCommandDeclaration
-import net.perfectdreams.discordinteraktions.common.commands.options.*
+import net.dv8tion.jda.api.entities.channel.ChannelType
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
+import net.dv8tion.jda.api.interactions.commands.build.*
+import net.perfectdreams.loritta.morenitta.interactions.UnleashedContext
 import net.perfectdreams.loritta.morenitta.interactions.commands.options.*
-import net.perfectdreams.loritta.morenitta.interactions.commands.options.OptionReference
 import net.perfectdreams.pantufa.PantufaBot
+import net.perfectdreams.pantufa.api.commands.PantufaReply
+import net.perfectdreams.pantufa.api.commands.exceptions.SilentCommandException
+import net.perfectdreams.pantufa.api.commands.exceptions.UnleashedCommandException
+import net.perfectdreams.pantufa.api.commands.styled
+import net.perfectdreams.pantufa.interactions.vanilla.economy.*
+import net.perfectdreams.pantufa.interactions.vanilla.discord.*
+import net.perfectdreams.pantufa.interactions.vanilla.magic.*
+import net.perfectdreams.pantufa.interactions.vanilla.minecraft.*
+import net.perfectdreams.pantufa.interactions.vanilla.misc.*
+import net.perfectdreams.pantufa.interactions.vanilla.moderation.*
+import net.perfectdreams.pantufa.interactions.vanilla.utils.*
+import net.perfectdreams.pantufa.network.Databases
+import net.perfectdreams.pantufa.tables.Users
+import net.perfectdreams.pantufa.utils.*
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.concurrent.CancellationException
+import kotlin.reflect.jvm.jvmName
 
 class UnleashedCommandManager(val m: PantufaBot) {
+    companion object {
+        private val logger = KotlinLogging.logger {}
+    }
+
     val slashCommands = mutableListOf<SlashCommandDeclaration>()
+    private var commandPathToDeclaration = mutableMapOf<String, SlashCommandDeclaration>()
 
     init {
-        // register(PerfectDreamsShopCommand(m))
+        logger.info { "Registering Unleashed commands..." }
+
+        // ===[ Discord ]===
+        register(PingCommand())
+
+        // ===[ Miscellaneous ]===
+        register(GuildsCommand())
+
+        // ===[ Economy ]===
+        register(LSXCommand())
+        register(PesadelosCommand())
+        register(SonecasCommand())
+        register(TransactionsCommand())
+
+        // ===[ Magic ]===
+        register(ExecuteCommand())
+
+        // ===[ Minecraft ]===
+        register(RegisterCommand())
+        register(OnlineCommand())
+        register(VIPInfoCommand())
+        register(ChatColorCommand())
+        register(MinecraftCommand())
+
+        // ===[ Moderation ]===
+        register(AdminConsoleBungeeCommand())
+        register(CommandsLogCommand())
+        register(SayCommand())
+
+        // ===[ Utils ]===
+        register(ChangePassCommand())
+        register(NotificarCommand())
+        register(VerificarCommand())
+        register(TPSCommand())
+
+        // Transform Slash Commands to Legacy Commands.
+        updateCommandPathToDeclarations()
     }
 
     fun register(declaration: SlashCommandDeclarationWrapper) {
-        slashCommands += declaration.command().build()
+        val builtDeclaration = declaration.command().build()
+
+        if (builtDeclaration.enableLegacyMessageSupport) {
+            val executors = mutableListOf<Any>()
+
+            if (builtDeclaration.executor != null)
+                executors.add(builtDeclaration.executor)
+
+            for (subcommand in builtDeclaration.subcommands) {
+                if (subcommand.executor != null) {
+                    executors.add(subcommand.executor)
+                }
+            }
+
+            for (subcommandGroup in builtDeclaration.subcommandGroups) {
+                for (subcommand in subcommandGroup.subcommands) {
+                    if (subcommand.executor != null) {
+                        executors.add(subcommand.executor)
+                    }
+                }
+            }
+
+            for (executor in executors) {
+                if (executor !is LorittaLegacyMessageCommandExecutor) {
+                    error("${executor::class.simpleName} does not inherit LorittaLegacyMessageCommandExecutor, but enable legacy message support is enabled!")                }
+            }
+        }
+
+        logger.info { "Registering command ${declaration::class.jvmName}!" }
+
+        slashCommands += builtDeclaration
     }
 
     /**
@@ -77,114 +154,6 @@ class UnleashedCommandManager(val m: PantufaBot) {
         }
     }
 
-
-    /**
-     * Converts a Discord InteraKTions [declaration] to JDA
-     *
-     * This is provided for backwards compatibility!
-     */
-    fun convertInteraKTionsDeclarationToJDA(declaration: ApplicationCommandDeclaration): CommandData {
-        when (declaration) {
-            is UserCommandDeclaration -> {
-                return Commands.user(declaration.name).apply {
-                    declaration.nameLocalizations?.mapKeysToJDALocales()
-                        ?.also { setNameLocalizations(it) }
-                    val defPermissions = declaration.defaultMemberPermissions
-                    if (defPermissions != null)
-                        defaultPermissions = DefaultMemberPermissions.enabledFor(defPermissions.code.value.toLong())
-                    val dmPermission = declaration.dmPermission
-                    if (dmPermission != null)
-                        isGuildOnly = !dmPermission
-                }
-            }
-
-            is MessageCommandDeclaration -> {
-                return Commands.message(declaration.name).apply {
-                    declaration.nameLocalizations?.mapKeysToJDALocales()
-                        ?.also { setNameLocalizations(it) }
-                    val defPermissions = declaration.defaultMemberPermissions
-                    if (defPermissions != null)
-                        defaultPermissions = DefaultMemberPermissions.enabledFor(defPermissions.code.value.toLong())
-                    val dmPermission = declaration.dmPermission
-                    if (dmPermission != null)
-                        isGuildOnly = !dmPermission
-                }
-            }
-
-            is net.perfectdreams.discordinteraktions.common.commands.SlashCommandDeclaration -> {
-                return Commands.slash(declaration.name, declaration.description).apply {
-                    declaration.nameLocalizations?.mapKeysToJDALocales()
-                        ?.also { setNameLocalizations(it) }
-                    declaration.descriptionLocalizations?.mapKeysToJDALocales()
-                        ?.also { setDescriptionLocalizations(it) }
-                    val defPermissions = declaration.defaultMemberPermissions
-                    if (defPermissions != null)
-                        defaultPermissions = DefaultMemberPermissions.enabledFor(defPermissions.code.value.toLong())
-                    val dmPermission = declaration.dmPermission
-                    if (dmPermission != null)
-                        isGuildOnly = !dmPermission
-
-                    // We can only have (subcommands OR subcommand groups) OR arguments
-                    if (declaration.subcommands.isNotEmpty() || declaration.subcommandGroups.isNotEmpty()) {
-                        for (subcommandDeclaration in declaration.subcommands) {
-                            subcommand(subcommandDeclaration.name, subcommandDeclaration.description) {
-                                val executor = subcommandDeclaration.executor
-
-                                require(executor != null) { "Subcommand command without a executor!" }
-
-                                subcommandDeclaration.nameLocalizations?.mapKeysToJDALocales()
-                                    ?.also { setNameLocalizations(it) }
-                                subcommandDeclaration.descriptionLocalizations?.mapKeysToJDALocales()
-                                    ?.also { setDescriptionLocalizations(it) }
-
-                                for (option in executor.options.registeredOptions) {
-                                    addOptions(*createOption(option).toTypedArray())
-                                }
-                            }
-                        }
-
-                        for (subcommandGroupDeclaration in declaration.subcommandGroups) {
-                            group(subcommandGroupDeclaration.name, subcommandGroupDeclaration.description) {
-                                subcommandGroupDeclaration.nameLocalizations?.mapKeysToJDALocales()
-                                    ?.also { setNameLocalizations(it) }
-                                subcommandGroupDeclaration.descriptionLocalizations?.mapKeysToJDALocales()
-                                    ?.also { setDescriptionLocalizations(it) }
-
-                                for (subcommandDeclaration in subcommandGroupDeclaration.subcommands) {
-                                    subcommand(subcommandDeclaration.name, subcommandDeclaration.description) {
-                                        val executor = subcommandDeclaration.executor
-
-                                        require(executor != null) { "Subcommand command without a executor!" }
-
-                                        subcommandDeclaration.nameLocalizations?.mapKeysToJDALocales()
-                                            ?.also { setNameLocalizations(it) }
-                                        subcommandDeclaration.descriptionLocalizations?.mapKeysToJDALocales()
-                                            ?.also { setDescriptionLocalizations(it) }
-
-                                        for (option in executor.options.registeredOptions) {
-                                            addOptions(*createOption(option).toTypedArray())
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        val executor = declaration.executor
-
-                        require(executor != null) { "Root command without a executor!" }
-
-                        for (option in executor.options.registeredOptions) {
-                            addOptions(*createOption(option).toTypedArray())
-                        }
-                    }
-                }
-            }
-            is SlashCommandGroupDeclaration -> {
-                error("This should never be called because the convertInteraKTionsDeclarationToJDA method is only called on a root command!")
-            }
-        }
-    }
-
     private fun createOption(interaKTionsOption: OptionReference<*>): List<OptionData> {
         when (interaKTionsOption) {
             is DiscordOptionReference -> {
@@ -207,7 +176,17 @@ class UnleashedCommandManager(val m: PantufaBot) {
                                 interaKTionsOption.name,
                                 description,
                                 interaKTionsOption.required
-                            )
+                            ).apply {
+                                if (interaKTionsOption.autocompleteExecutor != null) {
+                                    isAutoComplete = true
+                                }
+
+                                for (choice in interaKTionsOption.choices) {
+                                    when (choice) {
+                                        is StringDiscordOptionReference.Choice.RawChoice -> choice(choice.name, choice.value)
+                                    }
+                                }
+                            }
                         )
                     }
 
@@ -220,230 +199,273 @@ class UnleashedCommandManager(val m: PantufaBot) {
                             )
                         )
                     }
+
+                    is IntDiscordOptionReference -> {
+                        return listOf(
+                            Option<Int>(
+                                interaKTionsOption.name,
+                                description,
+                                interaKTionsOption.required
+                            )
+                        )
+                    }
+
+                    is ChannelDiscordOptionReference -> {
+                        return listOf(
+                            Option<GuildChannel>(
+                                interaKTionsOption.name,
+                                description,
+                                interaKTionsOption.required
+                            )
+                        )
+                    }
                 }
             }
         }
     }
 
+    suspend fun matches(event: MessageReceivedEvent, rawArguments: List<String>): Boolean {
+        val start = System.currentTimeMillis()
+        var rootDeclaration: SlashCommandDeclaration? = null
+        var slashDeclaration: SlashCommandDeclaration? = null
 
-    /**
-     * Converts a Discord InteraKTions [InteraKTionsCommandOption] to JDA
-     *
-     * This is provided for backwards compatibility!
-     */
-    private fun createOption(interaKTionsOption: InteraKTionsCommandOption<*>): List<OptionData> {
-        when (interaKTionsOption) {
-            is StringCommandOption -> {
-                return listOf(
-                    Option<String>(
-                        name = interaKTionsOption.name,
-                        description = interaKTionsOption.description,
-                        required = interaKTionsOption.required,
-                        autocomplete = interaKTionsOption.autocompleteExecutor != null,
-                    ) {
-                        val localizedNames = interaKTionsOption.nameLocalizations?.mapKeysToJDALocales()
-                        if (localizedNames != null)
-                            this.setNameLocalizations(localizedNames)
-                        val localizedDescriptions = interaKTionsOption.descriptionLocalizations?.mapKeysToJDALocales()
-                        if (localizedDescriptions != null)
-                            this.setDescriptionLocalizations(localizedDescriptions)
-                        interaKTionsOption.minLength?.let {
-                            if (it != 0)
-                                setMinLength(it)
-                        }
-                        interaKTionsOption.maxLength?.let {
-                            if (it != 0)
-                                setMaxLength(it)
-                        }
+        var argumentsToBeDropped = 0
 
-                        interaKTionsOption.choices?.forEach {
-                            this.addChoices(
-                                net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name, it.value)
-                                    .apply {
-                                        val localizedOptionNames = it.nameLocalizations?.mapKeysToJDALocales()
-                                        if (localizedOptionNames != null)
-                                            this.setNameLocalizations(localizedOptionNames)
-                                    }
-                            )
-                        }
-                    }
-                )
-            }
-            is IntegerCommandOption -> {
-                return listOf(
-                    Option<Long>(
-                        name = interaKTionsOption.name,
-                        description = interaKTionsOption.description,
-                        required = interaKTionsOption.required,
-                        autocomplete = interaKTionsOption.autocompleteExecutor != null,
-                    ) {
-                        val localizedNames = interaKTionsOption.nameLocalizations?.mapKeysToJDALocales()
-                        if (localizedNames != null)
-                            this.setNameLocalizations(localizedNames)
-                        val localizedDescriptions = interaKTionsOption.descriptionLocalizations?.mapKeysToJDALocales()
-                        if (localizedDescriptions != null)
-                            this.setDescriptionLocalizations(localizedDescriptions)
-                        interaKTionsOption.minValue?.let {
-                            setMinValue(it)
-                        }
-                        interaKTionsOption.maxValue?.let {
-                            setMaxValue(it)
-                        }
+        var bestMatch: SlashCommandDeclaration? = null
+        var absolutePathSize = 0
 
-                        interaKTionsOption.choices?.forEach {
-                            this.addChoices(
-                                net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name, it.value)
-                                    .apply {
-                                        val localizedOptionNames = it.nameLocalizations?.mapKeysToJDALocales()
-                                        if (localizedOptionNames != null)
-                                            this.setNameLocalizations(localizedOptionNames)
-                                    }
-                            )
-                        }
-                    }
-                )
-            }
-            is NumberCommandOption -> {
-                return listOf(
-                    Option<Double>(
-                        name = interaKTionsOption.name,
-                        description = interaKTionsOption.description,
-                        required = interaKTionsOption.required,
-                        autocomplete = interaKTionsOption.autocompleteExecutor != null,
-                    ) {
-                        val localizedNames = interaKTionsOption.nameLocalizations?.mapKeysToJDALocales()
-                        if (localizedNames != null)
-                            this.setNameLocalizations(localizedNames)
-                        val localizedDescriptions = interaKTionsOption.descriptionLocalizations?.mapKeysToJDALocales()
-                        if (localizedDescriptions != null)
-                            this.setDescriptionLocalizations(localizedDescriptions)
-                        interaKTionsOption.minValue?.let {
-                            setMinValue(it)
-                        }
-                        interaKTionsOption.maxValue?.let {
-                            setMaxValue(it)
-                        }
+        commandDeclarationLoop@for((commandPath, declaration) in commandPathToDeclaration) {
+            argumentsToBeDropped = 0
 
-                        interaKTionsOption.choices?.forEach {
-                            this.addChoices(
-                                net.dv8tion.jda.api.interactions.commands.Command.Choice(it.name, it.value)
-                                    .apply {
-                                        val localizedOptionNames = it.nameLocalizations?.mapKeysToJDALocales()
-                                        if (localizedOptionNames != null)
-                                            this.setNameLocalizations(localizedOptionNames)
-                                    }
-                            )
-                        }
-                    }
-                )
+            val absolutePathSplit = commandPath.split(" ")
+
+            if (absolutePathSize > absolutePathSplit.size)
+                continue
+
+            for ((index, pathSection) in absolutePathSplit.withIndex()) {
+                val rawArgument = rawArguments.getOrNull(index)?.lowercase()?.normalize() ?: continue@commandDeclarationLoop
+
+                if (pathSection.normalize() == rawArgument) {
+                    argumentsToBeDropped++
+                } else {
+                    continue@commandDeclarationLoop
+                }
             }
-            is BooleanCommandOption -> {
-                return listOf(
-                    Option<Boolean>(
-                        name = interaKTionsOption.name,
-                        description = interaKTionsOption.description,
-                        required = interaKTionsOption.required,
-                    ) {
-                        val localizedNames = interaKTionsOption.nameLocalizations?.mapKeysToJDALocales()
-                        if (localizedNames != null)
-                            this.setNameLocalizations(localizedNames)
-                        val localizedDescriptions = interaKTionsOption.descriptionLocalizations?.mapKeysToJDALocales()
-                        if (localizedDescriptions != null)
-                            this.setDescriptionLocalizations(localizedDescriptions)
-                    }
-                )
-            }
-            is UserCommandOption -> {
-                return listOf(
-                    Option<User>(
-                        name = interaKTionsOption.name,
-                        description = interaKTionsOption.description,
-                        required = interaKTionsOption.required,
-                    ) {
-                        val localizedNames = interaKTionsOption.nameLocalizations?.mapKeysToJDALocales()
-                        if (localizedNames != null)
-                            this.setNameLocalizations(localizedNames)
-                        val localizedDescriptions = interaKTionsOption.descriptionLocalizations?.mapKeysToJDALocales()
-                        if (localizedDescriptions != null)
-                            this.setDescriptionLocalizations(localizedDescriptions)
-                    }
-                )
-            }
-            is RoleCommandOption -> {
-                return listOf(
-                    Option<Role>(
-                        name = interaKTionsOption.name,
-                        description = interaKTionsOption.description,
-                        required = interaKTionsOption.required,
-                    ) {
-                        val localizedNames = interaKTionsOption.nameLocalizations?.mapKeysToJDALocales()
-                        if (localizedNames != null)
-                            this.setNameLocalizations(localizedNames)
-                        val localizedDescriptions = interaKTionsOption.descriptionLocalizations?.mapKeysToJDALocales()
-                        if (localizedDescriptions != null)
-                            this.setDescriptionLocalizations(localizedDescriptions)
-                    }
-                )
-            }
-            is ChannelCommandOption -> {
-                return listOf(
-                    Option<Channel>(
-                        name = interaKTionsOption.name,
-                        description = interaKTionsOption.description,
-                        required = interaKTionsOption.required,
-                    ) {
-                        val localizedNames = interaKTionsOption.nameLocalizations?.mapKeysToJDALocales()
-                        if (localizedNames != null)
-                            this.setNameLocalizations(localizedNames)
-                        val localizedDescriptions = interaKTionsOption.descriptionLocalizations?.mapKeysToJDALocales()
-                        if (localizedDescriptions != null)
-                            this.setDescriptionLocalizations(localizedDescriptions)
-                    }
-                )
-            }
-            is MentionableCommandOption -> {
-                return listOf(
-                    Option<IMentionable>(
-                        name = interaKTionsOption.name,
-                        description = interaKTionsOption.description,
-                        required = interaKTionsOption.required,
-                    ) {
-                        val localizedNames = interaKTionsOption.nameLocalizations?.mapKeysToJDALocales()
-                        if (localizedNames != null)
-                            this.setNameLocalizations(localizedNames)
-                        val localizedDescriptions = interaKTionsOption.descriptionLocalizations?.mapKeysToJDALocales()
-                        if (localizedDescriptions != null)
-                            this.setDescriptionLocalizations(localizedDescriptions)
-                    }
-                )
-            }
-            is AttachmentCommandOption -> {
-                return listOf(
-                    Option<Message.Attachment>(
-                        name = interaKTionsOption.name,
-                        description = interaKTionsOption.description,
-                        required = interaKTionsOption.required,
-                    ) {
-                        val localizedNames = interaKTionsOption.nameLocalizations?.mapKeysToJDALocales()
-                        if (localizedNames != null)
-                            this.setNameLocalizations(localizedNames)
-                        val localizedDescriptions = interaKTionsOption.descriptionLocalizations?.mapKeysToJDALocales()
-                        if (localizedDescriptions != null)
-                            this.setDescriptionLocalizations(localizedDescriptions)
-                    }
-                )
-            }
-            else -> error("Unknown Discord InteraKTions option type ${interaKTionsOption::class}")
+
+            bestMatch = declaration
+            absolutePathSize = argumentsToBeDropped
         }
+
+        if (bestMatch != null) {
+            rootDeclaration = bestMatch
+            slashDeclaration = bestMatch
+            argumentsToBeDropped = absolutePathSize
+        }
+
+        if (rootDeclaration == null || slashDeclaration == null)
+            return false
+
+        val executor = slashDeclaration.executor ?: error("Missing executor on $slashDeclaration!")
+
+        if (executor !is LorittaLegacyMessageCommandExecutor)
+            error("$executor doesn't inherit LorittaLegacyMessageCommandExecutor!")
+
+        var context: UnleashedContext? = null
+
+        try {
+            val rawArgumentsAfterDrop = rawArguments.drop(argumentsToBeDropped)
+
+            val discordAccount = m.getDiscordAccountFromId(event.author.idLong)
+
+            context = LegacyMessageCommandContext(
+                m,
+                event,
+                rawArgumentsAfterDrop,
+                slashDeclaration,
+                rootDeclaration
+            )
+
+            if (event.message.isFromType(ChannelType.TEXT)) {
+                logger.info("(${event.message.guild.name} -> ${event.message.channel.name}) ${event.author.name}#${event.author.discriminator} (${event.author.id}): ${event.message.contentDisplay}")
+            } else {
+                logger.info("(Direct Message) ${event.author.name}#${event.author.discriminator} (${event.author.id}): ${event.message.contentDisplay}")
+            }
+
+            if (slashDeclaration.requireMinecraftAccount) {
+                if (discordAccount == null || !discordAccount.isConnected) {
+                    context.reply(false) {
+                        styled(
+                            "Você precisa associar a sua conta do SparklyPower antes de poder usar este comando! Para associar, use `-registrar NomeNoServidor`!",
+                            Constants.ERROR
+                        )
+                    }
+                    return true
+                } else {
+                    val user = transaction(Databases.sparklyPower) {
+                        net.perfectdreams.pantufa.dao.User.find { Users.id eq discordAccount.minecraftId }.firstOrNull()
+                    }
+
+                    if (user == null) {
+                        context.reply(false) {
+                            styled(
+                                "Parece que você tem uma conta associada, mas não existe o seu username salvo no banco de dados! Bug?",
+                                Constants.ERROR
+                            )
+                        }
+
+                        return true
+                    }
+                }
+            }
+
+            val argMap = executor.convertToInteractionsArguments(context, rawArgumentsAfterDrop)
+
+            if (argMap != null) {
+                val args = SlashCommandArguments(
+                    SlashCommandArgumentsSource.SlashCommandArgumentsMapSource(argMap)
+                )
+
+                executor.execute(
+                    context,
+                    args
+                )
+
+                val end = System.currentTimeMillis()
+
+                if (event.message.isFromType(ChannelType.TEXT)) {
+                    logger.info("(${event.message.guild.name} -> ${event.message.channel.name}) ${event.author.name}#${event.author.discriminator} (${event.author.id}): ${event.message.contentDisplay} - OK! Processado em ${end - start}ms")
+                } else {
+                    logger.info("(Direct Message) ${event.author.name}#${event.author.discriminator} (${event.author.id}): ${event.message.contentDisplay} - OK! Processado em ${end - start}ms")
+                }
+
+                return true
+            }
+        } catch (e: Exception) {
+            when (e) {
+                is UnleashedCommandException -> {
+                    context?.reply(e.ephemeral, e.builder)
+                    return true
+                }
+
+                is CancellationException -> {
+                    logger.error(e) { "RestAction in command ${executor::class.simpleName} has been cancelled" }
+                    return true
+                }
+
+                is SilentCommandException -> return true
+            }
+
+            logger.error { "Exception when executing ${rootDeclaration.name} command! $e" }
+
+            if (!e.message.isNullOrEmpty()) {
+                event.channel.sendMessage(
+                    PantufaReply(
+                        e.message!!,
+                        Emotes.PantufaSob.toString()
+                    ).build(event.author)
+                ).queue()
+            }
+
+            return true
+        }
+
+        return false
     }
 
-    private fun Map<Locale, String>.mapKeysToJDALocales() = this.mapKeys {
-        val language = it.key.language
-        val country = it.key.country
-        var locale = language
-        if (country != null)
-            locale += "-$country"
+    fun findDeclarationPath(endDeclaration: SlashCommandDeclaration): List<Any> {
+        for (declaration in slashCommands) {
+            if (declaration == endDeclaration) {
+                return listOf(declaration)
+            }
 
-        DiscordLocale.from(locale)
+            for (subcommandDeclaration in declaration.subcommands) {
+                if (subcommandDeclaration == endDeclaration) {
+                    return listOf(declaration, subcommandDeclaration)
+                }
+            }
+
+            for (group in declaration.subcommandGroups) {
+                for (subcommandDeclaration in group.subcommands) {
+                    if (subcommandDeclaration == endDeclaration) {
+                        return listOf(declaration, group, subcommandDeclaration)
+                    }
+                }
+            }
+        }
+
+        error("Declaration path is null for $endDeclaration! This should never happen! Are you trying to find a declaration that isn't registered in InteraKTions Unleashed?")
+    }
+
+    private fun updateCommandPathToDeclarations() {
+        fun isDeclarationExecutable(declaration: SlashCommandDeclaration) = declaration.executor != null
+
+        val commandPathToDeclarations = mutableMapOf<String, SlashCommandDeclaration>()
+
+        fun putNormalized(key: String, value: SlashCommandDeclaration) {
+            commandPathToDeclarations[key.normalize()] = value
+        }
+
+        for (declaration in slashCommands.filter { it.enableLegacyMessageSupport }) {
+            val rootLabels = listOf(declaration.name) + declaration.alternativeLegacyLabels
+
+            if (isDeclarationExecutable(declaration)) {
+                for (rootLabel in rootLabels) {
+                    putNormalized(rootLabel, declaration)
+                }
+
+                for (absolutePath in declaration.alternativeLegacyAbsoluteCommandPaths) {
+                    putNormalized(absolutePath, declaration)
+                }
+            }
+
+            declaration.subcommands.forEach { subcommand ->
+                if (isDeclarationExecutable(subcommand)) {
+                    val subcommandLabels = listOf(subcommand.name) + subcommand.alternativeLegacyLabels
+
+                    for (rootLabel in rootLabels) {
+                        for (subcommandLabel in subcommandLabels) {
+                            putNormalized("$rootLabel $subcommandLabel", subcommand)
+                        }
+                    }
+
+                    for (absolutePath in subcommand.alternativeLegacyAbsoluteCommandPaths) {
+                        putNormalized(absolutePath, subcommand)
+                    }
+                }
+            }
+
+            declaration.subcommandGroups.forEach { group ->
+                val subcommandGroupLabels = listOf(group.name) + group.alternativeLegacyLabels
+
+                group.subcommands.forEach { subcommand ->
+                    if (isDeclarationExecutable(subcommand)) {
+                        val subcommandLabels = listOf(subcommand.name) + subcommand.alternativeLegacyLabels
+
+                        for (rootLabel in rootLabels) {
+                            for (subcommandGroupLabel in subcommandGroupLabels) {
+                                for (subcommandLabel in subcommandLabels) {
+                                    putNormalized("$rootLabel $subcommandGroupLabel $subcommandLabel", subcommand)
+                                }
+                            }
+                        }
+
+                        for (absolutePath in subcommand.alternativeLegacyAbsoluteCommandPaths) {
+                            putNormalized(absolutePath.normalize(), subcommand)
+                        }
+                    }
+                }
+            }
+        }
+        this.commandPathToDeclaration = commandPathToDeclarations
+    }
+
+    private fun String.normalize(): String {
+        val original = arrayOf("ę", "š")
+        val normalized =  arrayOf("e", "s")
+
+        return this.map { it ->
+            val index = original.indexOf(it.toString())
+            if (index >= 0) normalized[index] else it
+        }.joinToString("")
     }
 }

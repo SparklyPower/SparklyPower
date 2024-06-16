@@ -1,6 +1,7 @@
 package net.perfectdreams.pantufa.dao
 
-import net.perfectdreams.pantufa.interactions.components.utils.TransactionCurrency
+import net.perfectdreams.pantufa.api.economy.TransactionCurrency
+import net.perfectdreams.pantufa.api.economy.TransactionType
 import net.perfectdreams.pantufa.network.Databases
 import net.perfectdreams.pantufa.tables.Transactions
 import org.jetbrains.exposed.dao.LongEntity
@@ -11,10 +12,23 @@ import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.security.SecureRandom
 import java.util.UUID
 
 class Transaction(id: EntityID<Long>) : LongEntity(id) {
     companion object : LongEntityClass<Transaction>(Transactions) {
+        fun generateExampleTransactions(username: UUID) =
+            transaction(Databases.sparklyPower) {
+                Transaction.new {
+                    payer = username
+                    receiver = username
+                    currency = TransactionCurrency.entries.toList().random()
+                    type = TransactionType.entries.toList().random()
+                    time = System.currentTimeMillis()
+                    amount = SecureRandom().nextLong(0, 200_000L).toDouble()
+                }
+            }
+
         fun fetchTransactions(payer: UUID?, receiver: UUID?, currency: TransactionCurrency?) =
             transaction(Databases.sparklyPower) {
                 find {

@@ -1,6 +1,7 @@
 package net.perfectdreams.pantufa.utils.extensions
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import net.perfectdreams.pantufa.dao.Profile
 import net.perfectdreams.pantufa.dao.User
 import net.perfectdreams.pantufa.network.Databases
 import net.perfectdreams.pantufa.pantufa
@@ -22,3 +23,7 @@ val UUID.username get() = cachedUsernames[this] ?: pantufa.getMinecraftUserFromU
     cachedUsernames[this] = name
     return@let name
 }
+
+fun net.dv8tion.jda.api.entities.User.lorittaProfile() = transaction(Databases.loritta) {
+    Profile.findById(idLong)
+} ?: throw RuntimeException()

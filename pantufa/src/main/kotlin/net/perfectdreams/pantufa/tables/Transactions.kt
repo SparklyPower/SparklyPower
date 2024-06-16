@@ -1,7 +1,7 @@
 package net.perfectdreams.pantufa.tables
 
-import net.perfectdreams.pantufa.interactions.components.utils.TransactionCurrency
-import net.perfectdreams.pantufa.interactions.components.utils.TransactionType
+import net.perfectdreams.pantufa.api.economy.TransactionCurrency
+import net.perfectdreams.pantufa.api.economy.TransactionType
 import org.jetbrains.exposed.dao.id.LongIdTable
 
 object Transactions : LongIdTable() {

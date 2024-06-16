@@ -1,5 +1,7 @@
 package net.perfectdreams.loritta.morenitta.interactions.commands.options
 
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
+
 open class ApplicationCommandOptions {
     companion object {
         val NO_OPTIONS = object : ApplicationCommandOptions() {}
@@ -10,7 +12,21 @@ open class ApplicationCommandOptions {
     fun string(name: String, description: String) = StringDiscordOptionReference<String>(name, description, true)
         .also { registeredOptions.add(it) }
 
+    fun string(name: String, description: String, builder: StringDiscordOptionReference<String>.() -> (Unit) = {}) = StringDiscordOptionReference<String>(name, description, true)
+        .apply(builder)
+        .also { registeredOptions.add(it) }
+
     fun optionalString(name: String, description: String) = StringDiscordOptionReference<String?>(name, description, false)
+        .also { registeredOptions.add(it) }
+
+    fun optionalString(name: String, description: String, builder: StringDiscordOptionReference<String?>.() -> (Unit) = {}) = StringDiscordOptionReference<String?>(name, description, false)
+        .apply(builder)
+        .also { registeredOptions.add(it) }
+
+    fun integer(name: String, description: String) = IntDiscordOptionReference<Int>(name, description, true)
+        .also { registeredOptions.add(it) }
+
+    fun optionalInteger(name: String, description: String) = IntDiscordOptionReference<Int?>(name, description, false)
         .also { registeredOptions.add(it) }
 
     fun long(name: String, description: String) = LongDiscordOptionReference<Long>(name, description, true)
@@ -23,5 +39,11 @@ open class ApplicationCommandOptions {
         .also { registeredOptions.add(it) }
 
     fun optionalUser(name: String, description: String) = UserDiscordOptionReference<UserAndMember?>(name, description, false)
+        .also { registeredOptions.add(it) }
+
+    fun channel(name: String, description: String) = ChannelDiscordOptionReference<GuildChannel>(name, description, true)
+        .also { registeredOptions.add(it) }
+
+    fun optionalChannel(name: String, description: String) = ChannelDiscordOptionReference<GuildChannel?>(name, description, false)
         .also { registeredOptions.add(it) }
 }

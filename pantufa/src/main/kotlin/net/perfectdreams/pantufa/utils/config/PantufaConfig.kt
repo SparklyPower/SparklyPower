@@ -11,5 +11,6 @@ data class PantufaConfig(
     val postgreSqlLuckPerms: PostgreSqlConfig,
     val postgreSqlLoritta: PostgreSqlConfig,
     val mariaDbCraftConomy: PostgreSqlConfig,
-    val grafana: GrafanaConfig
+    val grafana: GrafanaConfig,
+    val sparklyPower: SparklyPowerConfig
 )
