@@ -25,6 +25,7 @@ import net.perfectdreams.dreamcore.utils.extensions.*
 import net.perfectdreams.dreamcore.utils.npc.SparklyNPCManager
 import net.perfectdreams.dreamcore.utils.npc.user.SparklyNPCCommand
 import net.perfectdreams.dreamcore.utils.npc.user.SparklyUserNPCManager
+import net.perfectdreams.dreamcore.utils.packetevents.PacketPipelineRegisterListener
 import net.perfectdreams.dreamcore.utils.scoreboards.SparklyScoreboardListener
 import net.perfectdreams.dreamcore.utils.scoreboards.SparklyScoreboardManager
 import net.perfectdreams.dreamcore.utils.skins.SkinUtils
@@ -139,6 +140,9 @@ class DreamCore : KotlinPlugin() {
 		sparklyDisplayManager.start()
 		sparklyUserDisplayManager.start()
 		registerCommand(SparklyDisplayCommand(this))
+
+		// SparklyPacketEvents
+		Bukkit.getPluginManager().registerEvents(PacketPipelineRegisterListener(), this)
 
 		val scheduler = Bukkit.getScheduler()
 

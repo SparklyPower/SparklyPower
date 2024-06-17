@@ -19,6 +19,7 @@ import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
 import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcore.utils.get
+import net.perfectdreams.dreamcore.utils.packetevents.ClientboundPacketSendEvent
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.CustomBlocks
@@ -175,315 +176,267 @@ class CustomBlocksListener(
     } */
 
     @EventHandler
-    fun onJoin(event: PlayerJoinEvent) {
+    fun onPacketSend(event: ClientboundPacketSendEvent) {
         val player = event.player
-        val nmsPlayer = (player as CraftPlayer).handle
 
-        // Create Netty pipeline to intercept packets
-        nmsPlayer
-            .connection
-            .connection
-            .channel
-            .pipeline()
-            .addBefore(
-                "packet_handler",
-                "dreamcustomitems-block-rewritter-handler",
-                object: ChannelDuplexHandler() {
-                    override fun write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise) {
-                        // THE MEAT:TM: OF THE CUSTOM BLOCK STUFF (this is VERY hardcore)
-                        // Reminder that is MOSTLY (some packets may not be ran on the main thread) ran on the main thread, so this needs to be quick and snappy!
-                        // Keep in mind that a LOT of these requires SparklyPaper's "Helpful NMS packet changes" to avoid reflection usage
-                        if (msg is ClientboundLevelChunkWithLightPacket) {
-                            // The check is made here to avoid getting the DreamBedrockIntegrations plugin on every packet
-                            val isBedrockClient = player.isBedrockClient
-                            // *Technically* this is bad, we shouldn't access the player world in a async thread
-                            // HOWEVER we are only using this to get the section count, so it shouldn't be *that* bad
-                            val playerWorld = player.world
+        val msg = event.packet
 
-                            // println("Map chunk packet")
-                            // This is actually pretty weird
-                            // there is actually a "nested" (?) packet
-                            // and because ProtocolLib reads the non-nested packet, we need to cast to the NMS object and read it from there
-                            //
-                            // Very useful! https://nms.screamingsandals.org/
-                            val clientboundLevelChunkWithLightPacket = msg
-                            val chunkX = clientboundLevelChunkWithLightPacket.x
-                            val chunkZ = clientboundLevelChunkWithLightPacket.z
+        // THE MEAT:TM: OF THE CUSTOM BLOCK STUFF (this is VERY hardcore)
+        // Reminder that is MOSTLY (some packets may not be ran on the main thread) ran on the main thread, so this needs to be quick and snappy!
+        // Keep in mind that a LOT of these requires SparklyPaper's "Helpful NMS packet changes" to avoid reflection usage
+        if (msg is ClientboundLevelChunkWithLightPacket) {
+            // The check is made here to avoid getting the DreamBedrockIntegrations plugin on every packet
+            val isBedrockClient = player.isBedrockClient
+            // *Technically* this is bad, we shouldn't access the player world in a async thread
+            // HOWEVER we are only using this to get the section count, so it shouldn't be *that* bad
+            val playerWorld = player.world
 
-                            val coordinateX = clientboundLevelChunkWithLightPacket.x * 16
-                            val coordinateZ = clientboundLevelChunkWithLightPacket.z * 16
-                            val chunkDataPacket = clientboundLevelChunkWithLightPacket.chunkData
+            // println("Map chunk packet")
+            // This is actually pretty weird
+            // there is actually a "nested" (?) packet
+            // and because ProtocolLib reads the non-nested packet, we need to cast to the NMS object and read it from there
+            //
+            // Very useful! https://nms.screamingsandals.org/
+            val clientboundLevelChunkWithLightPacket = msg
+            val chunkX = clientboundLevelChunkWithLightPacket.x
+            val chunkZ = clientboundLevelChunkWithLightPacket.z
 
-                            val worldMinHeight = playerWorld.minHeight
-                            val worldMaxHeight = playerWorld.maxHeight
-                            val worldTrueHeight = (worldMinHeight.absoluteValue + worldMaxHeight)
-                            val ySectionCount = worldTrueHeight / 16
+            val coordinateX = clientboundLevelChunkWithLightPacket.x * 16
+            val coordinateZ = clientboundLevelChunkWithLightPacket.z * 16
+            val chunkDataPacket = clientboundLevelChunkWithLightPacket.chunkData
 
-                            // And then we read the byte array from there!
-                            val originalBufferSize = chunkDataPacket.buffer.size
-                            val byteArray = chunkDataPacket.buffer
+            val worldMinHeight = playerWorld.minHeight
+            val worldMaxHeight = playerWorld.maxHeight
+            val worldTrueHeight = (worldMinHeight.absoluteValue + worldMaxHeight)
+            val ySectionCount = worldTrueHeight / 16
 
-                            // println("Chunk at $coordinateX, $coordinateZ")
+            // And then we read the byte array from there!
+            val originalBufferSize = chunkDataPacket.buffer.size
+            val byteArray = chunkDataPacket.buffer
 
-                            // println("Current Chunk: $chunkX, $chunkZ")
-                            // val copiedBuffer = measureTime { Unpooled.copiedBuffer(byteArray) }
-                            // val wrappedBuffer = measureTime { Unpooled.wrappedBuffer(byteArray) }
+            // println("Chunk at $coordinateX, $coordinateZ")
 
-                            // println("Took $copiedBuffer with copied buffer for ${packet.x} ${packet.z}")
-                            // println("Took $wrappedBuffer with wrapped buffer for ${packet.x} ${packet.z}")
+            // println("Current Chunk: $chunkX, $chunkZ")
+            // val copiedBuffer = measureTime { Unpooled.copiedBuffer(byteArray) }
+            // val wrappedBuffer = measureTime { Unpooled.wrappedBuffer(byteArray) }
 
-                            // Let's use a wrappedBuffer instead of a copiedBuffer, we don't really care about rewriting the backed array anyway
-                            val buf = Unpooled.wrappedBuffer(byteArray)
+            // println("Took $copiedBuffer with copied buffer for ${packet.x} ${packet.z}")
+            // println("Took $wrappedBuffer with wrapped buffer for ${packet.x} ${packet.z}")
 
-                            // println("Took $time to read the sections")
+            // Let's use a wrappedBuffer instead of a copiedBuffer, we don't really care about rewriting the backed array anyway
+            val buf = Unpooled.wrappedBuffer(byteArray)
 
-                            var requiresEdits = false
-                            // println("World: ${event.player.world.minHeight}")
-                            // println("Sections: $ySectionCount")
+            // println("Took $time to read the sections")
 
-                            val sections = ArrayList<ChunkSection>(ySectionCount)
-                            for (i in 0 until ySectionCount) {
-                                val section = chunkSectionType.read(buf)
+            var requiresEdits = false
+            // println("World: ${event.player.world.minHeight}")
+            // println("Sections: $ySectionCount")
 
-                                sections.add(section)
+            val sections = ArrayList<ChunkSection>(ySectionCount)
+            for (i in 0 until ySectionCount) {
+                val section = chunkSectionType.read(buf)
 
-                                val blockPalette = section.palette(PaletteType.BLOCKS) ?: continue // Does not have any block palette...
+                sections.add(section)
 
-                                // Keep in mind that having the block in the palette DOES NOT MEAN that the block is actually present in any of the sections, because it seems that the server caches blocks that were in the palette
-                                // Having the block in the palette: The block MAY or MAY NOT be in the section, but a block will NEVER be in the section while not present in the palette
-                                // We can't use replaceId because that creates bugs if the source and target block are both present in the chunk
-                                for (idx in 0 until blockPalette.size()) { // Each section is 4096 blocks
-                                    try {
-                                        val paletteBlockId = blockPalette.idByIndex(idx)
+                val blockPalette = section.palette(PaletteType.BLOCKS) ?: continue // Does not have any block palette...
 
-                                        val newState = VanillaBlockStateRemapper.stateIdToBlockState[paletteBlockId]
-                                        if (newState != null) {
-                                            // println("Remapping vanilla block ${Block.BLOCK_STATE_REGISTRY.byId(paletteBlockId)} to $newState")
-                                            blockPalette.setIdByIndex(idx, Block.BLOCK_STATE_REGISTRY.getId(newState))
-                                            requiresEdits = true
-                                            continue
-                                        }
+                // Keep in mind that having the block in the palette DOES NOT MEAN that the block is actually present in any of the sections, because it seems that the server caches blocks that were in the palette
+                // Having the block in the palette: The block MAY or MAY NOT be in the section, but a block will NEVER be in the section while not present in the palette
+                // We can't use replaceId because that creates bugs if the source and target block are both present in the chunk
+                for (idx in 0 until blockPalette.size()) { // Each section is 4096 blocks
+                    try {
+                        val paletteBlockId = blockPalette.idByIndex(idx)
 
-                                        val newCustomBlock = CustomBlocks.stateIdToBlockState[paletteBlockId]
-                                        if (newCustomBlock != null) {
-                                            // println("Remapping custom block ${Block.BLOCK_STATE_REGISTRY.byId(paletteBlockId)} to ${newCustomBlock.targetBlockStateNMS}")
-                                            blockPalette.setIdByIndex(idx, if (isBedrockClient) Block.BLOCK_STATE_REGISTRY.getId(newCustomBlock.fallbackBlockStateNMS) else Block.BLOCK_STATE_REGISTRY.getId(newCustomBlock.targetBlockStateNMS))
-                                            requiresEdits = true
-                                            continue
-                                        }
-                                    } catch (e: Exception) {
-                                        // This is here because Netty swallows the exception
-                                        e.printStackTrace()
-                                        return
-                                    }
-                                }
-                            }
-
-                            if (requiresEdits) {
-                                // println("Requires edit, so we are going to clear the read buffer")
-                                // Only rewrite the packet if we really need to edit the packet
-
-                                // Optimization: To avoid resizes, let's create a buffer with the same size as the original chunk
-                                val byteBuf = Unpooled.buffer(originalBufferSize)
-                                sections.forEach {
-                                    chunkSectionType.write(byteBuf, it)
-                                }
-
-                                chunkDataPacket.buffer = byteBuf.array() // This requires SparklyPaper's "Helpful NMS packet changes"
-                                super.write(ctx, msg, promise)
-                                return
-                            }
-                            super.write(ctx, msg, promise)
-                            return
+                        val newState = VanillaBlockStateRemapper.stateIdToBlockState[paletteBlockId]
+                        if (newState != null) {
+                            // println("Remapping vanilla block ${Block.BLOCK_STATE_REGISTRY.byId(paletteBlockId)} to $newState")
+                            blockPalette.setIdByIndex(idx, Block.BLOCK_STATE_REGISTRY.getId(newState))
+                            requiresEdits = true
+                            continue
                         }
 
-                        // ATTENTION! ClientboundBlockUpdatePacket and ClientboundSectionBlocksUpdatePacket reuse packets
-                        // To properly send them downstream
-                        if (msg is ClientboundBlockUpdatePacket) {
-                            // println("ClientboundBlockUpdatePacket")
-                            // The check is made here to avoid getting the DreamBedrockIntegrations plugin on every packet
-                            val isBedrockClient = player.isBedrockClient
-
-                            // println("ClientboundBlockUpdatePacket for $player is in ${Thread.currentThread()}")
-                            val updatePacket = msg
-                            // println("ClientboundBlockUpdatePacket for $player is $packet in ${Thread.currentThread()}, isBedrockClient? $isBedrockClient")
-
-                            // println("WrapperPlayServerBlockChange for ${updatePacket.pos.x}, ${updatePacket.pos.y}, ${updatePacket.pos.z} - ${updatePacket.blockState.bukkitMaterial}")
-
-                            // println("Custom block material is ${updatePacket.blockState.bukkitMaterial}")
-                            // If it is a target block, we need to sync it to 0 power
-                            val newState = VanillaBlockStateRemapper.stateToBlockState[updatePacket.blockState]
-                            if (newState != null) {
-                                // We create a new packet here because the server resends the same packet to multiple players
-                                // This is not a specific issue about us mind you, ProtocolLib has the same issue https://github.com/dmulloy2/ProtocolLib/issues/929
-                                super.write(
-                                    ctx,
-                                    ClientboundBlockUpdatePacket(
-                                        updatePacket.pos,
-                                        newState
-                                    ),
-                                    promise
-                                )
-                            } else {
-                                val customBlock = CustomBlocks.getCustomBlockOfNMSState(updatePacket.blockState)
-                                // println("Custom block material is ${updatePacket.blockState.bukkitMaterial}")
-                                // println("Custom block is $customBlock")
-                                if (customBlock != null) {
-                                    // Oh no, NMS!!!
-                                    // println("Target is ${customBlock.targetBlockStateNMS}")
-                                    super.write(
-                                        ctx,
-                                        ClientboundBlockUpdatePacket(
-                                            updatePacket.pos,
-                                            if (isBedrockClient) customBlock.fallbackBlockStateNMS else customBlock.targetBlockStateNMS
-                                        ),
-                                        promise
-                                    )
-                                } else {
-                                    super.write(
-                                        ctx,
-                                        msg,
-                                        promise
-                                    )
-                                }
-                            }
-                            return
+                        val newCustomBlock = CustomBlocks.stateIdToBlockState[paletteBlockId]
+                        if (newCustomBlock != null) {
+                            // println("Remapping custom block ${Block.BLOCK_STATE_REGISTRY.byId(paletteBlockId)} to ${newCustomBlock.targetBlockStateNMS}")
+                            blockPalette.setIdByIndex(idx, if (isBedrockClient) Block.BLOCK_STATE_REGISTRY.getId(newCustomBlock.fallbackBlockStateNMS) else Block.BLOCK_STATE_REGISTRY.getId(newCustomBlock.targetBlockStateNMS))
+                            requiresEdits = true
+                            continue
                         }
-
-                        if (msg is ClientboundSectionBlocksUpdatePacket) {
-                            // println("ClientboundSectionBlocksUpdatePacket")
-                            // The check is made here to avoid getting the DreamBedrockIntegrations plugin on every packet
-                            val isBedrockClient = player.isBedrockClient
-
-                            // println("ClientboundSectionBlocksUpdatePacket for $player is in ${Thread.currentThread()}")
-                            // println("Multi block change")
-                            // This is the CHUNK SECTION POSITION
-                            val sectionBlocksUpdatePacket = msg
-                            // println("ClientboundSectionBlocksUpdatePacket for $player is $packet in ${Thread.currentThread()}, isBedrockClient? $isBedrockClient")
-
-                            val sectionPos = sectionBlocksUpdatePacket.sectionPos
-                            val origin = sectionPos.origin()
-
-                            val shorts = sectionBlocksUpdatePacket.positions
-                            // println(blockPosition.x.toString() + ", " + blockPosition.y + ", " + blockPosition.z)
-
-                            // println("Section Pos: ${sectionPos.x()}, ${sectionPos.y()}, ${sectionPos.z()}")
-                            // println("Shorts:")
-                            // shorts.forEach {
-                            //     val x = it.toInt() ushr 8 and 15
-                            //     val y = it.toInt() ushr 0 and 15
-                            //     val z = it.toInt() ushr 4 and 15
-                            //     // println("$it $x, $y, $z")
-                            // }
-
-                            val changedBlocks = sectionBlocksUpdatePacket.states
-
-                            // If there isn't any note blocks in this packet, let's ignore it
-                            if (changedBlocks.all {
-                                    VanillaBlockStateRemapper.stateToBlockState[it] == null && CustomBlocks.getCustomBlockOfNMSState(it) == null
-                                }) {
-                                super.write(
-                                    ctx,
-                                    msg,
-                                    promise
-                                )
-                                return
-                            }
-
-                            val newChangedBlockStatesWithPosition = Short2ObjectArrayMap<BlockState>(shorts.size)
-
-                            for ((index, originalBlockState) in changedBlocks.withIndex()) {
-                                // TODO: Refactor this, maybe merge with the single block update code?
-                                val newState = VanillaBlockStateRemapper.stateToBlockState[originalBlockState]
-                                if (newState != null) {
-                                    newChangedBlockStatesWithPosition.put(shorts[index], newState)
-                                } else {
-                                    val customBlock = CustomBlocks.getCustomBlockOfNMSState(originalBlockState)
-                                    if (customBlock != null) {
-                                        // Oh no, NMS!!!
-                                        newChangedBlockStatesWithPosition.put(
-                                            shorts[index],
-                                            if (isBedrockClient) customBlock.fallbackBlockStateNMS else customBlock.targetBlockStateNMS
-                                        )
-                                    } else {
-                                        // add the block state as is to the list
-                                        newChangedBlockStatesWithPosition.put(
-                                            shorts[index],
-                                            originalBlockState
-                                        )
-                                    }
-                                }
-                            }
-
-                            super.write(
-                                ctx,
-                                ClientboundSectionBlocksUpdatePacket(
-                                    sectionPos,
-                                    newChangedBlockStatesWithPosition
-                                ),
-                                promise
-                            )
-                            return
-                        }
-
-                        if (msg is ClientboundLevelParticlesPacket) {
-                            val particleOptions = msg.particle
-
-                            if (particleOptions is BlockParticleOption) {
-                                val isBedrockClient = player.isBedrockClient
-                                val state = particleOptions.state
-                                val newState = VanillaBlockStateRemapper.stateToBlockState[state]
-                                if (newState != null) {
-                                    return super.write(
-                                        ctx,
-                                        ClientboundLevelParticlesPacket(
-                                            BlockParticleOption(
-                                                particleOptions.type,
-                                                newState
-                                            ),
-                                            msg.isOverrideLimiter,
-                                            msg.x,
-                                            msg.y,
-                                            msg.z,
-                                            msg.xDist,
-                                            msg.yDist,
-                                            msg.zDist,
-                                            msg.maxSpeed,
-                                            msg.count
-                                        ),
-                                        promise
-                                    )
-                                } else {
-                                    val customBlock = CustomBlocks.getCustomBlockOfNMSState(state)
-                                    if (customBlock != null) {
-                                        return super.write(
-                                            ctx,
-                                            ClientboundLevelParticlesPacket(
-                                                BlockParticleOption(
-                                                    particleOptions.type,
-                                                    if (isBedrockClient) customBlock.fallbackBlockStateNMS else customBlock.targetBlockStateNMS
-                                                ),
-                                                msg.isOverrideLimiter,
-                                                msg.x,
-                                                msg.y,
-                                                msg.z,
-                                                msg.xDist,
-                                                msg.yDist,
-                                                msg.zDist,
-                                                msg.maxSpeed,
-                                                msg.count
-                                            ),
-                                            promise
-                                        )
-                                    }
-                                    return super.write(ctx, msg, promise)
-                                }
-                            } else return super.write(ctx, msg, promise) // Doesn't have a BlockState, so just skip!
-                        }
-
-                        super.write(ctx, msg, promise)
+                    } catch (e: Exception) {
+                        // This is here because Netty swallows the exception
+                        e.printStackTrace()
+                        return
                     }
                 }
+            }
+
+            if (requiresEdits) {
+                // println("Requires edit, so we are going to clear the read buffer")
+                // Only rewrite the packet if we really need to edit the packet
+
+                // Optimization: To avoid resizes, let's create a buffer with the same size as the original chunk
+                val byteBuf = Unpooled.buffer(originalBufferSize)
+                sections.forEach {
+                    chunkSectionType.write(byteBuf, it)
+                }
+
+                chunkDataPacket.buffer = byteBuf.array() // This requires SparklyPaper's "Helpful NMS packet changes"
+                return
+            }
+            return
+        }
+
+        // ATTENTION! ClientboundBlockUpdatePacket and ClientboundSectionBlocksUpdatePacket reuse packets
+        // To properly send them downstream
+        if (msg is ClientboundBlockUpdatePacket) {
+            // println("ClientboundBlockUpdatePacket")
+            // The check is made here to avoid getting the DreamBedrockIntegrations plugin on every packet
+            val isBedrockClient = player.isBedrockClient
+
+            // println("ClientboundBlockUpdatePacket for $player is in ${Thread.currentThread()}")
+            val updatePacket = msg
+            // println("ClientboundBlockUpdatePacket for $player is $packet in ${Thread.currentThread()}, isBedrockClient? $isBedrockClient")
+
+            // println("WrapperPlayServerBlockChange for ${updatePacket.pos.x}, ${updatePacket.pos.y}, ${updatePacket.pos.z} - ${updatePacket.blockState.bukkitMaterial}")
+
+            // println("Custom block material is ${updatePacket.blockState.bukkitMaterial}")
+            // If it is a target block, we need to sync it to 0 power
+            val newState = VanillaBlockStateRemapper.stateToBlockState[updatePacket.blockState]
+            if (newState != null) {
+                // We create a new packet here because the server resends the same packet to multiple players
+                // This is not a specific issue about us mind you, ProtocolLib has the same issue https://github.com/dmulloy2/ProtocolLib/issues/929
+                event.packet = ClientboundBlockUpdatePacket(
+                    updatePacket.pos,
+                    newState
+                )
+                return
+            } else {
+                val customBlock = CustomBlocks.getCustomBlockOfNMSState(updatePacket.blockState)
+                // println("Custom block material is ${updatePacket.blockState.bukkitMaterial}")
+                // println("Custom block is $customBlock")
+                if (customBlock != null) {
+                    // Oh no, NMS!!!
+                    // println("Target is ${customBlock.targetBlockStateNMS}")
+                    event.packet = ClientboundBlockUpdatePacket(
+                        updatePacket.pos,
+                        if (isBedrockClient) customBlock.fallbackBlockStateNMS else customBlock.targetBlockStateNMS
+                    )
+                }
+            }
+            return
+        }
+
+        if (msg is ClientboundSectionBlocksUpdatePacket) {
+            // println("ClientboundSectionBlocksUpdatePacket")
+            // The check is made here to avoid getting the DreamBedrockIntegrations plugin on every packet
+            val isBedrockClient = player.isBedrockClient
+
+            // println("ClientboundSectionBlocksUpdatePacket for $player is in ${Thread.currentThread()}")
+            // println("Multi block change")
+            // This is the CHUNK SECTION POSITION
+            val sectionBlocksUpdatePacket = msg
+            // println("ClientboundSectionBlocksUpdatePacket for $player is $packet in ${Thread.currentThread()}, isBedrockClient? $isBedrockClient")
+
+            val sectionPos = sectionBlocksUpdatePacket.sectionPos
+            val origin = sectionPos.origin()
+
+            val shorts = sectionBlocksUpdatePacket.positions
+            // println(blockPosition.x.toString() + ", " + blockPosition.y + ", " + blockPosition.z)
+
+            // println("Section Pos: ${sectionPos.x()}, ${sectionPos.y()}, ${sectionPos.z()}")
+            // println("Shorts:")
+            // shorts.forEach {
+            //     val x = it.toInt() ushr 8 and 15
+            //     val y = it.toInt() ushr 0 and 15
+            //     val z = it.toInt() ushr 4 and 15
+            //     // println("$it $x, $y, $z")
+            // }
+
+            val changedBlocks = sectionBlocksUpdatePacket.states
+
+            // If there isn't any note blocks in this packet, let's ignore it
+            if (changedBlocks.all { VanillaBlockStateRemapper.stateToBlockState[it] == null && CustomBlocks.getCustomBlockOfNMSState(it) == null }) {
+                return
+            }
+
+            val newChangedBlockStatesWithPosition = Short2ObjectArrayMap<BlockState>(shorts.size)
+
+            for ((index, originalBlockState) in changedBlocks.withIndex()) {
+                // TODO: Refactor this, maybe merge with the single block update code?
+                val newState = VanillaBlockStateRemapper.stateToBlockState[originalBlockState]
+                if (newState != null) {
+                    newChangedBlockStatesWithPosition.put(shorts[index], newState)
+                } else {
+                    val customBlock = CustomBlocks.getCustomBlockOfNMSState(originalBlockState)
+                    if (customBlock != null) {
+                        // Oh no, NMS!!!
+                        newChangedBlockStatesWithPosition.put(
+                            shorts[index],
+                            if (isBedrockClient) customBlock.fallbackBlockStateNMS else customBlock.targetBlockStateNMS
+                        )
+                    } else {
+                        // add the block state as is to the list
+                        newChangedBlockStatesWithPosition.put(
+                            shorts[index],
+                            originalBlockState
+                        )
+                    }
+                }
+            }
+
+            event.packet = ClientboundSectionBlocksUpdatePacket(
+                sectionPos,
+                newChangedBlockStatesWithPosition
             )
+            return
+        }
+
+        if (msg is ClientboundLevelParticlesPacket) {
+            val particleOptions = msg.particle
+
+            if (particleOptions is BlockParticleOption) {
+                val isBedrockClient = player.isBedrockClient
+                val state = particleOptions.state
+                val newState = VanillaBlockStateRemapper.stateToBlockState[state]
+                if (newState != null) {
+                    event.packet = ClientboundLevelParticlesPacket(
+                        BlockParticleOption(
+                            particleOptions.type,
+                            newState
+                        ),
+                        msg.isOverrideLimiter,
+                        msg.x,
+                        msg.y,
+                        msg.z,
+                        msg.xDist,
+                        msg.yDist,
+                        msg.zDist,
+                        msg.maxSpeed,
+                        msg.count
+                    )
+                    return
+                } else {
+                    val customBlock = CustomBlocks.getCustomBlockOfNMSState(state)
+                    if (customBlock != null) {
+                        event.packet = ClientboundLevelParticlesPacket(
+                                BlockParticleOption(
+                                    particleOptions.type,
+                                    if (isBedrockClient) customBlock.fallbackBlockStateNMS else customBlock.targetBlockStateNMS
+                                ),
+                                msg.isOverrideLimiter,
+                                msg.x,
+                                msg.y,
+                                msg.z,
+                                msg.xDist,
+                                msg.yDist,
+                                msg.zDist,
+                                msg.maxSpeed,
+                                msg.count
+                        )
+                    }
+                    return
+                }
+            } else return // Doesn't have a BlockState, so just skip!
+        }
     }
 }

@@ -333,7 +333,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 				CustomCraftingRecipe.RUBY_REMAP,
 				recipe = addRecipe(
 					"rainbow_concrete",
-					CustomItems.RAINBOW_CONCRETE.apply {
+					CustomItems.RAINBOW_CONCRETE.clone().apply {
 						amount = 8
 					},
 					listOf(
@@ -355,7 +355,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 				CustomCraftingRecipe.RUBY_REMAP,
 				recipe = addRecipe(
 					"rainbow_terracotta",
-					CustomItems.RAINBOW_TERRACOTTA.apply {
+					CustomItems.RAINBOW_TERRACOTTA.clone().apply {
 						amount = 8
 					},
 					listOf(
