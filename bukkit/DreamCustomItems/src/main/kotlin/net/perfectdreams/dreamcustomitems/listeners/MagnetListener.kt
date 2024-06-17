@@ -40,6 +40,8 @@ class MagnetListener(val m: DreamCustomItems) : Listener {
         Material.NETHERRACK,
         Material.BASALT,
         Material.BLACKSTONE,
+        Material.SAND,
+        Material.SANDSTONE,
 
         Material.COAL,
         Material.COAL_BLOCK,
