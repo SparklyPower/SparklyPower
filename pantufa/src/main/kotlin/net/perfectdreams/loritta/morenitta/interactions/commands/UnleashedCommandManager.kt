@@ -12,7 +12,7 @@ import net.perfectdreams.loritta.morenitta.interactions.commands.options.*
 import net.perfectdreams.pantufa.PantufaBot
 import net.perfectdreams.pantufa.api.commands.PantufaReply
 import net.perfectdreams.pantufa.api.commands.exceptions.SilentCommandException
-import net.perfectdreams.pantufa.api.commands.exceptions.UnleashedCommandException
+import net.perfectdreams.pantufa.api.commands.exceptions.CommandException
 import net.perfectdreams.pantufa.api.commands.styled
 import net.perfectdreams.pantufa.interactions.vanilla.economy.*
 import net.perfectdreams.pantufa.interactions.vanilla.discord.*
@@ -24,6 +24,7 @@ import net.perfectdreams.pantufa.interactions.vanilla.utils.*
 import net.perfectdreams.pantufa.network.Databases
 import net.perfectdreams.pantufa.tables.Users
 import net.perfectdreams.pantufa.utils.*
+import net.perfectdreams.pantufa.utils.extensions.normalize
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.concurrent.CancellationException
 import kotlin.reflect.jvm.jvmName
@@ -72,7 +73,7 @@ class UnleashedCommandManager(val m: PantufaBot) {
         register(VerificarCommand())
         register(TPSCommand())
 
-        // Transform Slash Commands to Legacy Commands.
+        // After all commands are registered, we need to update them to path declarations.
         updateCommandPathToDeclarations()
     }
 
@@ -160,13 +161,24 @@ class UnleashedCommandManager(val m: PantufaBot) {
                 val description = interaKTionsOption.description
 
                 when (interaKTionsOption) {
+                    // First primitives then entities.
                     is LongDiscordOptionReference -> {
                         return listOf(
                             Option<Long>(
                                 interaKTionsOption.name,
                                 description,
                                 interaKTionsOption.required
-                            )
+                            ).apply {
+                                if (interaKTionsOption.autocompleteExecutor != null) {
+                                    isAutoComplete = true
+                                }
+
+                                for (choice in interaKTionsOption.choices) {
+                                    when (choice) {
+                                        is LongDiscordOptionReference.Choice.RawChoice -> choice(choice.name, choice.value)
+                                    }
+                                }
+                            }
                         )
                     }
 
@@ -190,19 +202,29 @@ class UnleashedCommandManager(val m: PantufaBot) {
                         )
                     }
 
-                    is UserDiscordOptionReference -> {
-                        return listOf(
-                            Option<User>(
-                                interaKTionsOption.name,
-                                description,
-                                interaKTionsOption.required
-                            )
-                        )
-                    }
-
                     is IntDiscordOptionReference -> {
                         return listOf(
                             Option<Int>(
+                                interaKTionsOption.name,
+                                description,
+                                interaKTionsOption.required
+                            ).apply {
+                                if (interaKTionsOption.autocompleteExecutor != null) {
+                                    isAutoComplete = true
+                                }
+
+                                for (choice in interaKTionsOption.choices) {
+                                    when (choice) {
+                                        is IntDiscordOptionReference.Choice.RawChoice -> choice(choice.name, choice.value)
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                    is UserDiscordOptionReference -> {
+                        return listOf(
+                            Option<User>(
                                 interaKTionsOption.name,
                                 description,
                                 interaKTionsOption.required
@@ -342,7 +364,7 @@ class UnleashedCommandManager(val m: PantufaBot) {
             }
         } catch (e: Exception) {
             when (e) {
-                is UnleashedCommandException -> {
+                is CommandException -> {
                     context?.reply(e.ephemeral, e.builder)
                     return true
                 }
@@ -457,15 +479,5 @@ class UnleashedCommandManager(val m: PantufaBot) {
             }
         }
         this.commandPathToDeclaration = commandPathToDeclarations
-    }
-
-    private fun String.normalize(): String {
-        val original = arrayOf("ę", "š")
-        val normalized =  arrayOf("e", "s")
-
-        return this.map { it ->
-            val index = original.indexOf(it.toString())
-            if (index >= 0) normalized[index] else it
-        }.joinToString("")
     }
 }

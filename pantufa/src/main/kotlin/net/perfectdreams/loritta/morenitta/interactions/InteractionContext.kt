@@ -45,10 +45,14 @@ abstract class InteractionContext(
         }.build()
 
         return if (replyCallback.isAcknowledged) {
-            val message = replyCallback.hook.sendMessage(createdMessage).setEphemeral(ephemeral).await()
+            val message = replyCallback.hook.sendMessage(createdMessage)
+                .setEphemeral(ephemeral)
+                .await()
             InteractionMessage.FollowUpInteractionMessage(message)
         } else {
-            val hook = replyCallback.reply(createdMessage).setEphemeral(ephemeral).await()
+            val hook = replyCallback.reply(createdMessage)
+                .setEphemeral(ephemeral)
+                .await()
             InteractionMessage.InitialInteractionMessage(hook)
         }
     }

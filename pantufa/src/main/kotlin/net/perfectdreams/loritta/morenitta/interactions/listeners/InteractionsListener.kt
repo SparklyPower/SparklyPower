@@ -23,7 +23,7 @@ import net.perfectdreams.loritta.morenitta.interactions.components.ComponentCont
 import net.perfectdreams.loritta.morenitta.interactions.modals.ModalArguments
 import net.perfectdreams.loritta.morenitta.interactions.modals.ModalContext
 import net.perfectdreams.pantufa.PantufaBot
-import net.perfectdreams.pantufa.api.commands.exceptions.UnleashedCommandException
+import net.perfectdreams.pantufa.api.commands.exceptions.CommandException
 import net.perfectdreams.pantufa.dao.User
 import net.perfectdreams.pantufa.network.Databases
 import net.perfectdreams.pantufa.tables.Users
@@ -39,29 +39,17 @@ class InteractionsListener(private val pantufa: PantufaBot) : ListenerAdapter() 
     val manager = UnleashedCommandManager(pantufa)
 
     override fun onReady(event: ReadyEvent) {
-        updateCommands(
-            0
-        ) { commands ->
-            event.jda.updateCommands {
-                addCommands(*commands.toTypedArray())
-            }.complete()
-        }
-
         if (!pantufa.config.discordInteractions.registerGlobally) {
-            pantufa.launch {
-                event.jda.guilds.filter { it.idLong in pantufa.config.discordInteractions.guildsToBeRegistered }
-                    .forEach {
-                        val registeredCommands = updateCommands(
-                            it.idLong
-                        ) { commands ->
-                            it.updateCommands {
-                                addCommands(*commands.toTypedArray())
-                            }.complete()
-                        }
-
-                        logger.info { "We have ${registeredCommands.size} registered commands." }
+            event.jda.guilds.filter { it.idLong in pantufa.config.discordInteractions.guildsToBeRegistered }
+                .forEach {
+                    updateCommands(
+                        it.idLong
+                    ) { commands ->
+                        it.updateCommands {
+                            addCommands(*commands.toTypedArray())
+                        }.complete()
                     }
-            }
+                }
         }
     }
 
@@ -154,7 +142,7 @@ class InteractionsListener(private val pantufa: PantufaBot) : ListenerAdapter() 
                 executor.execute(context, args)
             } catch (e: Exception) {
                 when (e) {
-                    is UnleashedCommandException -> {
+                    is CommandException -> {
                         context?.reply(e.ephemeral, e.builder)
                     }
                     else -> {

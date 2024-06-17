@@ -55,7 +55,7 @@ class IntDiscordOptionReference<T>(name: String, description: String, required: 
 }
 
 class LongDiscordOptionReference<T>(name: String, description: String, required: Boolean) : DiscordOptionReference<T>(name, description, required) {
-    val choices = mutableListOf<IntDiscordOptionReference.Choice>()
+    val choices = mutableListOf<LongDiscordOptionReference.Choice>()
     var autocompleteExecutor: AutocompleteExecutor<T>? = null
 
     override fun get(option: OptionMapping): T {

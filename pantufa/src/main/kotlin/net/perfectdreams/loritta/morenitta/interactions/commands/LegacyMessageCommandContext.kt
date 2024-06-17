@@ -13,6 +13,7 @@ import net.perfectdreams.loritta.morenitta.interactions.UnleashedHook
 import net.perfectdreams.loritta.morenitta.interactions.UnleashedMentions
 import net.perfectdreams.pantufa.PantufaBot
 import net.perfectdreams.pantufa.utils.extensions.await
+import net.perfectdreams.pantufa.utils.extensions.referenceIfPossible
 import java.util.*
 
 class LegacyMessageCommandContext(
@@ -61,7 +62,7 @@ class LegacyMessageCommandContext(
 
         return InteractionMessage.FollowUpInteractionMessage(
             event.channel.sendMessage(inlineBuilder)
-                .setMessageReference(event.message)
+                .referenceIfPossible(event.message)
                 .failOnInvalidReply(false)
                 .await()
         )
