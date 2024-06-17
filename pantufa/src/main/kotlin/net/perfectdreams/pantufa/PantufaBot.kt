@@ -160,9 +160,15 @@ class PantufaBot(val config: PantufaConfig) {
 		logger.info { "Adding Event Listener..." }
 		jda.addEventListener(DiscordListener(this))
 
-		logger.info { "Starting Pantufa Tasks..." }
-		PantufaTasks(this).start()
-		scheduleCoroutineAtFixedRate(ServerVotesNotifier::class.simpleName!!, 1.minutes, action = ServerVotesNotifier(this))
+		if (config.isTasksEnabled) {
+			logger.info { "Starting Pantufa Tasks..." }
+			PantufaTasks(this).start()
+			scheduleCoroutineAtFixedRate(
+				ServerVotesNotifier::class.simpleName!!,
+				1.minutes,
+				action = ServerVotesNotifier(this)
+			)
+		}
 
 		logger.info { "Done! :3" }
 	}

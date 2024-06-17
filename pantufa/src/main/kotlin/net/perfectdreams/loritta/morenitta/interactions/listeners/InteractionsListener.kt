@@ -40,16 +40,18 @@ class InteractionsListener(private val pantufa: PantufaBot) : ListenerAdapter() 
 
     override fun onReady(event: ReadyEvent) {
         if (!pantufa.config.discordInteractions.registerGlobally) {
-            event.jda.guilds.filter { it.idLong in pantufa.config.discordInteractions.guildsToBeRegistered }
-                .forEach {
-                    updateCommands(
-                        it.idLong
-                    ) { commands ->
-                        it.updateCommands {
-                            addCommands(*commands.toTypedArray())
-                        }.complete()
+            pantufa.launch {
+                event.jda.guilds.filter { it.idLong in pantufa.config.discordInteractions.guildsToBeRegistered }
+                    .forEach {
+                        updateCommands(
+                            it.idLong
+                        ) { commands ->
+                            event.jda.updateCommands {
+                                addCommands(*commands.toTypedArray())
+                            }.complete()
+                        }
                     }
-                }
+            }
         }
     }
 
