@@ -285,7 +285,7 @@ class DreamCaixaSecreta : KotlinPlugin() {
 			}
 		}
 
-		for (material in Material.values().filter { !it.isLegacy }) {
+		for (material in Material.values().filter { !it.isLegacy && it.isItem }) {
 			if (material.name.startsWith("MUSIC_DISC_")) {
 				prizes.add(
 					RandomItem(
@@ -319,7 +319,7 @@ class DreamCaixaSecreta : KotlinPlugin() {
 				)
 			}
 
-			if (material.name.endsWith("CONCRETE")) {
+			if (material.name.endsWith("_CONCRETE") && material != Material.SPARKLYPOWER_RAINBOW_CONCRETE) {
 				prizes.add(
 					RandomItem(
 						ItemStack(
