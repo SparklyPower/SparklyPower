@@ -153,7 +153,7 @@ object CustomBlocks {
                     it.type = Slab.Type.DOUBLE
                 } as CraftBlockData,
                 Bukkit.createBlockData(Material.BLACK_CONCRETE)
-            ) { emptyList(CustomItems.ASPHALT_PLAYER) }
+            ) { listOf(CustomItems.ASPHALT_PLAYER) }
         )
     )
 
