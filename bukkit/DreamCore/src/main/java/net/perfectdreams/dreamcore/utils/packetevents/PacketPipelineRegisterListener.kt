@@ -15,7 +15,7 @@ class PacketPipelineRegisterListener : Listener {
         val player = event.player
         val nmsPlayer = (player as CraftPlayer).handle
 
-        val packetsThatShouldNotTriggerEvents = mutableListOf<Packet<*>>()
+        val packetWithIdentifiers = mutableMapOf<Packet<*>, String>()
 
         // Create Netty pipeline to intercept packets
         nmsPlayer
@@ -28,16 +28,11 @@ class PacketPipelineRegisterListener : Listener {
                 "dreamcore-packet-events",
                 object: ChannelDuplexHandler() {
                     override fun write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise) {
+                        val packetSendEvent = ClientboundPacketSendEvent(player, msg, packetWithIdentifiers[msg], packetWithIdentifiers)
+
                         try {
-                            if (msg in packetsThatShouldNotTriggerEvents) {
-                                packetsThatShouldNotTriggerEvents.remove(msg)
-                                super.write(ctx, msg, promise)
-                                return
-                            }
-
-                            val packetSendEvent = ClientboundPacketSendEvent(player, msg, packetsThatShouldNotTriggerEvents)
-
                             val isNotCancelled = packetSendEvent.callEvent()
+
                             if (!isNotCancelled)
                                 return
 
@@ -45,6 +40,9 @@ class PacketPipelineRegisterListener : Listener {
                         } catch (e: Exception) {
                             e.printStackTrace()
                             throw e
+                        } finally {
+                            // Remove identifier
+                            packetWithIdentifiers.remove(msg)
                         }
                     }
                 }

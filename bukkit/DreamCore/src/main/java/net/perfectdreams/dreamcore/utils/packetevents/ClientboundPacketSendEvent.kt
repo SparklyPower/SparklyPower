@@ -11,7 +11,8 @@ import org.bukkit.event.HandlerList
 class ClientboundPacketSendEvent(
     val player: Player,
     var packet: Any,
-    private val packetsThatShouldNotTriggerEvents: MutableList<Packet<*>>
+    val identifier: String?,
+    private val packetWithIdentifiers: MutableMap<Packet<*>, String>,
     // The event is always async
 ) : Event(true), Cancellable {
     companion object {
@@ -33,8 +34,8 @@ class ClientboundPacketSendEvent(
         this.isCancelled = cancel
     }
 
-    fun sendPacketWithoutTriggeringEvents(packet: Packet<*>) {
-        packetsThatShouldNotTriggerEvents.add(packet)
+    fun sendPacketWithIdentifier(identifier: String, packet: Packet<*>) {
+        packetWithIdentifiers[packet] = identifier
         (player as CraftPlayer).handle.connection.sendPacket(packet)
     }
 }

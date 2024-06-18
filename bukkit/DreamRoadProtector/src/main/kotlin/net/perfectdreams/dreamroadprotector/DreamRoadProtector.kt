@@ -143,8 +143,9 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 			return
 
 		val fullyUsesNewRoadBlocks = e.block.world.name == "Survival2"
+
 		// TODO: We can allow black concrete in Survival2, but let's not do that for now
-		if (e.block.type == Material.BLACK_CONCRETE) {
+		if (!fullyUsesNewRoadBlocks && e.block.type == Material.BLACK_CONCRETE) {
 			e.isCancelled = true
 			e.player.sendMessage("§cVocê não pode usar blocos de concreto preto!")
 			e.player.world.spawnParticle(Particle.ANGRY_VILLAGER, e.block.location.add(0.5, 0.0, 0.5), 20, 0.5, 0.5, 0.5)
