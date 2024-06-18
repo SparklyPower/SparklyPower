@@ -135,6 +135,7 @@ class SparklyDisplay(
         )
 
         val item = location.world.dropItem(location, itemStack)
+        item.persistentDataContainer.set(m.handledBySparklyDisplay, uniqueId.toString())
 
         textDisplay.addPassenger(item)
         item.setGravity(false)
