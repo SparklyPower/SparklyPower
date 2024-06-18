@@ -208,6 +208,11 @@ class EnderHopperListener(val m: DreamEnderHopper) : Listener {
     }
 
     private fun processHopperItems(inventory: Inventory, enderHopperInformation: EnderHopperInformation) {
+        // First things first, is the chunk loaded?
+        // If it isn't, bail out!
+        if (!enderHopperInformation.enderHopperState.world.isChunkLoaded(enderHopperInformation.targetX / 16, enderHopperInformation.targetZ / 16))
+            return
+
         // Transfer all items from the source to the target inventory
         val targetContainer = enderHopperInformation.enderHopperState.world.getBlockAt(enderHopperInformation.targetX, enderHopperInformation.targetY, enderHopperInformation.targetZ).getState(false) as? Container
         if (targetContainer == null) {
