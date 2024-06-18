@@ -2,6 +2,7 @@ package net.perfectdreams.dreamscoreboard
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreambedrockintegrations.DreamBedrockIntegrations
 import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcash.utils.Cash
@@ -13,11 +14,14 @@ import net.perfectdreams.dreamcore.event.PlayerScoreboardCreatedEvent
 import net.perfectdreams.dreamcore.event.PlayerScoreboardRemovedEvent
 import net.perfectdreams.dreamcore.tables.EventVictories
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamscoreboard.commands.*
 import net.perfectdreams.dreamscoreboard.listeners.TagListener
 import net.perfectdreams.dreamscoreboard.utils.PlayerScoreboard
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
+import org.bukkit.ServerLinks
+import org.bukkit.ServerLinks.ServerLink
 import org.bukkit.Statistic
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.scoreboard.CraftScoreboard
@@ -33,6 +37,7 @@ import org.bukkit.scoreboard.Scoreboard
 import org.bukkit.scoreboard.Team
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.net.URI
 import java.time.Instant
 import java.time.ZoneId
 import java.util.*
@@ -64,6 +69,8 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 	val scoreboards = ConcurrentHashMap<Player, PlayerScoreboard>()
 	var cachedClubesPrefixes = WeakHashMap<Player, String?>()
 
+	private val serverLinks = mutableListOf<ServerLink>()
+
 	override fun softEnable() {
 		super.softEnable()
 
@@ -78,6 +85,26 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 		// registerCommand(EventosTopMeuClubeCommand)
 		registerCommand(GlowingCommand)
 		registerCommand(GlowingColorCommand)
+
+		serverLinks.add(
+			Bukkit.getServer().serverLinks.addLink(
+				textComponent {
+					color(NamedTextColor.BLUE)
+					content("Website")
+				},
+				URI("https://sparklypower.net/")
+			)
+		)
+
+		serverLinks.add(
+			Bukkit.getServer().serverLinks.addLink(
+				textComponent {
+					color(NamedTextColor.LIGHT_PURPLE)
+					content("Discord")
+				},
+				URI("https://discord.gg/sparklypower")
+			)
+		)
 
 		scheduler().schedule(this, SynchronizationContext.SYNC) {
 			while (true) {
@@ -282,6 +309,12 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 	override fun softDisable() {
 		super.softDisable()
+
+		serverLinks.forEach {
+			Bukkit.getServerLinks().removeLink(it)
+		}
+
+		serverLinks.clear()
 	}
 
 	@EventHandler
