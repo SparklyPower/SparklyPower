@@ -4,6 +4,7 @@ import com.okkero.skedule.schedule
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.commands.command
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreammusically.utils.MusicPack
 import net.perfectdreams.dreammusically.utils.Song
 import org.bukkit.Bukkit
@@ -21,32 +22,7 @@ class DreamMusically : KotlinPlugin(), Listener {
 	override fun softEnable() {
 		super.softEnable()
 
-		registerCommand(
-			command("MusicPackCommand", listOf("musicpacc")) {
-			permission = "dreammusically.musicpack"
-
-				executes {
-					val damageValue = this.args.getOrNull(0)?.toIntOrNull() ?: return@executes
-
-					val musicPack = MusicPack.musicPacks.firstOrNull { it.damage == damageValue } ?: return@executes
-
-					player.inventory.addItem(
-						ItemStack(Material.CARROT_ON_A_STICK)
-							.meta<ItemMeta> {
-								setDisplayName("§bDisco de Música")
-								lore = listOf(
-									"§7${musicPack.name}"
-								)
-								isUnbreakable = true
-							}.meta<org.bukkit.inventory.meta.Damageable> {
-								damage = damageValue
-							}
-					)
-				}
-			}
-		)
-
-		schedule {
+		/* schedule {
 			while (true) {
 				val song = Song.songs.random()
 
@@ -62,10 +38,10 @@ class DreamMusically : KotlinPlugin(), Listener {
 				// É melhor esperar (duração + 1) para evitar problemas
 				waitFor((song.duration + 1) * 20)
 			}
-		}
+		} */
 
 		// Loja
-		schedule {
+		launchMainThread {
 			var playJj2 = true
 
 			while (true) {
@@ -83,9 +59,9 @@ class DreamMusically : KotlinPlugin(), Listener {
 				}
 
 				if (playJj2) {
-					waitFor(1420)
+					delayTicks(1420)
 				} else {
-					waitFor(3360)
+					delayTicks(3360)
 				}
 				playJj2 = !playJj2
 			}
