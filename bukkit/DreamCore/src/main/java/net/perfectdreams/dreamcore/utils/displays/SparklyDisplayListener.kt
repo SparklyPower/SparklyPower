@@ -2,16 +2,19 @@ package net.perfectdreams.dreamcore.utils.displays
 
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent
 import net.perfectdreams.dreamcore.utils.get
+import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.server.PluginDisableEvent
+import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.EntitiesLoadEvent
 import java.util.*
 
 class SparklyDisplayListener(val m: SparklyDisplayManager) : Listener {
+    // TODO: Change this to EntitiesLoadEvent when Paper fixes the borked EntitiesLoadEvent call (the event isn't being fired in 1.21)
     @EventHandler
-    fun onEntitiesLoad(event: EntitiesLoadEvent) {
-        for (entity in event.entities) {
+    fun onEntitiesLoad(event: ChunkLoadEvent) {
+        for (entity in event.chunk.entities) {
             // Is this an NPC?
             val sparklyDisplayUniqueId = entity.persistentDataContainer.get(m.handledBySparklyDisplay)?.let { UUID.fromString(it) } ?: continue
 
