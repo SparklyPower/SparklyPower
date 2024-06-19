@@ -21,24 +21,6 @@ object Constants {
 		}
 	}
 
-	val ALLOWED_CHANNELS_IDS = listOf(
-		378935712679985152L, // comandos SparklyPower
-		830658622383980545L, // comandos SparklyPower 2
-		673531793546149899L, // comandos Loritta
-		704874923104927835L, // comandos Loritta 2
-		798014569191571506L, // comandos Loritta 3
-		798017447830880266L, // comandos Loritta 4
-		417059128519819265L, // staff SparklyPower
-		556589191547584544L, // staff SparklyPower cmds
-		358774895850815488L, // staff Loritta
-		547119872568459284L, // staff Loritta cmds
-		574985687951212549L, // SparklyPower VIPs
-		411606648822431744L, // loritta donators
-		1251330087211630633L
-	)
-
-
-
 	val LORITTA_AQUA = Color(26, 160, 254)
 	val WHITE_SPACE_MULTIPLE_REGEX = Regex(" +")
 	val LEFT_EMOJI = DiscordPartialEmoji(Snowflake(930922528715722782L), "chevron_left")
