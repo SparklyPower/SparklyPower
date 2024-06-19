@@ -231,47 +231,7 @@ class LSXCommand : SlashCommandDeclarationWrapper {
                 return
             }
 
-            if (source != null) {
-                val playerSonecasBalance = context.getPlayerSonecasBalance(accountInfo.uniqueId)
-
-                val replies = mutableListOf(
-                    PantufaReply(
-                        "**LorittaLand Sonhos Exchange Service (LSX)**",
-                        "\uD83D\uDCB5"
-                    ),
-                    PantufaReply(
-                        "`-transferir Fonte Destino Quantidade`",
-                        mentionUser = false
-                    ),
-                    PantufaReply(
-                        "**Câmbio de Sonhos:**"
-                    ),
-                    PantufaReply(
-                        "Um sonho da `loritta` equivalem a $loriToSparklyExchangeRate sonecas no `survival`"
-                    ),
-                    PantufaReply(
-                        "*Locais disponíveis para transferência...*",
-                        mentionUser = false
-                    ),
-                    PantufaReply(
-                        "**Loritta** `loritta` (*${profile.money} sonhos*)",
-                        "<:sparklyPower:331179879582269451>",
-                        mentionUser = false
-                    ),
-                    PantufaReply(
-                        "**SparklyPower Survival** `survival` (*$playerSonecasBalance sonecas*)",
-                        "<a:pantufa_pickaxe:997671670468853770>",
-                        mentionUser = false
-                    )
-                )
-
-                context.reply(false) {
-                    for (reply in replies) {
-                        styled(reply)
-                    }
-                }
-                return
-            } else {
+            if (source != null && destination != null) {
                 if (destination != null) {
                     mutex.withLock {
                         val refreshedProfile = context.user.lorittaProfile()
@@ -393,6 +353,46 @@ class LSXCommand : SlashCommandDeclarationWrapper {
                         }
                     }
                 }
+            } else {
+                val playerSonecasBalance = context.getPlayerSonecasBalance(accountInfo.uniqueId)
+
+                val replies = mutableListOf(
+                    PantufaReply(
+                        "**LorittaLand Sonhos Exchange Service (LSX)**",
+                        "\uD83D\uDCB5"
+                    ),
+                    PantufaReply(
+                        "`-transferir Fonte Destino Quantidade`",
+                        mentionUser = false
+                    ),
+                    PantufaReply(
+                        "**Câmbio de Sonhos:**"
+                    ),
+                    PantufaReply(
+                        "Um sonho da `loritta` equivalem a $loriToSparklyExchangeRate sonecas no `survival`"
+                    ),
+                    PantufaReply(
+                        "*Locais disponíveis para transferência...*",
+                        mentionUser = false
+                    ),
+                    PantufaReply(
+                        "**Loritta** `loritta` (*${profile.money} sonhos*)",
+                        "<:sparklyPower:331179879582269451>",
+                        mentionUser = false
+                    ),
+                    PantufaReply(
+                        "**SparklyPower Survival** `survival` (*$playerSonecasBalance sonecas*)",
+                        "<a:pantufa_pickaxe:997671670468853770>",
+                        mentionUser = false
+                    )
+                )
+
+                context.reply(false) {
+                    for (reply in replies) {
+                        styled(reply)
+                    }
+                }
+                return
             }
         }
 
