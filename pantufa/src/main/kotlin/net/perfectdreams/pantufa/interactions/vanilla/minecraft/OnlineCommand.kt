@@ -67,10 +67,6 @@ class OnlineCommand : SlashCommandDeclarationWrapper {
                     }
 
                     context.pantufa.launch {
-                        val playerOnlineGraphImage = if (showGraph)
-                            context.pantufa.playersOnlineGraph.getCachedGraph().inputStream()
-                        else null
-
                         val survivalPages = survivalPlayers.chunked(50)
                         val lobbyPages = lobbyPlayers.chunked(50)
 
@@ -108,10 +104,6 @@ class OnlineCommand : SlashCommandDeclarationWrapper {
                                     }
 
                             )
-
-                            if (playerOnlineGraphImage != null) {
-                                files += FileUpload.fromData(playerOnlineGraphImage, "graph.png")
-                            }
                         }
                     }
                 }, error = {

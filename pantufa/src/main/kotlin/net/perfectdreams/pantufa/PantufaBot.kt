@@ -71,7 +71,6 @@ class PantufaBot(val config: PantufaConfig) {
 	lateinit var interactionsListener: InteractionsListener
 	lateinit var jda: JDA
 	var mainLandGuild: Guild? = null
-	val playersOnlineGraph = CachedGraphManager(config.grafana.token, "${config.grafana.url}/render/d-solo/JeZauCDnk/sparklypower-network?orgId=1&var-sparklypower_server=sparklypower_survival&var-world=All&panelId=87&width=800&height=300&tz=America%2FSao_Paulo")
 	val tasksScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
 	fun start() {
