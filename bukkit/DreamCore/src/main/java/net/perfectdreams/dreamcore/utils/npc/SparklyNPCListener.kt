@@ -24,16 +24,14 @@ import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.server.PluginDisableEvent
-import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.EntitiesLoadEvent
 import org.bukkit.inventory.EquipmentSlot
 import java.util.*
 
 class SparklyNPCListener(val m: SparklyNPCManager) : Listener {
-    // TODO: Change this to EntitiesLoadEvent when Paper fixes the borked EntitiesLoadEvent call (the event isn't being fired in 1.21)
     @EventHandler
-    fun onEntitiesLoad(event: ChunkLoadEvent) {
-        for (entity in event.chunk.entities) {
+    fun onEntitiesLoad(event: EntitiesLoadEvent) {
+        for (entity in event.entities) {
             // Is this an NPC?
             if (entity.persistentDataContainer.get(m.npcKey)) {
                 // Is the entity's unique ID present in the NPC Entities list?
