@@ -10,10 +10,9 @@ import net.perfectdreams.pantufa.api.minecraft.MinecraftUserDisplayUtils
 import net.perfectdreams.pantufa.api.commands.styled
 import net.perfectdreams.pantufa.network.Databases
 import net.perfectdreams.pantufa.tables.Users
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.like
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class MinecraftCommand : SlashCommandDeclarationWrapper {
+class SparklyPlayerCommand : SlashCommandDeclarationWrapper {
     override fun command() = slashCommand("sparklyplayer", "Veja a conta associada ao SparklyPower de um usuário", CommandCategory.MINECRAFT) {
         enableLegacyMessageSupport = true
 
@@ -45,7 +44,9 @@ class MinecraftCommand : SlashCommandDeclarationWrapper {
                     transaction(Databases.sparklyPower) {
                         Users.select(Users.username).where {
                             Users.username.like(focusedOptionValue.replace("%", "") + "%")
-                        }.limit(25)
+                        }
+                            .limit(25)
+                            .toList()
                     }.associate { it[Users.username] to it[Users.username] }
                 }
             }

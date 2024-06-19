@@ -60,7 +60,7 @@ class UnleashedCommandManager(val m: PantufaBot) {
         register(OnlineCommand())
         register(VIPInfoCommand())
         register(ChatColorCommand())
-        register(MinecraftCommand())
+        register(SparklyPlayerCommand())
 
         // ===[ Moderation ]===
         register(AdminConsoleBungeeCommand())
