@@ -167,13 +167,13 @@ class LSXCommand : SlashCommandDeclarationWrapper {
     inner class LSXCommandExecutor : LorittaSlashCommandExecutor(), LorittaLegacyMessageCommandExecutor {
         inner class Options : ApplicationCommandOptions() {
             val source = optionalString("source", "Fonte do dinheiro (Sonhos ou Sonecas)") {
-                choice("survival", "SparklyPower Survival")
-                choice("loritta", "Loritta :3")
+                choice(TransferOptions.SPARKLYPOWER_SURVIVAL.codeName, "SparklyPower Survival")
+                choice(TransferOptions.LORITTA.codeName, "Loritta :3")
             }
 
             val destination = optionalString("destination", "Destino do dinheiro (Sonhos ou Sonecas)") {
-                choice("survival", "SparklyPower Survival")
-                choice("loritta", "Loritta :3")
+                choice(TransferOptions.SPARKLYPOWER_SURVIVAL.codeName, "SparklyPower Survival")
+                choice(TransferOptions.LORITTA.codeName, "Loritta :3")
             }
 
             val quantity = optionalString("quantity", "Quantidade de dinheiro a ser transferido!")
@@ -259,7 +259,7 @@ class LSXCommand : SlashCommandDeclarationWrapper {
                         if (0 >= parsedQuantity)
                             return@withLock
 
-                        if (from == TransferOptions.LORITTA && to == TransferOptions.PERFECTDREAMS_SURVIVAL) {
+                        if (from == TransferOptions.LORITTA && to == TransferOptions.SPARKLYPOWER_SURVIVAL) {
                             val sparklyPowerQuantity = parsedQuantity * loriToSparklyExchangeRate
 
                             val fromBalance = withdrawFromLoritta(
@@ -303,7 +303,7 @@ class LSXCommand : SlashCommandDeclarationWrapper {
                                     this.extra = context.user.id
                                 }
                             }
-                        } else if (from == TransferOptions.PERFECTDREAMS_SURVIVAL && to == TransferOptions.LORITTA) {
+                        } else if (from == TransferOptions.SPARKLYPOWER_SURVIVAL && to == TransferOptions.LORITTA) {
                             val lorittaQuantity = parsedQuantity / loriToSparklyExchangeRate
 
                             val fromBalance = withdrawFromSparklyPower(
