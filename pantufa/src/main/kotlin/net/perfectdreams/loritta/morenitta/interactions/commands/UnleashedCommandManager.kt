@@ -377,7 +377,7 @@ class UnleashedCommandManager(val m: PantufaBot) {
                 is SilentCommandException -> return true
             }
 
-            logger.error { "Exception when executing ${rootDeclaration.name} command! $e" }
+            logger.error(e) { "Exception when executing ${rootDeclaration.name} command!" }
 
             if (!e.message.isNullOrEmpty()) {
                 event.channel.sendMessage(
