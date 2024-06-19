@@ -1,5 +1,6 @@
 name: DreamVanish
 main: net.perfectdreams.dreamvanish.DreamVanish
 version: 1.0.0
-depend: ["DreamCore", "dynmap"]
+depend: ["DreamCore"]
+softdepend: ["dynmap"]
 api-version: 1.13
