@@ -186,6 +186,8 @@ class LSXCommand : SlashCommandDeclarationWrapper {
             val destination = args[options.destination]
             val quantity = args[options.quantity]
 
+            context.deferChannelMessage(false)
+            
             val profile = context.user.lorittaProfile()
             val bannedState = profile.getBannedState()
 
