@@ -5,7 +5,6 @@ import com.google.gson.JsonObject
 import dev.minn.jda.ktx.messages.Embed
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
-import net.dv8tion.jda.api.utils.FileUpload
 import net.perfectdreams.loritta.common.commands.CommandCategory
 import net.perfectdreams.loritta.morenitta.interactions.UnleashedContext
 import net.perfectdreams.loritta.morenitta.interactions.commands.*
@@ -67,43 +66,9 @@ class OnlineCommand : SlashCommandDeclarationWrapper {
                     }
 
                     context.pantufa.launch {
-                        val survivalPages = survivalPlayers.chunked(50)
-                        val lobbyPages = lobbyPlayers.chunked(50)
-
                         context.reply(false) {
-                            embeds += buildEmbed(totalPlayersOnline, survivalPlayers, survivalPages, lobbyPlayers, lobbyPages, page)
-
-                            actionRow(
-                                context.pantufa.interactivityManager
-                                    .buttonForUser(context.user, ButtonStyle.PRIMARY, builder = {
-                                        this.emoji = Emoji.fromCustom(
-                                            Constants.LEFT_EMOJI.name!!,
-                                            Constants.LEFT_EMOJI.id!!.value.toLong(),
-                                            Constants.LEFT_EMOJI.animated.discordBoolean
-                                        )
-                                    }) {
-                                        page--
-
-                                        it.deferAndEditOriginal {
-                                            embeds += buildEmbed(totalPlayersOnline, survivalPlayers, survivalPages, lobbyPlayers, lobbyPages, page)
-                                        }
-                                    },
-                                context.pantufa.interactivityManager
-                                    .buttonForUser(context.user, ButtonStyle.PRIMARY, builder = {
-                                        this.emoji = Emoji.fromCustom(
-                                            Constants.RIGHT_EMOJI.name!!,
-                                            Constants.RIGHT_EMOJI.id!!.value.toLong(),
-                                            Constants.RIGHT_EMOJI.animated.discordBoolean
-                                        )
-                                    }) {
-                                        page++
-
-                                        it.deferAndEditOriginal {
-                                            embeds += buildEmbed(totalPlayersOnline, survivalPlayers, survivalPages, lobbyPlayers, lobbyPages, page)
-                                        }
-                                    }
-
-                            )
+                            embeds += buildEmbed("SparklyPower Survival", survivalPlayers)
+                            embeds += buildEmbed("SparklyPower Lobby", lobbyPlayers)
                         }
                     }
                 }, error = {
@@ -122,33 +87,15 @@ class OnlineCommand : SlashCommandDeclarationWrapper {
         }
 
         private fun buildEmbed(
-            totalPlayersOnline: Int,
-            survivalPlayers: List<String>,
-            survivalPages: List<List<String>>,
-            lobbyPlayers: List<String>,
-            lobbyPages: List<List<String>>,
-            page: Int
+            sectionName: String,
+            sectionPlayers: List<String>
         ) = Embed {
-            title = "**Players Online no SparklyPower Network ($totalPlayersOnline players online)**"
+            title = "**Players Online no $sectionName (${sectionPlayers.size} players online)**"
             color = Constants.LORITTA_AQUA.rgb
 
-            field {
-                name = "SparklyPower Survival (${survivalPlayers.size})"
-                value = if (survivalPlayers.isNotEmpty()) {
-                    survivalPages[page].joinToString(", ", transform = { "**`$it`**" })
-                } else {
-                    "Ninguém online... \uD83D\uDE2D"
-                }
-            }
-
-            field {
-                name = "SparklyPower Lobby (${lobbyPlayers.size})"
-                value = if (lobbyPlayers.isNotEmpty()) {
-                    lobbyPages[page].joinToString(", ", transform = { "**`$it`**" })
-                } else {
-                    "Ninguém online... \uD83D\uDE2D"
-                }
-            }
+            description = if (sectionPlayers.isNotEmpty()) {
+                sectionPlayers.joinToString(", ", transform = { "**`$it`**" })
+            } else "Ninguém online... \uD83D\uDE2D"
         }
     }
 }
