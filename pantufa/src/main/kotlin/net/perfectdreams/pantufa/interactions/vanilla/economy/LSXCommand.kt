@@ -167,13 +167,13 @@ class LSXCommand : SlashCommandDeclarationWrapper {
     inner class LSXCommandExecutor : LorittaSlashCommandExecutor(), LorittaLegacyMessageCommandExecutor {
         inner class Options : ApplicationCommandOptions() {
             val source = optionalString("source", "Fonte do dinheiro (Sonhos ou Sonecas)") {
-                choice(TransferOptions.SPARKLYPOWER_SURVIVAL.codeName, "SparklyPower Survival")
-                choice(TransferOptions.LORITTA.codeName, "Loritta :3")
+                choice("SparklyPower Survival", TransferOptions.SPARKLYPOWER_SURVIVAL.codeName)
+                choice("Loritta :3", TransferOptions.LORITTA.codeName)
             }
 
             val destination = optionalString("destination", "Destino do dinheiro (Sonhos ou Sonecas)") {
-                choice(TransferOptions.SPARKLYPOWER_SURVIVAL.codeName, "SparklyPower Survival")
-                choice(TransferOptions.LORITTA.codeName, "Loritta :3")
+                choice("SparklyPower Survival", TransferOptions.SPARKLYPOWER_SURVIVAL.codeName)
+                choice("Loritta :3", TransferOptions.LORITTA.codeName)
             }
 
             val quantity = optionalString("quantity", "Quantidade de dinheiro a ser transferido!")
