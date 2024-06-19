@@ -290,7 +290,7 @@ class LSXCommand : SlashCommandDeclarationWrapper {
 
                             context.reply(false) {
                                 styled(
-                                    "Você transferiu **${quantity} Sonecas** (Valor final: $sparklyPowerQuantity) de `${from.fancyName}` para `${to.fancyName}`!",
+                                    "Você transferiu **${parsedQuantity} Sonecas** (Valor final: $sparklyPowerQuantity) de `${from.fancyName}` para `${to.fancyName}`!",
                                     "\uD83D\uDCB8"
                                 )
                             }
@@ -301,7 +301,7 @@ class LSXCommand : SlashCommandDeclarationWrapper {
                                     this.receiver = refreshedAccountInfo.uniqueId
                                     this.currency = TransactionCurrency.MONEY
                                     this.time = System.currentTimeMillis()
-                                    this.amount = quantity.toDouble()
+                                    this.amount = sparklyPowerQuantity.toDouble()
                                     this.extra = context.user.id
                                 }
                             }
@@ -345,7 +345,7 @@ class LSXCommand : SlashCommandDeclarationWrapper {
                                     this.payer = refreshedAccountInfo.uniqueId
                                     this.currency = TransactionCurrency.MONEY
                                     this.time = System.currentTimeMillis()
-                                    this.amount = quantity.toDouble()
+                                    this.amount = parsedQuantity.toDouble()
                                     this.extra = context.user.id
                                 }
                             }
