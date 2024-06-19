@@ -10,10 +10,10 @@ import net.perfectdreams.pantufa.api.minecraft.MinecraftUserDisplayUtils
 import net.perfectdreams.pantufa.api.commands.styled
 
 class MinecraftCommand : SlashCommandDeclarationWrapper {
-    override fun command() = slashCommand("minecraft", "Veja a conta associada ao SparklyPower de um usuário", CommandCategory.MINECRAFT) {
+    override fun command() = slashCommand("sparklyplayer", "Veja a conta associada ao SparklyPower de um usuário", CommandCategory.MINECRAFT) {
         enableLegacyMessageSupport = true
 
-        subcommand("player", "Veja a conta associada ao SparklyPower pelo nome de um player no SparklyPower") {
+        subcommand("playername", "Veja a conta associada ao SparklyPower pelo nome de um player no SparklyPower") {
             enableLegacyMessageSupport = true
             alternativeLegacyAbsoluteCommandPaths.apply {
                 add("mcplayer")
@@ -22,7 +22,7 @@ class MinecraftCommand : SlashCommandDeclarationWrapper {
             executor = MinecraftCheckPlayerCommandExecutor()
         }
 
-        subcommand("user", "Veja a conta associada ao SparklyPower pela conta no Discord") {
+        subcommand("discorduser", "Veja a conta associada ao SparklyPower pela conta no Discord") {
             enableLegacyMessageSupport = true
             alternativeLegacyAbsoluteCommandPaths.apply {
                 add("mcuser")
