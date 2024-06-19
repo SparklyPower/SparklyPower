@@ -2,49 +2,58 @@ package net.perfectdreams.loritta.morenitta.interactions
 
 import dev.minn.jda.ktx.coroutines.await
 import dev.minn.jda.ktx.messages.InlineMessage
-import net.dv8tion.jda.api.entities.Guild
-import net.dv8tion.jda.api.interactions.InteractionHook
+import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
 import net.dv8tion.jda.api.utils.messages.MessageCreateData
+import net.perfectdreams.pantufa.PantufaBot
+import java.util.*
 
-abstract class InteractionContext {
-    abstract val event: IReplyCallback
-    val guildId
-        get() = event.guild?.idLong
-
-    val guildOrNull: Guild?
-        get() = event.guild
-
-    val guild: Guild
-        get() = guildOrNull ?: error("This interaction was not sent in a guild!")
-
-    val user
-        get() = event.user
-
-    var wasInitiallyDeferredEphemerally: Boolean? = null
-
-    suspend fun deferChannelMessage(ephemeral: Boolean): InteractionHook {
-        val hook = event.deferReply().setEphemeral(ephemeral).await()
+abstract class InteractionContext(
+    pantufa: PantufaBot,
+    mentions: UnleashedMentions,
+    private val replyCallback: IReplyCallback
+) : UnleashedContext(
+    pantufa,
+    if (replyCallback.isFromGuild) replyCallback.guildLocale else null,
+    replyCallback.userLocale,
+    replyCallback.jda,
+    mentions,
+    replyCallback.user,
+    replyCallback.member,
+    replyCallback.guild,
+    replyCallback.messageChannel
+) {
+    override suspend fun deferChannelMessage(ephemeral: Boolean): UnleashedHook {
+        val hook = replyCallback.deferReply().setEphemeral(ephemeral).await()
         wasInitiallyDeferredEphemerally = ephemeral
-        return hook
+        return UnleashedHook.InteractionHook(hook)
     }
 
-    suspend inline fun reply(ephemeral: Boolean, content: String) = reply(ephemeral) {
-        this.content = content
-    }
+    override suspend fun reply(
+        ephemeral: Boolean,
+        builder: suspend InlineMessage<MessageCreateData>.() -> Unit
+    ): InteractionMessage {
+        val createdMessage = InlineMessage(MessageCreateBuilder()).apply {
+            allowedMentionTypes = EnumSet.of(
+                Message.MentionType.CHANNEL,
+                Message.MentionType.EMOJI,
+                Message.MentionType.SLASH_COMMAND
+            )
 
-    suspend inline fun reply(ephemeral: Boolean, builder: InlineMessage<MessageCreateData>.() -> Unit = {}) {
-        val createdMessage = InlineMessage(MessageCreateBuilder()).apply(builder).build()
+            builder()
+        }.build()
 
-        // We could actually disable the components when their state expires, however this is hard to track due to "@original" or ephemeral messages not having an ID associated with it
-        // So, if the message is edited, we don't know if we *can* disable the components when their state expires!
-
-        if (event.isAcknowledged) {
-            val message = event.hook.sendMessage(createdMessage).setEphemeral(ephemeral).await()
+        return if (replyCallback.isAcknowledged) {
+            val message = replyCallback.hook.sendMessage(createdMessage)
+                .setEphemeral(ephemeral)
+                .await()
+            InteractionMessage.FollowUpInteractionMessage(message)
         } else {
-            event.reply(createdMessage).setEphemeral(ephemeral).await()
-            wasInitiallyDeferredEphemerally = ephemeral
+            val hook = replyCallback.reply(createdMessage)
+                .setEphemeral(ephemeral)
+                .await()
+            InteractionMessage.InitialInteractionMessage(hook)
         }
     }
 }

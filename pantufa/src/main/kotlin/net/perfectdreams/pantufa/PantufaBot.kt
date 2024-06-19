@@ -4,38 +4,31 @@ import com.github.salomonbrys.kotson.*
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import dev.kord.common.entity.Snowflake
 import dev.kord.rest.service.RestClient
-import dev.minn.jda.ktx.interactions.commands.updateCommands
 import io.ktor.client.*
 import kotlinx.coroutines.*
 import mu.KotlinLogging
 import net.dv8tion.jda.api.*
+import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.entities.User
+import net.dv8tion.jda.api.events.Event
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent
+import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
+import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder
-import net.perfectdreams.discordinteraktions.common.DiscordInteraKTions
-import net.perfectdreams.loritta.morenitta.interactions.commands.UnleashedCommandManager
-import net.perfectdreams.loritta.morenitta.interactions.listeners.InteractionsListener
-import net.perfectdreams.pantufa.commands.CommandManager
-import net.perfectdreams.pantufa.commands.server.*
-import net.perfectdreams.pantufa.commands.vanilla.utils.PingCommand
+import net.perfectdreams.loritta.morenitta.interactions.InteractivityManager
 import net.perfectdreams.pantufa.dao.DiscordAccount
-import net.perfectdreams.pantufa.interactions.commands.*
-import net.perfectdreams.pantufa.interactions.commands.administration.*
-import net.perfectdreams.pantufa.interactions.commands.declarations.SayCommand
-import net.perfectdreams.pantufa.interactions.commands.say.SayEditMessageCommand
-import net.perfectdreams.pantufa.interactions.commands.say.SayEditModalSubmitExecutor
-import net.perfectdreams.pantufa.interactions.commands.say.SaySendModalSubmitExecutor
 import net.perfectdreams.pantufa.listeners.DiscordListener
-import net.perfectdreams.pantufa.listeners.InteractionListener
+import net.perfectdreams.loritta.morenitta.interactions.listeners.InteractionsListener
 import net.perfectdreams.pantufa.network.Databases
 import net.perfectdreams.pantufa.tables.DiscordAccounts
 import net.perfectdreams.pantufa.tables.NotifyPlayersOnline
 import net.perfectdreams.pantufa.tables.Users
 import net.perfectdreams.pantufa.utils.*
 import net.perfectdreams.pantufa.utils.config.PantufaConfig
-import net.perfectdreams.pantufa.utils.discord.DiscordCommandMap
 import net.perfectdreams.pantufa.utils.parallax.ParallaxEmbed
 import net.perfectdreams.pantufa.utils.socket.SocketHandler
 import net.perfectdreams.pantufa.utils.socket.SocketServer
@@ -64,27 +57,20 @@ class PantufaBot(val config: PantufaConfig) {
 		private val logger = KotlinLogging.logger {}
 	}
 
-	val applicationId = Snowflake(390927821997998081L)
-	val interaKTions = DiscordInteraKTions(config.token, applicationId)
-	val commandManager = UnleashedCommandManager(this)
-	val legacyCommandManager = CommandManager()
-	val legacyCommandMap = DiscordCommandMap(this)
+	val interactivityManager = InteractivityManager()
 	val executors = Executors.newCachedThreadPool()
 	val coroutineDispatcher = executors.asCoroutineDispatcher()
+	val coroutineMessageExecutor = createThreadPool("Message Executor Thread")
+	val coroutineMessageDispatcher = coroutineMessageExecutor.asCoroutineDispatcher()
+	fun createThreadPool(name: String) = Executors.newCachedThreadPool { r ->
+		Thread(r, name).apply {
+			isDaemon = true
+		}
+	}
+
+	lateinit var interactionsListener: InteractionsListener
 	lateinit var jda: JDA
-	val rest = RestClient(config.token)
-	val whitelistedGuildIds = listOf(
-		Snowflake(265632341530116097L), // SparklyPower (Old)
-		Snowflake(268353819409252352L), // Ideias Aleatórias
-		Snowflake(297732013006389252L), // Apartamento da Loritta
-		Snowflake(602640402830589954L), // Furdúncios Artísticos
-		Snowflake(320248230917046282), // SparklyPower (New)
-		Snowflake(420626099257475072L), // Loritta's Apartment
-		Snowflake(340165396692729883L), // Loritta's Emoji Server
-		Snowflake(538506322212159578L), // Loritta's Emoji Server 2
-		Snowflake(392482696720416775L), // Pantufa's Emoji Server
-		Snowflake(626604568741937199L) // Loritta's Emoji Server 4
-	)
+	var mainLandGuild: Guild? = null
 	val playersOnlineGraph = CachedGraphManager(config.grafana.token, "${config.grafana.url}/render/d-solo/JeZauCDnk/sparklypower-network?orgId=1&var-sparklypower_server=sparklypower_survival&var-world=All&panelId=87&width=800&height=300&tz=America%2FSao_Paulo")
 	val tasksScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
@@ -94,58 +80,8 @@ class PantufaBot(val config: PantufaConfig) {
 
 		initPostgreSql()
 
-		logger.info { "Registering Application Commands..." }
-
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.ChatColorCommand(this))
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.GuildsCommand(this))
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.LSXCommand(this))
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.MinecraftUserCommand(this))
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.MoneyCommand(this))
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.OnlineCommand(this))
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.PesadelosCommand(this))
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.RegistrarCommand(this))
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.VIPInfoCommand(this))
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.CommandsLogCommand(this))
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.TransactionsCommand(this))
-		interaKTions.manager.register(
-			net.perfectdreams.pantufa.interactions.components.ChangePageButtonClickExecutor,
-			net.perfectdreams.pantufa.interactions.components.ChangePageButtonClickExecutor()
-		)
-
-		interaKTions.manager.register(
-			net.perfectdreams.pantufa.interactions.components.TransactionFilterSelectMenuExecutor,
-			net.perfectdreams.pantufa.interactions.components.TransactionFilterSelectMenuExecutor()
-		)
-
-		interaKTions.manager.register(
-			net.perfectdreams.pantufa.interactions.commands.declarations.AdminConsoleBungeeCommand(this)
-		)
-
-		interaKTions.manager.register(SayCommand(this))
-
-		interaKTions.manager.register(SayEditMessageCommand(this))
-
-		interaKTions.manager.register(
-			SaySendModalSubmitExecutor,
-			SaySendModalSubmitExecutor(this)
-		)
-
-		interaKTions.manager.register(
-			SayEditModalSubmitExecutor,
-			SayEditModalSubmitExecutor(this)
-		)
-
-		interaKTions.manager.register(net.perfectdreams.pantufa.interactions.commands.declarations.ChangePassCommand(this))
-
 		logger.info { "Starting JDA..." }
 		jda = JDABuilder.create(EnumSet.allOf(GatewayIntent::class.java))
-			.addEventListeners(
-				InteractionListener(
-					rest,
-					Snowflake(390927821997998081L),
-					interaKTions
-				)
-			)
 			.addEventListeners(InteractionsListener(this))
 			.setRawEventsEnabled(true) // Required for InteractionListener
 			.setStatus(OnlineStatus.ONLINE)
@@ -153,61 +89,21 @@ class PantufaBot(val config: PantufaConfig) {
 			.build()
 			.awaitReady()
 
+		interactionsListener = InteractionsListener(this)
+		mainLandGuild = jda.getGuildById(config.sparklyPower.guild.idLong)
+
 		logger.info { "Starting API server..." }
 
 		val apiServer = APIServer(this)
 		apiServer.start()
-
-		logger.info { "Registering Unleashed commands..." }
-		commandManager.register(PingCommand())
-
-		logger.info { "Registering legacy commands..." }
-		legacyCommandMap.register(PingCommand.create(this))
-		legacyCommandMap.register(MinecraftUserCommand.create(this))
-		legacyCommandMap.register(NotificarPlayerCommand.create(this))
-		legacyCommandMap.register(NotificarEventoCommand.create(this))
-		legacyCommandMap.register(ChatColorCommand.create(this))
-		legacyCommandMap.register(VerificarStatusCommand.create(this))
-		legacyCommandMap.register(PesadelosCommand.create(this))
-		legacyCommandMap.register(VIPInfoCommand.create(this))
-		legacyCommandMap.register(MoneyCommand.create(this))
-
-		if (config.discordInteractions.registerGlobally) {
-			logger.info { "Updating Pantufa's Application Commands Globally..." }
-			jda.updateCommands {
-				addCommands(*interaKTions.manager.applicationCommandsDeclarations.map {
-					commandManager.convertInteraKTionsDeclarationToJDA(
-						it
-					)
-				}.toTypedArray())
-				addCommands(*commandManager.slashCommands.map { commandManager.convertDeclarationToJDA(it) }
-					.toTypedArray())
-			}.complete()
-		} else {
-			for (id in config.discordInteractions.guildsToBeRegistered) {
-				val guild = jda.getGuildById(id) ?: continue
-				logger.info { "Updating Pantufa's Application Commands on Guild $id..." }
-				guild.updateCommands {
-					addCommands(*interaKTions.manager.applicationCommandsDeclarations.map {
-						commandManager.convertInteraKTionsDeclarationToJDA(
-							it
-						)
-					}.toTypedArray())
-					addCommands(*commandManager.slashCommands.map { commandManager.convertDeclarationToJDA(it) }
-						.toTypedArray())
-				}.complete()
-			}
-		}
 
 		logger.info { "Starting Pantufa's SocketServer thread..." }
 		thread {
 			val socket = SocketServer(60799)
 			socket.socketHandler = object: SocketHandler {
 				override fun onSocketReceived(json: JsonObject, response: JsonObject) {
-					println("RECEIVED: " + json)
+					logger.info { "RECEIVED FROM SOCKET: $json" }
 					val type = json["type"].nullString ?: return
-
-					println("Type: $type")
 
 					when (type) {
 						"sendMessage" -> {
@@ -236,15 +132,13 @@ class PantufaBot(val config: PantufaConfig) {
 
 							val textChannel = jda.getTextChannelById(textChannelId)
 
-							println("textChannelId: ${textChannelId}")
-
 							textChannel?.sendMessage(messageBuilder.build())?.complete()
 							return
 						}
 
 						"sendEventStart" -> {
 							// TODO: This should be replaced with webhooks
-							val guild = Constants.SPARKLYPOWER_GUILD
+							val guild = mainLandGuild
 							if (guild != null) {
 								val roleId = json["roleId"].string
 								val channelId = json["channelId"].string
@@ -266,9 +160,15 @@ class PantufaBot(val config: PantufaConfig) {
 		logger.info { "Adding Event Listener..." }
 		jda.addEventListener(DiscordListener(this))
 
-		logger.info { "Starting Pantufa Tasks..." }
-		PantufaTasks(this).start()
-		scheduleCoroutineAtFixedRate(ServerVotesNotifier::class.simpleName!!, 1.minutes, action = ServerVotesNotifier(this))
+		if (config.isTasksEnabled) {
+			logger.info { "Starting Pantufa Tasks..." }
+			PantufaTasks(this).start()
+			scheduleCoroutineAtFixedRate(
+				ServerVotesNotifier::class.simpleName!!,
+				1.minutes,
+				action = ServerVotesNotifier(this)
+			)
+		}
 
 		logger.info { "Done! :3" }
 	}
@@ -321,6 +221,32 @@ class PantufaBot(val config: PantufaConfig) {
 		).start()
 	}
 
+	fun launchMessageJob(event: Event, block: suspend CoroutineScope.() -> Unit) {
+		val coroutineName = when (event) {
+			is MessageReceivedEvent -> "Message ${event.message} by user ${event.author} in ${event.channel} on ${if (event.isFromGuild) event.guild else null}"
+			is SlashCommandInteractionEvent -> "Slash Command ${event.fullCommandName} by user ${event.user} in ${event.channel} on ${if (event.isFromGuild) event.guild else null}"
+			is UserContextInteractionEvent -> "User Command ${event.fullCommandName} by user ${event.user} in ${event.channel} on ${if (event.isFromGuild) event.guild else null}"
+			is MessageContextInteractionEvent -> "User Command ${event.fullCommandName} by user ${event.user} in ${event.channel} on ${if (event.isFromGuild) event.guild else null}"
+			is CommandAutoCompleteInteractionEvent -> "Autocomplete for Command ${event.fullCommandName} by user ${event.user} in ${event.channel} on ${if (event.isFromGuild) event.guild else null}"
+			else -> throw IllegalArgumentException("You can't dispatch a $event in a launchMessageJob!")
+		}
+
+		logger.info { coroutineName }
+
+		val start = System.currentTimeMillis()
+		val job = GlobalScope.launch(
+			coroutineMessageDispatcher + CoroutineName(coroutineName),
+			block = block
+		)
+
+		job.invokeOnCompletion {
+			val diff = System.currentTimeMillis() - start
+			if (diff >= 60_000) {
+				logger.warn { "Message Coroutine $job took too long to process! ${diff}ms" }
+			}
+		}
+	}
+
 	/**
 	 * Schedules [action] to be executed on [tasksScope] every [period] with a [initialDelay]
 	 */
@@ -350,7 +276,7 @@ class PantufaBot(val config: PantufaConfig) {
 		}
 	}
 
-	suspend fun retrieveDiscordAccountFromUser(user: User): DiscordAccount? {
+	fun retrieveDiscordAccountFromUser(user: User): DiscordAccount? {
 		return getDiscordAccountFromId(user.idLong)
 	}
 

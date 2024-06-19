@@ -1,9 +1,6 @@
 package net.perfectdreams.loritta.morenitta.interactions.modals
 
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
-import net.perfectdreams.loritta.morenitta.interactions.commands.options.DiscordOptionReference
-import net.perfectdreams.loritta.morenitta.interactions.commands.options.OptionReference
 import net.perfectdreams.loritta.morenitta.interactions.modals.options.DiscordModalOptionReference
 import net.perfectdreams.loritta.morenitta.interactions.modals.options.ModalOptionReference
 

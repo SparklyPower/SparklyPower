@@ -1,19 +1,28 @@
 package net.perfectdreams.loritta.morenitta.interactions.commands
 
+import net.perfectdreams.loritta.common.commands.CommandCategory
+
 // ===[ SLASH COMMANDS ]===
-fun slashCommand(name: String, description: String, block: SlashCommandDeclarationBuilder.() -> (Unit)) = SlashCommandDeclarationBuilder(
+fun slashCommand(name: String, description: String, category: CommandCategory = CommandCategory.MAGIC, block: SlashCommandDeclarationBuilder.() -> (Unit)) = SlashCommandDeclarationBuilder(
     name,
-    description
+    description,
+    category
 ).apply(block)
 
 @InteraKTionsUnleashedDsl
 class SlashCommandDeclarationBuilder(
     val name: String,
-    val description: String
+    val description: String,
+    val category: CommandCategory = CommandCategory.MAGIC
 ) {
+    var examples: List<String> = emptyList()
     var executor: LorittaSlashCommandExecutor? = null
     val subcommands = mutableListOf<SlashCommandDeclarationBuilder>()
+    var requireMinecraftAccount: Boolean = false
     val subcommandGroups = mutableListOf<SlashCommandGroupDeclarationBuilder>()
+    var enableLegacyMessageSupport = false
+    var alternativeLegacyLabels = mutableListOf<String>()
+    var alternativeLegacyAbsoluteCommandPaths = mutableListOf<String>()
 
     fun subcommand(name: String, description: String, block: SlashCommandDeclarationBuilder.() -> (Unit)) {
         subcommands.add(
@@ -37,6 +46,12 @@ class SlashCommandDeclarationBuilder(
         return SlashCommandDeclaration(
             name,
             description,
+            category,
+            examples,
+            requireMinecraftAccount,
+            enableLegacyMessageSupport,
+            alternativeLegacyLabels,
+            alternativeLegacyAbsoluteCommandPaths,
             executor,
             subcommands.map { it.build() },
             subcommandGroups.map { it.build() }
@@ -51,6 +66,7 @@ class SlashCommandGroupDeclarationBuilder(
 ) {
     // Groups can't have executors!
     val subcommands = mutableListOf<SlashCommandDeclarationBuilder>()
+    var alternativeLegacyLabels = mutableListOf<String>()
 
     fun subcommand(name: String, description: String, block: SlashCommandDeclarationBuilder.() -> (Unit)) {
         subcommands += SlashCommandDeclarationBuilder(
@@ -63,6 +79,7 @@ class SlashCommandGroupDeclarationBuilder(
         return SlashCommandGroupDeclaration(
             name,
             description,
+            alternativeLegacyLabels,
             subcommands.map { it.build() }
         )
     }

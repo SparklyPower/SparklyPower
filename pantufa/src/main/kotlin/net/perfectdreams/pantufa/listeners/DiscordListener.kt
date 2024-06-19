@@ -3,14 +3,16 @@ package net.perfectdreams.pantufa.listeners
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.set
 import com.google.gson.JsonObject
+import net.dv8tion.jda.api.entities.MessageType
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import net.dv8tion.jda.api.events.guild.GuildBanEvent
-import net.dv8tion.jda.api.events.message.GenericMessageEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.perfectdreams.pantufa.PantufaBot
 import net.perfectdreams.pantufa.dao.User
 import net.perfectdreams.pantufa.network.Databases
 import net.perfectdreams.pantufa.utils.Constants
+import net.perfectdreams.pantufa.api.commands.PantufaReply
 import net.perfectdreams.pantufa.utils.Server
 import net.perfectdreams.pantufa.utils.extensions.await
 import net.perfectdreams.pantufa.utils.socket.SocketUtils
@@ -41,22 +43,77 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 		if (event.author.isBot)
 			return
 
-		m.launch {
-			if (event.channel.idLong == Constants.SPARKLYPOWER_STAFF_CHANNEL_ID) {
+		if (event.message.type != MessageType.DEFAULT && event.message.type != MessageType.INLINE_REPLY)
+			return
+
+		m.launchMessageJob(event) {
+			val sparklyPower = m.config.sparklyPower
+
+			if (event.channel.idLong == sparklyPower.guild.staffChannelId) {
 				val payload = JsonObject()
 				payload["type"] = "sendAdminChat"
 				payload["player"] = event.author.name
 				payload["message"] = event.message.contentRaw
 
-				SocketUtils.sendAsync(payload, host = Constants.PERFECTDREAMS_BUNGEE_IP, port = Constants.PERFECTDREAMS_BUNGEE_PORT)
+				SocketUtils.sendAsync(
+					payload,
+					host = sparklyPower.server.perfectDreamsBungeeIp,
+					port = sparklyPower.server.perfectDreamsBungeePort
+				)
 			}
 
-			if (m.legacyCommandMap.dispatch(event))
-				return@launch
-
-			for (command in m.legacyCommandManager.commands)
-				if (command.matches(event))
-					return@launch
+			if (checkCommandsAndDispatch(event))
+				return@launchMessageJob
 		}
+	}
+
+	suspend fun checkCommandsAndDispatch(event: MessageReceivedEvent): Boolean {
+		// If Pantufa can't speak in the current channel, do *NOT* try to process a command! If we try to process, Pantufa will have issues that she wants to talk in a channel, but she doesn't have the "canTalk()" permission!
+		if (event.channel is TextChannel && !event.channel.canTalk())
+			return false
+
+		val sparklyPower = m.config.sparklyPower
+
+		val rawMessage = event.message.contentRaw
+		val rawArguments = rawMessage
+			.split(" ")
+			.toMutableList()
+
+		val firstLabel = rawArguments.first()
+		val startsWithCommandPrefix = firstLabel.startsWith(PantufaBot.PREFIX)
+		val startsWithPantufaMention = firstLabel == "<@${m.jda.selfUser.id}>" || firstLabel == "<@!${m.jda.selfUser.id}>"
+
+		// If the message starts with the prefix, it could be a command!
+		if (startsWithCommandPrefix || startsWithPantufaMention) {
+			// First let's check if the user is using the command in a non-whitelisted channel.
+			if (event.channel.idLong !in sparklyPower.guild.whitelistedChannels &&
+				event.guild.idLong != 268353819409252352L && // Ideias Aleatórias
+				event.member?.roles?.any { it.idLong in sparklyPower.guild.whitelistedRoles } == false) {
+				// If the user is using the command in a non-whitelisted channel, send to him an error message.
+				event.channel.sendMessage(
+					PantufaReply(
+						"Você só pode usar meus lindos e incríveis comandos nos canais de comandos!",
+						Constants.ERROR
+					).build(event.author)
+				).complete()
+
+				return true
+			}
+
+			if (startsWithCommandPrefix) // If it is a command prefix, remove the prefix
+				rawArguments[0] = rawArguments[0].removePrefix(PantufaBot.PREFIX)
+			else if (startsWithPantufaMention) { // If it is a mention, remove the first argument (which is Pantufa's mention)
+				rawArguments.removeAt(0)
+				if (rawArguments.isEmpty()) // If it is empty, then it means that it was only Pantufa's mention, so just return false
+					return false
+			}
+
+			// Executar comandos
+			if (m.interactionsListener.manager.matches(event, rawArguments)) {
+				return true
+			}
+		}
+
+		return false
 	}
 }
