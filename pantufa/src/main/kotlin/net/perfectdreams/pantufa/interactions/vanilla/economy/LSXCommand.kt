@@ -187,7 +187,7 @@ class LSXCommand : SlashCommandDeclarationWrapper {
             val quantity = args[options.quantity]
 
             context.deferChannelMessage(false)
-            
+
             val profile = context.user.lorittaProfile()
             val bannedState = profile.getBannedState()
 
@@ -376,12 +376,12 @@ class LSXCommand : SlashCommandDeclarationWrapper {
                         mentionUser = false
                     ),
                     PantufaReply(
-                        "**Loritta** `loritta` (*${profile.money} sonhos*)",
+                        "**Loritta** `${TransferOptions.LORITTA.codeName}` (*${profile.money} sonhos*)",
                         "<:sparklyPower:331179879582269451>",
                         mentionUser = false
                     ),
                     PantufaReply(
-                        "**SparklyPower Survival** `survival` (*$playerSonecasBalance sonecas*)",
+                        "**SparklyPower Survival** `${TransferOptions.SPARKLYPOWER_SURVIVAL.codeName}` (*$playerSonecasBalance sonecas*)",
                         "<a:pantufa_pickaxe:997671670468853770>",
                         mentionUser = false
                     )
@@ -399,14 +399,14 @@ class LSXCommand : SlashCommandDeclarationWrapper {
         override suspend fun convertToInteractionsArguments(
             context: LegacyMessageCommandContext,
             args: List<String>
-        ): Map<OptionReference<*>, Any?>? {
+        ): Map<OptionReference<*>, Any?> {
             val source = args.getOrNull(0)
             val destination = args.getOrNull(1)
             val quantity = args.getOrNull(2)
 
             return mapOf(
-                options.source to source,
-                options.destination to destination,
+                options.source to source?.lowercase(),
+                options.destination to destination?.lowercase(),
                 options.quantity to quantity
             )
         }
