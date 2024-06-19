@@ -232,21 +232,48 @@ class LSXCommand : SlashCommandDeclarationWrapper {
             }
 
             if (source != null && destination != null) {
-                if (destination != null) {
-                    mutex.withLock {
-                        val refreshedProfile = context.user.lorittaProfile()
-                        val refreshedAccountInfo = context.retrieveConnectedMinecraftAccount()!!
+                mutex.withLock {
+                    val refreshedProfile = context.user.lorittaProfile()
+                    val refreshedAccountInfo = context.retrieveConnectedMinecraftAccount()!!
 
-                        val from = TransferOptions.entries.firstOrNull { it.codeName == source }
-                        val to = TransferOptions.entries.firstOrNull { it.codeName == destination }
+                    val from = TransferOptions.entries.firstOrNull { it.codeName == source }
+                    val to = TransferOptions.entries.firstOrNull { it.codeName == destination }
 
-                        if (from != null && to != null && quantity != null) {
-                            val parsedQuantity = NumberUtils.convertShortenedNumberToLong(quantity)
+                    if (from != null && to != null && quantity != null) {
+                        val parsedQuantity = NumberUtils.convertShortenedNumberToLong(quantity)
 
-                            if (parsedQuantity == null) {
+                        if (parsedQuantity == null) {
+                            context.reply(false) {
+                                styled(
+                                    "Quantidade inválida!",
+                                    Constants.ERROR
+                                )
+                            }
+
+                            return@withLock
+                        }
+
+                        if (from == to)
+                            return@withLock
+
+                        if (0 >= parsedQuantity)
+                            return@withLock
+
+                        if (from == TransferOptions.LORITTA && to == TransferOptions.PERFECTDREAMS_SURVIVAL) {
+                            val sparklyPowerQuantity = parsedQuantity * loriToSparklyExchangeRate
+
+                            val fromBalance = withdrawFromLoritta(
+                                refreshedProfile,
+                                refreshedAccountInfo.username,
+                                refreshedAccountInfo.uniqueId,
+                                parsedQuantity,
+                                sparklyPowerQuantity
+                            )
+
+                            if (!fromBalance) {
                                 context.reply(false) {
                                     styled(
-                                        "Quantidade inválida!",
+                                        "Você não possui dinheiro suficiente em `${from.fancyName}` para transferência!",
                                         Constants.ERROR
                                     )
                                 }
@@ -254,103 +281,74 @@ class LSXCommand : SlashCommandDeclarationWrapper {
                                 return@withLock
                             }
 
-                            if (from == to)
-                                return@withLock
+                            giveToSparklyPower(
+                                refreshedAccountInfo.uniqueId,
+                                sparklyPowerQuantity
+                            )
 
-                            if (0 >= parsedQuantity)
-                                return@withLock
-
-                            if (from == TransferOptions.LORITTA && to == TransferOptions.PERFECTDREAMS_SURVIVAL) {
-                                val sparklyPowerQuantity = parsedQuantity * loriToSparklyExchangeRate
-
-                                val fromBalance = withdrawFromLoritta(
-                                    refreshedProfile,
-                                    refreshedAccountInfo.username,
-                                    refreshedAccountInfo.uniqueId,
-                                    parsedQuantity,
-                                    sparklyPowerQuantity
+                            context.reply(false) {
+                                styled(
+                                    "Você transferiu **${quantity} Sonecas** (Valor final: $sparklyPowerQuantity) de `${from.fancyName}` para `${to.fancyName}`!",
+                                    "\uD83D\uDCB8"
                                 )
+                            }
 
-                                if (!fromBalance) {
-                                    context.reply(false) {
-                                        styled(
-                                            "Você não possui dinheiro suficiente em `${from.fancyName}` para transferência!",
-                                            Constants.ERROR
-                                        )
-                                    }
-
-                                    return@withLock
-                                }
-
-                                giveToSparklyPower(
-                                    refreshedAccountInfo.uniqueId,
-                                    sparklyPowerQuantity
-                                )
-
-                                context.reply(false) {
-                                    styled(
-                                        "Você transferiu **${quantity} Sonecas** (Valor final: $sparklyPowerQuantity) de `${from.fancyName}` para `${to.fancyName}`!",
-                                        "\uD83D\uDCB8"
-                                    )
-                                }
-
-                                transaction(Databases.sparklyPower) {
-                                    Transaction.new {
-                                        this.type = TransactionType.LSX
-                                        this.receiver = refreshedAccountInfo.uniqueId
-                                        this.currency = TransactionCurrency.MONEY
-                                        this.time = System.currentTimeMillis()
-                                        this.amount = quantity.toDouble()
-                                        this.extra = context.user.id
-                                    }
-                                }
-                            } else if (from == TransferOptions.PERFECTDREAMS_SURVIVAL && to == TransferOptions.LORITTA) {
-                                val lorittaQuantity = parsedQuantity / loriToSparklyExchangeRate
-
-                                val fromBalance = withdrawFromSparklyPower(
-                                    refreshedAccountInfo.uniqueId,
-                                    parsedQuantity
-                                )
-
-                                if (!fromBalance) {
-                                    context.reply(false) {
-                                        styled(
-                                            "Você não possui dinheiro suficiente em `${from.fancyName}` para transferência!",
-                                            Constants.ERROR
-                                        )
-                                    }
-
-                                    return@withLock
-                                }
-
-                                giveToLoritta(
-                                    refreshedProfile,
-                                    refreshedAccountInfo.username,
-                                    refreshedAccountInfo.uniqueId,
-                                    lorittaQuantity,
-                                    parsedQuantity
-                                )
-
-                                context.reply(false) {
-                                    styled(
-                                        "Você transferiu **${quantity} Sonhos** (Valor final: $lorittaQuantity) de `${from.fancyName}` para `${to.fancyName}`!",
-                                        "\uD83D\uDCB8"
-                                    )
-                                }
-
-                                transaction(Databases.sparklyPower) {
-                                    Transaction.new {
-                                        this.type = TransactionType.LSX
-                                        this.payer = refreshedAccountInfo.uniqueId
-                                        this.currency = TransactionCurrency.MONEY
-                                        this.time = System.currentTimeMillis()
-                                        this.amount = quantity.toDouble()
-                                        this.extra = context.user.id
-                                    }
+                            transaction(Databases.sparklyPower) {
+                                Transaction.new {
+                                    this.type = TransactionType.LSX
+                                    this.receiver = refreshedAccountInfo.uniqueId
+                                    this.currency = TransactionCurrency.MONEY
+                                    this.time = System.currentTimeMillis()
+                                    this.amount = quantity.toDouble()
+                                    this.extra = context.user.id
                                 }
                             }
-                            return@withLock
+                        } else if (from == TransferOptions.PERFECTDREAMS_SURVIVAL && to == TransferOptions.LORITTA) {
+                            val lorittaQuantity = parsedQuantity / loriToSparklyExchangeRate
+
+                            val fromBalance = withdrawFromSparklyPower(
+                                refreshedAccountInfo.uniqueId,
+                                parsedQuantity
+                            )
+
+                            if (!fromBalance) {
+                                context.reply(false) {
+                                    styled(
+                                        "Você não possui dinheiro suficiente em `${from.fancyName}` para transferência!",
+                                        Constants.ERROR
+                                    )
+                                }
+
+                                return@withLock
+                            }
+
+                            giveToLoritta(
+                                refreshedProfile,
+                                refreshedAccountInfo.username,
+                                refreshedAccountInfo.uniqueId,
+                                lorittaQuantity,
+                                parsedQuantity
+                            )
+
+                            context.reply(false) {
+                                styled(
+                                    "Você transferiu **${quantity} Sonhos** (Valor final: $lorittaQuantity) de `${from.fancyName}` para `${to.fancyName}`!",
+                                    "\uD83D\uDCB8"
+                                )
+                            }
+
+                            transaction(Databases.sparklyPower) {
+                                Transaction.new {
+                                    this.type = TransactionType.LSX
+                                    this.payer = refreshedAccountInfo.uniqueId
+                                    this.currency = TransactionCurrency.MONEY
+                                    this.time = System.currentTimeMillis()
+                                    this.amount = quantity.toDouble()
+                                    this.extra = context.user.id
+                                }
+                            }
                         }
+                        return@withLock
                     }
                 }
             } else {
