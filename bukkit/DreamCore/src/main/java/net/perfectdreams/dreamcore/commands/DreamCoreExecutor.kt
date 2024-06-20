@@ -6,6 +6,6 @@ import net.perfectdreams.dreamcore.utils.commands.executors.SparklyCommandExecut
 
 class DreamCoreExecutor : SparklyCommandExecutor() {
     override fun execute(context: CommandContext, args: CommandArguments) {
-        context.sendMessage("§aDreamCore! Let's make the world a better place, one plugin at a time b")
+        context.sendMessage("§aDreamCore! Let's make the world a better place, one plugin at a time")
     }
 }
