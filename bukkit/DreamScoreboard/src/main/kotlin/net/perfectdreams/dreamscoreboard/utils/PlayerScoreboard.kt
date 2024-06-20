@@ -297,8 +297,8 @@ class PlayerScoreboard(val m: DreamScoreboard, val player: Player, val phoenix: 
 
 	private fun setupFacebook(_idx: Int): Int {
 		var idx = _idx
-		phoenix.setText("§1➦ §9§lFacebook", idx--)
-		phoenix.setText("§6/facebook", idx--)
+		phoenix.setText("§1➦ §9§lLoritta", idx--)
+		phoenix.setText("§9loritta.website", idx--)
 		return idx
 	}
 
