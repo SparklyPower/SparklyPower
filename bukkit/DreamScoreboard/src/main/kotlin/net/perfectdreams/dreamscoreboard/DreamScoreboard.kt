@@ -20,8 +20,6 @@ import net.perfectdreams.dreamscoreboard.listeners.TagListener
 import net.perfectdreams.dreamscoreboard.utils.PlayerScoreboard
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
-import org.bukkit.ServerLinks
-import org.bukkit.ServerLinks.ServerLink
 import org.bukkit.Statistic
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.scoreboard.CraftScoreboard
@@ -69,8 +67,6 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 	val scoreboards = ConcurrentHashMap<Player, PlayerScoreboard>()
 	var cachedClubesPrefixes = WeakHashMap<Player, String?>()
 
-	private val serverLinks = mutableListOf<ServerLink>()
-
 	override fun softEnable() {
 		super.softEnable()
 
@@ -85,26 +81,6 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 		// registerCommand(EventosTopMeuClubeCommand)
 		registerCommand(GlowingCommand)
 		registerCommand(GlowingColorCommand)
-
-		serverLinks.add(
-			Bukkit.getServer().serverLinks.addLink(
-				textComponent {
-					color(NamedTextColor.BLUE)
-					content("Website")
-				},
-				URI("https://sparklypower.net/")
-			)
-		)
-
-		serverLinks.add(
-			Bukkit.getServer().serverLinks.addLink(
-				textComponent {
-					color(NamedTextColor.LIGHT_PURPLE)
-					content("Discord")
-				},
-				URI("https://discord.gg/sparklypower")
-			)
-		)
 
 		scheduler().schedule(this, SynchronizationContext.SYNC) {
 			while (true) {
@@ -309,12 +285,6 @@ class DreamScoreboard : KotlinPlugin(), Listener {
 
 	override fun softDisable() {
 		super.softDisable()
-
-		serverLinks.forEach {
-			Bukkit.getServerLinks().removeLink(it)
-		}
-
-		serverLinks.clear()
 	}
 
 	@EventHandler

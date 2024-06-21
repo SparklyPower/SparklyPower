@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.devBundle("net.sparklypower.sparklypaper", "1.21-R0.1-SNAPSHOT")
+    paperweight.devBundle("net.sparklypower.sparklypaper", "1.20.6-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     implementation("com.github.ChestShop-authors:ChestShop-3:3.12")
 }
