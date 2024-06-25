@@ -128,8 +128,15 @@ class ApproveMapComponentListener(val m: PantufaBot) : ListenerAdapter() {
 
 						try {
 							val user = m.jda.retrieveUserById(requestedByUserId).await() ?: return@launch
+							val imagePreviewUrl = event.message.attachments.first().url
 							user.openPrivateChannel().await()
-								.sendMessage("A equipe aprovou a sua imagem, e a gráfica da Gabriela fez a sua imagem em mapas e mandou os mapas para a sua Caixa Postal! Pegue os mapas na `/warp correios`!")
+								.sendMessage("""${Emotes.PantufaThumbsUp} **A equipe aprovou a sua imagem!**
+									|
+									|A gráfica da Gabriela pegou seus **${Emotes.Pesadelos} pesadelos** seus para fabricar a sua imagem em ${Emotes.FilledMap} mapas, e agora **os mapas fabricados já estão na sua Caixa Postal**!
+									|
+									|Pegue os mapas na `/warp correios`! (Se você estiver online no SparklyPower quando recebeu esta mensagem, você recebeu os mapas no seu inventário)
+									|
+									|$imagePreviewUrl""".trimMargin())
 								.await()
 						} catch (e: Exception) {
 							// User does not exist!
