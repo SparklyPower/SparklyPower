@@ -132,7 +132,7 @@ class ApproveMapComponentListener(val m: PantufaBot) : ListenerAdapter() {
 							user.openPrivateChannel().await()
 								.sendMessage("""${Emotes.PantufaThumbsUp} **A equipe aprovou a sua imagem!**
 									|
-									|A gráfica da Gabriela pegou seus **${Emotes.Pesadelos} pesadelos** seus para fabricar a sua imagem em ${Emotes.FilledMap} mapas, e agora **os mapas fabricados já estão na sua Caixa Postal**!
+									|A gráfica da Gabriela pegou **${Emotes.Pesadelos} ${response.cost} pesadelos** seus para fabricar a sua imagem em ${Emotes.FilledMap} mapas, e agora **os mapas fabricados já estão na sua Caixa Postal**!
 									|
 									|Pegue os mapas na `/warp correios`! (Se você estiver online no SparklyPower quando recebeu esta mensagem, você recebeu os mapas no seu inventário)
 									|

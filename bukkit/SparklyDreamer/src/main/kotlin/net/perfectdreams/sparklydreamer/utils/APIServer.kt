@@ -271,7 +271,8 @@ class APIServer(private val plugin: SparklyDreamer) {
                             // TODO: Transaction Logs
 
                             return@transaction GeneratePantufaPrintShopCustomMapsResponse.Success(
-                                customMap[PlayerPantufaPrintShopCustomMaps.requestedBy].toString()
+                                customMap[PlayerPantufaPrintShopCustomMaps.requestedBy].toString(),
+                                priceOfAllTheMaps
                             )
                         }
 
