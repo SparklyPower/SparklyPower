@@ -21,6 +21,7 @@ data class CustomTextualRecipe(
 data class CustomCraftingRecipe(
     override val plugin: Plugin,
     val itemRemapper: (ItemStack) -> (ItemStack) = { ItemStack(it) },
+    val checkRemappedItems: Boolean,
     val recipe: Recipe
 ) : CustomRecipe() {
     companion object {

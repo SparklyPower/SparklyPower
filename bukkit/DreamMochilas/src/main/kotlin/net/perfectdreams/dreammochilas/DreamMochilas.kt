@@ -174,6 +174,7 @@ class DreamMochilas : KotlinPlugin(), Listener {
 						else -> ItemStack(it)
 					}
 				},
+				checkRemappedItems = false,
 				recipe = addRecipe(
 					"rainbow_mochila",
 					createMochila(MochilaData.Rainbow),

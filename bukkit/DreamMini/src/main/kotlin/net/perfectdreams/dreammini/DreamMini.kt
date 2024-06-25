@@ -12,6 +12,7 @@ import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreammini.commands.*
 import net.perfectdreams.dreammini.utils.*
+import net.sparklypower.sparklypaper.event.inventory.CraftItemRecipeEvent
 import org.bukkit.*
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
@@ -457,8 +458,8 @@ class DreamMini : KotlinPlugin(), Listener {
 	}
 
 	@EventHandler
-	fun onCraft(e: CraftItemEvent) {
-		for (item in e.inventory) {
+	fun onCraft(e: CraftItemRecipeEvent) {
+		for (item in e.craftingMatrix) {
 			if (item != null && item.hasItemMeta() && item.itemMeta.persistentDataContainer.get(DISALLOW_CRAFTING_KEY))
 				e.isCancelled = true
 		}

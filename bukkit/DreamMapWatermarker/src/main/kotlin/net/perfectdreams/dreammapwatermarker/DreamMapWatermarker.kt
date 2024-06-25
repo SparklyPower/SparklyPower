@@ -20,6 +20,7 @@ import net.perfectdreams.dreammapwatermarker.loricoolcards.LoriCoolCardsHandler
 import net.perfectdreams.dreammapwatermarker.map.ImgRenderer
 import net.perfectdreams.dreammapwatermarker.tables.LoriCoolCardsClaimedAlbums
 import net.perfectdreams.dreammapwatermarker.tables.LoriCoolCardsGeneratedMaps
+import net.sparklypower.sparklypaper.event.inventory.CraftItemRecipeEvent
 import org.bukkit.Bukkit
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
@@ -107,7 +108,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 
 						player.inventory.setItemInMainHand(
 							item.lore(
-								"§7Diretamente da §dGráfica da Pantufa§7...",
+								"§7Diretamente da §dGráfica da Gabriela§7...",
 								"§7(temos os melhores preços da região!)",
 								"§7§oUm incrível mapa para você!",
 								"§7",
@@ -132,8 +133,8 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 	}
 
 	@EventHandler
-	fun onCraft(event: CraftItemEvent) {
-		val inventoryMatrix = event.inventory.matrix ?: return
+	fun onCraft(event: CraftItemRecipeEvent) {
+		val inventoryMatrix = event.craftingMatrix ?: return
 
 		val hasCustomMap = inventoryMatrix.filterNotNull().any {
 			it.itemMeta?.persistentDataContainer?.get(MAP_CUSTOM_OWNER_KEY, PersistentDataType.STRING) != null || it.lore?.lastOrNull() == "§a§lObrigado por votar! ^-^" || it.itemMeta?.displayName?.endsWith("Players Online!") == true || it.itemMeta?.persistentDataContainer?.has(LOCK_MAP_CRAFT_KEY, PersistentDataType.BYTE) == true

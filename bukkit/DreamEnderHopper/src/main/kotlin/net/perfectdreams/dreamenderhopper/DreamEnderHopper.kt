@@ -35,6 +35,7 @@ class DreamEnderHopper : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				true,
 				addRecipe(
 					"enderhopper",
 					createEnderHopper(),

@@ -17,6 +17,7 @@ import net.perfectdreams.dreammochilas.FunnyIds
 import net.perfectdreams.dreammochilas.dao.Mochila
 import net.perfectdreams.dreammochilas.utils.MochilaInventoryHolder
 import net.perfectdreams.dreammochilas.utils.MochilaUtils
+import net.sparklypower.sparklypaper.event.inventory.CraftItemRecipeEvent
 import org.bukkit.Bukkit
 import org.bukkit.Keyed
 import org.bukkit.Material
@@ -85,23 +86,23 @@ class InventoryListener(val m: DreamMochilas) : Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    fun onCraft(e: CraftItemEvent) {
+    fun onCraft(e: CraftItemRecipeEvent) {
         val recipe = e.recipe
         if (recipe is Keyed) {
             val recipeKey = recipe.key.key == "rainbow_mochila"
 
             if (recipeKey) {
-                val nonNullItemsFromInventory = e.inventory.filterNotNull()
+                val nonNullItemsFromInventory = e.craftingMatrix.filterNotNull()
                 val areAllMochilasValid = nonNullItemsFromInventory.filter { it.type == Material.PAPER }.all { MochilaUtils.isMochila(it) }
                 val areAllRainbowWoolsValid = nonNullItemsFromInventory.filter { it.type == Material.WHITE_WOOL }.all { it.itemMeta?.hasCustomModelData() == true && it.itemMeta?.customModelData == 1 }
 
                 if (!areAllMochilasValid || !areAllRainbowWoolsValid)
                     e.isCancelled = true
                 else {
-                    val oldMochilaItem = e.inventory.matrix[4] ?: return
+                    val oldMochilaItem = e.craftingMatrix[4] ?: return
                     val oldMeta = oldMochilaItem.itemMeta
 
-                    e.currentItem?.meta<ItemMeta> {
+                    e.result = e.result?.meta<ItemMeta> {
                         displayName(oldMeta.displayName())
                         lore(oldMeta.lore())
 

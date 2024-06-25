@@ -130,6 +130,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				true,
 				recipe = addRecipe(
 					"magnet",
 					CustomItems.MAGNET,
@@ -151,6 +152,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				true,
 				recipe = addRecipe(
 					"magnet_2",
 					CustomItems.MAGNET_2,
@@ -171,6 +173,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				true,
 				recipe = addRecipe(
 					"magnet_repair",
 					CustomItems.MAGNET,
@@ -190,6 +193,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"hamburger",
 					CustomItems.HAMBURGER,
@@ -208,6 +212,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"cupcake",
 					CustomItems.CUPCAKE,
@@ -228,6 +233,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"pudding",
 					CustomItems.PUDDING,
@@ -248,6 +254,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"microwave",
 					CustomItems.MICROWAVE,
@@ -270,6 +277,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"superfurnace",
 					CustomItems.SUPERFURNACE,
@@ -290,6 +298,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"trashcan",
 					CustomItems.TRASHCAN,
@@ -309,6 +318,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"rainbow_wool",
 					CustomItems.RAINBOW_WOOL.clone().apply {
@@ -331,6 +341,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"rainbow_concrete",
 					CustomItems.RAINBOW_CONCRETE.clone().apply {
@@ -353,6 +364,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"rainbow_terracotta",
 					CustomItems.RAINBOW_TERRACOTTA.clone().apply {
@@ -374,6 +386,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"estalinho_red",
 					CustomItems.ESTALINHO_RED,
@@ -393,6 +406,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"estalinho_green",
 					CustomItems.ESTALINHO_GREEN,
@@ -413,6 +427,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"cuia_empty_brown",
 					CustomItems.CHIMARRAO_EMPTY_BROWN,
@@ -433,6 +448,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"cuia_empty_lori_white",
 					CustomItems.CHIMARRAO_EMPTY_LORI_WHITE,
@@ -454,6 +470,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 			CustomCraftingRecipe(
 				this,
 				CustomCraftingRecipe.RUBY_REMAP,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"cuia_empty_lori_black",
 					CustomItems.CHIMARRAO_EMPTY_LORI_BLACK,
@@ -474,6 +491,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"cuia_brown",
 					CustomItems.CHIMARRAO_BROWN,
@@ -493,6 +511,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"cuia_lori_white",
 					CustomItems.CHIMARRAO_LORI_WHITE,
@@ -512,6 +531,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"cuia_lori_black",
 					CustomItems.CHIMARRAO_LORI_BLACK,
@@ -531,6 +551,7 @@ class DreamCustomItems : KotlinPlugin(), Listener {
 		customRecipes.add(
 			CustomCraftingRecipe(
 				this,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"crazygabii_plushie",
 					ItemStack(Material.PAPER)

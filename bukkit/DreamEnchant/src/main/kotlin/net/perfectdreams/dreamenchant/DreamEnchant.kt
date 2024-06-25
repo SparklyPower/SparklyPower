@@ -63,6 +63,7 @@ class DreamEnchant : KotlinPlugin() {
 			CustomCraftingRecipe(
 				this,
 				itemRemapper = CustomCraftingRecipe.RUBY_REMAP,
+				checkRemappedItems = true,
 				recipe = addRecipe(
 					"super_enchanting_table",
 					createSpecialEnchantmentTableItemStack(0),
