@@ -48,6 +48,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 	companion object {
 		val LOCK_MAP_CRAFT_KEY = SparklyNamespacedKey("lock_map_craft")
 		val MAP_CUSTOM_OWNER_KEY = SparklyNamespacedKey("map_custom_owner")
+		val PRINT_SHOP_REQUEST_ID_KEY = SparklyNamespacedKey("print_shop_request_id", PersistentDataType.LONG)
 
 		fun watermarkMap(itemStack: ItemStack, customOwner: UUID?) {
 			itemStack.meta<MapMeta> {

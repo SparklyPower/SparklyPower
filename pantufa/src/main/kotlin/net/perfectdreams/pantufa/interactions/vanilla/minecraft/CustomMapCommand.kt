@@ -397,7 +397,7 @@ class CustomMapCommand(val m: PantufaBot) : SlashCommandDeclarationWrapper {
                         }
 
                         styled(
-                            "**Preço:** ${Emotes.Pesadelos} ${25 * amountOfImagesOnItemFrames} pesadelos",
+                            "**Preço:** ${Emotes.Pesadelos} ${prestartResponse.totalCost} pesadelos",
                             Emotes.PantufaCoffee
                         )
 

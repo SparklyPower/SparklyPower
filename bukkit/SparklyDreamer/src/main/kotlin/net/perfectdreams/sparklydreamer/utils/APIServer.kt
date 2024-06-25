@@ -22,6 +22,7 @@ import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.lore
+import net.perfectdreams.dreamcore.utils.set
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker.Companion.LOCK_MAP_CRAFT_KEY
@@ -48,7 +49,7 @@ import javax.imageio.ImageIO
 
 class APIServer(private val plugin: SparklyDreamer) {
     companion object {
-        private const val PANTUFA_PRINT_SHOP_MAP_PESADELOS_COST = 25L
+        private const val PANTUFA_PRINT_SHOP_MAP_PESADELOS_COST = 15L
 
     }
     private val logger = plugin.logger
@@ -220,7 +221,9 @@ class APIServer(private val plugin: SparklyDreamer) {
                                                 "§7(temos os melhores preços da região!)",
                                                 "§7§oUm incrível mapa para você!",
                                                 "§7",
-                                                "§7Mapa feito para §a$requesterUserName §e(◠‿◠✿)"
+                                                "§7Mapa feito para §a$requesterUserName §e(◠‿◠✿)",
+                                                "§7",
+                                                "§7ID do Pedido: §6${request.requestId}"
                                             ).apply {
                                                 this.addUnsafeEnchantment(Enchantment.INFINITY, 1)
                                                 this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
@@ -228,6 +231,7 @@ class APIServer(private val plugin: SparklyDreamer) {
                                                     this.mapView = mapView
                                                     this.persistentDataContainer.set(LOCK_MAP_CRAFT_KEY, PersistentDataType.BYTE, 1)
                                                     this.persistentDataContainer.set(MAP_CUSTOM_OWNER_KEY, PersistentDataType.STRING, requesterUniqueId.toString())
+                                                    this.persistentDataContainer.set(DreamMapWatermarker.PRINT_SHOP_REQUEST_ID_KEY, request.requestId)
                                                 }
                                             }
                                     )
