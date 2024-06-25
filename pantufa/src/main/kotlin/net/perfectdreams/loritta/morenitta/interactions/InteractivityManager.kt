@@ -9,12 +9,13 @@ import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.interactions.components.buttons.Button
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu
-import net.perfectdreams.loritta.common.emotes.Emote
 import net.perfectdreams.loritta.morenitta.interactions.components.ComponentContext
 import net.perfectdreams.loritta.morenitta.interactions.modals.ModalArguments
 import net.perfectdreams.loritta.morenitta.interactions.modals.ModalContext
 import net.perfectdreams.loritta.morenitta.utils.extensions.toJDA
 import net.perfectdreams.pantufa.api.commands.styled
+import net.perfectdreams.pantufa.utils.Emotes
+import net.perfectdreams.pantufa.utils.extensions.toJDA
 import java.util.*
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
@@ -189,7 +190,7 @@ class InteractivityManager {
             }
 
         @get:JvmSynthetic // Hide from Java callers
-        var loriEmoji: Emote
+        var loriEmoji: Emotes.Emote
             @Deprecated("", level = DeprecationLevel.ERROR) // Prevent Kotlin callers
             get() = throw UnsupportedOperationException()
             set(value) {

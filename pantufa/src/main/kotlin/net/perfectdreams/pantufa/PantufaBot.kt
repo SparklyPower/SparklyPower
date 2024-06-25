@@ -23,6 +23,7 @@ import net.perfectdreams.loritta.morenitta.interactions.InteractivityManager
 import net.perfectdreams.pantufa.dao.DiscordAccount
 import net.perfectdreams.pantufa.listeners.DiscordListener
 import net.perfectdreams.loritta.morenitta.interactions.listeners.InteractionsListener
+import net.perfectdreams.pantufa.listeners.ApproveMapComponentListener
 import net.perfectdreams.pantufa.network.Databases
 import net.perfectdreams.pantufa.tables.DiscordAccounts
 import net.perfectdreams.pantufa.tables.NotifyPlayersOnline
@@ -32,6 +33,7 @@ import net.perfectdreams.pantufa.utils.config.PantufaConfig
 import net.perfectdreams.pantufa.utils.parallax.ParallaxEmbed
 import net.perfectdreams.pantufa.utils.socket.SocketHandler
 import net.perfectdreams.pantufa.utils.socket.SocketServer
+import net.sparklypower.tables.PlayerPantufaPrintShopCustomMaps
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.statements.jdbc.JdbcConnectionImpl
@@ -158,6 +160,7 @@ class PantufaBot(val config: PantufaConfig) {
 
 		logger.info { "Adding Event Listener..." }
 		jda.addEventListener(DiscordListener(this))
+		jda.addEventListener(ApproveMapComponentListener(this))
 
 		if (config.isTasksEnabled) {
 			logger.info { "Starting Pantufa Tasks..." }
@@ -177,7 +180,8 @@ class PantufaBot(val config: PantufaConfig) {
 			SchemaUtils.createMissingTablesAndColumns(
 				DiscordAccounts,
 				Users,
-				NotifyPlayersOnline
+				NotifyPlayersOnline,
+				PlayerPantufaPrintShopCustomMaps
 			)
 		}
 

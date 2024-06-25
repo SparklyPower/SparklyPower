@@ -85,6 +85,7 @@ interface CommandContext {
                                     is IntDiscordOptionReference -> append("número inteiro")
                                     is UserDiscordOptionReference -> append("usuário")
                                     is ChannelDiscordOptionReference -> append("canal")
+                                    is AttachmentDiscordOptionReference -> append("arquivo")
                                 }
 
                                 if (option is DiscordOptionReference) {

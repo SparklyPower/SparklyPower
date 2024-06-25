@@ -2,32 +2,61 @@ package net.perfectdreams.sparklydreamer.utils
 
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.serialization.decodeFromString
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
+import net.perfectdreams.dreamcash.DreamCash
+import net.perfectdreams.dreamcash.tables.Cashes
+import net.perfectdreams.dreamcash.utils.Cash
+import net.perfectdreams.dreamcore.cash.NightmaresCashRegister
+import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamsonecas.SonecasUtils
+import net.perfectdreams.dreamcore.utils.DreamUtils
+import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.lore
+import net.perfectdreams.dreamcorreios.DreamCorreios
+import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
+import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker.Companion.LOCK_MAP_CRAFT_KEY
+import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker.Companion.MAP_CUSTOM_OWNER_KEY
 import net.perfectdreams.dreamsonecas.tables.PlayerSonecas
 import net.perfectdreams.sparklydreamer.SparklyDreamer
-import net.sparklypower.rpc.SparklySurvivalRPCRequest
-import net.sparklypower.rpc.SparklySurvivalRPCResponse
+import net.sparklypower.rpc.*
+import net.sparklypower.tables.PlayerPantufaPrintShopCustomMaps
+import org.bukkit.Bukkit
+import org.bukkit.Material
+import org.bukkit.enchantments.Enchantment
+import org.bukkit.inventory.ItemFlag
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.MapMeta
+import org.bukkit.persistence.PersistentDataType
+import org.jetbrains.exposed.sql.SqlExpressionBuilder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
+import java.time.Instant
 import java.util.*
+import javax.imageio.ImageIO
 
 class APIServer(private val plugin: SparklyDreamer) {
+    companion object {
+        private const val PANTUFA_PRINT_SHOP_MAP_PESADELOS_COST = 25L
+
+    }
     private val logger = plugin.logger
     private var server: ApplicationEngine? = null
 
     fun start() {
         logger.info { "Starting HTTP Server..." }
+
         val server = embeddedServer(Netty, port = 9999) {
             routing {
                 get("/") {
@@ -69,6 +98,187 @@ class APIServer(private val plugin: SparklyDreamer) {
                         Json.encodeToString<SparklySurvivalRPCResponse>(response),
                         ContentType.Application.Json
                     )
+                }
+
+                post("/prestart-pantufa-print-shop-maps") {
+                    val dreamCashPlugin = Bukkit.getPluginManager().getPlugin("DreamCash")?.let { if (it.isEnabled) it else null }
+
+                    if (dreamCashPlugin != null) {
+                        // Okay, so the plugin is enabled and ready to rock!
+                        val request = Json.decodeFromString<PrestartPantufaPrintShopCustomMapsRequest>(call.receiveText())
+
+                        // Check if the user has enough pesadelos
+                        val response = transaction(Databases.databaseNetwork) {
+                            val requesterUniqueId = UUID.fromString(request.requestedById)
+                            val priceOfAllTheMaps = PANTUFA_PRINT_SHOP_MAP_PESADELOS_COST * request.amountOfMapsToBeGenerated
+
+                            // Do we have enough money?
+                            val pesadelos = Cashes.selectAll()
+                                .where { Cashes.uniqueId eq requesterUniqueId }
+                                .limit(1)
+                                .firstOrNull()
+                                ?.get(Cashes.cash)
+                                ?: return@transaction PrestartPantufaPrintShopCustomMapsResponse.NotEnoughPesadelos(
+                                    PANTUFA_PRINT_SHOP_MAP_PESADELOS_COST,
+                                    priceOfAllTheMaps
+                                )
+
+                            if (priceOfAllTheMaps > pesadelos)
+                                return@transaction PrestartPantufaPrintShopCustomMapsResponse.NotEnoughPesadelos(
+                                    PANTUFA_PRINT_SHOP_MAP_PESADELOS_COST,
+                                    priceOfAllTheMaps
+                                )
+
+                            return@transaction PrestartPantufaPrintShopCustomMapsResponse.Success(
+                                PANTUFA_PRINT_SHOP_MAP_PESADELOS_COST,
+                                priceOfAllTheMaps
+                            )
+                        }
+
+                        call.respondText(
+                            Json.encodeToString<PrestartPantufaPrintShopCustomMapsResponse>(response),
+                            ContentType.Application.Json
+                        )
+                    } else {
+                        call.respondText(
+                            Json.encodeToString<PrestartPantufaPrintShopCustomMapsResponse>(PrestartPantufaPrintShopCustomMapsResponse.PluginUnavailable),
+                            ContentType.Application.Json
+                        )
+                    }
+                }
+
+                post("/create-pantufa-print-shop-maps") {
+                    val dreamMapWatermarkerPlugin = Bukkit.getPluginManager().getPlugin("DreamMapWatermarker")?.let { if (it.isEnabled) it else null }
+                    val dreamCorreiosPlugin = Bukkit.getPluginManager().getPlugin("DreamCorreios")?.let { if (it.isEnabled) it else null }
+                    val dreamCashPlugin = Bukkit.getPluginManager().getPlugin("DreamCash")?.let { if (it.isEnabled) it else null }
+
+                    if (dreamMapWatermarkerPlugin != null && dreamCorreiosPlugin != null && dreamCashPlugin != null) {
+                        dreamMapWatermarkerPlugin as DreamMapWatermarker
+                        dreamCorreiosPlugin as DreamCorreios
+                        dreamCashPlugin as DreamCash
+
+                        // Okay, so the plugin is enabled and ready to rock!
+                        val request = Json.decodeFromString<GeneratePantufaPrintShopCustomMapsRequest>(call.receiveText())
+
+                        val response = transaction(Databases.databaseNetwork) {
+                            val mapsRequestId = request.requestId
+                            // Get the map data from the database
+                            val customMap = PlayerPantufaPrintShopCustomMaps.selectAll()
+                                .where {
+                                    PlayerPantufaPrintShopCustomMaps.id eq mapsRequestId
+                                }
+                                .limit(1)
+                                .firstOrNull()
+
+                            if (customMap == null)
+                                return@transaction GeneratePantufaPrintShopCustomMapsResponse.UnknownMapRequest
+
+                            if (customMap[PlayerPantufaPrintShopCustomMaps.approvedBy] != null)
+                                return@transaction GeneratePantufaPrintShopCustomMapsResponse.RequestAlreadyApproved
+
+                            val requesterUniqueId = customMap[PlayerPantufaPrintShopCustomMaps.requestedBy]
+                            val requesterUserName = Users.selectAll()
+                                .where {
+                                    Users.id eq requesterUniqueId
+                                }
+                                .limit(1)
+                                .firstOrNull()
+                                ?.get(Users.username)
+
+                            if (requesterUserName == null)
+                                return@transaction GeneratePantufaPrintShopCustomMapsResponse.UnknownPlayer
+
+                            // Do we have enough money?
+                            val pesadelos = Cashes.selectAll()
+                                .where { Cashes.uniqueId eq customMap[PlayerPantufaPrintShopCustomMaps.requestedBy] }
+                                .limit(1)
+                                .firstOrNull()
+                                ?.get(Cashes.cash) ?: return@transaction GeneratePantufaPrintShopCustomMapsResponse.NotEnoughPesadelos
+
+                            val images = customMap[PlayerPantufaPrintShopCustomMaps.mapImages].split(",")
+                                .map { ImageIO.read(Base64.getDecoder().decode(it).inputStream()) }
+
+                            val priceOfAllTheMaps = PANTUFA_PRINT_SHOP_MAP_PESADELOS_COST * images.size
+                            if (priceOfAllTheMaps > pesadelos)
+                                return@transaction GeneratePantufaPrintShopCustomMapsResponse.NotEnoughPesadelos
+
+                            // Ouch, main thread access, this will freeze the transaction for a bit
+                            val generateAndGiveMapsJob = plugin.launchMainThreadDeferred {
+                                val mapsToBeGiven = mutableListOf<ItemStack>()
+                                val mapIds = mutableSetOf<Int>()
+
+                                for (image in images) {
+                                    val mapView = dreamMapWatermarkerPlugin.createImageOnMap(image)
+
+                                    mapIds.add(mapView.id)
+                                    mapsToBeGiven.add(
+                                        ItemStack(Material.FILLED_MAP)
+                                            .lore(
+                                                "§7Diretamente da §dGráfica da Gabriela§7...",
+                                                "§7(temos os melhores preços da região!)",
+                                                "§7§oUm incrível mapa para você!",
+                                                "§7",
+                                                "§7Mapa feito para §a$requesterUserName §e(◠‿◠✿)"
+                                            ).apply {
+                                                this.addUnsafeEnchantment(Enchantment.INFINITY, 1)
+                                                this.addItemFlags(ItemFlag.HIDE_ENCHANTS)
+                                                this.meta<MapMeta> {
+                                                    this.mapView = mapView
+                                                    this.persistentDataContainer.set(LOCK_MAP_CRAFT_KEY, PersistentDataType.BYTE, 1)
+                                                    this.persistentDataContainer.set(MAP_CUSTOM_OWNER_KEY, PersistentDataType.STRING, requesterUniqueId.toString())
+                                                }
+                                            }
+                                    )
+                                }
+
+                                // Add the items to the user's caixa postal
+                                dreamCorreiosPlugin.addItem(
+                                    requesterUniqueId,
+                                    *mapsToBeGiven.toTypedArray()
+                                )
+
+                                mapIds
+                            }
+
+                            val mapIds = runBlocking { generateAndGiveMapsJob.await() }
+
+                            // Approve the maps
+                            PlayerPantufaPrintShopCustomMaps.update({
+                                PlayerPantufaPrintShopCustomMaps.id eq mapsRequestId
+                            }) {
+                                it[PlayerPantufaPrintShopCustomMaps.approvedAt] = Instant.now()
+                                it[PlayerPantufaPrintShopCustomMaps.approvedBy] = UUID.fromString(request.approvedById)
+                                it[PlayerPantufaPrintShopCustomMaps.mapIds] = buildJsonArray {
+                                    for (mapId in mapIds) {
+                                        add(mapId)
+                                    }
+                                }.toString()
+                            }
+
+                            // Charge the player!
+                            Cashes.update({ Cashes.uniqueId eq customMap[PlayerPantufaPrintShopCustomMaps.requestedBy] }) {
+                                with(SqlExpressionBuilder) {
+                                    it[Cashes.cash] = Cashes.cash - priceOfAllTheMaps
+                                }
+                            }
+
+                            // TODO: Transaction Logs
+
+                            return@transaction GeneratePantufaPrintShopCustomMapsResponse.Success(
+                                customMap[PlayerPantufaPrintShopCustomMaps.requestedBy].toString()
+                            )
+                        }
+
+                        call.respondText(
+                            Json.encodeToString<GeneratePantufaPrintShopCustomMapsResponse>(response),
+                            ContentType.Application.Json
+                        )
+                    } else {
+                        call.respondText(
+                            Json.encodeToString<GeneratePantufaPrintShopCustomMapsResponse>(GeneratePantufaPrintShopCustomMapsResponse.PluginUnavailable),
+                            ContentType.Application.Json
+                        )
+                    }
                 }
             }
         }

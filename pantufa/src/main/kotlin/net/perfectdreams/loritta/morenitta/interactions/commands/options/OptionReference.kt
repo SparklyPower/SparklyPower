@@ -3,6 +3,7 @@ package net.perfectdreams.loritta.morenitta.interactions.commands.options
 import net.dv8tion.jda.api.entities.Member
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.interactions.commands.OptionMapping
+import net.perfectdreams.i18nhelper.core.keydata.StringI18nData
 import net.perfectdreams.loritta.morenitta.interactions.commands.autocomplete.AutocompleteExecutor
 
 sealed class OptionReference<T>(
@@ -92,3 +93,9 @@ data class UserAndMember(
     val user: User,
     val member: Member?
 )
+
+class AttachmentDiscordOptionReference<T>(name: String, description: String, required: Boolean) : DiscordOptionReference<T>(name, description, required) {
+    override fun get(option: OptionMapping): T {
+        return option.asAttachment as T
+    }
+}

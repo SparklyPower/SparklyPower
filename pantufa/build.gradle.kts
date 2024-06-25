@@ -20,6 +20,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
+    implementation(project(":common:rpc-payloads"))
+    implementation(project(":common:tables"))
     implementation("ch.qos.logback:logback-classic:1.4.11")
     implementation("io.github.microutils:kotlin-logging:2.1.23")
 
@@ -51,7 +53,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:0.50.1")
     implementation("org.jetbrains.exposed:exposed-dao:0.50.1")
     implementation("org.jetbrains.exposed:exposed-jdbc:0.50.1")
-    implementation("net.perfectdreams.exposedpowerutils:postgres-java-time:1.2.1")
+    implementation("net.perfectdreams.exposedpowerutils:postgres-java-time:1.4.0")
 
     implementation("io.ktor:ktor-client-cio:2.1.0")
 

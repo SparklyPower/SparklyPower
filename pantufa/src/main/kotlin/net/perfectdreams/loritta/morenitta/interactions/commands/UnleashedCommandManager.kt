@@ -2,6 +2,7 @@ package net.perfectdreams.loritta.morenitta.interactions.commands
 
 import dev.minn.jda.ktx.interactions.commands.*
 import mu.KotlinLogging
+import net.dv8tion.jda.api.entities.Message.Attachment
 import net.dv8tion.jda.api.entities.User
 import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
@@ -22,6 +23,7 @@ import net.perfectdreams.pantufa.interactions.vanilla.misc.*
 import net.perfectdreams.pantufa.interactions.vanilla.moderation.*
 import net.perfectdreams.pantufa.interactions.vanilla.utils.*
 import net.perfectdreams.pantufa.network.Databases
+import net.perfectdreams.pantufa.pantufa
 import net.perfectdreams.pantufa.tables.Users
 import net.perfectdreams.pantufa.utils.*
 import net.perfectdreams.pantufa.utils.extensions.normalize
@@ -61,6 +63,7 @@ class UnleashedCommandManager(val m: PantufaBot) {
         register(VIPInfoCommand())
         register(ChatColorCommand())
         register(SparklyPlayerCommand())
+        register(CustomMapCommand(pantufa))
 
         // ===[ Moderation ]===
         register(AdminConsoleBungeeCommand())
@@ -235,6 +238,16 @@ class UnleashedCommandManager(val m: PantufaBot) {
                     is ChannelDiscordOptionReference -> {
                         return listOf(
                             Option<GuildChannel>(
+                                interaKTionsOption.name,
+                                description,
+                                interaKTionsOption.required
+                            )
+                        )
+                    }
+
+                    is AttachmentDiscordOptionReference -> {
+                        return listOf(
+                            Option<Attachment>(
                                 interaKTionsOption.name,
                                 description,
                                 interaKTionsOption.required

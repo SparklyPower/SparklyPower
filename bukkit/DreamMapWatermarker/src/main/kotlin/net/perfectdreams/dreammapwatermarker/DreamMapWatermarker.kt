@@ -10,10 +10,13 @@ import kotlinx.serialization.decodeFromString
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.commands.command
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
+import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreammapwatermarker.commands.DreamMapMakerCommand
 import net.perfectdreams.dreammapwatermarker.commands.LoriCoolCardsAdminCommand
 import net.perfectdreams.dreammapwatermarker.commands.LoriCoolCardsCommand
 import net.perfectdreams.dreammapwatermarker.loricoolcards.LoriCoolCardsHandler
+
 import net.perfectdreams.dreammapwatermarker.map.ImgRenderer
 import net.perfectdreams.dreammapwatermarker.tables.LoriCoolCardsClaimedAlbums
 import net.perfectdreams.dreammapwatermarker.tables.LoriCoolCardsGeneratedMaps
@@ -30,6 +33,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.map.MapPalette
 import org.bukkit.map.MapRenderer
+import org.bukkit.map.MapView
 import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -103,7 +107,7 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 
 						player.inventory.setItemInMainHand(
 							item.lore(
-								"§7Diretamente de §dXerox da Pantufa§7...",
+								"§7Diretamente da §dGráfica da Pantufa§7...",
 								"§7(temos os melhores preços da região!)",
 								"§7§oUm incrível mapa para você!",
 								"§7",
@@ -230,5 +234,31 @@ class DreamMapWatermarker : KotlinPlugin(), Listener {
 
 		// Return the buffered image
 		return bimage
+	}
+
+	// This is just a smol API for other plugins to hook up into DreamMapWatermarker
+	suspend fun createImageOnMap(image: BufferedImage): MapView {
+		DreamUtils.assertMainThread(true)
+
+		// Create map
+		val map = Bukkit.createMap(Bukkit.getWorlds().first { it.name == "world" })
+
+		map.isLocked = true // Optimizes the map because the server doesn't attempt to get the world data when the player is holding the map in their hand
+		val renderers: List<MapRenderer> = map.renderers
+
+		for (r in renderers) {
+			map.removeRenderer(r)
+		}
+
+		map.addRenderer(ImgRenderer(MapPalette.imageToBytes(image)))
+
+		// Save map
+		onAsyncThread {
+			withContext(Dispatchers.IO) {
+				ImageIO.write(image, "png", File(imageFolder, "${map.id}.png"))
+			}
+		}
+
+		return map
 	}
 }

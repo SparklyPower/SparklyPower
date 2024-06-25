@@ -1,6 +1,10 @@
 package net.perfectdreams.pantufa.utils
 
+import net.perfectdreams.loritta.common.entities.Mentionable
+
 object Emotes {
+    val DefaultStyledPrefix = UnicodeEmote("\uD83D\uDD39")
+
     val PantufaCoffee = PantufaEmoji(
         853048446981111828,
         "pantufa_coffee",
@@ -96,17 +100,43 @@ object Emotes {
         "pantufa_thumbsup",
         false
     )
+    val Pesadelos = PantufaEmoji(
+        983023709369536582L,
+        "pesadelos",
+        false
+    )
+    val FilledMap = PantufaEmoji(
+        1254988625511186463L,
+        "filled_map",
+        false
+    )
+
+    sealed class Emote {
+        /**
+         * The emote name
+         */
+        abstract val name: String
+
+        abstract val asMention: String
+    }
 
     data class PantufaEmoji(
         val id: Long,
-        val name: String,
+        override val name: String,
         val animated: Boolean
-    ) {
-        val asMention: String
+    ) : Emote() {
+        override val asMention: String
             get() = "<${if (animated) "a" else ""}:$name:$id>"
 
         override fun toString(): String {
             return this.asMention
         }
+    }
+
+    class UnicodeEmote(override val name: String) : Emote() {
+        override val asMention: String
+            get() = name
+
+        override fun toString() = asMention
     }
 }

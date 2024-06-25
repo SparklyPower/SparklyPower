@@ -2,4 +2,5 @@ name: SparklyDreamer
 main: net.perfectdreams.sparklydreamer.SparklyDreamer
 version: 1.0.0
 depend: ["DreamCore"]
+softdepend: ["DreamCorreios", "DreamMapWatermarker"]
 api-version: 1.13

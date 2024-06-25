@@ -1,6 +1,8 @@
 package net.perfectdreams.loritta.morenitta.interactions.commands.options
 
+import net.dv8tion.jda.api.entities.Message.Attachment
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
+import net.perfectdreams.i18nhelper.core.keydata.StringI18nData
 
 open class ApplicationCommandOptions {
     companion object {
@@ -45,5 +47,11 @@ open class ApplicationCommandOptions {
         .also { registeredOptions.add(it) }
 
     fun optionalChannel(name: String, description: String) = ChannelDiscordOptionReference<GuildChannel?>(name, description, false)
+        .also { registeredOptions.add(it) }
+
+    fun attachment(name: String, description: String) = AttachmentDiscordOptionReference<Attachment>(name, description, true)
+        .also { registeredOptions.add(it) }
+
+    fun optionalAttachment(name: String, description: String) = AttachmentDiscordOptionReference<Attachment?>(name, description, false)
         .also { registeredOptions.add(it) }
 }

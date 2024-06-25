@@ -2,7 +2,21 @@ package net.perfectdreams.pantufa.api.commands
 
 import dev.minn.jda.ktx.messages.InlineMessage
 import kotlinx.serialization.json.JsonNull.content
-import net.perfectdreams.loritta.cinnamon.emotes.Emotes
+import net.perfectdreams.pantufa.utils.Emotes
+
+/**
+ * Appends a Loritta-styled formatted message to the builder's message content.
+ *
+ * By default, Loritta-styled formatting looks like this: `[prefix] **|** [content]`.
+ *
+ * If there's already content present in the builder, a new line will be inserted before the styled replied!
+ *
+ * @param content the content of the styled message
+ * @param prefix  the emote prefix of the styled message
+ */
+fun InlineMessage<*>.styled(content: String, prefix: Emotes.Emote) = styled(
+    PantufaReply(content, prefix.asMention)
+)
 
 /**
  * Appends a Loritta-styled formatted message to the builder's message content.

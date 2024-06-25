@@ -14,7 +14,13 @@ data class SparklyPowerConfig(
         val perfectDreamsSurvivalPort: Int,
         val perfectDreamsBungeeIp: String,
         val perfectDreamsBungeePort: Int,
-    )
+        val sparklyPowerSurvival: ServerRPC
+    ) {
+        @Serializable
+        data class ServerRPC(
+            val apiUrl: String
+        )
+    }
 
     @Serializable
     data class SparklyPowerGuildConfig(
@@ -23,6 +29,7 @@ data class SparklyPowerConfig(
         val whitelistedChannels: List<Long>,
         val whitelistedRoles: List<Long>,
         val staffChannelId: Long,
+        val pantufaPrintShopChannelId: Long,
         val memberRoleId: Long,
         val ownerRoleId: Long,
         val adminRoleId: Long,
