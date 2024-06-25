@@ -12,7 +12,8 @@ class GeneratePantufaPrintShopCustomMapsRequest(
 sealed class GeneratePantufaPrintShopCustomMapsResponse {
     @Serializable
     data class Success(
-        val requestedById: String
+        val requestedById: String,
+        val cost: Long
     ): GeneratePantufaPrintShopCustomMapsResponse()
 
     @Serializable
