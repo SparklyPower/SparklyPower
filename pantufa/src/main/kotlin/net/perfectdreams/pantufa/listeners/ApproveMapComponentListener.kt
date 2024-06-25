@@ -136,6 +136,8 @@ class ApproveMapComponentListener(val m: PantufaBot) : ListenerAdapter() {
 									|
 									|Pegue os mapas na `/warp correios`! (Se você estiver online no SparklyPower quando recebeu esta mensagem, você recebeu os mapas no seu inventário)
 									|
+									|**Sua imagem foi aprovada por:** ${event.user.asMention} (@${event.user.name}), que tal mandar um "obg ${event.user.asMention}" depois? ${Emotes.PantufaLick}
+									|
 									|$imagePreviewUrl""".trimMargin())
 								.await()
 						} catch (e: Exception) {
