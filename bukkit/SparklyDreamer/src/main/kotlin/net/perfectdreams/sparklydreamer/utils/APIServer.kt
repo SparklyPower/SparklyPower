@@ -160,6 +160,8 @@ class APIServer(private val plugin: SparklyDreamer) {
                         // Okay, so the plugin is enabled and ready to rock!
                         val request = Json.decodeFromString<GeneratePantufaPrintShopCustomMapsRequest>(call.receiveText())
 
+                        logger.info { "Processing map request ID ${request.requestId}, approved by ${request.approvedById}" }
+
                         val response = transaction(Databases.databaseNetwork) {
                             val mapsRequestId = request.requestId
                             // Get the map data from the database
@@ -268,6 +270,8 @@ class APIServer(private val plugin: SparklyDreamer) {
                                 customMap[PlayerPantufaPrintShopCustomMaps.requestedBy].toString()
                             )
                         }
+
+                        logger.info { "Successfully processed map request ID ${request.requestId}, approved by ${request.approvedById}! Result: $response" }
 
                         call.respondText(
                             Json.encodeToString<GeneratePantufaPrintShopCustomMapsResponse>(response),
