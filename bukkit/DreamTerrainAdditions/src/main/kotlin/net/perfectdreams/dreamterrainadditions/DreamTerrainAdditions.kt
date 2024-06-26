@@ -194,7 +194,9 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		val isOwner = claim.ownerID == e.player.uniqueId
 		val isTrusted = claim.hasExplicitPermission(e.player, ClaimPermission.Build)
 
-		val canFlyJetpackHere = if (claimAdditions.blockJetpacks == ClaimAdditionsData.JetpackBlockLevel.ALLOW_ONLY_TRUSTED) {
+		val canFlyJetpackHere = if (claimAdditions.blockJetpacks == ClaimAdditionsData.JetpackBlockLevel.ALLOW) {
+			true
+		} else if (claimAdditions.blockJetpacks == ClaimAdditionsData.JetpackBlockLevel.ALLOW_ONLY_TRUSTED) {
 			isOwner || isTrusted
 		} else {
 			false
