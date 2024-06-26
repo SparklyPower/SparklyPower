@@ -22,10 +22,14 @@ import org.bukkit.potion.PotionEffectType
 import java.util.*
 
 class DreamRoadProtector : KotlinPlugin(), Listener {
-	val lastLocations = WeakHashMap<Player, Location>()
-	val walkingOnRoadWithSpeed = SparklyNamespacedBooleanKey("is_on_road_with_speed")
-	val migratedToTheNewRoad = SparklyNamespacedBooleanKey("migrated_to_the_new_road")
-	val migratedToTheNewNewRoad = SparklyNamespacedBooleanKey("migrated_to_the_new_new_road")
+	private val lastLocations = WeakHashMap<Player, Location>()
+	private val walkingOnRoadWithSpeed = SparklyNamespacedBooleanKey("is_on_road_with_speed")
+	private val migratedToTheNewRoad = SparklyNamespacedBooleanKey("migrated_to_the_new_road")
+	private val migratedToTheNewNewRoad = SparklyNamespacedBooleanKey("migrated_to_the_new_new_road")
+	private val worldMigrations = setOf(
+		"world",
+		"Survival2"
+	)
 
 	override fun softEnable() {
 		super.softEnable()
@@ -74,8 +78,7 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 
 	@EventHandler
 	fun onChunkLoad(e: ChunkLoadEvent) {
-		// TODO: Migrate this ONCE AGAIN!
-		if (e.world.name == "Survival2") { // For now only on survival2
+		if (e.world.name in worldMigrations) {
 			if (!e.chunk.persistentDataContainer.get(migratedToTheNewNewRoad)) {
 				val hasMigratedToBookshelfs = e.chunk.persistentDataContainer.get(migratedToTheNewRoad)
 
@@ -142,16 +145,6 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 		if (e.player.hasPermission("dreamroadprotector.bypass"))
 			return
 
-		val fullyUsesNewRoadBlocks = e.block.world.name == "Survival2"
-
-		// TODO: We can allow black concrete in Survival2, but let's not do that for now
-		if (!fullyUsesNewRoadBlocks && e.block.type == Material.BLACK_CONCRETE) {
-			e.isCancelled = true
-			e.player.sendMessage("§cVocê não pode usar blocos de concreto preto!")
-			e.player.world.spawnParticle(Particle.ANGRY_VILLAGER, e.block.location.add(0.5, 0.0, 0.5), 20, 0.5, 0.5, 0.5)
-			return
-		}
-
 		val hasRoadNearby = hasRoadNearby(e.block.location)
 
 		if (hasRoadNearby) {
@@ -183,8 +176,6 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 		if (location.world.name != "world" && location.world.name != "Survival2")
 			return false
 
-		val fullyUsesNewRoadBlocks = location.world.name == "Survival2"
-
 		val x = location.blockX
 		val y = location.blockY
 		val z = location.blockZ
@@ -193,10 +184,6 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 			for (currentY in y - 5..y + 5) {
 				for (currentZ in z - 3..z + 3) {
 					val block = location.world.getBlockAt(currentX, currentY, currentZ)
-
-					val isConcrete = block.type == Material.BLACK_CONCRETE
-					if (!fullyUsesNewRoadBlocks && isConcrete)
-						return true
 
 					val isServerAsphalt = block.type == Material.SPARKLYPOWER_ASPHALT_SERVER || block.type == Material.SPARKLYPOWER_ASPHALT_SERVER_SLAB
 					if (isServerAsphalt)
