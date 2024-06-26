@@ -1,5 +1,7 @@
 package net.perfectdreams.pantufa.interactions.vanilla.minecraft
 
+import dev.minn.jda.ktx.interactions.components.button
+import dev.minn.jda.ktx.messages.MessageCreate
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
@@ -11,6 +13,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 import mu.KotlinLogging
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.dv8tion.jda.api.utils.FileUpload
 import net.perfectdreams.loritta.common.commands.CommandCategory
 import net.perfectdreams.loritta.morenitta.interactions.UnleashedContext
@@ -27,6 +30,8 @@ import net.perfectdreams.pantufa.utils.ImageUtils
 import net.perfectdreams.pantufa.utils.ImageUtils.clone
 import net.perfectdreams.pantufa.utils.ImageUtils.getResizedInstance
 import net.perfectdreams.pantufa.utils.SkinRendererUtils
+import net.perfectdreams.pantufa.utils.extensions.await
+import net.perfectdreams.pantufa.utils.extensions.toJDA
 import net.sparklypower.rpc.UpdatePlayerSkinRequest
 import net.sparklypower.rpc.UpdatePlayerSkinResponse
 import java.awt.Color
@@ -316,10 +321,6 @@ class SparklySkinCommand(val m: PantufaBot) : SlashCommandDeclarationWrapper {
                     return
                 }
 
-                mineSkinResponse.headers.forEach { s, strings ->
-                    println(s)
-                    println(strings)
-                }
                 this.mineSkinRatelimitHeaders = MineSkinRatelimitHeaders(
                     mineSkinResponse.headers["x-ratelimit-remaining"]!!.toInt(),
                     mineSkinResponse.headers["x-ratelimit-reset"]!!.toLong(),
@@ -388,6 +389,27 @@ class SparklySkinCommand(val m: PantufaBot) : SlashCommandDeclarationWrapper {
 
                         files += FileUpload.fromData(scaledSkinStatueAsBytes, "new_skin_statue.png")
                     }
+
+                    val channel = m.jda.getTextChannelById(m.config.sparklyPower.guild.sparklySkinsLogChannelId) ?: return
+                    channel.sendMessage(
+                        MessageCreate {
+                            styled(
+                                "**Skin enviada na Pantufa por:** ${context.user.asMention} [**`${account.username}`** (`${account.uniqueId}`)]"
+                            )
+
+                            styled(
+                                "**Texture Value:** `$mineSkinTextureValue`"
+                            )
+
+                            styled(
+                                "**Texture Signature:** `$mineSkinTextureSignature`"
+                            )
+
+
+                            files += FileUpload.fromData(imageAsByteArray, "skin_image.png")
+                            files += FileUpload.fromData(scaledSkinStatueAsBytes, "new_skin_statue.png")
+                        }
+                    ).await()
                 }
             }
         }
