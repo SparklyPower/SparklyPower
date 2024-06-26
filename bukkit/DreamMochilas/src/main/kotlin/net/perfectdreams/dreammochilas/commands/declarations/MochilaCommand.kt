@@ -39,6 +39,11 @@ class MochilaCommand(val m: DreamMochilas) : SparklyCommandDeclarationWrapper {
             executor = MochilasMemoryExecutor(m)
         }
 
+        subcommand(listOf("clearlocks")) {
+            permissions = listOf("sparklymochilas.setup")
+            executor = ClearMochilasLockExecutor(m)
+        }
+
         subcommand(listOf("hack_tests")) {
             subcommand(listOf("interact_and_open")) {
                 permissions = listOf("sparklymochilas.setup")
