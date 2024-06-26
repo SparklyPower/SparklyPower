@@ -34,6 +34,7 @@ class DreamMenu(val size: Int, val title: Component, val cancelItemMovement: Boo
 						.meta<ItemMeta> {
 							displayName(Component.empty())
 							setCustomModelData(2)
+							isHideTooltip = true // Do not show the item's tooltip!
 						}
 				)
 			}
