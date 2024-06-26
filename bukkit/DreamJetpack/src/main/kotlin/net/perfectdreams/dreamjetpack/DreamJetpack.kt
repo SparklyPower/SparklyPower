@@ -12,6 +12,7 @@ import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
 import net.perfectdreams.dreamcore.utils.preferences.sendMessage
+import net.perfectdreams.dreamjetpack.events.PlayerJetpackCheckEvent
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
@@ -122,6 +123,18 @@ class DreamJetpack : KotlinPlugin(), Listener {
 					if (chestplate.containsEnchantment(Enchantment.MENDING))
 						chestplate.removeEnchantment(Enchantment.MENDING)
 
+					val jetpackCheckEvent = PlayerJetpackCheckEvent(player)
+					val success = jetpackCheckEvent.callEvent()
+					if (!success) {
+						// Event was cancelled! This means that the player should stop flying
+						toBeRemoved.add(player)
+						bossBars[player]?.removeAll()
+						bossBars.remove(player)
+
+						player.allowFlight = false
+						continue
+					}
+
 					val meta = chestplate.itemMeta as org.bukkit.inventory.meta.Damageable
 
 					val applyDamage = when {
@@ -224,6 +237,13 @@ class DreamJetpack : KotlinPlugin(), Listener {
 
 					if (blacklistedWorlds.contains(e.player.world.name)) {
 						e.player.sendMessage("$PREFIX §cVocê não pode voar aqui")
+						return
+					}
+
+					val jetpackCheckEvent = PlayerJetpackCheckEvent(e.player)
+					val success = jetpackCheckEvent.callEvent()
+					if (!success) {
+						// Check event wasn't a success, bail out!
 						return
 					}
 

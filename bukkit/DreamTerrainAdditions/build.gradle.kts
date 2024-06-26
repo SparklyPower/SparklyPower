@@ -15,6 +15,7 @@ dependencies {
     paperweight.devBundle("net.sparklypower.sparklypaper", "1.20.6-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
     compileOnly(project(":bukkit:DreamVanish"))
+    compileOnly(project(":bukkit:DreamJetpack"))
 }
 
 kotlin {

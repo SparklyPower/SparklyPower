@@ -240,6 +240,34 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                             plugin.saveInAsyncTask()
                         }
                     }
+                    slot(5, 3) {
+                        item = ItemStack(Material.CHAINMAIL_CHESTPLATE)
+                            .meta<ItemMeta> {
+                                if (claimAdditions.blockJetpacks == DreamTerrainAdditions.ClaimAdditionsData.JetpackBlockLevel.ALLOW_ONLY_TRUSTED) {
+                                    setDisplayName("§a§lPermitir que usem Jetpack no terreno")
+                                } else {
+                                    setDisplayName("§b§Bloquear que usem Jetpack no terreno")
+                                }
+
+                                lore = listOf(
+                                    "§7Bloqueia outros players de usarem Jetpack no seu terreno, exceto quem tem permissão no terreno.",
+                                )
+                            }
+
+                        onClick {
+                            it.closeInventory()
+                            // TODO: This can be way more complex
+                            claimAdditions.blockJetpacks = if (claimAdditions.blockJetpacks == DreamTerrainAdditions.ClaimAdditionsData.JetpackBlockLevel.ALLOW_ONLY_TRUSTED) {
+                                DreamTerrainAdditions.ClaimAdditionsData.JetpackBlockLevel.ALLOW
+                            } else {
+                                DreamTerrainAdditions.ClaimAdditionsData.JetpackBlockLevel.ALLOW_ONLY_TRUSTED
+                            }
+                            val areJetpacksAllowed = claimAdditions.blockJetpacks == DreamTerrainAdditions.ClaimAdditionsData.JetpackBlockLevel.ALLOW
+                            it.sendMessage("§aO bloqueio de Jetpacks no terreno está agora ${humanizeBoolean(areJetpacksAllowed)} no seu terreno!")
+
+                            plugin.saveInAsyncTask()
+                        }
+                    }
 
                     slot(8, 1) {
                         item = ItemStack(Material.PLAYER_HEAD)

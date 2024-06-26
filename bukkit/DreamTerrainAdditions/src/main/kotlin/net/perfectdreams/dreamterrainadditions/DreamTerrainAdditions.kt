@@ -5,24 +5,21 @@ import com.okkero.skedule.schedule
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import me.ryanhamshire.GriefPrevention.ClaimPermission
 import me.ryanhamshire.GriefPrevention.GriefPrevention
-import me.ryanhamshire.GriefPrevention.events.ClaimChangeEvent
-import me.ryanhamshire.GriefPrevention.events.ClaimCreatedEvent
-import me.ryanhamshire.GriefPrevention.events.ClaimResizeEvent
 import me.ryanhamshire.GriefPrevention.events.TrustChangedEvent
+import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
-import net.perfectdreams.dreamcore.utils.VaultUtils
+import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler
-import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.serializer.UUIDAsStringSerializer
+import net.perfectdreams.dreamjetpack.DreamJetpack
+import net.perfectdreams.dreamjetpack.events.PlayerJetpackCheckEvent
 import net.perfectdreams.dreamterrainadditions.commands.*
 import net.perfectdreams.dreamterrainadditions.commands.declarations.TempTrustCommand
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -169,6 +166,49 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 			e.isCancelled = true
 
 			e.player.sendTitle("§f", "§cO dono não deixa outros players entrarem no terreno!", 0, 60, 0)
+		} else if (claimAdditions.blockJetpacks != ClaimAdditionsData.JetpackBlockLevel.ALLOW && DreamJetpack.INSTANCE.flyingPlayers.contains(e.player)) {
+			// Okay, it isn't allowed...
+			val isOwner = claim.ownerID == e.player.uniqueId
+			val isTrusted = claim.hasExplicitPermission(e.player, ClaimPermission.Build)
+
+			val canFlyJetpackHere = if (claimAdditions.blockJetpacks == ClaimAdditionsData.JetpackBlockLevel.ALLOW_ONLY_TRUSTED) {
+				isOwner || isTrusted
+			} else {
+				false
+			}
+
+			if (!canFlyJetpackHere) {
+				// This is not a ban, we are just checking if the player is flying with a Jetpack but they are trying to enter a restricted claim
+				e.isCancelled = true
+				e.player.sendTitle("§f", "§cO dono não deixa players entrarem usando uma Jetpack!", 0, 60, 0)
+			}
+		}
+	}
+
+	@EventHandler
+	fun onToggleJetpack(e: PlayerJetpackCheckEvent) {
+		// Are we in a claim?
+		val claim = GriefPrevention.instance.dataStore.getClaimAt(e.player.location, false, null) ?: return
+		val claimAdditions = getClaimAdditionsById(claim.id) ?: return
+
+		val isOwner = claim.ownerID == e.player.uniqueId
+		val isTrusted = claim.hasExplicitPermission(e.player, ClaimPermission.Build)
+
+		val canFlyJetpackHere = if (claimAdditions.blockJetpacks == ClaimAdditionsData.JetpackBlockLevel.ALLOW_ONLY_TRUSTED) {
+			isOwner || isTrusted
+		} else {
+			false
+		}
+
+		if (!canFlyJetpackHere) {
+			// You can't fly in here my duuuude!
+			e.player.sendActionBar(
+				textComponent {
+					color(NamedTextColor.RED)
+					content("O dono do terreno bloqueou o uso de Jetpacks aqui!")
+				}
+			)
+			e.isCancelled = true
 		}
 	}
 
@@ -229,7 +269,6 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		EntityType.TRADER_LLAMA,
 		EntityType.TROPICAL_FISH,
 		EntityType.FROG,
-
 	)
 
 	val aggressiveMobs = listOf(
@@ -423,6 +462,7 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		var disableTrapdoorAndDoorAccess by data::disableTrapdoorAndDoorAccess
 		var allowSpawnFromMobSpawners by data::allowSpawnFromMobSpawners
 		var blockAllPlayersExceptTrusted by data::blockAllPlayersExceptTrusted
+		var blockJetpacks by data::blockJetpacks
 
 		val temporaryTrustedPlayersMutex = Mutex()
 	}
@@ -440,6 +480,24 @@ class DreamTerrainAdditions : KotlinPlugin(), Listener {
 		var disablePlantsSpreading: Boolean = false,
 		var disableTrapdoorAndDoorAccess: Boolean = false,
 		var allowSpawnFromMobSpawners: Boolean = false,
-		var blockAllPlayersExceptTrusted: Boolean = false
-	)
+		var blockAllPlayersExceptTrusted: Boolean = false,
+		var blockJetpacks: JetpackBlockLevel = JetpackBlockLevel.ALLOW
+	) {
+		enum class JetpackBlockLevel {
+			/**
+			 * Everyone can use Jetpacks
+			 */
+			ALLOW,
+
+			/**
+			 * Only trusted users can use Jetpacks
+			 */
+			ALLOW_ONLY_TRUSTED,
+
+			/**
+			 * No one can use jetpacks, including the owner
+			 */
+			DENY
+		}
+	}
 }
