@@ -262,8 +262,8 @@ object ConfigureClaimCommand : DSLCommandBase<DreamTerrainAdditions> {
                             } else {
                                 DreamTerrainAdditions.ClaimAdditionsData.JetpackBlockLevel.ALLOW_ONLY_TRUSTED
                             }
-                            val areJetpacksAllowed = claimAdditions.blockJetpacks == DreamTerrainAdditions.ClaimAdditionsData.JetpackBlockLevel.ALLOW
-                            it.sendMessage("§aO bloqueio de Jetpacks no terreno está agora ${humanizeBoolean(areJetpacksAllowed)} no seu terreno!")
+                            val areJetpacksDisallowed = claimAdditions.blockJetpacks != DreamTerrainAdditions.ClaimAdditionsData.JetpackBlockLevel.ALLOW
+                            it.sendMessage("§aO bloqueio de Jetpacks no terreno está agora ${humanizeBoolean(areJetpacksDisallowed)} no seu terreno!")
 
                             plugin.saveInAsyncTask()
                         }
