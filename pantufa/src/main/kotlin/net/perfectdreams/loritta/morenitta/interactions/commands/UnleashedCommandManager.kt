@@ -64,6 +64,7 @@ class UnleashedCommandManager(val m: PantufaBot) {
         register(ChatColorCommand())
         register(SparklyPlayerCommand())
         register(CustomMapCommand(pantufa))
+        register(SparklySkinCommand(pantufa))
 
         // ===[ Moderation ]===
         register(AdminConsoleBungeeCommand())

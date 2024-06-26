@@ -13,5 +13,6 @@ data class PantufaConfig(
     val postgreSqlLoritta: PostgreSqlConfig,
     val mariaDbCraftConomy: PostgreSqlConfig,
     val grafana: GrafanaConfig,
-    val sparklyPower: SparklyPowerConfig
+    val sparklyPower: SparklyPowerConfig,
+    val mineSkin: MineSkinConfig
 )

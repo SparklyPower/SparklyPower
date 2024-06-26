@@ -1,5 +1,6 @@
 package net.perfectdreams.sparklydreamer.utils
 
+import com.destroystokyo.paper.profile.ProfileProperty
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -9,6 +10,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.add
@@ -17,12 +19,15 @@ import net.perfectdreams.dreamcash.DreamCash
 import net.perfectdreams.dreamcash.tables.Cashes
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.cash.NightmaresCashRegister
+import net.perfectdreams.dreamcore.tables.PlayerSkins
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.lore
+import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamcore.utils.set
+import net.perfectdreams.dreamcore.utils.skins.StoredDatabaseSkin
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker.Companion.LOCK_MAP_CRAFT_KEY
@@ -43,6 +48,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.sql.upsert
 import java.time.Instant
 import java.util.*
 import javax.imageio.ImageIO
@@ -288,6 +294,53 @@ class APIServer(private val plugin: SparklyDreamer) {
                             ContentType.Application.Json
                         )
                     }
+                }
+
+                post("/update-player-skin") {
+                    val request = Json.decodeFromString<UpdatePlayerSkinRequest>(call.receiveText())
+
+                    // Set the current player's skin in the database
+                    transaction(Databases.databaseNetwork) {
+                        PlayerSkins.upsert(PlayerSkins.id) {
+                            it[PlayerSkins.id] = UUID.fromString(request.requestedById)
+                            it[PlayerSkins.data] = Json.encodeToString<StoredDatabaseSkin>(
+                                StoredDatabaseSkin.CustomMojangSkin(
+                                    request.skinId,
+                                    Clock.System.now(),
+                                    request.playerTextureValue,
+                                    request.playerTextureSignature
+                                )
+                            )
+                        }
+                    }
+
+                    val player = Bukkit.getPlayer(UUID.fromString(request.requestedById))
+
+                    if (player != null) {
+                        val playerProfileUpdate = plugin.launchMainThreadDeferred {
+                            // Update the player's profile
+                            // This works, and it is WAY simpler than the whatever hacky hack SkinsRestorer is doing
+                            val playerProfile = player.playerProfile
+                            playerProfile.removeProperty("textures")
+                            playerProfile.setProperty(
+                                ProfileProperty(
+                                    "textures",
+                                    request.playerTextureValue,
+                                    request.playerTextureSignature
+                                )
+                            )
+                            player.playerProfile = playerProfile
+
+                            player.sendMessage("§aSkin atualizada!")
+                        }
+
+                        playerProfileUpdate.await()
+                    }
+
+                    call.respondText(
+                        Json.encodeToString<UpdatePlayerSkinResponse>(UpdatePlayerSkinResponse.Success(player != null)),
+                        ContentType.Application.Json
+                    )
                 }
             }
         }

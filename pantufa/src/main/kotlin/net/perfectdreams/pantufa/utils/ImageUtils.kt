@@ -2,6 +2,8 @@ package net.perfectdreams.pantufa.utils
 
 import mu.KotlinLogging
 import net.perfectdreams.pantufa.PantufaBot
+import java.awt.Image
+import java.awt.RenderingHints
 import java.awt.image.BufferedImage
 import java.net.HttpURLConnection
 import java.net.URL
@@ -77,5 +79,40 @@ object ImageUtils {
         }
 
         return null
+    }
+
+    /**
+     * Clones the image
+     */
+    fun BufferedImage.clone() = deepCopy(this)
+
+    fun deepCopy(bi: BufferedImage): BufferedImage {
+        val cm = bi.colorModel
+        val isAlphaPremultiplied = cm.isAlphaPremultiplied
+        val raster = bi.copyData(bi.raster.createCompatibleWritableRaster())
+        return BufferedImage(cm, raster, isAlphaPremultiplied, null)
+    }
+
+    /**
+     * Resizes an image, this is way faster than using [Image.getScaledInstance], see [https://stackoverflow.com/a/32278737/7271796](https://stackoverflow.com/a/32278737/7271796)
+     */
+    fun BufferedImage.getResizedInstance(width: Int, height: Int, interpolationHint: InterpolationType): BufferedImage {
+        if (this.getWidth(null) == width && this.getHeight(null) == height)
+            return this // It already is in the right size, yay! We don't need to resize it :3
+
+        val newImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+        val graphics = newImage.createGraphics()
+        graphics.setRenderingHint(
+            RenderingHints.KEY_INTERPOLATION,
+            interpolationHint.graphics2DRenderingHint
+        )
+        graphics.drawImage(this, 0, 0, width, height, null)
+        return newImage
+    }
+
+    enum class InterpolationType(val graphics2DRenderingHint: Any) {
+        NEAREST_NEIGHBOR(RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR),
+        BILINEAR(RenderingHints.VALUE_INTERPOLATION_BILINEAR),
+        BICUBIC(RenderingHints.VALUE_INTERPOLATION_BICUBIC)
     }
 }
