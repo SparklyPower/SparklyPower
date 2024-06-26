@@ -85,17 +85,27 @@ class DreamJetpack : KotlinPlugin(), Listener {
 			while (true) {
 				for (player in flyingPlayers) {
 					if (player.isFlying) {
-						player.world.spawnParticle(
-							Particle.CAMPFIRE_COSY_SMOKE,
-							player.location.clone()
-								.add(0.0, 0.6, 0.0)
-								.add(player.location.direction.multiply(-0.2)),
-							0,
-							0.0,
-							-0.25,
-							0.0,
-							0.5
-						)
+						// Okay this may seem weird but Bedrock's particles are BORKED as all hell
+						// Instead of the smoke floating down in a beautiful way, it goes up, and that's VERY annoying
+						// So we won't send these particles to Bedrock players
+						val targetParticleSpawnLocation = player.location.clone()
+							.add(0.0, 0.6, 0.0)
+							.add(player.location.direction.multiply(-0.3))
+
+						for (playerInWorld in player.world.players) {
+							if (!playerInWorld.isBedrockClient) {
+								playerInWorld.spawnParticle(
+									Particle.CAMPFIRE_COSY_SMOKE,
+									targetParticleSpawnLocation,
+									0,
+									0.0,
+									-0.25,
+									0.0,
+									0.5
+								)
+							}
+						}
+
 					}
 				}
 
