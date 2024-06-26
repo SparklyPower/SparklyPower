@@ -107,7 +107,7 @@ class APIServer(private val plugin: SparklyDreamer) {
                     )
                 }
 
-                post("/prestart-pantufa-print-shop-maps") {
+                post("/pantufa/prestart-pantufa-print-shop-maps") {
                     val dreamCashPlugin = Bukkit.getPluginManager().getPlugin("DreamCash")?.let { if (it.isEnabled) it else null }
 
                     if (dreamCashPlugin != null) {
@@ -154,7 +154,7 @@ class APIServer(private val plugin: SparklyDreamer) {
                     }
                 }
 
-                post("/create-pantufa-print-shop-maps") {
+                post("/pantufa/create-pantufa-print-shop-maps") {
                     val dreamMapWatermarkerPlugin = Bukkit.getPluginManager().getPlugin("DreamMapWatermarker")?.let { if (it.isEnabled) it else null }
                     val dreamCorreiosPlugin = Bukkit.getPluginManager().getPlugin("DreamCorreios")?.let { if (it.isEnabled) it else null }
                     val dreamCashPlugin = Bukkit.getPluginManager().getPlugin("DreamCash")?.let { if (it.isEnabled) it else null }
@@ -296,7 +296,7 @@ class APIServer(private val plugin: SparklyDreamer) {
                     }
                 }
 
-                post("/update-player-skin") {
+                post("/pantufa/update-player-skin") {
                     val request = Json.decodeFromString<UpdatePlayerSkinRequest>(call.receiveText())
 
                     // Set the current player's skin in the database

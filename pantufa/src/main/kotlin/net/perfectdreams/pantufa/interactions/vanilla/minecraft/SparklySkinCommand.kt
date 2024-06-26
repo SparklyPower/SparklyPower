@@ -349,7 +349,7 @@ class SparklySkinCommand(val m: PantufaBot) : SlashCommandDeclarationWrapper {
                 .content
 
             val skinUpdateResponse = Json.decodeFromString<UpdatePlayerSkinResponse>(
-                PantufaBot.http.post("${m.config.sparklyPower.server.sparklyPowerSurvival.apiUrl.removeSuffix("/")}/update-player-skin") {
+                PantufaBot.http.post("${m.config.sparklyPower.server.sparklyPowerSurvival.apiUrl.removeSuffix("/")}/pantufa/update-player-skin") {
                     setBody(
                         Json.encodeToString(
                             UpdatePlayerSkinRequest(

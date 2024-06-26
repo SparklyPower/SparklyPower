@@ -48,7 +48,7 @@ class ApproveMapComponentListener(val m: PantufaBot) : ListenerAdapter() {
 
 				val response = mutex.withLock {
 					Json.decodeFromString<GeneratePantufaPrintShopCustomMapsResponse>(
-						PantufaBot.http.post("${m.config.sparklyPower.server.sparklyPowerSurvival.apiUrl.removeSuffix("/")}/create-pantufa-print-shop-maps") {
+						PantufaBot.http.post("${m.config.sparklyPower.server.sparklyPowerSurvival.apiUrl.removeSuffix("/")}/pantufa/create-pantufa-print-shop-maps") {
 							setBody(
 								Json.encodeToString(
 									GeneratePantufaPrintShopCustomMapsRequest(mapId, minecraftAccountId.toString())

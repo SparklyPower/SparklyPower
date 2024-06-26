@@ -356,7 +356,7 @@ class CustomMapCommand(val m: PantufaBot) : SlashCommandDeclarationWrapper {
             }
 
             val prestartResponse = Json.decodeFromString<PrestartPantufaPrintShopCustomMapsResponse>(
-                PantufaBot.http.post("${m.config.sparklyPower.server.sparklyPowerSurvival.apiUrl.removeSuffix("/")}/prestart-pantufa-print-shop-maps") {
+                PantufaBot.http.post("${m.config.sparklyPower.server.sparklyPowerSurvival.apiUrl.removeSuffix("/")}/pantufa/prestart-pantufa-print-shop-maps") {
                     setBody(
                         Json.encodeToString(
                             PrestartPantufaPrintShopCustomMapsRequest(account.uniqueId.toString(), amountOfImagesOnItemFrames)
