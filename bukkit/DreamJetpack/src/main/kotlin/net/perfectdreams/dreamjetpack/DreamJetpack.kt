@@ -35,7 +35,6 @@ class DreamJetpack : KotlinPlugin(), Listener {
 	companion object {
 		lateinit var INSTANCE: DreamJetpack
 		val PREFIX = "§8[§a§lJetpack§8]§e"
-		const val TAKE_DAMAGE_EVERY = 180
 		val IS_JETPACK_KEY = SparklyNamespacedBooleanKey("is_jetpack")
 	}
 
@@ -166,11 +165,23 @@ class DreamJetpack : KotlinPlugin(), Listener {
 					val applyDamage = when {
 						player.hasPermission("dreamjetpack.vip++") -> 0
 						player.hasPermission("dreamjetpack.vip+") -> 1
-						player.hasPermission("dreamjetpack.vip") -> 2
-						else -> 3
+						player.hasPermission("dreamjetpack.vip") -> 1
+						else -> 1
 					}
 
-					if (durabilityTicks % TAKE_DAMAGE_EVERY == 0) {
+					// Before this was 180 for every rank, but now we will control exactly when the damage is applied
+					// VIP++: Unlimited
+					// VIP+: 8 hours
+					// VIP: 4 hours
+					// Normal players: One hour
+					val takeDamageEvery = when {
+						player.hasPermission("dreamjetpack.vip++") -> 120 // Unused
+						player.hasPermission("dreamjetpack.vip+") -> 120
+						player.hasPermission("dreamjetpack.vip") -> 60
+						else -> 15
+					}
+
+					if (durabilityTicks % takeDamageEvery == 0) {
 						if (applyDamage == 0) {
 							meta.damage = 0
 						} else {
@@ -209,7 +220,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 
 						val timeRemaining = if (applyDamage == 0)
 							-1
-						else ((TAKE_DAMAGE_EVERY * (240 - meta.damage) / applyDamage) - durabilityTicks % TAKE_DAMAGE_EVERY)
+						else ((takeDamageEvery * (240 - meta.damage) / applyDamage) - durabilityTicks % takeDamageEvery)
 
 						val minutes = timeRemaining / 60
 						val seconds = timeRemaining % 60
