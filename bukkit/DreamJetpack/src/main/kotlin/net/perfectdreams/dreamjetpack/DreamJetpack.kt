@@ -12,10 +12,12 @@ import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
 import net.perfectdreams.dreamcore.utils.preferences.sendMessage
+import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamjetpack.events.PlayerJetpackCheckEvent
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
+import org.bukkit.Particle.DustOptions
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.boss.BossBar
@@ -27,6 +29,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
+import java.awt.Color
 
 class DreamJetpack : KotlinPlugin(), Listener {
 	companion object {
@@ -77,6 +80,29 @@ class DreamJetpack : KotlinPlugin(), Listener {
 				sender.sendMessage("§aVocê recebeu uma Jetpack!")
 			}
 		})
+
+		// We spawn the particles on a separate thread because it looks smoother because we can change how many times it is triggered every tick :3
+		launchMainThread {
+			while (true) {
+				for (player in flyingPlayers) {
+					if (player.isFlying) {
+						player.world.spawnParticle(
+							Particle.CAMPFIRE_COSY_SMOKE,
+							player.location.clone()
+								.add(0.0, 0.6, 0.0)
+								.add(player.location.direction.multiply(-0.2)),
+							0,
+							0.0,
+							-0.25,
+							0.0,
+							0.5
+						)
+					}
+				}
+
+				delayTicks(2L)
+			}
+		}
 
 		scheduler().schedule(this) {
 			while (true) {
@@ -207,9 +233,7 @@ class DreamJetpack : KotlinPlugin(), Listener {
 						}
 					}
 
-					player.world.spawnParticle(Particle.SMOKE, player.location, 20, 1.0, 1.0, 1.0)
-
-					chestplate.itemMeta = meta as ItemMeta
+					chestplate.itemMeta = meta
 				}
 
 				flyingPlayers.removeAll(toBeRemoved)
