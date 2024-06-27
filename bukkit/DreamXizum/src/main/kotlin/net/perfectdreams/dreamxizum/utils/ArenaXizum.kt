@@ -179,7 +179,7 @@ class ArenaXizum(val m: DreamXizum, val data: ArenaXizumData) {
 
 		val head = ItemStack(Material.PLAYER_HEAD, 1)
 		val meta = head.itemMeta as SkullMeta
-		meta.owner = loser.name
+		meta.playerProfile = loser.playerProfile
 		head.itemMeta = meta
 		val item = loserLocation.world.dropItemNaturally(loserLocation, head)
 
