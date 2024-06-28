@@ -2,21 +2,30 @@ package net.perfectdreams.dreamcash.commands
 
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.luckperms.api.LuckPermsProvider
 import net.luckperms.api.node.types.InheritanceNode
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
+import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcash.DreamCash
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamclubes.tables.ClubeHomeUpgrades
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.adventure.append
+import net.perfectdreams.dreamcore.utils.adventure.appendTextComponent
+import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
+import net.perfectdreams.dreamcore.utils.adventure.lore
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamloja.DreamLoja
 import net.perfectdreams.dreamloja.tables.ShopWarpUpgrades
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.jetbrains.exposed.sql.insert
@@ -39,7 +48,309 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
         val lojaUpgradePrice = (lojaUpgradeCount + 1) * 400
 
         val menu = createMenu(54, "§fꈉ\ue261") {
-            fun generateItemAt(x: Int, y: Int, type: Material, customModelData: Int? = null, name: String, quantity: Long, callback: () -> (Boolean)) {
+            // VIPs
+            val isVipPlusPlus = sender.hasPermission("group.vip++")
+            val isVipPlus = sender.hasPermission("group.vip+")
+            val isVip = sender.hasPermission("group.vip")
+            val hasAnyVip = isVip || isVipPlus || isVipPlusPlus
+
+            fun generateVIPItemAt(
+                x: Int,
+                y: Int,
+                type: Material,
+                customModelData: Int? = null,
+                name: String,
+                groupName: String,
+                quantity: Long
+            ) {
+                slot(x, y) {
+                    item = ItemStack(type)
+                        .rename(name)
+                        .lore(
+                            "§c$quantity pesadelos"
+                        )
+                        .meta<ItemMeta> {
+                            setCustomModelData(customModelData)
+                        }
+
+                    onClick {
+                        if (hasAnyVip && !isVip) {
+                            sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
+                            return@onClick
+                        }
+
+                        // TODO: Refactor this to avoid duplicate code between the Java Edition vs Bedrock Edition GUIs
+                        val menu = if (!sender.isBedrockClient) {
+                            createMenu(9 * 3, "§fꈉ\uE291陇§a§lDuração do $name") {
+                                // The item may be 5 slots, but we use the last slot for the "fake" button
+                                repeat(3) { y ->
+                                    val days: Int
+                                    val discount: Int
+                                    val multiplyValueBy: Int
+
+                                    when (y) {
+                                        0 -> {
+                                            days = 30
+                                            discount = 0
+                                            multiplyValueBy = 1
+                                        }
+                                        1 -> {
+                                            days = 90
+                                            discount = 0
+                                            multiplyValueBy = 3
+                                        }
+                                        2 -> {
+                                            days = 180
+                                            discount = 10
+                                            multiplyValueBy = 6
+                                        }
+                                        else -> error("Unexpected y value! $y")
+                                    }
+
+                                    val realPriceInPesadelos = ((quantity * multiplyValueBy) * ((100 - discount) / 100.0)).toLong()
+
+                                    repeat(5) {
+                                        slot(4 + it, y) {
+                                            val itemStackToBeApplied = if (it == 4) {
+                                                ItemStack(Material.PAPER)
+                                                    .meta<ItemMeta> {
+                                                        isHideTooltip = true
+                                                        setCustomModelData(204 + y)
+                                                    }
+                                            } else {
+                                                ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
+                                                    .meta<ItemMeta> {
+                                                        setCustomModelData(2)
+                                                    }
+                                            }
+
+                                            item = itemStackToBeApplied
+                                                .meta<ItemMeta> {
+                                                    displayNameWithoutDecorations {
+                                                        color(NamedTextColor.GREEN)
+                                                        append("Comprar - $days dias")
+                                                        append(" ")
+                                                        if (discount != 0) {
+                                                            appendTextComponent {
+                                                                color(NamedTextColor.RED)
+                                                                decorate(TextDecoration.BOLD)
+                                                                content("[$discount% OFF]")
+                                                            }
+                                                        }
+                                                    }
+
+                                                    lore {
+                                                        textWithoutDecorations {
+                                                            color(NamedTextColor.GRAY)
+                                                            append("Preço: ")
+
+                                                            appendTextComponent {
+                                                                color(NamedTextColor.WHITE)
+                                                                append("\uE290")
+                                                            }
+
+                                                            append(" ")
+
+                                                            appendTextComponent {
+                                                                color(NamedTextColor.GREEN)
+                                                                content("$realPriceInPesadelos pesadelos")
+                                                            }
+                                                        }
+
+                                                        this.emptyLine()
+
+                                                        textWithoutDecorations {
+                                                            color(NamedTextColor.YELLOW)
+                                                            content("Clique para confirmar a compra!")
+                                                        }
+                                                    }
+
+                                                    this.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
+                                                }
+
+                                            onClick {
+                                                checkIfPlayerHasSufficientMoney(sender, realPriceInPesadelos) {
+                                                    InventoryUtils.askForConfirmation(
+                                                        sender,
+                                                        afterAccept = {
+                                                            sender.closeInventory()
+
+                                                            m.launchAsyncThread {
+                                                                transaction(Databases.databaseNetwork) {
+                                                                    try {
+                                                                        Cash.takeCash(
+                                                                            sender,
+                                                                            realPriceInPesadelos,
+                                                                            TransactionContext(extra = "comprar `$name ($days dias)` no `/lojacash`")
+                                                                        )
+                                                                    } catch (e: IllegalArgumentException) {
+                                                                        sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
+                                                                        return@transaction
+                                                                    }
+                                                                }
+
+                                                                onMainThread {
+                                                                    Bukkit.dispatchCommand(
+                                                                        Bukkit.getConsoleSender(),
+                                                                        "lp user ${sender.name} parent addtemp $groupName ${days}d accumulate"
+                                                                    )
+
+                                                                    sender.sendMessage("§aObrigado pela compra! ^-^")
+
+                                                                    Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou $name ($days dias)§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
+                                                                }
+                                                            }
+                                                        },
+                                                        afterDecline = {
+                                                            it.closeInventory()
+                                                            showShopMenu(sender)
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            // Bedrock Fallback
+                            createMenu(9, "§a§lDuração do $name") {
+                                repeat(3) { y ->
+                                    val days: Int
+                                    val discount: Int
+                                    val multiplyValueBy: Int
+                                    val material: Material
+
+                                    when (y) {
+                                        0 -> {
+                                            days = 30
+                                            discount = 0
+                                            multiplyValueBy = 1
+                                            material = Material.IRON_INGOT
+                                        }
+                                        1 -> {
+                                            days = 90
+                                            discount = 0
+                                            multiplyValueBy = 3
+                                            material = Material.GOLD_INGOT
+                                        }
+                                        2 -> {
+                                            days = 180
+                                            discount = 10
+                                            multiplyValueBy = 6
+                                            material = Material.DIAMOND
+                                        }
+                                        else -> error("Unexpected y value! $y")
+                                    }
+
+                                    val realPriceInPesadelos = ((quantity * multiplyValueBy) * ((100 - discount) / 100.0)).toLong()
+
+                                    slot(y, 0) {
+                                        val itemStackToBeApplied = ItemStack(material)
+
+                                        item = itemStackToBeApplied
+                                            .meta<ItemMeta> {
+                                                displayNameWithoutDecorations {
+                                                    color(NamedTextColor.GREEN)
+                                                    append("Comprar - $days dias")
+                                                    append(" ")
+                                                    if (discount != 0) {
+                                                        appendTextComponent {
+                                                            color(NamedTextColor.RED)
+                                                            decorate(TextDecoration.BOLD)
+                                                            content("[$discount% OFF]")
+                                                        }
+                                                    }
+                                                }
+
+                                                lore {
+                                                    textWithoutDecorations {
+                                                        color(NamedTextColor.GRAY)
+                                                        append("Preço: ")
+
+                                                        appendTextComponent {
+                                                            color(NamedTextColor.WHITE)
+                                                            append("\uE290")
+                                                        }
+
+                                                        append(" ")
+
+                                                        appendTextComponent {
+                                                            color(NamedTextColor.GREEN)
+                                                            content("$realPriceInPesadelos pesadelos")
+                                                        }
+                                                    }
+
+                                                    this.emptyLine()
+
+                                                    textWithoutDecorations {
+                                                        color(NamedTextColor.YELLOW)
+                                                        content("Clique para confirmar a compra!")
+                                                    }
+                                                }
+
+                                                this.addItemFlags(ItemFlag.HIDE_ADDITIONAL_TOOLTIP)
+                                            }
+
+                                        onClick {
+                                            checkIfPlayerHasSufficientMoney(sender, realPriceInPesadelos) {
+                                                InventoryUtils.askForConfirmation(
+                                                    sender,
+                                                    afterAccept = {
+                                                        sender.closeInventory()
+
+                                                        m.launchAsyncThread {
+                                                            transaction(Databases.databaseNetwork) {
+                                                                try {
+                                                                    Cash.takeCash(
+                                                                        sender,
+                                                                        realPriceInPesadelos,
+                                                                        TransactionContext(extra = "comprar `$name ($days dias)` no `/lojacash`")
+                                                                    )
+                                                                } catch (e: IllegalArgumentException) {
+                                                                    sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
+                                                                    return@transaction
+                                                                }
+                                                            }
+
+                                                            onMainThread {
+                                                                Bukkit.dispatchCommand(
+                                                                    Bukkit.getConsoleSender(),
+                                                                    "lp user ${sender.name} parent addtemp $groupName ${days}d accumulate"
+                                                                )
+
+                                                                sender.sendMessage("§aObrigado pela compra! ^-^")
+
+                                                                Bukkit.broadcastMessage("${DreamCash.PREFIX} §b${sender.displayName}§a comprou $name ($days dias)§a na loja de §cpesadelos§a (§6/lojacash§a), agradeça por ter ajudado a manter o §4§lSparkly§b§lPower§a online! ^-^")
+                                                            }
+                                                        }
+                                                    },
+                                                    afterDecline = {
+                                                        it.closeInventory()
+                                                        showShopMenu(sender)
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        menu.sendTo(sender)
+                    }
+                }
+            }
+
+            fun generateItemAt(
+                x: Int,
+                y: Int,
+                type: Material,
+                customModelData: Int? = null,
+                name: String,
+                quantity: Long,
+                callback: () -> (Boolean)
+            ) {
                 slot(x, y) {
                     item = ItemStack(type)
                         .rename(name)
@@ -65,7 +376,11 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                                             transaction(Databases.databaseNetwork) {
                                                 try {
-                                                    Cash.takeCash(sender, quantity, TransactionContext(extra = "comprar `$name` no `/lojacash`"))
+                                                    Cash.takeCash(
+                                                        sender,
+                                                        quantity,
+                                                        TransactionContext(extra = "comprar `$name` no `/lojacash`")
+                                                    )
                                                 } catch (e: IllegalArgumentException) {
                                                     sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
                                                     return@transaction
@@ -90,26 +405,12 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                 }
             }
 
-            // VIPs
-            val isVipPlusPlus = sender.hasPermission("group.vip++")
-            val isVipPlus = sender.hasPermission("group.vip+")
-            val isVip = sender.hasPermission("group.vip")
-            val hasAnyVip = isVip || isVipPlus || isVipPlusPlus
-
             // Accumulate means "add more time", this is to avoid issues when giving the VIP group ;)
-            generateItemAt(0, 0, Material.IRON_INGOT, 1, "§b§lVIP §7(um mês • R$ 14,99)", 500) {
-                if (hasAnyVip && !isVip) {
-                    sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
-                    false
-                } else {
-                    Bukkit.dispatchCommand(
-                        Bukkit.getConsoleSender(),
-                        "lp user ${sender.name} parent addtemp vip 32d accumulate"
-                    )
-                    true
-                }
-            }
-            generateItemAt(1, 0, Material.GOLD_INGOT, 1, "§b§lVIP§e+ §7(um mês • R$ 29,99)", 1_000) {
+            generateVIPItemAt(0, 0, Material.IRON_INGOT, 1, "§b§lVIP", "vip", 500)
+            generateVIPItemAt(1, 0, Material.GOLD_INGOT, 1, "§b§lVIP§e+", "vip+", 1_000)
+            generateVIPItemAt(2, 0, Material.DIAMOND, 1, "§b§lVIP§e++", "vip++", 2_000)
+
+            /* generateItemAt(1, 0, Material.GOLD_INGOT, 1, "§b§lVIP§e+", 1_000) {
                 if (hasAnyVip && !isVipPlus) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
                     false
@@ -121,7 +422,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                     true
                 }
             }
-            generateItemAt(2, 0, Material.DIAMOND, 1, "§b§lVIP§e++ §7(um mês • R$ 44,99)", 1_500) {
+            generateItemAt(2, 0, Material.DIAMOND, 1, "§b§lVIP§e++", 2_000) {
                 if (hasAnyVip && !isVipPlusPlus) {
                     sender.sendMessage("§cVocê não pode alterar o seu VIP atual enquanto você já tem outro VIP ativo!")
                     false
@@ -132,7 +433,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                     )
                     true
                 }
-            }
+            } */
 
             // Blocos de Proteção
             generateItemAt(0, 1, Material.DIRT, null, "§e2500 blocos de proteção", 65) {
@@ -194,7 +495,11 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                                     transaction(Databases.databaseNetwork) {
                                         try {
-                                            Cash.takeCash(sender, 100, TransactionContext(extra = "comprar `slots adicionais para o clube` no `/lojacash`"))
+                                            Cash.takeCash(
+                                                sender,
+                                                100,
+                                                TransactionContext(extra = "comprar `slots adicionais para o clube` no `/lojacash`")
+                                            )
                                             clube.maxMembers++
                                         } catch (e: IllegalArgumentException) {
                                             sender.sendMessage("§cVocê não tem pesadelos suficientes para comprar isto!")
@@ -269,7 +574,11 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                                     transaction(Databases.databaseNetwork) {
                                         try {
-                                            Cash.takeCash(sender, 250, TransactionContext(extra = "comprar `slots adicionais para casas do clube` no `/lojacash`"))
+                                            Cash.takeCash(
+                                                sender,
+                                                250,
+                                                TransactionContext(extra = "comprar `slots adicionais para casas do clube` no `/lojacash`")
+                                            )
                                             ClubeHomeUpgrades.insert {
                                                 it[ClubeHomeUpgrades.clube] = clube.id
                                                 it[ClubeHomeUpgrades.boughtAt] = Instant.now()
@@ -334,7 +643,11 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
 
                                     transaction(Databases.databaseNetwork) {
                                         try {
-                                            Cash.takeCash(sender, lojaUpgradePrice, TransactionContext(extra = "comprar `slots adicionais para a warps de loja` no `/lojacash`"))
+                                            Cash.takeCash(
+                                                sender,
+                                                lojaUpgradePrice,
+                                                TransactionContext(extra = "comprar `slots adicionais para a warps de loja` no `/lojacash`")
+                                            )
 
                                             ShopWarpUpgrades.insert {
                                                 it[ShopWarpUpgrades.playerId] = sender.uniqueId
@@ -389,7 +702,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
                 }
             }
 
-            this.slot(6,  5) {
+            this.slot(6, 5) {
                 item = ItemStack(Material.BEACON)
                     .rename("§e§lInformações sobre o meu VIP ativo")
 
