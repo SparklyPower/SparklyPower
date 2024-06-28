@@ -408,7 +408,7 @@ class LojaCashCommand(val m: DreamCash) : SparklyCommand(arrayOf("lojacash", "ca
             // Accumulate means "add more time", this is to avoid issues when giving the VIP group ;)
             generateVIPItemAt(0, 0, Material.IRON_INGOT, 1, "§b§lVIP", "vip", 500)
             generateVIPItemAt(1, 0, Material.GOLD_INGOT, 1, "§b§lVIP§e+", "vip+", 1_000)
-            generateVIPItemAt(2, 0, Material.DIAMOND, 1, "§b§lVIP§e++", "vip++", 2_000)
+            generateVIPItemAt(2, 0, Material.DIAMOND, 1, "§b§lVIP§e++", "vip++", 1_800)
 
             /* generateItemAt(1, 0, Material.GOLD_INGOT, 1, "§b§lVIP§e+", 1_000) {
                 if (hasAnyVip && !isVipPlus) {
