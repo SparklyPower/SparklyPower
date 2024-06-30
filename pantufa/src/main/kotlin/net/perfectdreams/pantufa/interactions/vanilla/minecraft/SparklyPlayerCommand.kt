@@ -130,19 +130,42 @@ class SparklyPlayerCommand : SlashCommandDeclarationWrapper {
             context: LegacyMessageCommandContext,
             args: List<String>
         ): Map<OptionReference<*>, Any?>? {
-            val user = context.mentions.users.firstOrNull()
+            val arg0 = args.getOrNull(0)
 
-            if (user == null) {
+            if (arg0 == null) {
                 context.explain()
                 return null
             }
 
-            return mapOf(
-                options.user to UserAndMember(
-                    user,
-                    context.guild.getMemberById(user.idLong)
+            if (arg0 == context.mentions.users.firstOrNull()?.asMention) {
+                return mapOf(
+                    options.user to UserAndMember(
+                        context.mentions.users.first(),
+                        context.guild.getMemberById(context.mentions.users.first().idLong)
+                    )
                 )
-            )
+            } else {
+                val user = try {
+                    context.jda.getUserById(arg0) ?: run {
+                        context.reply(false) {
+                            styled(
+                                "Usuário desconhecido!"
+                            )
+                        }
+                        return null
+                    }
+                } catch (e: NumberFormatException) {
+                    context.explain()
+                    return null
+                }
+
+                return mapOf(
+                    options.user to UserAndMember(
+                        user,
+                        context.guild.getMemberById(user.idLong)
+                    )
+                )
+            }
         }
     }
 }

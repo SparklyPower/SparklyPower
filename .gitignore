@@ -126,3 +126,6 @@ fabric.properties
 
 # Pantufa's Config Files
 pantufa.conf
+
+## Avoid ignoring the pantufa.conf in the resources
+!/pantufa/src/main/resources/pantufa.conf

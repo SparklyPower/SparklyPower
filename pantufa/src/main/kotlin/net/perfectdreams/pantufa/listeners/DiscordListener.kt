@@ -72,8 +72,6 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 		if (event.channel is TextChannel && !event.channel.canTalk())
 			return false
 
-		val sparklyPower = m.config.sparklyPower
-
 		val rawMessage = event.message.contentRaw
 		val rawArguments = rawMessage
 			.split(" ")
@@ -85,21 +83,6 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 
 		// If the message starts with the prefix, it could be a command!
 		if (startsWithCommandPrefix || startsWithPantufaMention) {
-			// First let's check if the user is using the command in a non-whitelisted channel.
-			if (event.channel.idLong !in sparklyPower.guild.whitelistedChannels &&
-				event.guild.idLong != 268353819409252352L && // Ideias Aleatórias
-				event.member?.roles?.any { it.idLong in sparklyPower.guild.whitelistedRoles } == false) {
-				// If the user is using the command in a non-whitelisted channel, send to him an error message.
-				event.channel.sendMessage(
-					PantufaReply(
-						"Você só pode usar meus lindos e incríveis comandos nos canais de comandos!",
-						Constants.ERROR
-					).build(event.author)
-				).complete()
-
-				return true
-			}
-
 			if (startsWithCommandPrefix) // If it is a command prefix, remove the prefix
 				rawArguments[0] = rawArguments[0].removePrefix(PantufaBot.PREFIX)
 			else if (startsWithPantufaMention) { // If it is a mention, remove the first argument (which is Pantufa's mention)
