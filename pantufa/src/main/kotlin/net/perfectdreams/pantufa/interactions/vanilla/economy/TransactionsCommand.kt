@@ -23,7 +23,7 @@ class TransactionsCommand : SlashCommandDeclarationWrapper {
 
     override fun command() = slashCommand("transactions", "Confira as transações mais recentes com base nos critérios escolhidos", CommandCategory.ECONOMY) {
         enableLegacyMessageSupport = true
-
+        requireMinecraftAccount = true
         examples = listOf(
             "pesadelos MrPowerGamerBR |-| Verifica somente as transações de pesadelos do Jogador",
             "sonecas MrPowerGamerBR |-| Verifica somente as transações de sonecas do Jogador"
