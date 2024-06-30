@@ -15,15 +15,18 @@ import org.jetbrains.exposed.sql.transactions.transaction
 class PesadelosCommand : SlashCommandDeclarationWrapper {
     override fun command() = slashCommand("pesadelos", "Veja quantos pesadelos você tem!", CommandCategory.ECONOMY) {
         enableLegacyMessageSupport = true
-        requireMinecraftAccount = true
-        alternativeLegacyAbsoluteCommandPaths.apply {
-            add("pesadelos")
-        }
 
-        executor = PesadelosCommandExecutor()
+        subcommand("atm", "Veja quantos pesadelos você e outros jogadores do SparklyPower possuem!") {
+            requireMinecraftAccount = true
+            alternativeLegacyAbsoluteCommandPaths.apply {
+                add("pesadelos")
+            }
+
+            executor = PesadelosAtmCommandExecutor()
+        }
     }
 
-    inner class PesadelosCommandExecutor : LorittaSlashCommandExecutor(), LorittaLegacyMessageCommandExecutor {
+    inner class PesadelosAtmCommandExecutor : LorittaSlashCommandExecutor(), LorittaLegacyMessageCommandExecutor {
         inner class Options : ApplicationCommandOptions() {
             val playerName = optionalString("player_name", "Nome do Player")
         }

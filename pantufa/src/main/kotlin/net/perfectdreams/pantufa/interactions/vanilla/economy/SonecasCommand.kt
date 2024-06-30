@@ -15,19 +15,23 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class SonecasCommand : SlashCommandDeclarationWrapper {
-    override fun command() = slashCommand("sonecas", "Veja quantas sonecas você e outros jogadores do SparklyPower possuem!", CommandCategory.ECONOMY) {
+    override fun command() = slashCommand("sonecas", "TODOFIXTHISDATA", CommandCategory.ECONOMY) {
         enableLegacyMessageSupport = true
-        requireMinecraftAccount = true
-        alternativeLegacyAbsoluteCommandPaths.apply {
-            add("sonecas")
-            add("bal")
-            add("atm")
-        }
 
-        executor = SonecasCommandExecutor()
+        subcommand("atm", "Veja quantas sonecas você e outros jogadores do SparklyPower possuem!") {
+            requireMinecraftAccount = true
+            alternativeLegacyAbsoluteCommandPaths.apply {
+                add("sonecas")
+                add("bal")
+                add("atm")
+                add("money")
+            }
+
+            executor = SonecasAtmCommandExecutor()
+        }
     }
 
-    inner class SonecasCommandExecutor : LorittaSlashCommandExecutor(), LorittaLegacyMessageCommandExecutor {
+    inner class SonecasAtmCommandExecutor : LorittaSlashCommandExecutor(), LorittaLegacyMessageCommandExecutor {
         inner class Options : ApplicationCommandOptions() {
             val playerName = optionalString("player_name", "Nome do Player")
         }

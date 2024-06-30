@@ -4,7 +4,6 @@ import com.github.salomonbrys.kotson.*
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import dev.kord.rest.service.RestClient
 import io.ktor.client.*
 import kotlinx.coroutines.*
 import mu.KotlinLogging

@@ -307,11 +307,10 @@ class UnleashedCommandManager(val m: PantufaBot) {
             error("$executor doesn't inherit LorittaLegacyMessageCommandExecutor!")
 
         var context: UnleashedContext? = null
+        val sparklyPower = m.config.sparklyPower
 
         try {
             val rawArgumentsAfterDrop = rawArguments.drop(argumentsToBeDropped)
-
-            val discordAccount = m.getDiscordAccountFromId(event.author.idLong)
 
             context = LegacyMessageCommandContext(
                 m,
@@ -321,6 +320,21 @@ class UnleashedCommandManager(val m: PantufaBot) {
                 rootDeclaration
             )
 
+            // First let's check if the user is using the command in a non-whitelisted channel.
+            if (event.channel.idLong !in sparklyPower.guild.whitelistedChannels &&
+                event.guild.idLong != 268353819409252352L && // Ideias Aleatórias
+                event.member?.roles?.any { it.idLong in sparklyPower.guild.whitelistedRoles } == false) {
+                // If the user is using the command in a non-whitelisted channel, send to him an error message.
+                event.channel.sendMessage(
+                    PantufaReply(
+                        "Você só pode usar meus lindos e incríveis comandos nos canais de comandos!",
+                        Constants.ERROR
+                    ).build(event.author)
+                ).complete()
+
+                return false
+            }
+
             if (event.message.isFromType(ChannelType.TEXT)) {
                 logger.info("(${event.message.guild.name} -> ${event.message.channel.name}) ${event.author.name}#${event.author.discriminator} (${event.author.id}): ${event.message.contentDisplay}")
             } else {
@@ -328,6 +342,8 @@ class UnleashedCommandManager(val m: PantufaBot) {
             }
 
             if (slashDeclaration.requireMinecraftAccount) {
+                val discordAccount = m.getDiscordAccountFromId(event.author.idLong)
+
                 if (discordAccount == null || !discordAccount.isConnected) {
                     context.reply(false) {
                         styled(
@@ -337,8 +353,10 @@ class UnleashedCommandManager(val m: PantufaBot) {
                     }
                     return true
                 } else {
+                    context.discordAccount = discordAccount
+
                     val user = transaction(Databases.sparklyPower) {
-                        net.perfectdreams.pantufa.dao.User.find { Users.id eq discordAccount.minecraftId }.firstOrNull()
+                        net.perfectdreams.pantufa.dao.User.find { Users.id eq context.discordAccount!!.minecraftId }.firstOrNull()
                     }
 
                     if (user == null) {
@@ -351,6 +369,8 @@ class UnleashedCommandManager(val m: PantufaBot) {
 
                         return true
                     }
+
+                    context.sparklyPlayer = user
                 }
             }
 

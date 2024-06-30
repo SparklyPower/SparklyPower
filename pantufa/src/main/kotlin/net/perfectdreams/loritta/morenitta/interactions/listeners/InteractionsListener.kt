@@ -113,9 +113,10 @@ class InteractionsListener(private val pantufa: PantufaBot) : ListenerAdapter() 
                     event
                 )
 
-                val discordAccount = pantufa.getDiscordAccountFromId(event.user.idLong)
 
                 if (slashDeclaration.requireMinecraftAccount) {
+                    val discordAccount = pantufa.getDiscordAccountFromId(event.user.idLong)
+
                     if (discordAccount == null || !discordAccount.isConnected) {
                         context.reply(false) {
                             styled(
@@ -125,8 +126,10 @@ class InteractionsListener(private val pantufa: PantufaBot) : ListenerAdapter() 
                         }
                         return@launchMessageJob
                     } else {
+                        context.discordAccount = discordAccount
+
                         val user = transaction(Databases.sparklyPower) {
-                            User.find { Users.id eq discordAccount.minecraftId }.firstOrNull()
+                            User.find { Users.id eq context.discordAccount!!.minecraftId }.firstOrNull()
                         }
 
                         if (user == null) {
@@ -138,6 +141,8 @@ class InteractionsListener(private val pantufa: PantufaBot) : ListenerAdapter() 
                             }
                             return@launchMessageJob
                         }
+
+                        context.sparklyPlayer = user
                     }
                 }
 

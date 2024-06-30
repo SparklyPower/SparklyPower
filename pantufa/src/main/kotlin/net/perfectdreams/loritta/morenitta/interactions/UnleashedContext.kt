@@ -46,6 +46,8 @@ abstract class UnleashedContext(
     val channel: MessageChannel
         get() = channelOrNull ?: error("This interaction was not sent in a message channel!")
 
+    var discordAccount: DiscordAccount? = null
+    var sparklyPlayer: net.perfectdreams.pantufa.dao.User? = null
     var wasInitiallyDeferredEphemerally: Boolean? = null
 
     abstract suspend fun deferChannelMessage(ephemeral: Boolean): UnleashedHook
@@ -106,16 +108,14 @@ abstract class UnleashedContext(
         pantufa.retrieveDiscordAccountFromUser(user.idLong)
 
     suspend fun retrieveConnectedMinecraftAccount(): MinecraftAccountInfo? {
-        val discordAccount = retrieveConnectedDiscordAccount() ?: return null
-
-        if (!discordAccount.isConnected)
+        if (discordAccount == null) {
             return null
-
-        val dbUser = transaction(Databases.sparklyPower) {
-            net.perfectdreams.pantufa.dao.User.find { Users.id eq discordAccount.minecraftId }.firstOrNull()
         }
 
-        if (dbUser == null) {
+        if (!discordAccount!!.isConnected)
+            return null
+
+        if (sparklyPlayer == null) {
             reply(false) {
                 styled(
                     "${user.asMention} Parece que você tem uma conta associada, mas não existe o seu username salvo no banco de dados! Bug?",
@@ -126,8 +126,8 @@ abstract class UnleashedContext(
         }
 
         return MinecraftAccountInfo(
-            discordAccount.minecraftId,
-            dbUser.username
+            discordAccount!!.minecraftId,
+            sparklyPlayer!!.username
         )
     }
 
