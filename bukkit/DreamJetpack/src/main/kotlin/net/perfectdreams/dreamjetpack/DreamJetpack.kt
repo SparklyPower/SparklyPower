@@ -89,13 +89,18 @@ class DreamJetpack : KotlinPlugin(), Listener {
 						// Instead of the smoke floating down in a beautiful way, it goes up, and that's VERY annoying
 						// So we won't send these particles to Bedrock players
 						val targetParticleSpawnLocation = player.location.clone()
-							.add(0.0, 0.6, 0.0)
+							.add(0.0, 0.7, 0.0)
 							.add(player.location.direction.multiply(-0.3))
 
 						for (playerInWorld in player.world.players) {
 							if (!playerInWorld.isBedrockClient) {
+								// Don't send jetpack particles to the current player if the player is looking down to avoid the particles being in their way
+								// Helps if they are placing blocks or something
+								if (playerInWorld == player && player.pitch >= 20.0)
+									continue
+
 								playerInWorld.spawnParticle(
-									Particle.CAMPFIRE_COSY_SMOKE,
+									Particle.SMOKE,
 									targetParticleSpawnLocation,
 									0,
 									0.0,
@@ -105,7 +110,6 @@ class DreamJetpack : KotlinPlugin(), Listener {
 								)
 							}
 						}
-
 					}
 				}
 
