@@ -5,22 +5,11 @@ import net.perfectdreams.loritta.morenitta.interactions.UnleashedContext
 import net.perfectdreams.loritta.morenitta.interactions.commands.*
 import net.perfectdreams.loritta.morenitta.interactions.commands.options.ApplicationCommandOptions
 import net.perfectdreams.loritta.morenitta.interactions.commands.options.OptionReference
-import net.perfectdreams.pantufa.dao.Transaction
-import net.perfectdreams.pantufa.interactions.vanilla.economy.transactions.TransactionsUtils.buildTransactionsMessage
-import net.perfectdreams.pantufa.network.Databases
-import net.perfectdreams.pantufa.utils.MessagePanelType
 import net.perfectdreams.pantufa.api.economy.TransactionCurrency
-import net.perfectdreams.pantufa.utils.extensions.username
 import net.perfectdreams.pantufa.utils.extensions.uuid
-import net.perfectdreams.pantufa.utils.saveAndCreateData
-import net.perfectdreams.pantufa.api.commands.styled
-import org.jetbrains.exposed.sql.transactions.transaction
+import net.perfectdreams.pantufa.interactions.vanilla.economy.transactions.TransactionsUtils
 
 class TransactionsCommand : SlashCommandDeclarationWrapper {
-    companion object {
-        const val TRANSACTIONS_PER_PAGE = 10
-    }
-
     override fun command() = slashCommand("transactions", "Confira as transações mais recentes com base nos critérios escolhidos", CommandCategory.ECONOMY) {
         enableLegacyMessageSupport = true
         requireMinecraftAccount = true
@@ -50,54 +39,24 @@ class TransactionsCommand : SlashCommandDeclarationWrapper {
         override val options = Options()
 
         override suspend fun execute(context: UnleashedContext, args: SlashCommandArguments) {
-            val selfId = context.pantufa.retrieveDiscordAccountFromUser(context.user.idLong)?.minecraftId
-            val user = args[options.user]?.uuid()
+            val selfId = context.retrieveConnectedMinecraftAccountOrFail().uniqueId
+            val user = args[options.user]?.uuid() ?: selfId
             val currency = args[options.currency]?.let(TransactionCurrency::valueOf)
-
-            val fetchedTransactions = if (user != null) {
-                Transaction.fetchTransactionsFromSingleUser(user, currency)
-            } else if (selfId != null) {
-                Transaction.fetchTransactionsFromSingleUser(selfId, currency)
-            } else {
-                context.reply(true) {
-                    styled(
-                        "E o usuário nn sei"
-                    )
-                }
-                return
-            }
-
-            val size = transaction(Databases.sparklyPower) { fetchedTransactions.count() }
             val page = args[options.page] ?: 0
-
-            if (page < 0 || page * TRANSACTIONS_PER_PAGE > size) {
-                context.reply(true) {
-                    styled(
-                        "Essa página não existe! Pelo visto você ou o Jogador ainda não é tão rico pra ter tantas transações assim..."
-                    )
-                }
-                return
-            }
 
             context.deferChannelMessage(false)
 
-            val messageData = saveAndCreateData(
-                size,
+            val messageData = TransactionsUtils.createMessage(
+                context.pantufa,
                 context.user.idLong,
-                user ?: selfId!!,
-                MessagePanelType.TRANSACTIONS,
-                fetchedTransactions
+                selfId,
+                user,
+                page.toLong(),
+                emptyList(),
+                currency
             )
 
-            context.reply(false, messageData.buildTransactionsMessage(
-                context.pantufa,
-                currency,
-                context.user.idLong,
-                user?.username ?: selfId!!.username,
-                0,
-                selfId,
-                emptyList()
-            ))
+            context.reply(false, messageData)
         }
 
         override suspend fun convertToInteractionsArguments(
@@ -115,7 +74,7 @@ class TransactionsCommand : SlashCommandDeclarationWrapper {
             )
 
             if (currency == null) {
-                currency = "MONEY"
+                currency = null
                 if (user == null) {
                     user = context.retrieveConnectedMinecraftAccountOrFail().username
 

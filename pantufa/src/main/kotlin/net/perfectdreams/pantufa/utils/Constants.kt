@@ -22,7 +22,16 @@ object Constants {
 	}
 
 	val LORITTA_AQUA = Color(26, 160, 254)
+	val LORITTA_ERROR = 0xFF5C44
 	val WHITE_SPACE_MULTIPLE_REGEX = Regex(" +")
 	val LEFT_EMOJI = DiscordPartialEmoji(Snowflake(930922528715722782L), "chevron_left")
 	val RIGHT_EMOJI = DiscordPartialEmoji(Snowflake(930922702011773038L), "chevron_right")
+	val emptyMessages = listOf(
+		"Vazio, igualzinho a minha conta bancária",
+		"Vazio, ou seja, não cheio",
+		"Vazio, igual ao vazio do meu coração",
+		"Vazio, um espaço desprovido de entidades",
+		"Vazio, um vazio existencial",
+		"Vazio, por favor, não confundir com o Vazio de League of Legends"
+	)
 }

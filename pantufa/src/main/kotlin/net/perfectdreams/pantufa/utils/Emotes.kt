@@ -1,9 +1,15 @@
 package net.perfectdreams.pantufa.utils
 
-import net.perfectdreams.loritta.common.entities.Mentionable
-
 object Emotes {
     val DefaultStyledPrefix = UnicodeEmote("\uD83D\uDD39")
+    val MoneyWithWings = UnicodeEmote("\uD83D\uDCB8")
+    val DollarBill = UnicodeEmote("\uD83D\uDCB5")
+    val MoneyBag = UnicodeEmote("\uD83D\uDCB0")
+    val CreditCard = UnicodeEmote("\uD83D\uDCB3")
+    val Envelope = UnicodeEmote("\uD83D\uDCE9")
+    val Tickets = UnicodeEmote("\uD83C\uDF9F")
+    val Dart = UnicodeEmote("\uD83C\uDFAF")
+    val Gift = UnicodeEmote("\uD83C\uDF81")
 
     val PantufaCoffee = PantufaEmoji(
         853048446981111828,
