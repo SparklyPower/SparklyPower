@@ -19,9 +19,14 @@ private val cachedUsernames: ConcurrentMap<UUID, String> = Caffeine.newBuilder()
 suspend fun String.uuid(): UUID = pantufa.retrieveMinecraftUserFromUsername(this)?.id?.value ?: UUID.randomUUID()
 
 val UUID.username get() = cachedUsernames[this] ?: pantufa.getMinecraftUserFromUniqueId(this).let {
-    val name = it?.username ?: toString()
-    cachedUsernames[this] = name
-    return@let name
+    val name = it?.username
+
+    if (name != null) {
+        cachedUsernames[this] = name
+        return@let name
+    } else {
+        return@let null
+    }
 }
 
 fun net.dv8tion.jda.api.entities.User.lorittaProfile() = transaction(Databases.loritta) {

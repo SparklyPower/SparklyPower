@@ -51,7 +51,7 @@ class TransactionsCommand : SlashCommandDeclarationWrapper {
                 context.user.idLong,
                 selfId,
                 user,
-                page.toLong(),
+                (if (page == 0) 0 else page - 1).toLong(),
                 emptyList(),
                 currency
             )
@@ -63,9 +63,6 @@ class TransactionsCommand : SlashCommandDeclarationWrapper {
             context: LegacyMessageCommandContext,
             args: List<String>
         ): Map<OptionReference<*>, Any?>? {
-            var currency = args.getOrNull(0)
-            var user = args.getOrNull(1)
-            val page = args.getOrNull(2)?.toIntOrNull()
             val parser = hashMapOf(
                 "pesadelos" to "CASH",
                 "p" to "CASH",
@@ -73,79 +70,66 @@ class TransactionsCommand : SlashCommandDeclarationWrapper {
                 "s" to "MONEY"
             )
 
-            if (currency == null) {
-                currency = null
-                if (user == null) {
-                    user = context.retrieveConnectedMinecraftAccountOrFail().username
+            var currency: String?
+            var user: String?
+            var page: Int?
+            val connectedAccount = context.retrieveConnectedMinecraftAccountOrFail()
 
-                    return if (page == null) {
-                        mapOf(
-                            options.currency to currency,
-                            options.user to user,
-                            options.page to 0
-                        )
+            when (args.size) {
+                // -transactions
+                0 -> {
+                    currency = null
+                    user = null
+                    page = 0
+                }
+                // -transactions [page || user || currency]
+                1 -> {
+                    if (args[0].toIntOrNull() == null) {
+                        currency = parser[args[0]]
+                        user = if (currency == null) {
+                            args[0]
+                        } else {
+                            connectedAccount.username
+                        }
+                        page = 0
                     } else {
-                        mapOf(
-                            options.currency to currency,
-                            options.user to user,
-                            options.page to page
-                        )
-                    }
-                } else {
-                    return if (page == null) {
-                        mapOf(
-                            options.currency to currency,
-                            options.user to user,
-                            options.page to 0
-                        )
-                    } else {
-                        mapOf(
-                            options.currency to currency,
-                            options.user to user,
-                            options.page to page
-                        )
+                        currency = null
+                        user = null
+                        page = args[0].toIntOrNull()
                     }
                 }
-            } else {
-                val parsedCurrency = parser[currency.lowercase()]
-
-                if (parsedCurrency == null) {
-                    context.explain()
-                    return null
-                } else {
-                    if (user == null) {
-                        user = context.retrieveConnectedMinecraftAccountOrFail().username
-
-                        return if (page == null) {
-                            mapOf(
-                                options.currency to parsedCurrency,
-                                options.user to user,
-                                options.page to 0
-                            )
-                        } else {
-                            mapOf(
-                                options.currency to parsedCurrency,
-                                options.user to user,
-                                options.page to page
-                            )
-                        }
+                // -transactions [currency || user] [page || user]
+                2 -> {
+                    currency = parser[args[0]]
+                    user = if (currency == null) {
+                        args[0]
                     } else {
-                        return if (page == null) {
-                            mapOf(
-                                options.currency to parsedCurrency,
-                                options.user to user,
-                                options.page to 0
-                            )
-                        } else {
-                            mapOf(
-                                options.currency to parsedCurrency,
-                                options.user to user,
-                                options.page to page
-                            )
-                        }
+                        connectedAccount.username
                     }
+                    page = if (args[1].toIntOrNull() == null) {
+                        user = args[1]
+                        0
+                    } else {
+                        args[1].toIntOrNull()
+                    }
+                }
+                // -transactions [currency] [user] [page]
+                3 -> {
+                    currency = parser[args[0]]
+                    user = args[1]
+                    page = args[2].toIntOrNull()
+                }
+
+                else -> {
+                    return null
                 }
             }
+
+            return mapOf(
+                options.currency to currency,
+                options.user to user,
+                options.page to page
+            )
         }
     }
 }

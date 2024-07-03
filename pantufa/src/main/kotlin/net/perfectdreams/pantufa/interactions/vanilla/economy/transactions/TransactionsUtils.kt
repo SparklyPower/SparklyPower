@@ -76,13 +76,15 @@ object TransactionsUtils {
                         transactions,
                         page,
                         isSelf,
-                        totalTransactions
+                        totalTransactions,
+                        currency
                     )
                 } else {
                     apply(
                         createNoMatchingTransactionsEmbed(
                             isSelf,
-                            viewingTransactionsOfPlayerUniqueId
+                            viewingTransactionsOfPlayerUniqueId,
+                            currency
                         )
                     )
                 }
@@ -212,13 +214,16 @@ object TransactionsUtils {
         transactions: List<Transaction>,
         page: Long,
         isSelf: Boolean,
-        totalTransactions: Long
+        totalTransactions: Long,
+        currency: TransactionCurrency? = null
     ) {
         title = buildString {
             if (isSelf)
-                append("Suas Transações")
+                append("Suas Transações ${if (currency == null) "(Sonecas & Pesadelos)" else "(${currency.displayName})"}")
+            else if (viewingTransactionsOfPlayerUniqueId.username == null)
+                append("O player que você inseriu não existe")
             else
-                append("Transações de ${viewingTransactionsOfPlayerUniqueId.username}")
+                append("Transações de ${viewingTransactionsOfPlayerUniqueId.username} ${if (currency == null) "(Sonecas & Pesadelos)" else "(${currency.displayName})"}")
 
             append(" — ")
             append("Página ${page + 1}")
@@ -263,18 +268,18 @@ object TransactionsUtils {
                         }
                     }
                     TransactionType.SELL_SHOP_ITEM -> {
-                        val isAServerOfficialStore = transaction.receiver == null
-                        val isTheActualPlayerTheReceiver = transaction.receiver == viewingTransactionsOfPlayerUniqueId
+                        val isAServerOfficialStore = transaction.payer == null
+                        val isTheActualPlayerThePayer = transaction.payer == viewingTransactionsOfPlayerUniqueId
 
                         append(Emotes.CreditCard)
                         append(" ")
                         if (isAServerOfficialStore) {
                             append("Vendeu `${transaction.extra}` por $formattedAmount numa loja oficial do servidor")
                         } else {
-                            if (isTheActualPlayerTheReceiver) {
-                                append("Comprou `${transaction.extra}` por $formattedAmount em sua loja por `${transaction.payer?.username ?: "Desconhecido"}`")
+                            if (isTheActualPlayerThePayer) {
+                                append("Comprou `${transaction.extra}` por $formattedAmount em sua loja de `${transaction.receiver?.username ?: "Desconhecido"}`")
                             } else {
-                                append("Vendeu `${transaction.extra}` por $formattedAmount na loja de `${transaction.receiver?.username ?: "Desconhecido"}`")
+                                append("Vendeu `${transaction.extra}` por $formattedAmount na loja de `${transaction.payer?.username ?: "Desconhecido"}`")
                             }
                         }
                     }
@@ -312,13 +317,12 @@ object TransactionsUtils {
                         val sentFromLoritta = transaction.receiver != null
 
                         val asSonhos = currency.format(transaction.amount / 2.0, "sonhos")
-                        val asSonecas = currency.format(transaction.amount * 2.0)
 
                         // This command wouldn't work if the extra (user ID) is null, so we can safely assume it's not null
                         val userInfo = m.jda.getUserById(transaction.extra!!)!!
 
                         val output = if (sentFromLoritta) {
-                            "Transferiu ${currency.format(transaction.amount, "sonhos")} da Loritta pela conta `${userInfo.name} (${transaction.extra})` para o SparklyPower ($asSonecas)"
+                            "Transferiu $asSonhos da Loritta pela conta `${userInfo.name} (${transaction.extra})` para o SparklyPower ($formattedAmount)"
                         } else {
                             "Transferiu $formattedAmount do SparklyPower para a Loritta pela conta `${userInfo.name} (${transaction.extra})` ($asSonhos)"
                         }
@@ -352,12 +356,15 @@ object TransactionsUtils {
     private fun createNoMatchingTransactionsEmbed(
         isSelf: Boolean,
         playerUniqueId: UUID,
+        currency: TransactionCurrency? = null
     ): InlineEmbed.() -> (Unit) = {
         title = buildString{
             if (isSelf)
-                append("Suas Transações")
+                append("Suas Transações ${if (currency == null) "(Sonecas & Pesadelos)" else "(${currency.displayName})"}")
+            else if (playerUniqueId.username == null)
+                append("O player que você inseriu não existe")
             else
-                append("Transações de ${playerUniqueId.username}")
+                append("Transações de ${playerUniqueId.username} ${if (currency == null) "(Sonecas & Pesadelos)" else "(${currency.displayName})"}")
         }
 
         color = Constants.LORITTA_ERROR
