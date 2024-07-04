@@ -45,7 +45,7 @@ import javax.imageio.ImageIO
 
 class CustomMapCommand(val m: PantufaBot) : SlashCommandDeclarationWrapper {
     companion object {
-        val MAP_SIZE_REGEX = Regex("([0-9])x([0-9])")
+        val MAP_SIZE_REGEX = Regex("([0-9]+)x([0-9]+)")
 
         private val SKINS = listOf(
             "/skins/loritta.png",
