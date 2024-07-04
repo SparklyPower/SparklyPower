@@ -13,6 +13,7 @@ import net.perfectdreams.loritta.morenitta.interactions.commands.*
 import net.perfectdreams.loritta.morenitta.interactions.commands.options.ApplicationCommandOptions
 import net.perfectdreams.loritta.morenitta.interactions.commands.options.OptionReference
 import net.perfectdreams.loritta.serializable.StoredSparklyPowerLSXSonhosTransaction
+import net.perfectdreams.pantufa.PantufaBot
 import net.perfectdreams.pantufa.api.commands.PantufaReply
 import net.perfectdreams.pantufa.api.commands.styled
 import net.perfectdreams.pantufa.api.economy.TransferOptions
@@ -21,6 +22,7 @@ import net.perfectdreams.pantufa.dao.Transaction
 import net.perfectdreams.pantufa.api.economy.TransactionCurrency
 import net.perfectdreams.pantufa.api.economy.TransactionType
 import net.perfectdreams.pantufa.network.Databases
+import net.perfectdreams.pantufa.tables.LuckPermsUserPermissions
 import net.perfectdreams.pantufa.tables.PlayerSonecas
 import net.perfectdreams.pantufa.tables.Profiles
 import net.perfectdreams.pantufa.utils.*
@@ -217,10 +219,13 @@ class LSXCommand : SlashCommandDeclarationWrapper {
 
             val survivalOnlineTrackedHours = context.pantufa.getPlayerTimeOnlineInTheLastXDays(accountInfo.uniqueId, 30)
 
-            if (Duration.ofHours(24) >= survivalOnlineTrackedHours.duration) {
+            val playerUniqueId = accountInfo.uniqueId
+            val requiredHours = getRequiredOnlineHours(context.pantufa, playerUniqueId)
+
+            if (Duration.ofHours(requiredHours) >= survivalOnlineTrackedHours.duration) {
                 context.reply(false) {
                     styled(
-                        "Você precisa ter mais de 24 horas online no SparklyPower Survival nos últimos 30 dias (desde ${survivalOnlineTrackedHours.since.toInstant().toKotlinInstant().toMessageFormat(
+                        "Você precisa ter mais de $requiredHours horas online no SparklyPower Survival nos últimos 30 dias (desde ${survivalOnlineTrackedHours.since.toInstant().toKotlinInstant().toMessageFormat(
                             DiscordTimestampStyle.ShortDate)}) antes de poder transferir sonhos! Atualmente você tem ${
                             (survivalOnlineTrackedHours.duration.get(
                                 ChronoUnit.SECONDS
@@ -409,6 +414,22 @@ class LSXCommand : SlashCommandDeclarationWrapper {
                 options.destination to destination?.lowercase(),
                 options.quantity to quantity
             )
+        }
+
+        suspend fun getRequiredOnlineHours(pantufa: PantufaBot, playerUniqueId: UUID): Long {
+            val userPerms = pantufa.transactionOnLuckPermsDatabase {
+                LuckPermsUserPermissions.selectAll().where {
+                    LuckPermsUserPermissions.uuid eq playerUniqueId.toString()
+                }.toList()
+            }
+
+            val vipPlusPlusPermission = userPerms.firstOrNull { it[LuckPermsUserPermissions.permission] == "group.vip++" }
+
+            return if (vipPlusPlusPermission != null) {
+                12
+            } else {
+                24
+            }
         }
     }
 }
