@@ -370,6 +370,18 @@ class UnleashedCommandManager(val m: PantufaBot) {
                         return true
                     }
 
+                    val userBan = context.getUserBanned(discordAccount.minecraftId)
+
+                    if (userBan != null) {
+                        context.reply(false) {
+                            styled(
+                                "Você está banido do SparklyPower!"
+                            )
+                        }
+
+                        return true
+                    }
+
                     context.sparklyPlayer = user
                 }
             }

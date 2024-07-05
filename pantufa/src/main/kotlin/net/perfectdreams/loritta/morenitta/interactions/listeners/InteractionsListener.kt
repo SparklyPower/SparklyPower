@@ -142,6 +142,17 @@ class InteractionsListener(private val pantufa: PantufaBot) : ListenerAdapter() 
                             return@launchMessageJob
                         }
 
+                        val userBan = context.getUserBanned(discordAccount.minecraftId)
+
+                        if (userBan != null) {
+                            context.reply(false) {
+                                styled(
+                                    "Você está banido do SparklyPower!"
+                                )
+                            }
+                            return@launchMessageJob
+                        }
+
                         context.sparklyPlayer = user
                     }
                 }
