@@ -1,4 +1,4 @@
-package net.perfectdreams.dreamchat.tables
+package net.perfectdreams.dreamcore.tables
 
 import net.perfectdreams.dreamcore.DreamCore
 import org.jetbrains.exposed.dao.id.LongIdTable

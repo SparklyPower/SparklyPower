@@ -86,7 +86,8 @@ class DreamCore : KotlinPlugin() {
 				Transactions,
 				PreferencesTable,
 				PlayerSkins,
-				DiscordAccounts
+				DiscordAccounts,
+				TrackedOnlineHours
 			)
 		}
 

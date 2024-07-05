@@ -3,7 +3,6 @@ package net.perfectdreams.dreamchat.commands
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamchat.DreamChat
-import net.perfectdreams.dreamchat.tables.TrackedOnlineHours
 import net.perfectdreams.dreamcore.dao.User
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.adventure.append

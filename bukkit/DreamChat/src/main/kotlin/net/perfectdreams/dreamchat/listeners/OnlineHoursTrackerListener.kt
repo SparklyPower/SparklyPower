@@ -1,7 +1,7 @@
 package net.perfectdreams.dreamchat.listeners
 
 import net.perfectdreams.dreamchat.DreamChat
-import net.perfectdreams.dreamchat.tables.TrackedOnlineHours
+import net.perfectdreams.dreamcore.tables.TrackedOnlineHours
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import org.bukkit.entity.Player

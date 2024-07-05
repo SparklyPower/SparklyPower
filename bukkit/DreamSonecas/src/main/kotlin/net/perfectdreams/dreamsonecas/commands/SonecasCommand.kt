@@ -9,10 +9,7 @@ import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.TransactionContext
 import net.perfectdreams.dreamcore.utils.TransactionType
-import net.perfectdreams.dreamcore.utils.adventure.append
-import net.perfectdreams.dreamcore.utils.adventure.appendCommand
-import net.perfectdreams.dreamcore.utils.adventure.runCommandOnClick
-import net.perfectdreams.dreamcore.utils.adventure.textComponent
+import net.perfectdreams.dreamcore.utils.adventure.*
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclarationWrapper
@@ -340,7 +337,8 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
             }
 
             m.launchAsyncThread {
-                val result = SonecasUtils.transferSonecasFromPlayerToPlayer(player.uniqueId, receiverName, quantity)
+                val bypassLastActiveTime = m.bypassLastActiveTime.remove(player.uniqueId)
+                val result = SonecasUtils.transferSonecasFromPlayerToPlayer(player.uniqueId, receiverName, quantity, bypassLastActiveTime == receiverName)
 
                 onMainThread {
                     when (result) {
@@ -373,6 +371,28 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
                                 appendSpace()
                                 append("Transferência concluída com sucesso! Você recebeu *nada* de si mesmo, porque você está tentando transferir sonecas para si mesmo! Se você quer uma soneca de verdade, vá dormir.")
                             }
+                            return@onMainThread
+                        }
+                        SonecasUtils.TransferSonhosResult.PlayerHasNotJoinedRecently -> {
+                            context.sendMessage {
+                                color(NamedTextColor.RED)
+                                append(prefix())
+                                appendSpace()
+                                append("O player ")
+                                appendTextComponent {
+                                    color(NamedTextColor.AQUA)
+                                    append(receiverName)
+                                }
+                                append(" não entra a mais de 14 dias! Você tem certeza que você colocou o nome correto?")
+                            }
+                            context.sendMessage {
+                                color(NamedTextColor.RED)
+                                append(prefix())
+                                appendSpace()
+                                append("Se você tem certeza que você colocou o nome correto, use o comando novamente!")
+                            }
+
+                            m.bypassLastActiveTime[player.uniqueId] = receiverName
                             return@onMainThread
                         }
                         is SonecasUtils.TransferSonhosResult.Success -> {

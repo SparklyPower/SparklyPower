@@ -1,13 +1,12 @@
 package net.perfectdreams.dreamsonecas
 
 import kotlinx.coroutines.Dispatchers
+import net.perfectdreams.dreamcore.tables.TrackedOnlineHours
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.Databases
 import net.perfectdreams.dreamsonecas.tables.PlayerSonecas
-import org.jetbrains.exposed.sql.SqlExpressionBuilder
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.updateReturning
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.lastValue
 import java.math.BigDecimal
 import java.text.NumberFormat
 import java.time.Instant
@@ -38,7 +37,12 @@ object SonecasUtils {
     /**
      * Transfers sonecas from one player to another player
      */
-    suspend fun transferSonecasFromPlayerToPlayer(giverUniqueId: UUID, receiverName: String, quantity: Double): TransferSonhosResult {
+    suspend fun transferSonecasFromPlayerToPlayer(
+        giverUniqueId: UUID,
+        receiverName: String,
+        quantity: Double,
+        bypassLastActiveTime: Boolean
+    ): TransferSonhosResult {
         return net.perfectdreams.exposedpowerutils.sql.transaction(Dispatchers.IO, Databases.databaseNetwork) {
             // Does the other account exist?
             val receiverData = Users.selectAll().where { Users.username eq receiverName }.firstOrNull()
@@ -52,12 +56,26 @@ object SonecasUtils {
                 return@transaction TransferSonhosResult.CannotTransferSonecasToSelf
 
             // Do we have enough money?
-            val selfSonecas = PlayerSonecas.selectAll().where { PlayerSonecas.id eq giverUniqueId }.firstOrNull()?.get(
-                PlayerSonecas.money)?.toDouble() ?: 0.0
+            val selfSonecas = PlayerSonecas.selectAll().where { PlayerSonecas.id eq giverUniqueId }.firstOrNull()?.get(PlayerSonecas.money)?.toDouble() ?: 0.0
 
             if (quantity > selfSonecas) {
                 // You don't have enough naps!
                 return@transaction TransferSonhosResult.NotEnoughSonecas(selfSonecas)
+            }
+
+            // Before we transfer, we will check if the user has logged in for the last 14 days, if they haven't, we will send a warning to them
+            if (!bypassLastActiveTime) {
+                // When was the last time that player logged in?
+                val lastTimeThatTheUserLoggedIn = TrackedOnlineHours.select(TrackedOnlineHours.loggedIn).where {
+                    TrackedOnlineHours.player eq receiverData[Users.id].value
+                }.orderBy(TrackedOnlineHours.loggedIn, SortOrder.DESC)
+                    .limit(1)
+                    .firstOrNull()
+                    ?.get(TrackedOnlineHours.loggedIn)
+
+                if (lastTimeThatTheUserLoggedIn == null || lastTimeThatTheUserLoggedIn.isBefore(Instant.now().minusSeconds(86400 * 14))) { // 14 days
+                    return@transaction TransferSonhosResult.PlayerHasNotJoinedRecently
+                }
             }
 
             // We need to manually create the account if the user does not have a sonecas account yet
@@ -128,6 +146,7 @@ object SonecasUtils {
     sealed class TransferSonhosResult {
         data object UserDoesNotExist : TransferSonhosResult()
         data object CannotTransferSonecasToSelf : TransferSonhosResult()
+        data object PlayerHasNotJoinedRecently : TransferSonhosResult()
         data class NotEnoughSonecas(val currentUserMoney: Double) : TransferSonhosResult()
         data class Success(
             val receiverName: String,

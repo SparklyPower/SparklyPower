@@ -32,6 +32,7 @@ import net.perfectdreams.dreamchat.utils.bot.PantufaResponse
 import net.perfectdreams.dreamchat.utils.bot.responses.*
 import net.perfectdreams.dreamchat.utils.chatevent.EventoChatHandler
 import net.perfectdreams.dreamcore.DreamCore
+import net.perfectdreams.dreamcore.tables.TrackedOnlineHours
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
@@ -120,8 +121,7 @@ class DreamChat : KotlinPlugin() {
 			SchemaUtils.createMissingTablesAndColumns(
 				ChatUsers,
 				EventMessages,
-				PremiumUsers,
-				TrackedOnlineHours
+				PremiumUsers
 			)
 		}
 
