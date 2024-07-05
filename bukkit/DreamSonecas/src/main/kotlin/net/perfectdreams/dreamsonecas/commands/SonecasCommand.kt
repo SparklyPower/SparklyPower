@@ -328,7 +328,6 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
                 return
             }
 
-            // TODO: Check if the quantity is actually valid
             if (quantity.isInfinite() || quantity.isNaN()) {
                 context.sendMessage {
                     content("Número inválido!")
@@ -338,7 +337,7 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
 
             m.launchAsyncThread {
                 val bypassLastActiveTime = m.bypassLastActiveTime.remove(player.uniqueId)
-                val result = SonecasUtils.transferSonecasFromPlayerToPlayer(player.uniqueId, receiverName, quantity, bypassLastActiveTime == receiverName)
+                val result = SonecasUtils.transferSonecasFromPlayerToPlayer(player.name, player.uniqueId, receiverName, quantity, bypassLastActiveTime == receiverName)
 
                 onMainThread {
                     when (result) {
@@ -396,14 +395,7 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
                             return@onMainThread
                         }
                         is SonecasUtils.TransferSonhosResult.Success -> {
-                            // This sucks
-                            TransactionContext(
-                                payer = player.uniqueId,
-                                receiver = result.receiverId,
-                                type = TransactionType.PAYMENT,
-                                amount = result.quantityGiven
-                            ).saveToDatabase()
-
+                            // The receiver player messages and SFX is handled by "SonecasUtils.postTransfer"
                             context.sendMessage {
                                 color(NamedTextColor.GREEN)
                                 append(prefix())
@@ -437,43 +429,6 @@ class SonecasCommand(val m: DreamSonecas) : SparklyCommandDeclarationWrapper {
                             }
 
                             player.playSound(player.location, "sparklypower.sfx.money", SoundCategory.RECORDS, 1.0f, DreamUtils.random.nextFloat(0.9f, 1.1f))
-
-                            // Is the player online?
-                            val receiverPlayer = Bukkit.getPlayer(result.receiverId)
-
-                            if (receiverPlayer != null) {
-                                receiverPlayer.sendMessage(
-                                    textComponent {
-                                        color(NamedTextColor.GREEN)
-                                        append(prefix())
-                                        appendSpace()
-
-                                        append("Você recebeu ")
-                                        append(NamedTextColor.WHITE, "\uE283")
-                                        appendSpace()
-                                        append(NamedTextColor.GREEN, SonecasUtils.formatSonecasAmountWithCurrencyName(result.quantityGiven))
-                                        append(" de ")
-                                        append(NamedTextColor.AQUA, player.name)
-                                        append("!")
-                                    }
-                                )
-
-                                receiverPlayer.sendMessage(
-                                    textComponent {
-                                        color(NamedTextColor.YELLOW)
-                                        append(prefix())
-                                        appendSpace()
-
-                                        append("Você agora possui ")
-                                        append(NamedTextColor.WHITE, "\uE283")
-                                        appendSpace()
-                                        append(NamedTextColor.GREEN, SonecasUtils.formatSonecasAmountWithCurrencyName(result.receiverMoney))
-                                        append(" e está em #${result.receiverRanking} lugar no ranking!")
-                                    }
-                                )
-
-                                receiverPlayer.playSound(receiverPlayer.location, "sparklypower.sfx.money", SoundCategory.RECORDS, 1.0f, DreamUtils.random.nextFloat(0.9f, 1.1f))
-                            }
                             return@onMainThread
                         }
                     }

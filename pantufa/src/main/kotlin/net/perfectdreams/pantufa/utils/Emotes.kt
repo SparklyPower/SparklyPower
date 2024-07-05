@@ -1,5 +1,7 @@
 package net.perfectdreams.pantufa.utils
 
+import net.perfectdreams.loritta.common.emotes.DiscordEmote
+
 object Emotes {
     val DefaultStyledPrefix = UnicodeEmote("\uD83D\uDD39")
     val MoneyWithWings = UnicodeEmote("\uD83D\uDCB8")
@@ -61,6 +63,10 @@ object Emotes {
         "pantufa_hangloose",
         false
     )
+    val LoriHanglooseRight = PantufaEmoji(982764105918205952L, "lori_hangloose", false)
+    val GabrielaHanglooseRight = PantufaEmoji(982764945236176919L, "gabi_hangloose", false)
+    val PantufaHanglooseRight = PantufaEmoji(1008059742356250759L, "pantufa_hangloose_right", false)
+    val PowerHanglooseRight = PantufaEmoji(1008059744717635624L, "power_hangloose_right", false)
     val PantufaHeart = PantufaEmoji(
         853048447175098388,
         "pantufa_heart",
@@ -109,6 +115,11 @@ object Emotes {
     val Pesadelos = PantufaEmoji(
         983023709369536582L,
         "pesadelos",
+        false
+    )
+    val Sonecas = PantufaEmoji(
+        983023797877743698L,
+        "sonecas",
         false
     )
     val FilledMap = PantufaEmoji(

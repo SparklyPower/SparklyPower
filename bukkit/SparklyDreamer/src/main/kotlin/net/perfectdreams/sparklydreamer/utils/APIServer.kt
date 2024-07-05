@@ -32,6 +32,7 @@ import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker.Companion.LOCK_MAP_CRAFT_KEY
 import net.perfectdreams.dreammapwatermarker.DreamMapWatermarker.Companion.MAP_CUSTOM_OWNER_KEY
+import net.perfectdreams.dreamsonecas.SonecasUtils
 import net.perfectdreams.dreamsonecas.tables.PlayerSonecas
 import net.perfectdreams.sparklydreamer.SparklyDreamer
 import net.sparklypower.rpc.*
@@ -339,6 +340,39 @@ class APIServer(private val plugin: SparklyDreamer) {
 
                     call.respondText(
                         Json.encodeToString<UpdatePlayerSkinResponse>(UpdatePlayerSkinResponse.Success(player != null)),
+                        ContentType.Application.Json
+                    )
+                }
+
+                post("/pantufa/transfer-sonecas") {
+                    val request = Json.decodeFromString<TransferSonecasRequest>(call.receiveText())
+
+                    val transferResult = SonecasUtils.transferSonecasFromPlayerToPlayer(
+                        request.giverName,
+                        UUID.fromString(request.requestedById),
+                        request.receiverName,
+                        request.quantity,
+                        request.bypassLastActiveTime
+                    )
+
+                    val response = when (transferResult) {
+                        SonecasUtils.TransferSonhosResult.CannotTransferSonecasToSelf -> TransferSonecasResponse.CannotTransferSonecasToSelf
+                        is SonecasUtils.TransferSonhosResult.NotEnoughSonecas -> TransferSonecasResponse.NotEnoughSonecas(transferResult.currentUserMoney)
+                        SonecasUtils.TransferSonhosResult.PlayerHasNotJoinedRecently -> TransferSonecasResponse.PlayerHasNotJoinedRecently
+                        SonecasUtils.TransferSonhosResult.UserDoesNotExist -> TransferSonecasResponse.UserDoesNotExist
+                        is SonecasUtils.TransferSonhosResult.Success -> TransferSonecasResponse.Success(
+                            transferResult.receiverName,
+                            transferResult.receiverId.toString(),
+                            transferResult.quantityGiven,
+                            transferResult.selfMoney,
+                            transferResult.selfRanking,
+                            transferResult.receiverMoney,
+                            transferResult.receiverRanking
+                        )
+                    }
+
+                    call.respondText(
+                        Json.encodeToString<TransferSonecasResponse>(response),
                         ContentType.Application.Json
                     )
                 }
