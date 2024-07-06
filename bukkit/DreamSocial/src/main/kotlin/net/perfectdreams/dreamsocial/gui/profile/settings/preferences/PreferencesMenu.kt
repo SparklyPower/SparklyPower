@@ -4,13 +4,16 @@ import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import net.kyori.adventure.text.format.NamedTextColor
 import net.perfectdreams.dreamcore.dao.PreferencesEntity
+import net.perfectdreams.dreamcore.utils.ClickContext
 import net.perfectdreams.dreamcore.utils.adventure.lore
 import net.perfectdreams.dreamcore.utils.createMenu
 import net.perfectdreams.dreamcore.utils.extensions.*
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamsocial.DreamSocial
 import net.perfectdreams.dreamsocial.gui.confirmation.getConfirmationButton
 import net.perfectdreams.dreamsocial.gui.profile.settings.preferences.helper.item.item
+import org.bukkit.entity.HumanEntity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.meta.ItemMeta
 
@@ -37,10 +40,13 @@ fun renderPreferencesMenu(plugin: DreamSocial, preferencesEntity: PreferencesEnt
 
                 item = getActivationButton(isActivated)
 
-                onClick {
-                    if (isBusy) return@onClick
+                var onClickCallback: (ClickContext.(HumanEntity) -> Unit)? = null
+                onClickCallback = onClickCallback@{
+                    if (isBusy) return@onClickCallback
 
                     isBusy = true
+
+                    val clickContext = this
 
                     if (player.highestRole < broadcastType.minimumRoleToDisable) {
                         it.sendMessage(
@@ -48,23 +54,28 @@ fun renderPreferencesMenu(plugin: DreamSocial, preferencesEntity: PreferencesEnt
                                 .asComponent.color(NamedTextColor.RED)
                         )
 
-                        return@onClick it.closeInventory()
+                        return@onClickCallback it.closeInventory()
                     }
 
-                    plugin.schedule(SynchronizationContext.ASYNC) {
+                    plugin.launchAsyncThread {
                         preferencesEntity.flip(broadcastType)
 
-                        waitFor(20 * 5)
+                        onMainThread {
+                            // TODO: We need to "reedit" the current active menu, how can we do that?
+                            isActivated = !isActivated
 
-                        switchContext(SynchronizationContext.SYNC)
+                            clickContext.setSlot(secondX + firstY * 9) {
+                                this.item = getActivationButton(isActivated)
 
-                        isActivated = !isActivated
+                                this.onClick(onClickCallback!!)
+                            }
 
-                        it.openInventory.setItem(secondX + firstY * 9, getActivationButton(isActivated))
-
-                        isBusy = false
+                            isBusy = false
+                        }
                     }
                 }
+
+                onClick(onClickCallback)
             }
         }
     }

@@ -23,7 +23,7 @@ class DreamSocial : KotlinPlugin() {
         val dreamChat = (Bukkit.getPluginManager().getPlugin("DreamChat") as DreamChat)
 
         // Disabled because it is a bit buggy
-        // registerCommand(ProfileCommand(this))
+        registerCommand(ProfileCommand(this))
         registerCommand(AnnounceCommand(this, dreamChat))
     }
 }

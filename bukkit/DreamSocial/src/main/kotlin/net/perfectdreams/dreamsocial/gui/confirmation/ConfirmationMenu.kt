@@ -2,6 +2,7 @@ package net.perfectdreams.dreamsocial.gui.confirmation
 
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.perfectdreams.dreamcore.utils.ClickContext
 import net.perfectdreams.dreamcore.utils.createMenu
 import net.perfectdreams.dreamcore.utils.extensions.asComponent
 import net.perfectdreams.dreamcore.utils.extensions.meta
@@ -10,7 +11,7 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 
-fun renderConfirmationMenu(callback: (HumanEntity) -> Unit) = createMenu(9, "ꈉ§f\uE266§r陇§fVocê tem certeza?") {
+fun renderConfirmationMenu(callback: ClickContext.(HumanEntity) -> Unit) = createMenu(9, "ꈉ§f\uE266§r陇§fVocê tem certeza?") {
     slot(3, 0) {
         item = getConfirmationButton(true, "Confirmar" to "Cancelar")
 

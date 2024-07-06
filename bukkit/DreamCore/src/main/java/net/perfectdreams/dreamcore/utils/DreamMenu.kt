@@ -18,9 +18,33 @@ import org.bukkit.inventory.meta.ItemMeta
 /**
  * Uma classe para criar menus de uma maneira simples e fácil!
  */
-class DreamMenu(val size: Int, val title: Component, val cancelItemMovement: Boolean, val slots: List<DreamMenuSlot>) {
+class DreamMenu(
+	val size: Int,
+	val title: Component,
+	val cancelItemMovement: Boolean,
+	val slots: MutableList<DreamMenuSlot>
+) {
 	fun createInventory(): Inventory {
 		val inventory = Bukkit.createInventory(DreamMenuHolder(this), size, title)
+		refreshInventory(inventory)
+
+		return inventory
+	}
+
+	fun sendTo(player: Player) {
+		player.openInventory(createInventory())
+	}
+
+	fun setSlot(inventory: Inventory, x: Int, y: Int, block: DreamMenuSlotBuilder.() -> Unit) = setSlot(inventory, x + (y * 9), block)
+
+	fun setSlot(inventory: Inventory, index: Int, block: DreamMenuSlotBuilder.() -> Unit) {
+		val slot = DreamMenuSlotBuilder(index).apply(block).build()
+		slots.removeIf { it.position == index }
+		slots.add(slot)
+		refreshInventory(inventory)
+	}
+
+	fun refreshInventory(inventory: Inventory) {
 		slots.forEach {
 			if (it.item != null)
 				inventory.setItem(it.position, it.item)
@@ -39,15 +63,9 @@ class DreamMenu(val size: Int, val title: Component, val cancelItemMovement: Boo
 				)
 			}
 		}
-
-		return inventory
 	}
 
-	fun sendTo(player: Player) {
-		player.openInventory(createInventory())
-	}
-
-	class DreamMenuSlot(val position: Int, val item: ItemStack?, val onClick: ((HumanEntity) -> Unit)?)
+	class DreamMenuSlot(val position: Int, val item: ItemStack?, val onClick: (ClickContext.(HumanEntity) -> Unit)?)
 
 	class DreamMenuHolder(val menu: DreamMenu) : InventoryHolder {
 		override fun getInventory(): Inventory {
@@ -74,9 +92,9 @@ class DreamMenuBuilder(val size: Int, val title: Component) {
 
 class DreamMenuSlotBuilder(val index: Int) {
 	var item: ItemStack? = null
-	private var onClick: ((HumanEntity) -> Unit)? = null
+	private var onClick: (ClickContext.(HumanEntity) -> Unit)? = null
 
-	fun onClick(callback: (HumanEntity) -> Unit) {
+	fun onClick(callback: ClickContext.(HumanEntity) -> Unit) {
 		onClick = callback
 	}
 
@@ -111,7 +129,9 @@ class DreamMenuListener : Listener {
 		val slot = dreamMenu.slots.firstOrNull { it.position == clickedSlot }
 
 		if (slot != null) {
-			slot.onClick?.invoke(e.whoClicked)
+			// Technically the upper inventory will ALWAYS BE a DreamMenu, no exceptions (I hope!)
+			val clickContext = ClickContext(dreamMenu, e.inventory)
+			slot.onClick?.invoke(clickContext, e.whoClicked)
 		}
 	}
 
@@ -154,5 +174,13 @@ class DreamMenuListener : Listener {
 
 		if (dreamMenu.cancelItemMovement)
 			e.isCancelled = true
+	}
+}
+
+class ClickContext(val menu: DreamMenu, val inventory: Inventory) {
+	fun setSlot(x: Int, y: Int, block: DreamMenuSlotBuilder.() -> Unit) = setSlot(x + (y * 9), block)
+
+	fun setSlot(index: Int, block: DreamMenuSlotBuilder.() -> Unit) {
+		menu.setSlot(inventory, index, block)
 	}
 }
