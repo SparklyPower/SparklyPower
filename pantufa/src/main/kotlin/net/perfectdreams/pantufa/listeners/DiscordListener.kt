@@ -20,6 +20,7 @@ import net.perfectdreams.pantufa.utils.Emotes
 import net.perfectdreams.pantufa.utils.Server
 import net.perfectdreams.pantufa.utils.extensions.await
 import net.perfectdreams.pantufa.utils.extensions.referenceIfPossible
+import net.perfectdreams.pantufa.utils.extensions.toJDA
 import net.perfectdreams.pantufa.utils.socket.SocketUtils
 import net.perfectdreams.pantufa.utils.svm.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -102,9 +103,10 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 
 				if (predictedValue == 1) {
 					// We match against the original content (but with the short words replaced) to avoid normalization causing issues
-					val matches = accountMatchRegexes.firstNotNullOfOrNull { it.find(unshortenedWordsContent) }
-					if (matches != null) {
-						val username = matches.groupValues[1]
+					val matches = accountMatchRegexes.flatMap { it.findAll(unshortenedWordsContent) }
+					for (match in matches) {
+						// We try querying all possible matches
+						val username = match.groupValues[1]
 						val account = m.getMinecraftUserFromUsername(username)
 						if (account != null) {
 							val discordAccount = m.getDiscordAccountFromUniqueId(account.id.value)
@@ -131,9 +133,12 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 										)
 									}
 								).referenceIfPossible(event.message).await()
+								return@launchMessageJob
 							}
 						}
 					}
+
+					event.message.addReaction(Emotes.PantufaShrug.toJDA()).await()
 				}
 			}
 

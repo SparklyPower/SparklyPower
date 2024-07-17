@@ -112,6 +112,11 @@ object Emotes {
         "pantufa_thumbsup",
         false
     )
+    val PantufaShrug = PantufaEmoji(
+        1004449909816168489,
+        "pantufa_shrug",
+        false
+    )
     val Pesadelos = PantufaEmoji(
         983023709369536582L,
         "pesadelos",
