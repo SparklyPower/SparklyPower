@@ -32,7 +32,10 @@ fun main() {
             "eu perdi minha senha e não sei como recuperar",
             "Trocar minha senha de login do Mine",
             "Trocar minha senha de login do SparklyPower",
-            "Gostaria de saber como recuperar a senha da conta, eu esqueci a minha"
+            "Gostaria de saber como recuperar a senha da conta, eu esqueci a minha",
+            "perdi a senha da conta",
+            "perdi a senha da minha conta",
+            "perdi a senha do SparklyPower"
         ),
         File("D:\\SparklyPowerAssets\\SVMQuestionsScratchPad\\base-negative-messages.txt")
             .readLines()
