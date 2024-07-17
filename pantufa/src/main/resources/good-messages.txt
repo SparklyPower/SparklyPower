@@ -1,0 +1,410 @@
+hech eu nao sei um pingo de kotlin
+..eval val messages = context.message.channel.history.retrievePastChunked(10_000)File("/home/good-messages.txt").writeText(messages.filterNot { it.author.isBot }.filter { it.contentRaw.length >= 5 }.joinToString("\n") { it.contentStripped.replace("\n", "") })context.sendMessage(messages.size.toString())
+Com dor nas costas
+iala ta putinho jkkkk
+nao acredite nas mentiras dele
+Calma amigo
+vai vc @GAIB2006
+10000@Loritta • Canary 🐦 :bigbrain:
+VAI TD MUNDO TOMAR NO MEIO DA PORRA DO CU
+@a paumpkin 👻 Oiê paum, como se tá ? :dog_fofo:@nathan perdoa o natan com sono e vc?
+mas ok
+ta escrito no codigo
+@MrPowerGamerBR😘|💁Criador da Lori isso pega as msg ignorando bots?
+:pqp:
+@SrGaabriel sjim
+entendi
+retrievePastChunked(10_000) é extension?
+@a paumpkin 👻 Oiê paum, como se tá ? :dog_fofo:
+os emojis diminuiram?
+Algm qr um pack de pé?
+carai
+loritta espiã
+:sad_gesso:
+o negócio parece interessante
+:tobias_cry:
+é q o yuri era único
+:CHSharingan1A::CHSharingan1B::CHSharingan1C::CHSharingan1D::CHSharingan2A::CHSharingan2B::CHSharingan2C::CHSharingan2D::CHSharingan3A::CHSharingan3B::CHSharingan3C::CHSharingan3D::CHSharingan4A::CHSharingan4B::CHSharingan4C::CHSharingan4D:.
+Ele tá vigiando a gente mano
+pegando daqui
+Sim mano,eu quero ver o negócio
+tá pegando o histórico de mensagens de um servidor no discord? @MrPowerGamerBR😘|💁Criador da Lori
+ele n vai voltar
+mas é o negocio
+talvez yuri nunca mais volte@Professor Snate eu ja aceitei isso
+nao é tao foda assim
+para O negocio@hechfx o negócio parece ser muito foda mano
+Negócio?
+talvez yuri nunca mais volte
++vaporonda negócio
+@a paumpkin 👻 eu to triste, e agr quero deixar vc triste tbm, então
+n e g ó c i o
+para O negocio
+entendi
+@hechfx ele está delirando
+@hechfx pegando mensagens boas para o negócio
+vc tem alguma ideia doq isso q o power deu eval faz? :analise:
+..eval val messages = context.message.channel.history.retrievePastChunked(10_000)File("/home/good-messages.txt").writeText(messages.filterNot { it.author.isBot }.filterNot { it.contentRaw.length >= 5 }.joinToString("\n") { it.contentStripped.replace("\n", "") })context.sendMessage(messages.size.toString())
+:gesso:
+@MrPowerGamerBR😘|💁Criador da Lori what are you doing
+pepela
+@JGS GESSO
+eu gravo e n fica nada disso
+mas pra mim tá normal
+kkkkkkkkk
+e ela reclama disso
+:lori_thonk:
+pq a minha tia comprou o mesmo cel q o meu
+pepega
+privatizar a lorifa
+@🎃 MystAnorak 🎃 a rifa ainda existe
+@JGS nunca percebi
+@blueslimee  Blue, vou te mandar a vitamina por fax, sugestão by: @Azureツ
+pq é q a rifa foi removida mesmo?same energy
+Seria legal
+Aí tipo
+10000
+O dono do servidor organizaria uma rifa só com os membros @hechfx
+@MrPowerGamerBR😘|💁Criador da Lori power, só uma perguntitaTeu celular quando tu grava audio tipo no vip vap fica chiado/abafado?
+@hechfx sim
+wtf is this
+rifa privada?
+2 vezes
+Eu queria saber oq esse eval q ele deu faz :analise:
+vc ganha as vantagens dnv?
+@MrPowerGamerBR😘|💁Criador da Lori Se eu falar que te amo você coloca rifa privada?
+se vc votar 120 vezes
+@Shadow God ∆ :dokyo_hm:
+aoaoaoa
+acho q naveguei pra muito longe na interwebs
+:pray_cat:
+Tipo do dono do servidor configura a loritta pra fazer uma rifa
+power conta ai pra gente quantos lorittabans estão ativos
+@MrPowerGamerBR😘|💁Criador da Lori mano você já pensou em criar uma forma de ter rifa específica em um servidor?
+:whitekannapeerpru:
+em bots confiáveis não
+é uma ma ideia colocar ads em bots de discord?
+:cat_groove:
+quantos usuários será que estão banidos de usar a lori?@SrGaabriel vários
+galera
+quantos usuários será que estão banidos de usar a lori?
+catjam
+..eval val messages = context.message.channel.history.retrievePastChunked(10_000)File("/home/good-messages.txt").writeText(messages.filterNot { it.author.isBot }.filterNot { it.contentRaw.length >= 5 }.joinToString("\n"))context.sendMessage(messages.size.toString())
+KKKKK
+:wave_doggo:
+Do nada
+Descobri que na internet todo mundo é justiceiro
+:sad_cat12:
+Man do céu tô entendendo nada
+https://raw.githubusercontent.com/flameshot-org/flameshot-org.github.io/master/docs/media/animatedUsage.gif
+..ping
+Loiro José
+Estupro culposo
+Só coisa triste
+Eu tô cansadinho da internet hoje
+sharex ainda é melhor tho
+til tem flameshot para windows
+:cat_groove:
+:analise:
+Mas não deu resposta
+Não deu erro
+Jesus amado
+achei que era linux-only
+Agora ficou neutro
+e eu nem sabia que tinha pra windows
+Não deu o erro agora
+flameshot é muito bo recomendo
+seria pratico um chat pra mandar os comando dos ademir
+tá fazendo o que eu to pensando? responde no ✨ canal secreto ✨
+..eval val messages = context.message.channel.history.retrievePastChunked(10_000)File("/home/good-messages.txt").writeText(messages.filterNot { !it.author.isBot }.filterNot { it.contentRaw.length >= 5 }.joinToString("\n"))context.sendMessage(messages.size.toString())
+:pepo_embasado:
+Power revoltado agora
+@MrPowerGamerBR😘|💁Criador da Lori q q tu ta fazeno omi
+:analise:
+Algo haver com bot
+isBot
+quanto eval
+Oq tá acontecendo
+power
+..eval val messages = context.message.channel.history.retrievePastChunked(10_000)File("/home/good-messages.txt").writeText(messages.filterNot { !it.author.isBot }.filterNot { it.contentRaw.size >= 5 }.joinToString("\n"))context.sendMessage(messages.size.toString())
+Jesus Cristo
+Canary Sensatah™️
+Erros em kotlin são gigantes :analise:
+@ペドロフランカ não muito mas nois releva oq fazes?@Mïstęry-kün sla pode ser
+..eval val messages = context.message.channel.history.retrievePastChunked(10_000)File("/home/good-messages.txt").writeText(messages.getRetrievedHistory().filterNot { !it.user.isBot }.filterNot { it.contentRaw.size >= 5 }.joinToString("\n"))context.sendMessage(messages.getRetrievedHistory().size.toString())
+:hmmm:
+Oto boaindo
+os incomodados se retirem
+A vey apaga isso ai
+To tentando entender oq isso faz :analise:
+..eval val messages = context.message.channel.history.retrievePastChunked(10_000)File("/home/good-messages.txt").writeText(messages.filterNot { !it.user.isBot }.filterNot { it.contentRaw.size >= 5 }.joinToString("\n"))context.sendMessage(messages.size.toString())
+:sad_cat15:
+power fazendo spam
+a lori falo q o power num sabe programa
+..eval val messages = context.message.channel.history.retrievePastChunked(10_000)File("/home/good-messages.txt").writeText(messages.filterNot { !it.user.isBot }.filterNot { it.contentRaw.size >= 5 }.joinToString("\n"))context.sendMessage(messages.toString().size)
+chamo power de ruim
+karaio
+https://tenor.com/view/mais-um-dia-sem-tomar-ban-obrigado-adm-another-day-ban-vibing-gif-17743084
+Thonk
+@ペドロフランカ não muito mas nois releva oq fazes?@Mïstęry-kün sla pode ser
+ata nao era um ban
+https://media.tenor.com/images/492214def289cbb628ba1db67abb1dca/tenor.gif
+..eval val messages = context.message.channel.history.retrievePastChunked(10_000)File("/home/good-messages.txt").writeText(messages.filterNot { !it.user.isBot }).filterNot { it.contentRaw.size >= 5 }.joinToString("\n"))context.sendMessage(messages.toString().size)
+h-hech san 😳
+:analise:
+@Mïstęry-kün bem e vc@ペドロフランカ não muito mas nois releva oq fazes?
+me bane n
+te dou skin no lol
+@ペドロフランカ  como vai?@Mïstęry-kün bem e vc
+Power tá filosofando
+me bane nao adm
+@Mïstęry-kün iae blz@ペドロフランカ  como vai?
+N vo entra
+@Mïstęry-kün iae blz
+Eu só mandei blz os cara manda coisa nada a ve
+Fenyx geografia
+"olha que legal, colocaram o Brasil no mapa":lab_velho:
+bob o construtor
+macaco macaco macaco
+https://tenor.com/view/cat-anime-sleep-sleeping-cup-gif-4605306
+:sad_gesso:
+ah você removeu
+:cat_toes:
+@SrGaabriel amas eu editei
+Alguém me ensina como mecher no Crowdin?
+boa noite 👍
+boa noit
+vou mimir
+@joaoesteves10 acabei esquecendo da sua resposta, calma aí
+:cat_toes:
+acho q ele foi mais banido pelo spam
+@CakeMew @blueslimee https://docusaurus.io/
+canibalismo
+:floshed:
+portuga eu vo te comer calado
+Tem twitter para isso
+Para de militar
+travei
+:notlike:
+karaio, gay viro ofensa
+pera, chamar a loritta de gay é ofensa? :lori_thinking:
+@Zagrion os servidores sao da amazon
+Pqp graças a esse nome, nem aparece a hora que ele mandou a mensagem.
++ban @꧁༂Ӿ₳ⱤØ₱ł₦ⱧØᴴᴬᶜᴷᵧₒᵤ ꝈԱͲȺᎠටR☬➻꧂  Muito engraçado vir aqui so pra falar isso
+E é um jogo f2p
+aaaaaaaaaaiaiiiaiiaiaiaiaiaiiaiaiaaiiaiaiaaiaiaiaiaiaiaaaaaanaianaiaiaiainaannnn
+Jogo morto não seria jogo que não é mais falado? O pessoal não faz vídeo dele em si?
+loritta gay
+para eu jogar
+Mas a conta estaria lá
+vou dormir
+a loritta e viada
+eu simplesmente deixaria de jogar
+mas ele ta morto
+o jogo ainda ta online, vc joga se vc quiser
+@Zagrion obvio
+e tem player
+eles n sao obrigados a te dar nenhuma compensação
+é morto
+pokemon go
+logo vc vai jogar com bot
+uma hora ou outra n vai ter player
+:lori_thinking:
+https://cdn.discordapp.com/attachments/341979206969982976/773684491179786281/0ae77e8cd62143e7a6f768233476aa7a.mp4
+@portugalense ok consideremos q fortnite comece a morrer gradualmente
+:amenocat:
+e a empresa simplesmente bloquear o sistema
+@joaoesteves10 bani
+Liga de Futebol favorita do chat.
+Mesma coisa que vc comprar um celular
+E eles teriam de te compensar de alguma forma
+Me pergunto, da onde criam essas copypastas idiotas?
+Eu n perderia grande coisa tbh
+vo la
+vai no suporte inglês
+zag zag zag
+:pensivewobbleslow:
+https://i.imgur.com/JthLLQ0.png
+mas vc comprou skin
+fortnite é gratis
+ia ser um amém
+vc vai ter perdido dinheiro
+se fortnite acabar hoje
+vai chegar uma hora q vai ser mesmisse
+quase perdi meu cachorro :tobias_pensive:
+portugalense
+se o jogo morrer n vai ter com quem jogar
+mas n q va acabar
+ah sim
+é provável
+vAi mOrRer
+logo nao e pq
+vc mesmo se respondeu
+logo n é um bom investimento
+pq vc nao joga com ngm@Zagrion !!!!!!!!!!11
+então
+com ele
+eu decido o que fazer
+pq vc nao joga com ngm
+meu dindin
+se ele não mandar um . agora deleto o texto todo
+¯\\_(ツ)\_/¯
+#😎│bate-papo-politics quando?
+@Zagrion Eu n vejo among US como um bom investimento
+@Sapphyre
+lxtoria
+vc esta comparando um jogo indie com um jogo AAA
+caraio
+achei essa print do nada
+:GWchadMEGATHINK:
+sua comparação eh injusta
+se um dia eu for morar nos estados unidos, vai ser nesse estado
+eu n vou comprar among us para n jogar
+eu nao zerei o jogo portuga
+Vc se divertiu
+n sabe aproveitar um jogo
+@Zagrion vc jogou
+pq vc é trouxa
+SAELRNDONSRIAEDSRAEO
+é resumo
+NÃO É COPYPASTA
+engraçado q a primeira palavra
+meu red dead 2 ta parado ate hj
+ban joao
+meu deus
+amas não sei
+Novo jogo do mês, Broker Da Loritta 2: Desdobramento do mercado livre.
+@SrGaabriel tinha um texto enorme aqui mas eu tireiacho que para voter fraud há preocupações maiores em termos de escala e facilidade do que isso
+ai é foda
+q eu jogo
+Mas comprar e nao jogar
+bom, eu termino todos jogos
+e parou de jogar?
+comprou um jogo
+quem nunca
+vc investiu em nd
+nao como diversão
+exato
+vc vai comprar um jogo e n jogar?
+como investimento
+ele decide comprar um jogo
+é sim
+1 em 1000 vezes
+bom, teoricamente
+Raramente
+de todo
+como se fosse bolsa de valores
+@Zagrion Eunn jogo among US
+trata jogo
+@Professor Snate to falando q o portuga
+*como
+O João, comi funciona o Crowdin?
+isso n faz sentido oq vc disse
+@S̵̛̔r̵͋̕ ̴̃͗ H̶͊͋o̴̿̚lmĕ̷͝s🕵 doando
+@Zagrion ué, mas boa parte da economia br gira em torno de jogo
+:naochoreralls:
+alguem sabe como manda algo no chat "mendigagem"?
+:catthumbsup:
+eu vejo como
+hmm hj vo compra fall guys pq ele vai valorizar
+nao sabia q jogo tinha virado bolsa de valores
+¯\\_(ツ)\_/¯
+boa noite
+n vejo como um investimento que valha a pena
+Eu n ter amigos para jogar among US
+vAi mOrRer
+e muito bom
+A discussão fica interessante, a suspeita
+vc fala
+maluco todo jogo
+o foda é que eu tenho nitro
+@Zagrion tem nada haver
+:GWbruhShrekThonk:
+@hechfx sim
+nao sei
+porra meu filho acabou de nascerportuga: aI vAi mOrRer
+@nathan perdoa o natan true
+GW ACABOU?
+Among é bom jogar com amigos
+ficar com essa de "aI vAi mOrRer"
+fall guys só n tem vídeo, mas ainda tem mta gente jogando
+Eu quero que ele dure
+vc tem q comprar um jogo pq vc gosta dele
+vc n rem q comprar.um jogo com medo dele morrer
+..ping
+https://cdn.discordapp.com/attachments/734928731759706176/771032946207227924/bobfire.png
+eu não acho que among vai morrer tão rápido
+@Azureツ Bora ser ativo na tecafeia ?
+rapido
+vai morrer
+E como Fall Guys
+@blueslimee  Blue, vou te mandar a vitamina por fax, sugestão by: @Azureツ
+queria ter sonhos
+queria receber sonhos no daily
+preciso de sonhos
+queria sonhos
+Em caso de investigação na Loritta, eu oficialmente declaro que não tenho envolvimento com esta pessoa e não sei como tenho o mesmo adicionado, provavelmente fui inserido por terceiros, declaro que estou disposto a colaborar com as investigações e estou disposto a me apresentar a depoimento se necessário, declaro que sou completamente inocente e não tenho envolvimento nenhum com a venda de sonhos mostrada nessa mensagem específic
+pode vender nitro por sonhos?
+dá para trocar nitro por sonhos?
+algm vendendo rep por 1.5k?
+alguém chama 1k ae
+Poder comprar rifa usando 'k', por exemplo: "+comprar rifa 4k" , ia ajudar na hora de comprar
++bolsonaro2 alguém doa 10k
+Alguém compra rep por 20k 10k?
+Vendo rep 100k alguém querendo?
+vendo rep por 100k kkkkkjj
+bom dia alguém quer comprar Rep por 2k?
+Te ensino por 2k de sonho
+vendo meu corpo de pato por 10k
+algm 100k chama ae
+algm chama 550k ae
+quem sabe algum dia o power umilder pudesse fazer um evento valendo um minecraft orignal <a:sad_cat_shy:718513898537615531> ou por nas caixas nn sei foi bem legal ficar juntando caixas pra pegar nitros <:catthumbsup:644616343584374785>
+vendo rep por 1k chama brow
+Vendo rep por 2k
+Chama mais 1 k ae
+Quem for doador de 40 reais também ter vantagens na Loritta Canary por exemplo, não ter taxa no coinflip, rifa, etc.
+Sonhos ou moedas de bots cumprindo missões.
+2x vezes Sonhos no Daily multiplicado.
+:pepeJAM: • @hechfx Tocando agora: Ping!!
+Bolsonaro:flag_br: :flag_br: :sunglasses: :thumbsup: :sunglasses: :muscle: é o salvador dessa grande nação chamada Brasil :sunglasses: :sunglasses: :point_right: :point_right: :flag_br: :flag_br:
+:lambidas:
+I hate TypeScript onii-san.
+tabo
+q isso
+#fechadoscombolsonaro2026
+@kv sim vc me lambeu
+calmae
+@kv vo mandar no seu pv
+Php
+I hate
+@hechfx parou de ligar bdc?
+@Shad vamo, coloque.
+Odeio TypeScript, mas eu preciso me acostumar com tipagem
+pra mim tá HAUSHUSHSHS
+Eu to passando é raiva
+SAIDFOUIADSHFSAOSAPO
+Organizado nada
+TS :pensive:
+aqui
+q
+Obama prism
+@DanielaGC_ que código mais organizado
+pls não
+:moai_awakens:
+Logo, ele perdeu.
+Passou 10 segundos desde que postei a imagem.
+Sim
+TS? :disney:
+Lag não conta.
+ganhou https://i.imgur.com/HLBNIbq.png
+não
+Perdeu.
+ai ela pede pra alguem doar o cu
+me da um pouco de sangue
+Falta mais 15k para ter os sonhos nessesrios para dar de recompensa ao vencedor do question deste mês
+Fui visitar minha webnamorada do fre frai e fui ver q a casa dela era uma tal de delegacia,devo me preocupar? (Obs:ela tem 9 anos)
+Te dou 30 k de sonhos se instalar windows no computador da Apple
+mas vc pode me doar sonhos e eu tiro sua taxa
+Gente, alguém sabe algum bot que dar e remove cargo quando um membros remove ou ganha algum cargo? Contexto: Meus membros NITRO são o únicos que podem configurar cor de perfil personalizada porque o SlashBot tem lá o recurso de limita o ganho do cargo só para cargo específico. Assim, gostaria que após a pessoas parar de Boostar meu servidor, automaticamente ela perdesse também o cargo de cor de perfil. Obg.
+Alguém pode me ensinar a ganhar sonhos na loritta sem ser votando
+Alguém pode me esclarecer uma duvida ? Se o sv está com 25 boosts , e eu der boost conta o Premium que tira taxa ou tem que ser abaixo de 25 boosts

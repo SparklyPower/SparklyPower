@@ -3,22 +3,52 @@ package net.perfectdreams.pantufa.listeners
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.set
 import com.google.gson.JsonObject
+import dev.minn.jda.ktx.messages.MessageCreate
+import kotlinx.serialization.json.Json
+import mu.KotlinLogging
+import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageType
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import net.dv8tion.jda.api.events.guild.GuildBanEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import net.perfectdreams.pantufa.PantufaBot
+import net.perfectdreams.pantufa.api.commands.styled
 import net.perfectdreams.pantufa.dao.User
 import net.perfectdreams.pantufa.network.Databases
-import net.perfectdreams.pantufa.utils.Constants
-import net.perfectdreams.pantufa.api.commands.PantufaReply
+import net.perfectdreams.pantufa.utils.Emotes
 import net.perfectdreams.pantufa.utils.Server
 import net.perfectdreams.pantufa.utils.extensions.await
+import net.perfectdreams.pantufa.utils.extensions.referenceIfPossible
 import net.perfectdreams.pantufa.utils.socket.SocketUtils
+import net.perfectdreams.pantufa.utils.svm.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.io.File
+import java.util.*
 
 class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
+	companion object {
+		private val logger = KotlinLogging.logger {}
+	}
+
+	private val vocabulary: Map<String, Int>
+	private val svm: SVM
+
+	private val accountMatchRegexes = listOf(
+		// do/de/da NomeDaConta
+		Regex("d[oae] ([A-z0-9_]{3,16})"),
+		// esse/essa NomeDaConta
+		Regex("ess[ea] ([A-z0-9_]{3,16})"),
+		// quem é o/a NomeDaConta
+		Regex("quem é [oa] ([A-z0-9_]{3,16})")
+	)
+
+	init {
+		val svmTrainData = Json.decodeFromString<TrainedSVMData>(PantufaBot::class.java.getResourceAsStream("/discord-account-question-svm.json").readAllBytes().toString(Charsets.UTF_8))
+		vocabulary = svmTrainData.vocabulary
+		svm = SVM(svmTrainData.weights, svmTrainData.bias)
+	}
+
 	override fun onGuildBan(event: GuildBanEvent) {
 		m.launch {
 			val user = m.getDiscordAccountFromUser(event.user) ?: return@launch
@@ -26,15 +56,15 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 
 			val userBan = try {
 				event.guild.retrieveBan(event.user)
-						.await()
+					.await()
 			} catch (e: Exception) { return@launch }
 
 			Server.PERFECTDREAMS_BUNGEE.send(
-					jsonObject(
-							"type" to "executeCommand",
-							"player" to "Pantufa",
-							"command" to "ban $sparklyUsername Banido no Discord do SparklyPower: ${userBan.reason}"
-					)
+				jsonObject(
+					"type" to "executeCommand",
+					"player" to "Pantufa",
+					"command" to "ban $sparklyUsername Banido no Discord do SparklyPower: ${userBan.reason}"
+				)
 			)
 		}
 	}
@@ -60,6 +90,51 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 					host = sparklyPower.server.perfectDreamsBungeeIp,
 					port = sparklyPower.server.perfectDreamsBungeePort
 				)
+			}
+
+			if (event.channel.idLong == sparklyPower.guild.chitChatChannelId) {
+				val unshortenedWordsContent = replaceShortenedWordsWithLongWords(event.message.contentRaw)
+				val content = normalizeNaiveBayesInput(unshortenedWordsContent)
+				val stuff = textToFeatures(content, vocabulary)
+				val predictedValue = svm.predict(stuff)
+
+				logger.info { "Content $content is $predictedValue" }
+
+				if (predictedValue == 1) {
+					// We match against the original content (but with the short words replaced) to avoid normalization causing issues
+					val matches = accountMatchRegexes.firstNotNullOfOrNull { it.find(unshortenedWordsContent) }
+					if (matches != null) {
+						val username = matches.groupValues[1]
+						val account = m.getMinecraftUserFromUsername(username)
+						if (account != null) {
+							val discordAccount = m.getDiscordAccountFromUniqueId(account.id.value)
+
+							if (discordAccount != null) {
+								event.channel.sendMessage(
+									MessageCreate {
+										styled(
+											"A conta de `${account.username}` no Discord é <@${discordAccount.discordId}> (`${discordAccount.discordId}`)",
+											Emotes.PantufaHi
+										)
+
+										styled(
+											"**Dica da Pantufinha:** No futuro use o comando `/sparklyplayer playername` para ver a conta do Discord de outros players do SparklyPower!",
+											Emotes.PantufaComfy
+										)
+
+										this.content += "\n-# • Resposta automática, espero que ela tenha te ajudado!"
+
+										allowedMentionTypes = EnumSet.of(
+											Message.MentionType.EMOJI,
+											Message.MentionType.CHANNEL,
+											Message.MentionType.SLASH_COMMAND,
+										)
+									}
+								).referenceIfPossible(event.message).await()
+							}
+						}
+					}
+				}
 			}
 
 			if (checkCommandsAndDispatch(event))

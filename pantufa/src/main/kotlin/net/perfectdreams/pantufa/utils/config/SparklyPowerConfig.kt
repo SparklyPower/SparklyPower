@@ -28,6 +28,7 @@ data class SparklyPowerConfig(
         val staffRoleId: Long,
         val whitelistedChannels: List<Long>,
         val whitelistedRoles: List<Long>,
+        val chitChatChannelId: Long,
         val staffChannelId: Long,
         val pantufaPrintShopChannelId: Long,
         val sparklySkinsLogChannelId: Long,
