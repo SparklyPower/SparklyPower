@@ -2,6 +2,7 @@ package net.perfectdreams.pantufa.utils.extensions
 
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.entities.MessageHistory
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel
 import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.requests.RestAction
@@ -21,6 +22,33 @@ fun MessageCreateAction.referenceIfPossible(message: Message): MessageCreateActi
 	if (message.isFromGuild && !message.guild.selfMember.hasPermission(message.channel as GuildChannel, Permission.MESSAGE_HISTORY))
 		return this
 	return this.setMessageReference(message)
+}
+
+suspend fun MessageHistory.retrievePastChunked(quantity: Int): List<Message> {
+	val messages = mutableListOf<Message>()
+
+	for (x in 0 until quantity step 100) {
+		val newMessages = this.retrievePast(100).await()
+		if (newMessages.isEmpty())
+			break
+
+		messages += newMessages
+	}
+	return messages
+}
+
+suspend fun MessageHistory.retrieveAllMessages(): List<Message> {
+	val messages = mutableListOf<Message>()
+
+	while (true) {
+		val newMessages = this.retrievePast(100).await()
+		if (newMessages.isEmpty())
+			break
+
+		messages += newMessages
+	}
+
+	return messages
 }
 
 /**

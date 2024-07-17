@@ -9,13 +9,18 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageType
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel
+import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.guild.GuildBanEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
+import net.dv8tion.jda.api.interactions.components.buttons.Button
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.perfectdreams.pantufa.PantufaBot
 import net.perfectdreams.pantufa.api.commands.styled
 import net.perfectdreams.pantufa.dao.User
 import net.perfectdreams.pantufa.network.Databases
+import net.perfectdreams.pantufa.serverresponses.sparklypower.HowToResetMyPasswordResponse
 import net.perfectdreams.pantufa.tables.Users
 import net.perfectdreams.pantufa.utils.Emotes
 import net.perfectdreams.pantufa.utils.Server
@@ -53,6 +58,24 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 		val svmTrainData = Json.decodeFromString<TrainedSVMData>(PantufaBot::class.java.getResourceAsStream("/discord-account-question-svm.json").readAllBytes().toString(Charsets.UTF_8))
 		vocabulary = svmTrainData.vocabulary
 		svm = SVM(svmTrainData.weights, svmTrainData.bias)
+	}
+
+	val supportResponses = listOf(
+		HowToResetMyPasswordResponse(m, loadSVM("svm-how-to-reset-my-password"))
+	)
+
+	private fun loadSVM(name: String): SparklySVM {
+		val trainedSVMData = Json.decodeFromString<TrainedSVMData>(
+			PantufaBot::class.java.getResourceAsStream("/support_vector_machines_data/$name.json").readAllBytes().toString(Charsets.UTF_8)
+		)
+
+		return SparklySVM(
+			SVM(
+				trainedSVMData.weights,
+				trainedSVMData.bias
+			),
+			trainedSVMData.vocabulary
+		)
 	}
 
 	override fun onGuildBan(event: GuildBanEvent) {
@@ -157,6 +180,40 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 					}
 
 					event.message.addReaction(Emotes.PantufaShrug.toJDA()).await()
+				}
+			}
+
+			val currentChannel = event.channel
+
+			if (currentChannel is ThreadChannel) {
+				val parentChannel = currentChannel.parentChannel
+
+				if (parentChannel.idLong == m.config.sparklyPower.guild.supportChannelId) {
+					// We remove any lines starting with > (quote) because this sometimes causes responses to something inside a citation, and that looks kinda bad
+					val cleanMessage = event.message.contentRaw.lines()
+						.dropWhile { it.startsWith(">") }
+						.joinToString("\n")
+
+					for (response in supportResponses) {
+						if (response.handleResponse(cleanMessage)) {
+							val automatedSupportResponse = response.getSupportResponse(event.author, cleanMessage)
+
+							if (automatedSupportResponse != null) {
+								event.channel.sendMessage(
+									MessageCreate {
+										content = buildString {
+											for (response in automatedSupportResponse.replies) {
+												appendLine(response.build(event.author))
+											}
+
+											appendLine("-# • Resposta automática, se ela resolveu a sua dúvida, feche o ticket com `/closeticket`!")
+										}
+									}
+								).setMessageReference(event.messageIdLong).failOnInvalidReply(false).await()
+								break
+							}
+						}
+					}
 				}
 			}
 

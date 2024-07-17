@@ -6,6 +6,7 @@ class SVMBuilder(val featureSize: Int, val learningRate: Double = 0.01, val lamb
 
     fun train(data: List<DataPoint>, epochs: Int) {
         repeat(epochs) {
+            println("current epoch: $it")
             for (point in data) {
                 val prediction = predictRaw(point.features)
                 val condition = point.label * prediction

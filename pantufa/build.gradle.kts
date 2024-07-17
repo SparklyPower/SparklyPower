@@ -82,6 +82,7 @@ kotlin {
 jib {
     container {
         ports = listOf("8080")
+        mainClass = "net.perfectdreams.pantufa.PantufaLauncher"
     }
 
     to {
