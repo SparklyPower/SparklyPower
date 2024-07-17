@@ -46,6 +46,7 @@ fun replaceShortenedWordsWithLongWords(source: String) = source
     .replace(Regex("\\bSparkly\\b", RegexOption.IGNORE_CASE), "SparklyPower")
     .replace(Regex("\\bservidor\\b", RegexOption.IGNORE_CASE), "SparklyPower")
     .replace(Regex("\\bserver\\b", RegexOption.IGNORE_CASE), "SparklyPower")
+    .replace(Regex("\\bspk\\b", RegexOption.IGNORE_CASE), "SparklyPower")
     .replace(Regex("\\bpesa\\b", RegexOption.IGNORE_CASE), "pesadelos")
     .replace(Regex("\\beh\\b", RegexOption.IGNORE_CASE), "é")
     .replace(Regex("\\badissiona\\b", RegexOption.IGNORE_CASE), "adiciona")
@@ -69,6 +70,8 @@ fun replaceShortenedWordsWithLongWords(source: String) = source
     .replace(Regex("\\bdc\\b", RegexOption.IGNORE_CASE), "Discord")
     .replace(Regex("\\bdsc\\b", RegexOption.IGNORE_CASE), "Discord")
     .replace(Regex("\\bdisc\\b", RegexOption.IGNORE_CASE), "Discord")
+    .replace(Regex("\\bql\\b", RegexOption.IGNORE_CASE), "qual")
+    .replace(Regex("\\bqlq\\b", RegexOption.IGNORE_CASE), "qualquer")
 
 fun normalizeNaiveBayesInput(source: String) = source
     .lowercase()
