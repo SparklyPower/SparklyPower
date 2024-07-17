@@ -16,13 +16,16 @@ import net.perfectdreams.pantufa.PantufaBot
 import net.perfectdreams.pantufa.api.commands.styled
 import net.perfectdreams.pantufa.dao.User
 import net.perfectdreams.pantufa.network.Databases
+import net.perfectdreams.pantufa.tables.Users
 import net.perfectdreams.pantufa.utils.Emotes
 import net.perfectdreams.pantufa.utils.Server
+import net.perfectdreams.pantufa.utils.exposed.ilike
 import net.perfectdreams.pantufa.utils.extensions.await
 import net.perfectdreams.pantufa.utils.extensions.referenceIfPossible
 import net.perfectdreams.pantufa.utils.extensions.toJDA
 import net.perfectdreams.pantufa.utils.socket.SocketUtils
 import net.perfectdreams.pantufa.utils.svm.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.util.*
@@ -109,7 +112,20 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 					for (match in matches) {
 						// We try querying all possible matches
 						val username = match.groupValues[1]
-						val account = m.getMinecraftUserFromUsername(username)
+						val account = transaction(Databases.sparklyPower) {
+							// First we get the exact match
+							val fullMatchedUsername = User.find { Users.username eq username }.firstOrNull()
+							if (fullMatchedUsername != null)
+								return@transaction fullMatchedUsername
+
+							// Then we try getting ignored case (what if there are two users with the same name but in different casing? probably impossible but who knows...)
+							val ignoredCaseUsername = User.find { Users.username ilike username }.firstOrNull()
+							if (ignoredCaseUsername != null)
+								return@transaction ignoredCaseUsername
+
+							return@transaction null
+						}
+
 						if (account != null) {
 							val discordAccount = m.getDiscordAccountFromUniqueId(account.id.value)
 
