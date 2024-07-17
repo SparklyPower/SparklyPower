@@ -40,13 +40,13 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 
 	private val accountMatchRegexes = listOf(
 		// do/de/da NomeDaConta
-		Regex("d[oae] ([A-z0-9_]{3,16})"),
+		Regex("d[oae] ([A-z0-9_]{3,16})", RegexOption.IGNORE_CASE),
 		// esse/essa NomeDaConta
-		Regex("ess[ea] ([A-z0-9_]{3,16})"),
+		Regex("ess[ea] ([A-z0-9_]{3,16})", RegexOption.IGNORE_CASE),
 		// quem é o/a NomeDaConta
-		Regex("quem é [oa] ([A-z0-9_]{3,16})"),
+		Regex("quem é [oa] ([A-z0-9_]{3,16})", RegexOption.IGNORE_CASE),
 		// conhece NomeDaConta
-		Regex("conhece [oa]? ?([A-z0-9_]{3,16})")
+		Regex("conhece [oa]? ?([A-z0-9_]{3,16})", RegexOption.IGNORE_CASE)
 	)
 
 	init {
