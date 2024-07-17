@@ -41,7 +41,9 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 		// esse/essa NomeDaConta
 		Regex("ess[ea] ([A-z0-9_]{3,16})"),
 		// quem é o/a NomeDaConta
-		Regex("quem é [oa] ([A-z0-9_]{3,16})")
+		Regex("quem é [oa] ([A-z0-9_]{3,16})"),
+		// conhece NomeDaConta
+		Regex("conhece [oa]? ?([A-z0-9_]{3,16})")
 	)
 
 	init {
