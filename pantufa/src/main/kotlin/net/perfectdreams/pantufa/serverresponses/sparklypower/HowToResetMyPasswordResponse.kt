@@ -16,7 +16,7 @@ class HowToResetMyPasswordResponse(val m: PantufaBot, svm: SparklySVM) : SVMPant
         if (discordAccount != null && discordAccount.isConnected) {
             val minecraftAccount = m.getMinecraftUserFromUniqueId(discordAccount.minecraftId)
 
-            return AutomatedSupportResponse(
+            return AutomatedSupportResponse.AutomatedSupportPantufaReplyResponse(
                 listOf(
                     PantufaReply(
                         "Como você tem a conta `${minecraftAccount?.username}` do SparklyPower conectada a sua conta do Discord, você pode trocar a sua senha do SparklyPower usando `/changepass` aqui no Discord do SparklyPower!",
@@ -30,8 +30,26 @@ class HowToResetMyPasswordResponse(val m: PantufaBot, svm: SparklySVM) : SVMPant
                     )
                 )
             )
-        }
+        } else {
+            return AutomatedSupportResponse.AutomatedSupportMessageResponse {
+                embed {
+                    title = "Quero trocar a minha senha!"
 
-        return null
+                    description = """<:nd_or:1013294801044656129> **Para esse suporte é preciso seguir essas informações:**
+
+<:nd_or:1013294801044656129> **Se você é registrado**, você pode usar o comando `/changepass` da Pantufa no <#830658622383980545>.
+
+<:nd_or:1013294801044656129> **Caso não seja registrado**: Você é Minecraft: Bedrock Edition (Mobile, Consoles ou Bedrock Edition no PC) ou Minecraft: Java Edition?
+
+<:nb_or:1013294515932639232><:nde_or:1013294832032153752> **Se você é mobile**, basta conectar a sua conta do Xbox (que tem a sua gamertag) ao seu Discord e avise a Staff.
+
+<:nb_or:1013294515932639232><:nde_or:1013294832032153752> **Se você é PC**, seu Minecraft é original ou pirata?
+<:nb_or:1013294515932639232><:nh_or:1013294856593997955><:nde_or:1013294832032153752> __Se ele é original__, você precisa enviar uma print da tela inicial do seu launcher, onde apareça o seu nickname.
+<:nb_or:1013294515932639232><:nh_or:1013294856593997955><:nde_or:1013294832032153752> __Se ele é pirata__, você não tem como resetar a senha por falta de autenticação. Você pode criar outra conta para jogar ou provar que a conta é sua."""
+
+                    color = 15567872
+                }
+            }
+        }
     }
 }

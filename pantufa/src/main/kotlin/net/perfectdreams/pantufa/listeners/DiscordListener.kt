@@ -20,6 +20,7 @@ import net.perfectdreams.pantufa.PantufaBot
 import net.perfectdreams.pantufa.api.commands.styled
 import net.perfectdreams.pantufa.dao.User
 import net.perfectdreams.pantufa.network.Databases
+import net.perfectdreams.pantufa.serverresponses.AutomatedSupportResponse
 import net.perfectdreams.pantufa.serverresponses.sparklypower.HowToResetMyPasswordResponse
 import net.perfectdreams.pantufa.tables.Users
 import net.perfectdreams.pantufa.utils.Emotes
@@ -199,17 +200,32 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 							val automatedSupportResponse = response.getSupportResponse(event.author, cleanMessage)
 
 							if (automatedSupportResponse != null) {
-								event.channel.sendMessage(
-									MessageCreate {
-										content = buildString {
-											for (response in automatedSupportResponse.replies) {
-												appendLine(response.build(event.author))
-											}
+								val messageCreateData = when (automatedSupportResponse) {
+									is AutomatedSupportResponse.AutomatedSupportPantufaReplyResponse -> {
+										MessageCreate {
+											content = buildString {
+												for (response in automatedSupportResponse.replies) {
+													appendLine(response.build(event.author))
+												}
 
-											appendLine("-# • Resposta automática, se ela resolveu a sua dúvida, feche o ticket com `/closeticket`!")
+												appendLine("-# • Resposta automática, se ela resolveu a sua dúvida, feche o ticket com `/closeticket`!")
+											}
 										}
 									}
-								).setMessageReference(event.messageIdLong).failOnInvalidReply(false).await()
+									is AutomatedSupportResponse.AutomatedSupportMessageResponse -> {
+										MessageCreate {
+											automatedSupportResponse.messageBuilder.invoke(this)
+
+											if (content != null) {
+												content = "\n-# • Resposta automática, se ela resolveu a sua dúvida, feche o ticket com `/closeticket`!"
+											} else {
+												content = "-# • Resposta automática, se ela resolveu a sua dúvida, feche o ticket com `/closeticket`!"
+											}
+										}
+									}
+								}
+
+								event.channel.sendMessage(messageCreateData).setMessageReference(event.messageIdLong).failOnInvalidReply(false).await()
 								break
 							}
 						}
