@@ -197,6 +197,8 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 
 					for (response in supportResponses) {
 						if (response.handleResponse(cleanMessage)) {
+							logger.info { "Using support response \"${response::class.simpleName}\" for message \"${event.message.contentRaw}\" ${event.message.jumpUrl}" }
+
 							val automatedSupportResponse = response.getSupportResponse(event.author, cleanMessage)
 
 							if (automatedSupportResponse != null) {
