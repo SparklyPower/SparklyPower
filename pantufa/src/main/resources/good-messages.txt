@@ -1,3 +1,5 @@
+Alguém sabe como troca a senha do server do Minecraft da loritta(esqueci a minha😭😭😭)
+eu so quero te avisar que ele disse que nn pode entrar no ticket como tava dizendo no motivo do ban dele pq quando eu mandei o server de dc do sparkly ele tava banido ate do dc, ent vc pode me dizer se tem uma especie de formulario ou algo pra ele se explicar e vcs verem se o ban foi justo ou nn?
 hech eu nao sei um pingo de kotlin
 ..eval val messages = context.message.channel.history.retrievePastChunked(10_000)File("/home/good-messages.txt").writeText(messages.filterNot { it.author.isBot }.filter { it.contentRaw.length >= 5 }.joinToString("\n") { it.contentStripped.replace("\n", "") })context.sendMessage(messages.size.toString())
 Com dor nas costas

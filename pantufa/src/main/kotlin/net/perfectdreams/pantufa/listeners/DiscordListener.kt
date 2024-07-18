@@ -10,12 +10,9 @@ import net.dv8tion.jda.api.entities.Message
 import net.dv8tion.jda.api.entities.MessageType
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel
-import net.dv8tion.jda.api.entities.emoji.Emoji
 import net.dv8tion.jda.api.events.guild.GuildBanEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import net.dv8tion.jda.api.interactions.components.buttons.Button
-import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle
 import net.perfectdreams.pantufa.PantufaBot
 import net.perfectdreams.pantufa.api.commands.styled
 import net.perfectdreams.pantufa.dao.User
@@ -31,9 +28,7 @@ import net.perfectdreams.pantufa.utils.extensions.referenceIfPossible
 import net.perfectdreams.pantufa.utils.extensions.toJDA
 import net.perfectdreams.pantufa.utils.socket.SocketUtils
 import net.perfectdreams.pantufa.utils.svm.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.io.File
 import java.util.*
 
 class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
@@ -41,8 +36,7 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 		private val logger = KotlinLogging.logger {}
 	}
 
-	private val vocabulary: Map<String, Int>
-	private val svm: SVM
+	private val discordAccountQuestionSVM: SparklySVM
 
 	private val accountMatchRegexes = listOf(
 		// do/de/da NomeDaConta
@@ -56,9 +50,7 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 	)
 
 	init {
-		val svmTrainData = Json.decodeFromString<TrainedSVMData>(PantufaBot::class.java.getResourceAsStream("/discord-account-question-svm.json").readAllBytes().toString(Charsets.UTF_8))
-		vocabulary = svmTrainData.vocabulary
-		svm = SVM(svmTrainData.weights, svmTrainData.bias)
+		discordAccountQuestionSVM = loadSVM("svm-discord-account-question")
 	}
 
 	val supportResponses = listOf(
@@ -125,12 +117,11 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 			if (event.channel.idLong == sparklyPower.guild.chitChatChannelId) {
 				val unshortenedWordsContent = replaceShortenedWordsWithLongWords(event.message.contentRaw)
 				val content = normalizeNaiveBayesInput(unshortenedWordsContent)
-				val stuff = textToFeatures(content, vocabulary)
-				val predictedValue = svm.predict(stuff)
+				val (predictedValue, rawValue) = discordAccountQuestionSVM.predictWithRawValue(content)
 
-				logger.info { "Content $content is $predictedValue" }
+				logger.info { "Content \"$content\" is $predictedValue ($rawValue)" }
 
-				if (predictedValue == 1) {
+				if (predictedValue) {
 					// We match against the original content (but with the short words replaced) to avoid normalization causing issues
 					val matches = accountMatchRegexes.flatMap { it.findAll(unshortenedWordsContent) }
 					for (match in matches) {

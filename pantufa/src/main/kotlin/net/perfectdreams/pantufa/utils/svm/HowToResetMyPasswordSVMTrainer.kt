@@ -39,6 +39,7 @@ fun main() {
         ),
         File("D:\\SparklyPowerAssets\\SVMQuestionsScratchPad\\base-negative-messages.txt")
             .readLines()
+            .map { replaceShortenedWordsWithLongWords(it) }
     ).train()
 
     File("svm-how-to-reset-my-password.json")

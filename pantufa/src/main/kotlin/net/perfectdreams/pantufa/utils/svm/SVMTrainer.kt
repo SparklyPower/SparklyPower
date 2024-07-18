@@ -7,9 +7,11 @@ class SVMTrainer(
     val nonQuestionTexts: List<String>
 ) {
     fun train(): TrainedSVMData {
+        // Normalize the questions...
         val questionTexts = questionTexts.map { normalizeNaiveBayesInput(it) }
 
-        val texts = questionTexts + nonQuestionTexts
+        // And normalize the non questions too!
+        val texts = questionTexts + nonQuestionTexts.map { normalizeNaiveBayesInput(it) }
         val labels = mutableListOf<Int>()
         for (text in questionTexts) {
             labels.add(1)
