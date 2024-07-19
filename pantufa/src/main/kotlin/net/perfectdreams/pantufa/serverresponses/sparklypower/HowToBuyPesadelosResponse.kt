@@ -13,7 +13,7 @@ class HowToBuyPesadelosResponse(val m: PantufaBot, svm: SparklySVM) : SVMPantufa
         return AutomatedSupportResponse.AutomatedSupportPantufaReplyResponse(
             listOf(
                 PantufaReply(
-                    "Você pode comprar pesadelos no SparklyPower em nossa loja! https://sparklypower.net/loja",
+                    "Você pode comprar pesadelos no SparklyPower em nossa loja: https://sparklypower.net/loja",
                     Emotes.Pesadelos.toString(),
                     mentionUser = false
                 ),

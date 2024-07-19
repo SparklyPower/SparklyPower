@@ -7,7 +7,9 @@ object SVMDatasets {
         "como comprar pesadelos?",
         "quero comprar pesadelos?",
         "como consegue pesadelos?",
+        "como consigo pesadelos?",
         "como pega pesadelos?",
+        "como pego pesadelos?",
         "qual é a loja de pesadelos?",
         "qual é o link para comprar pesadelos?"
     )

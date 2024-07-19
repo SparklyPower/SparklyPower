@@ -74,6 +74,8 @@ fun replaceShortenedWordsWithLongWords(source: String) = source
     .replace(Regex("\\bql\\b", RegexOption.IGNORE_CASE), "qual")
     .replace(Regex("\\bqlq\\b", RegexOption.IGNORE_CASE), "qualquer")
     .replace(Regex("\\bnn\\b", RegexOption.IGNORE_CASE), "não")
+    .replace(Regex("\\bgivei\\b", RegexOption.IGNORE_CASE), "dei")
+    .replace(Regex("\\bgivou\\b", RegexOption.IGNORE_CASE), "deu")
 
 fun normalizeNaiveBayesInput(source: String) = source
     .lowercase()
