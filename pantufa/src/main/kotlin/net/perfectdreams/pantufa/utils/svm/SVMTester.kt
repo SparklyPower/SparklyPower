@@ -6,11 +6,17 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 object SVMTester {
-    fun main() {
+    @JvmStatic
+    fun main(args: Array<String>) {
         var svmSourceFileName = System.getProperty("svmtester.svmFileName")
         if (svmSourceFileName == null) {
             println("Type the trained SVM file name:")
             svmSourceFileName = readln()
+
+            if (!svmSourceFileName.endsWith(".json")) {
+                println("Missing .json extension, appending it...")
+                svmSourceFileName = "\".json\""
+            }
         }
 
         val sourceSVMData = Json.decodeFromString<TrainedSVMData>(
