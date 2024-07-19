@@ -84,6 +84,7 @@ fun normalizeNaiveBayesInput(source: String) = source
     .replace(",", "")
     .replace("\"", "")
     .replace("`", "")
+    .replace("<@[0-9]+>".toRegex(), "")
     .trim()
 
 private fun String.normalize(): String {
