@@ -30,7 +30,7 @@ abstract class SVMBaseTest(
     @Test
     fun testQuestions() {
         for (question in questionsThatShouldMatch) {
-            val content = normalizeNaiveBayesInput(question)
+            val content = normalizeNaiveBayesInput(replaceShortenedWordsWithLongWords(question))
 
             // Content too short, bail out!
             if (2 >= content.split(" ").size)
@@ -47,7 +47,7 @@ abstract class SVMBaseTest(
     @Test
     fun testNotQuestions() {
         for (question in questionsThatShouldNotMatch) {
-            val content = normalizeNaiveBayesInput(question)
+            val content = normalizeNaiveBayesInput(replaceShortenedWordsWithLongWords(question))
 
             val result = svm.predictWithRawValue(content)
             if (result.result)
