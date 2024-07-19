@@ -5,30 +5,36 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 
-fun main() {
-    var svmSourceFileName = System.getProperty("svmtester.svmFileName")
-    if (svmSourceFileName == null) {
-        println("Type the trained SVM file name:")
-        svmSourceFileName = readln()
+object SVMTester {
+    fun main() {
+        var svmSourceFileName = System.getProperty("svmtester.svmFileName")
+        if (svmSourceFileName == null) {
+            println("Type the trained SVM file name:")
+            svmSourceFileName = readln()
+        }
+
+        val sourceSVMData = Json.decodeFromString<TrainedSVMData>(
+            File(svmSourceFileName)
+                .readText()
+        )
+
+        interactiveTester(sourceSVMData)
     }
 
-    val sourceSVMData = Json.decodeFromString<TrainedSVMData>(
-        File(svmSourceFileName)
-            .readText()
-    )
+    fun interactiveTester(sourceSVMData: TrainedSVMData) {
+        val svm = SparklySVM(SVM(sourceSVMData.weights, sourceSVMData.bias), sourceSVMData.vocabulary)
 
-    val svm = SparklySVM(SVM(sourceSVMData.weights, sourceSVMData.bias), sourceSVMData.vocabulary)
+        println("Successfully loaded SVM!")
 
-    println("Successfully loaded SVM!")
+        while (true) {
+            println("Type!")
 
-    while (true) {
-        println("Type!")
+            val input = readln()
+            val changedInput = normalizeNaiveBayesInput(replaceShortenedWordsWithLongWords(input))
 
-        val input = readln()
-        val changedInput = normalizeNaiveBayesInput(replaceShortenedWordsWithLongWords(input))
+            val result = svm.predictRaw(changedInput)
 
-        val result = svm.predictRaw(changedInput)
-
-        println("Result for \"$changedInput\": ${result >= 0} (raw result: ${result})")
+            println("Result for \"$changedInput\": ${result >= 0} (raw result: ${result})")
+        }
     }
 }

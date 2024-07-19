@@ -18,6 +18,7 @@ import net.perfectdreams.pantufa.api.commands.styled
 import net.perfectdreams.pantufa.dao.User
 import net.perfectdreams.pantufa.network.Databases
 import net.perfectdreams.pantufa.serverresponses.AutomatedSupportResponse
+import net.perfectdreams.pantufa.serverresponses.sparklypower.HowToBuyPesadelosResponse
 import net.perfectdreams.pantufa.serverresponses.sparklypower.HowToResetMyPasswordResponse
 import net.perfectdreams.pantufa.tables.Users
 import net.perfectdreams.pantufa.utils.Emotes
@@ -54,7 +55,8 @@ class DiscordListener(val m: PantufaBot) : ListenerAdapter() {
 	}
 
 	val supportResponses = listOf(
-		HowToResetMyPasswordResponse(m, loadSVM("svm-how-to-reset-my-password"))
+		HowToResetMyPasswordResponse(m, loadSVM("svm-how-to-reset-my-password")),
+		HowToBuyPesadelosResponse(m, loadSVM("svm-how-to-buy-pesadelos"))
 	)
 
 	private fun loadSVM(name: String): SparklySVM {

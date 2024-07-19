@@ -37,4 +37,6 @@ fun main() {
 
     File("svm-discord-account-question.json")
         .writeText(Json.encodeToString(trained))
+
+    SVMTester.interactiveTester(trained)
 }

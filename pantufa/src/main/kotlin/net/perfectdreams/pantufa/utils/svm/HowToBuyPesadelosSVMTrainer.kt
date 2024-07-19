@@ -5,7 +5,7 @@ import kotlinx.serialization.json.Json
 import java.io.File
 
 fun main() {
-    val dataset = SVMDatasets.howToResetMyPassword
+    val dataset = SVMDatasets.howToBuyPesadelos
 
     val otherDatasets = SVMDatasets.allDatasets.toMutableList()
     otherDatasets.remove(dataset)
@@ -20,7 +20,7 @@ fun main() {
         negativeDataset.map { replaceShortenedWordsWithLongWords(it) }
     ).train()
 
-    File("svm-how-to-reset-my-password.json")
+    File("svm-how-to-buy-pesadelos.json")
         .writeText(Json.encodeToString(trained))
 
     SVMTester.interactiveTester(trained)
