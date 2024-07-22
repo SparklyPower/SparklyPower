@@ -13,6 +13,9 @@ class HowToBuyPesadelosSVMTest : SVMBaseTest(
     listOf(
         "como compra itens na loja?",
         "eu enviei pesadelos para a pessoa errada como consigo de volta?",
-        "gente eu enviei pesadelos para a pessoa errada como eu consigo eles de volta?"
+        "gente eu enviei pesadelos para a pessoa errada como eu consigo eles de volta?",
+        "devolvi os pesadelos",
+        "E meus pesa sairam",
+        "Estava acontecendo uma rifa de pesadelos"
     )
 )
