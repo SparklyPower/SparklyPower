@@ -11,7 +11,9 @@ object SVMDatasets {
         "como pega pesadelos?",
         "como pego pesadelos?",
         "qual é a loja de pesadelos?",
-        "qual é o link para comprar pesadelos?"
+        "qual é o link para comprar pesadelos?",
+        "como ganha pesadelos?",
+        "como ganhar pesadelos?"
     )
 
     val howToResetMyPassword = listOf(
