@@ -29,8 +29,8 @@ class TransactionsCommand : SlashCommandDeclarationWrapper {
     inner class TransactionsCommandExecutor : LorittaSlashCommandExecutor(), LorittaLegacyMessageCommandExecutor {
         inner class Options : ApplicationCommandOptions() {
             val currency = optionalString("currency", "Moeda que você deseja ver as transações") {
-                choice("MONEY", "Sonecas (Padrão)")
-                choice("CASH", "Pesadelos")
+                choice("Sonecas", "MONEY")
+                choice("Pesadelos", "CASH")
             }
             val user = optionalString("user", "Nome do jogador")
             val page = optionalInteger("page", "Página que você deseja visualizar")
