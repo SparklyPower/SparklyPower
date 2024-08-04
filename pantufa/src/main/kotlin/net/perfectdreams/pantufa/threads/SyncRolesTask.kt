@@ -20,7 +20,7 @@ class SyncRolesTask : Runnable {
 	}
 
 	private fun getPlayersWithGroup(vararg primaryGroup: String): List<UUID> {
-		logger.info { "Getting all players that have $primaryGroup as their primary group..." }
+		logger.info { "Getting all players that have ${primaryGroup.joinToString()} as their primary group..." }
 
 		val primaryGroupPlayers = transaction(Databases.sparklyPowerLuckPerms) {
 			LuckPermsPlayers.selectAll().where { LuckPermsPlayers.primaryGroup inList primaryGroup.toMutableList() }.map {
@@ -56,11 +56,17 @@ class SyncRolesTask : Runnable {
 			}.toList()
 		}
 
-		membersWithAdminRole.forEach {
-			val accountOfTheUser = discordAccountsOfTheUsers.firstOrNull { account -> account.discordId == it.user.idLong }
+		for (memberWithAdminRole in membersWithAdminRole) {
+			val accountOfTheUser = discordAccountsOfTheUsers.firstOrNull { account -> account.discordId == memberWithAdminRole.idLong }
 
 			if (accountOfTheUser == null || !accountOfTheUser.isConnected || !eligibleUniqueIds.contains(accountOfTheUser.minecraftId)) {
-				guild.removeRoleFromMember(it, adminRole).queue()
+				try {
+					logger.info { "Attempting to remove $adminRole from $adminRole..." }
+					guild.removeRoleFromMember(memberWithAdminRole, adminRole).complete()
+					logger.info { "Successfully removed $adminRole from $adminRole!" }
+				} catch (e: Exception) {
+					logger.warn(e) { "Something went wrong while trying to remove role $adminRole from $memberWithAdminRole! Ignoring..." }
+				}
 			}
 		}
 
@@ -70,14 +76,27 @@ class SyncRolesTask : Runnable {
 			}.toList()
 		}
 
-		eligibleUniqueIds.forEach {
-			val accountOfTheUser = discordAccountsOfEligibleUniqueIds.firstOrNull { account -> account.minecraftId == it }
+		for (eligibleUniqueId in eligibleUniqueIds) {
+			val accountOfTheUser = discordAccountsOfEligibleUniqueIds.firstOrNull { account -> account.minecraftId == eligibleUniqueId }
 
 			if (accountOfTheUser?.isConnected == true) {
 				val member = guild.getMemberById(accountOfTheUser.discordId)
 
-				if (member != null && !member.roles.contains(adminRole))
-					guild.addRoleToMember(member, adminRole).queue()
+				if (member != null) {
+					if (!member.roles.contains(adminRole)) {
+						try {
+							logger.info { "Attempting to give $adminRole to $member..." }
+							guild.addRoleToMember(member, adminRole).complete()
+							logger.info { "Successfully given $adminRole to $member!" }
+						} catch (e: Exception) {
+							logger.warn(e) { "Something went wrong while trying to add role $member to $adminRole! Ignoring..." }
+						}
+					} else {
+						logger.info { "Not giving $adminRole to $member because they already have that role..." }
+					}
+				} else {
+					logger.info { "Not giving $adminRole to $member because they aren't in the server..." }
+				}
 			}
 		}
 	}
@@ -99,16 +118,26 @@ class SyncRolesTask : Runnable {
 
 				val usersWithSparklyMemberRole = guild.getMembersWithRoles(role)
 
-				usersWithSparklyMemberRole.forEach {
-					if (!discordAccounts.any { account -> account.isConnected && account.discordId == it.user.idLong })
-						guild.removeRoleFromMember(it, role).queue()
+				for (userWithSparklyMemberRole in usersWithSparklyMemberRole) {
+					if (!discordAccounts.any { account -> account.isConnected && account.discordId == userWithSparklyMemberRole.user.idLong }) {
+						try {
+							guild.removeRoleFromMember(userWithSparklyMemberRole, role).complete()
+						} catch (e: Exception) {
+							logger.warn(e) { "Something went wrong while trying to add role $role from $userWithSparklyMemberRole! Ignoring..." }
+						}
+					}
 				}
 
 				for (discordAccount in discordAccounts) {
 					val member = guild.getMemberById(discordAccount.discordId) ?: continue
 
-					if (!member.roles.contains(role))
-						guild.addRoleToMember(member, role).queue()
+					if (!member.roles.contains(role)) {
+						try {
+							guild.addRoleToMember(member, role).complete()
+						} catch (e: Exception) {
+							logger.warn(e) { "Something went wrong while trying to add role $role to $member! Ignoring..." }
+						}
+					}
 				}
 
 				val owners = getPlayersWithGroup("dono")
@@ -138,7 +167,7 @@ class SyncRolesTask : Runnable {
 				logger.warn { "Guild ${sparklyPower.guild.idLong} does not exist or isn't loaded yet! Skipping role synchronization..." }
 			}
 		} catch (e: Exception) {
-			e.printStackTrace()
+			logger.warn(e) { "Something went wrong while trying to synchronize roles!" }
 		}
 	}
 }
