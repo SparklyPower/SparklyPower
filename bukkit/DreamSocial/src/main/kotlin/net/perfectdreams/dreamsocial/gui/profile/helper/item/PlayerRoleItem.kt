@@ -15,6 +15,7 @@ fun PlayerRole.item(isGirl: Boolean): ItemStack {
         PlayerRole.VIP_PLUS_PLUS -> 117
         PlayerRole.DEVELOPER -> 109
         PlayerRole.BUILDER -> 108
+        PlayerRole.TRIAL_SUPPORT -> 114
         PlayerRole.SUPPORT -> 114
         PlayerRole.MODERATOR -> 111
         PlayerRole.ADMIN -> 107
