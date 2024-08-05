@@ -9,6 +9,7 @@ enum class PlayerRole(val localizedName: String, val permission: String) {
     VIP_PLUS_PLUS("VIP++", "group.vip++"),
     DEVELOPER("Desenvolvedor", "group.developer"),
     BUILDER("Construtor", "group.builder"),
+    TRIAL_SUPPORT("Trial Suporte", "group.trialsuporte"),
     SUPPORT("Suporte", "group.suporte"),
     MODERATOR("Moderador", "group.moderador"),
     ADMIN("Admin", "group.admin"),
@@ -17,7 +18,7 @@ enum class PlayerRole(val localizedName: String, val permission: String) {
     fun isPlayerInIt(player: Player) = player.hasPermission(this.permission)
 
     companion object {
-        private val values = values().associateBy(PlayerRole::permission)
+        private val values = entries.associateBy(PlayerRole::permission)
 
         fun getFromPermission(permission: String) = values[permission] ?: MEMBER
     }
@@ -33,4 +34,4 @@ val Player.hasAnyVIP get() = this.isVIP || this.isVIPPlus || this.isVIPPlusPlus
 
 val Player.isStaff get() = this.hasPermission("sparklypower.soustaff")
 
-val Player.highestRole get() = PlayerRole.values().last { it.isPlayerInIt(this) }
+val Player.highestRole get() = PlayerRole.entries.lastOrNull { it.isPlayerInIt(this) } ?: PlayerRole.MEMBER
