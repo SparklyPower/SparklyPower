@@ -45,6 +45,8 @@ object CommandsLogUtils {
 
                         ":calendar: [<t:$timestamp:d> <t:$timestamp:t> | <t:$timestamp:R>]\n:map: $coords **${it.player}**: `$message`"
                     }
+
+                    inline = false
                 }
             }
 
