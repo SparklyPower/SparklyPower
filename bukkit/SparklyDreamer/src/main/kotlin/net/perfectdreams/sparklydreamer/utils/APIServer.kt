@@ -8,24 +8,22 @@ import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
+import kotlinx.serialization.json.*
 import net.perfectdreams.dreamcash.DreamCash
 import net.perfectdreams.dreamcash.tables.Cashes
-import net.perfectdreams.dreamcash.utils.Cash
-import net.perfectdreams.dreamcore.cash.NightmaresCashRegister
+import net.perfectdreams.dreamcore.dao.DiscordAccount
+import net.perfectdreams.dreamcore.dao.User
+import net.perfectdreams.dreamcore.tables.DiscordAccounts
 import net.perfectdreams.dreamcore.tables.PlayerSkins
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.Databases
-import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.lore
-import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
 import net.perfectdreams.dreamcore.utils.set
 import net.perfectdreams.dreamcore.utils.skins.StoredDatabaseSkin
 import net.perfectdreams.dreamcorreios.DreamCorreios
@@ -44,12 +42,8 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.persistence.PersistentDataType
-import org.jetbrains.exposed.sql.SqlExpressionBuilder
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
-import org.jetbrains.exposed.sql.upsert
 import java.time.Instant
 import java.util.*
 import javax.imageio.ImageIO
@@ -376,6 +370,56 @@ class APIServer(private val plugin: SparklyDreamer) {
                         ContentType.Application.Json
                     )
                 }
+
+                get("/loritta/{userId}/sonecas") {
+                    val userId = call.parameters.getOrFail("userId").toLong()
+
+                    val discordAccount = transaction(Databases.databaseNetwork) {
+                        DiscordAccount.find { DiscordAccounts.discordId eq userId and (DiscordAccounts.isConnected eq true) }.firstOrNull()
+                    }
+
+                    if (discordAccount != null) {
+                        val result = net.perfectdreams.exposedpowerutils.sql.transaction(Dispatchers.IO, Databases.databaseNetwork) {
+                            val user = User.findById(discordAccount.minecraftId) ?: return@transaction null
+
+                            val money = PlayerSonecas.selectAll()
+                                .where { PlayerSonecas.id eq discordAccount.minecraftId }
+                                .firstOrNull()
+                                ?.get(PlayerSonecas.money)
+                                ?.toDouble() ?: 0.0
+
+                            return@transaction LorittaGetSonecasResult(
+                                user.id.value.toString(),
+                                user.username,
+                                money
+                            )
+                        }
+
+                        if (result == null) {
+                            call.respondText(
+                                "",
+                                ContentType.Application.Json,
+                                status = HttpStatusCode.NotFound
+                            )
+                        } else {
+                            call.respondText(
+                                buildJsonObject {
+                                    put("userUniqueId", result.userUniqueId)
+                                    put("username", result.username)
+                                    put("sonecas", result.sonecas)
+                                }.toString(),
+                                ContentType.Application.Json,
+                                status = HttpStatusCode.OK
+                            )
+                        }
+                    } else {
+                        call.respondText(
+                            "",
+                            ContentType.Application.Json,
+                            status = HttpStatusCode.NotFound
+                        )
+                    }
+                }
             }
         }
 
@@ -393,4 +437,10 @@ class APIServer(private val plugin: SparklyDreamer) {
             logger.warning { "HTTP Server wasn't started, so we won't stop it..." }
         }
     }
+
+    data class LorittaGetSonecasResult(
+        val userUniqueId: String,
+        val username: String,
+        val sonecas: Double
+    )
 }
