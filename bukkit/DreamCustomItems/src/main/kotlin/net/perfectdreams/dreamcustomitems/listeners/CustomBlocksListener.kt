@@ -1,13 +1,9 @@
 package net.perfectdreams.dreamcustomitems.listeners
 
-import com.okkero.skedule.schedule
 import com.viaversion.viaversion.api.minecraft.chunks.ChunkSection
 import com.viaversion.viaversion.api.minecraft.chunks.PaletteType
 import com.viaversion.viaversion.api.type.types.chunk.ChunkSectionType1_18
 import io.netty.buffer.Unpooled
-import io.netty.channel.ChannelDuplexHandler
-import io.netty.channel.ChannelHandlerContext
-import io.netty.channel.ChannelPromise
 import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap
 import net.minecraft.core.particles.BlockParticleOption
 import net.minecraft.core.registries.BuiltInRegistries
@@ -24,21 +20,13 @@ import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcustomitems.DreamCustomItems
 import net.perfectdreams.dreamcustomitems.utils.CustomBlocks
 import net.perfectdreams.dreamcustomitems.utils.VanillaBlockStateRemapper
-import net.sparklypower.sparklypaper.event.block.PlayerBlockDestroySpeedEvent
-import org.bukkit.Bukkit
-import org.bukkit.Material
 import org.bukkit.block.ChiseledBookshelf
-import org.bukkit.block.data.AnaloguePowerable
-import org.bukkit.block.data.type.Slab
-import org.bukkit.craftbukkit.block.data.CraftBlockData
-import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockDropItemEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.ProjectileHitEvent
-import org.bukkit.event.player.PlayerJoinEvent
 import kotlin.math.absoluteValue
 
 class CustomBlocksListener(
