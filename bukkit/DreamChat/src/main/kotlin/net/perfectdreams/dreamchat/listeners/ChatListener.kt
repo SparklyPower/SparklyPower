@@ -257,6 +257,22 @@ class ChatListener(val m: DreamChat) : Listener {
 	fun onChat(e: AsyncPlayerChatEvent) {
 		e.isCancelled = true
 
+		val lockedTellPlayer = m.lockedTells[e.player]
+		if (lockedTellPlayer != null) {
+			if (Bukkit.getPlayerExact(lockedTellPlayer) != null) {
+				scheduler().schedule(m) {
+					e.player.performCommand("tell $lockedTellPlayer ${e.message}")
+				}
+				return
+			} else {
+				e.player.sendMessage("§cO seu chat travado foi desativado devido á saida do player §b${lockedTellPlayer}§c")
+				e.player.sendMessage("§cPor segurança, nós não enviamos a sua última mensagem, já que ela iria para o chat normal e não para a sua conversa privada")
+				e.isCancelled = true
+				m.lockedTells.remove(e.player)
+				return
+			}
+		}
+
 		val player = e.player
 		var message = e.message
 		var currentMessage: String? = null
