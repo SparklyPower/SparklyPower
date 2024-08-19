@@ -250,7 +250,6 @@ class ChatListener(val m: DreamChat) : Listener {
 
 	val messageCache = mutableListOf<PlayerMessage>()
 	val maxCacheSize = 1000
-	val messageExpiryTicks = 600L // 600 ticks = 30 segundos
 	var lastEventMessage: String? = null
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -296,9 +295,6 @@ class ChatListener(val m: DreamChat) : Listener {
 			}
 		}
 
-		println("Resposta do evento chat: $currentMessage")
-		println("$message - $lastEventMessage")
-
 		if (message.equals(lastEventMessage, true)) {
 			println("Mensagem do evento detectada ($lastEventMessage). Ignorando verificação de raid.");
 		} else {
@@ -317,12 +313,6 @@ class ChatListener(val m: DreamChat) : Listener {
 					messageCache.add(PlayerMessage(player, message))
 				}
 
-				Bukkit.getScheduler().runTaskLater(m, Runnable {
-					synchronized(messageCache) {
-						messageCache.removeAll { it.message.equals(message, true) && it.player.name == player.name }
-					}
-				}, messageExpiryTicks)
-
 				val messageCount = synchronized(messageCache) {
 					messageCache
 						.filter { it.message.equals(message, true) }
@@ -332,10 +322,6 @@ class ChatListener(val m: DreamChat) : Listener {
 				}
 
 				if (messageCount >= 3) {
-					println("--------------------------")
-					println("OMG Raid? Mensagem '$message' enviada por 2 ou mais jogadores em um curto período de tempo, bloqueando a mensagem.")
-					println("--------------------------")
-
 					DreamNetwork.PANTUFA.sendMessageAsync(
 						"1274126432691552429",
 						"**${
@@ -380,6 +366,7 @@ class ChatListener(val m: DreamChat) : Listener {
 		chatCooldownCache[player] = System.currentTimeMillis()
 		lastMessageCache[player] = e.message.toLowerCase()
 
+		// Vamos verificar se o cara só está falando o nome do cara da Staff
 		for (onlinePlayers in Bukkit.getOnlinePlayers()) {
 			if (onlinePlayers.hasPermission("sparklypower.soustaff")) {
 				if (message.equals(onlinePlayers.name, true)) {

@@ -43,6 +43,7 @@ class EventoChatMensagem : IEventoChat {
 		val lastRecord = currentMessage.timeElapsed
 
 		if (lastRecord != null && lastRecord > timeElapsed) {
+			// Novo recorde, woo!
 			val bestWinner = currentMessage.bestWinner
 			if (bestWinner != null) {
 				broadcastMessage(BroadcastType.CHAT_EVENT) {
