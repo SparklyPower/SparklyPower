@@ -206,5 +206,48 @@ object McMMOTagsUtils {
                 )
             )
         }
+
+        //Clava
+        if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.MACES].equals(e.player.name, true)) {
+            playerTagsEvent.tags.add(
+                PlayerTag(
+                    "§x§7§0§8§0§9§0§lL",
+                    "§x§7§0§8§0§9§0§lClavista",
+                    listOf(
+                        "§b${e.player.displayName}§7 é o top #1 clavista do McMMO!"
+                    ),
+                    "/mctop lenhador",
+                    false
+                )
+            )
+        }
+
+        if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.TRIDENTS].equals(e.player.name, true)) {
+            playerTagsEvent.tags.add(
+                PlayerTag(
+                    "§x§0§0§0§0§f§f§lP",
+                    "§x§0§0§0§0§f§f§lPoseidon",
+                    listOf(
+                        "§b${e.player.displayName}§7 é o top #1 com tridentes do McMMO!"
+                    ),
+                    "/mctop lenhador",
+                    false
+                )
+            )
+        }
+
+        if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.CROSSBOWS].equals(e.player.name, true)) {
+            playerTagsEvent.tags.add(
+                PlayerTag(
+                    "§x§f§f§f§f§0§0§lA",
+                    "§x§f§f§f§f§0§0§lAtirador$nothingOrArtigo",
+                    listOf(
+                        "§b${e.player.displayName}§7 é o top #1 atirador com bestas do McMMO!"
+                    ),
+                    "/mctop lenhador",
+                    false
+                )
+            )
+        }
     }
 }
