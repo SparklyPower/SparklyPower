@@ -285,9 +285,7 @@ class ChatListener(val m: DreamChat) : Listener {
 			}
 
 			if (message.equals(currentMessage, true)) {
-				println("A mensagem correta é $currentMessage")
-				println("Mensagem do evento de chat detectada. Ignorando verificação de raid.")
-
+				m.logger.info("Mensagem do evento de chat detectada. Ignorando verificação de raid.")
 				if (m.eventoChat.event.process(player, message)) {
 					m.eventoChat.finish(player)
 					lastEventMessage = currentMessage
@@ -296,7 +294,7 @@ class ChatListener(val m: DreamChat) : Listener {
 		}
 
 		if (message.equals(lastEventMessage, true)) {
-			println("Mensagem do evento detectada ($lastEventMessage). Ignorando verificação de raid.");
+			m.logger.info("Mensagem do evento detectada ($lastEventMessage). Ignorando verificação de raid.");
 		} else {
 			synchronized(messageCache) {
 				if (messageCache.size >= maxCacheSize) {
