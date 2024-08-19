@@ -61,7 +61,7 @@ object McMMOTagsUtils {
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 arqueiro do McMMO!"
                     ),
-                    "/mctop arco",
+                    "/mctop arquearia",
                     false
                 )
             )
@@ -211,12 +211,12 @@ object McMMOTagsUtils {
         if (DreamChat.INSTANCE.topPlayerSkills[PrimarySkillType.MACES].equals(e.player.name, true)) {
             playerTagsEvent.tags.add(
                 PlayerTag(
-                    "§x§7§0§8§0§9§0§lL",
-                    "§x§7§0§8§0§9§0§lClavista",
+                    "§x§7§0§8§0§9§0§lD",
+                    "§x§7§0§8§0§9§0§lDemolidor",
                     listOf(
-                        "§b${e.player.displayName}§7 é o top #1 clavista do McMMO!"
+                        "§b${e.player.displayName}§7 é o top #1 demolidor do McMMO!"
                     ),
-                    "/mctop lenhador",
+                    "/mctop mangual",
                     false
                 )
             )
@@ -230,7 +230,7 @@ object McMMOTagsUtils {
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 com tridentes do McMMO!"
                     ),
-                    "/mctop lenhador",
+                    "/mctop tridentes",
                     false
                 )
             )
@@ -244,7 +244,7 @@ object McMMOTagsUtils {
                     listOf(
                         "§b${e.player.displayName}§7 é o top #1 atirador com bestas do McMMO!"
                     ),
-                    "/mctop lenhador",
+                    "/mctop besta",
                     false
                 )
             )
