@@ -13,9 +13,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.content.*
 import io.ktor.http.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -32,6 +30,10 @@ import net.perfectdreams.dreamchat.events.ApplyPlayerTagsEvent
 import net.perfectdreams.dreamchat.tables.ChatUsers
 import net.perfectdreams.dreamchat.tables.PremiumUsers
 import net.perfectdreams.dreamchat.utils.*
+import net.perfectdreams.dreamchat.utils.chatevent.EventoChatCalcular
+import net.perfectdreams.dreamchat.utils.chatevent.EventoChatDesembaralhar
+import net.perfectdreams.dreamchat.utils.chatevent.EventoChatMensagem
+import net.perfectdreams.dreamchat.utils.chatevent.IEventoChat
 import net.perfectdreams.dreamclubes.tables.PlayerDeaths
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamclubes.utils.KDWrapper
@@ -41,8 +43,11 @@ import net.perfectdreams.dreamcore.tables.DiscordAccounts
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.jsonParser
 import net.perfectdreams.dreamcore.utils.extensions.artigo
+import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.girl
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.pantufa.rpc.GetDiscordUserRequest
 import net.perfectdreams.pantufa.rpc.GetDiscordUserResponse
 import net.perfectdreams.pantufa.rpc.PantufaRPCRequest
@@ -69,6 +74,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.text.NumberFormat
 import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import kotlin.collections.set
@@ -237,32 +243,97 @@ class ChatListener(val m: DreamChat) : Listener {
 		}
 	}
 
+	data class PlayerMessage(
+		val player: Player,
+		val message: String
+	)
+
+	val messageCache = mutableListOf<PlayerMessage>()
+	val maxCacheSize = 1000
+	val messageExpiryTicks = 600L // 600 ticks = 30 segundos
+	var lastEventMessage: String? = null
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onChat(e: AsyncPlayerChatEvent) {
 		e.isCancelled = true
 
-		val lockedTellPlayer = m.lockedTells[e.player]
-		if (lockedTellPlayer != null) {
-			if (Bukkit.getPlayerExact(lockedTellPlayer) != null) {
-				scheduler().schedule(m) {
-					e.player.performCommand("tell $lockedTellPlayer ${e.message}")
+		val player = e.player
+		var message = e.message
+		var currentMessage: String? = null
+
+		if (m.eventoChat.running) {
+			currentMessage = when (val event = m.eventoChat.event) {
+				is EventoChatCalcular -> event.getCorrectAnswer()
+				is EventoChatDesembaralhar -> event.getCorrectAnswer()
+				is EventoChatMensagem -> event.getCorrectAnswer()
+				else -> null
+			}
+
+			if (message.equals(currentMessage, true)) {
+				println("A mensagem correta é $currentMessage")
+				println("Mensagem do evento de chat detectada. Ignorando verificação de raid.")
+
+				if (m.eventoChat.event.process(player, message)) {
+					m.eventoChat.finish(player)
+					lastEventMessage = currentMessage
 				}
-				return
-			} else {
-				e.player.sendMessage("§cO seu chat travado foi desativado devido á saida do player §b${lockedTellPlayer}§c")
-				e.player.sendMessage("§cPor segurança, nós não enviamos a sua última mensagem, já que ela iria para o chat normal e não para a sua conversa privada")
-				e.isCancelled = true
-				m.lockedTells.remove(e.player)
-				return
 			}
 		}
 
-		val player = e.player
-		val rawMessage = e.message
-		var message = rawMessage
+		println("Resposta do evento chat: $currentMessage")
+		println("$message - $lastEventMessage")
 
-		if (m.eventoChat.running && m.eventoChat.event.process(e.player, message))
-			m.eventoChat.finish(player)
+		if (message.equals(lastEventMessage, true)) {
+			println("Mensagem do evento detectada ($lastEventMessage). Ignorando verificação de raid.");
+		} else {
+			synchronized(messageCache) {
+				if (messageCache.size >= maxCacheSize) {
+					messageCache.removeAt(0)
+				}
+
+				val playersWithSameMessage = messageCache
+					.filter { it.message.equals(message, true) }
+					.map { it.player.name }
+					.toMutableList()
+
+				if (!playersWithSameMessage.contains(player.name)) {
+					playersWithSameMessage.add(player.name)
+					messageCache.add(PlayerMessage(player, message))
+				}
+
+				Bukkit.getScheduler().runTaskLater(m, Runnable {
+					synchronized(messageCache) {
+						messageCache.removeAll { it.message.equals(message, true) && it.player.name == player.name }
+					}
+				}, messageExpiryTicks)
+
+				val messageCount = synchronized(messageCache) {
+					messageCache
+						.filter { it.message.equals(message, true) }
+						.map { it.player.name }
+						.toSet()
+						.size
+				}
+
+				if (messageCount >= 3) {
+					println("--------------------------")
+					println("OMG Raid? Mensagem '$message' enviada por 2 ou mais jogadores em um curto período de tempo, bloqueando a mensagem.")
+					println("--------------------------")
+
+					DreamNetwork.PANTUFA.sendMessageAsync(
+						"1274126432691552429",
+						"**${
+							player.name.replace(
+								"_",
+								"\\_"
+							)
+						} provavelmente está raidando o servidor, mensagem enviada pelo usuário: ```\n$message\n``` <@&332650495522897920>"
+					)
+					e.isCancelled = true
+					return
+				}
+			}
+		}
 
 		val lastMessageSentAt = chatCooldownCache.getOrDefault(player, 0)
 		val diff = System.currentTimeMillis() - lastMessageSentAt
@@ -293,7 +364,6 @@ class ChatListener(val m: DreamChat) : Listener {
 		chatCooldownCache[player] = System.currentTimeMillis()
 		lastMessageCache[player] = e.message.toLowerCase()
 
-		// Vamos verificar se o cara só está falando o nome do cara da Staff
 		for (onlinePlayers in Bukkit.getOnlinePlayers()) {
 			if (onlinePlayers.hasPermission("sparklypower.soustaff")) {
 				if (message.equals(onlinePlayers.name, true)) {

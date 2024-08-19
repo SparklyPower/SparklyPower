@@ -136,33 +136,34 @@ class EventoChatDesembaralhar : IEventoChat {
 	)
 
 	var currentWord: String? = null
+	var lastEventMessage: String? = null
 
 	override fun preStart() {
 		currentWord = words.random()
 	}
 
 	override fun getAnnouncementMessage(): String {
-		val currentWord = currentWord!!
+		val word = currentWord ?: return ""
 
-		var shuffledChars = currentWord.toCharArray().toList()
-
-		while (shuffledChars.joinToString("") == currentWord)
+		// Atualizar lastEventMessage aqui não será necessário
+		var shuffledChars = word.toCharArray().toList()
+		while (shuffledChars.joinToString("") == word) {
 			shuffledChars = shuffledChars.shuffled()
+		}
 
-		val shuffledWord = shuffledChars.joinToString(separator = "")
-
-		return shuffledWord
+		return shuffledChars.joinToString(separator = "")
 	}
 
 	override fun getToDoWhat(): String {
 		return "desembaralhar"
 	}
 
+	fun getCorrectAnswer(): String {
+		return currentWord ?: ""
+	}
+
 	@Synchronized
 	override fun process(player: Player, message: String): Boolean {
-		if (currentWord == null)
-			return false
-
-		return message.equals(currentWord, true)
+		return message.equals(getCorrectAnswer(), true)
 	}
 }
