@@ -13,9 +13,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.content.*
 import io.ktor.http.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -32,6 +30,10 @@ import net.perfectdreams.dreamchat.events.ApplyPlayerTagsEvent
 import net.perfectdreams.dreamchat.tables.ChatUsers
 import net.perfectdreams.dreamchat.tables.PremiumUsers
 import net.perfectdreams.dreamchat.utils.*
+import net.perfectdreams.dreamchat.utils.chatevent.EventoChatCalcular
+import net.perfectdreams.dreamchat.utils.chatevent.EventoChatDesembaralhar
+import net.perfectdreams.dreamchat.utils.chatevent.EventoChatMensagem
+import net.perfectdreams.dreamchat.utils.chatevent.IEventoChat
 import net.perfectdreams.dreamclubes.tables.PlayerDeaths
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamclubes.utils.KDWrapper
@@ -41,8 +43,11 @@ import net.perfectdreams.dreamcore.tables.DiscordAccounts
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.jsonParser
 import net.perfectdreams.dreamcore.utils.extensions.artigo
+import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.girl
 import net.perfectdreams.dreamcore.utils.extensions.meta
+import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
+import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.pantufa.rpc.GetDiscordUserRequest
 import net.perfectdreams.pantufa.rpc.GetDiscordUserResponse
 import net.perfectdreams.pantufa.rpc.PantufaRPCRequest
@@ -69,6 +74,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.text.NumberFormat
 import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import kotlin.collections.set
@@ -237,6 +243,15 @@ class ChatListener(val m: DreamChat) : Listener {
 		}
 	}
 
+	data class PlayerMessage(
+		val player: Player,
+		val message: String
+	)
+
+	val messageCache = mutableListOf<PlayerMessage>()
+	val maxCacheSize = 1000
+	var lastEventMessage: String? = null
+
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	fun onChat(e: AsyncPlayerChatEvent) {
 		e.isCancelled = true
@@ -258,11 +273,67 @@ class ChatListener(val m: DreamChat) : Listener {
 		}
 
 		val player = e.player
-		val rawMessage = e.message
-		var message = rawMessage
+		var message = e.message
+		var currentMessage: String? = null
 
-		if (m.eventoChat.running && m.eventoChat.event.process(e.player, message))
-			m.eventoChat.finish(player)
+		if (m.eventoChat.running) {
+			currentMessage = when (val event = m.eventoChat.event) {
+				is EventoChatCalcular -> event.getCorrectAnswer()
+				is EventoChatDesembaralhar -> event.getCorrectAnswer()
+				is EventoChatMensagem -> event.getCorrectAnswer()
+				else -> null
+			}
+
+			if (message.equals(currentMessage, true)) {
+				m.logger.info("Mensagem do evento de chat detectada. Ignorando verificação de raid.")
+				if (m.eventoChat.event.process(player, message)) {
+					m.eventoChat.finish(player)
+					lastEventMessage = currentMessage
+				}
+			}
+		}
+
+		if (message.equals(lastEventMessage, true)) {
+			m.logger.info("Mensagem do evento detectada ($lastEventMessage). Ignorando verificação de raid.");
+		} else {
+			synchronized(messageCache) {
+				if (messageCache.size >= maxCacheSize) {
+					messageCache.removeAt(0)
+				}
+
+				val playersWithSameMessage = messageCache
+					.filter { it.message.equals(message, true) }
+					.map { it.player.name }
+					.toMutableList()
+
+				if (!playersWithSameMessage.contains(player.name)) {
+					playersWithSameMessage.add(player.name)
+					messageCache.add(PlayerMessage(player, message))
+				}
+
+				val messageCount = synchronized(messageCache) {
+					messageCache
+						.filter { it.message.equals(message, true) }
+						.map { it.player.name }
+						.toSet()
+						.size
+				}
+
+				if (messageCount >= 3) {
+					DreamNetwork.PANTUFA.sendMessageAsync(
+						"1274126432691552429",
+						"**${
+							player.name.replace(
+								"_",
+								"\\_"
+							)
+						} provavelmente está raidando o servidor, mensagem enviada pelo usuário: ```\n$message\n``` <@&332650495522897920>"
+					)
+					e.isCancelled = true
+					return
+				}
+			}
+		}
 
 		val lastMessageSentAt = chatCooldownCache.getOrDefault(player, 0)
 		val diff = System.currentTimeMillis() - lastMessageSentAt
