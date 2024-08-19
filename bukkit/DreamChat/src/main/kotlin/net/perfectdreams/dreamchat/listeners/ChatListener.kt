@@ -327,7 +327,7 @@ class ChatListener(val m: DreamChat) : Listener {
 								"_",
 								"\\_"
 							)
-						} provavelmente está raidando o servidor, mensagem enviada pelo usuário: ```\n$message\n``` <@&332650495522897920>"
+						}** provavelmente está raidando o servidor, mensagem enviada pelo usuário: ```\n$message\n``` <@&332650495522897920>"
 					)
 					e.isCancelled = true
 					return
