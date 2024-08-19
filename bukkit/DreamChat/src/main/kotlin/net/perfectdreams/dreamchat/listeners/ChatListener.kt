@@ -249,7 +249,7 @@ class ChatListener(val m: DreamChat) : Listener {
 	)
 
 	val messageCache = mutableListOf<PlayerMessage>()
-	val maxCacheSize = 1000
+	val maxCacheSize = 10
 	var lastEventMessage: String? = null
 
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
