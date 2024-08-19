@@ -39,19 +39,21 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 		this.delayBetween = 900_000 // 15 minutes
 		this.requiredPlayers = 7
 
-		prizes.add(ItemStack(Material.DIAMOND, 2))
-		prizes.add(ItemStack(Material.EMERALD))
-		prizes.add(ItemStack(Material.IRON_INGOT, 8))
-		prizes.add(ItemStack(Material.GOLD_INGOT, 4))
-		prizes.add(ItemStack(Material.COAL, 48))
-		prizes.add(ItemStack(Material.CAKE, 4))
-		prizes.add(ItemStack(Material.SPONGE, 4))
-		prizes.add(ItemStack(Material.MELON, 16))
-		prizes.add(ItemStack(Material.PUMPKIN, 16))
-		prizes.add(ItemStack(Material.APPLE, 32))
-		prizes.add(ItemStack(Material.PUMPKIN_PIE, 32))
-		prizes.add(ItemStack(Material.COOKIE, 32))
-		prizes.add(ItemStack(Material.BREAD, 32))
+		prizes.apply {
+			add(ItemStack(Material.DIAMOND, 2))
+			add(ItemStack(Material.EMERALD))
+			add(ItemStack(Material.IRON_INGOT, 8))
+			add(ItemStack(Material.GOLD_INGOT, 4))
+			add(ItemStack(Material.COAL, 48))
+			add(ItemStack(Material.CAKE, 4))
+			add(ItemStack(Material.SPONGE, 4))
+			add(ItemStack(Material.MELON, 16))
+			add(ItemStack(Material.PUMPKIN, 16))
+			add(ItemStack(Material.APPLE, 32))
+			add(ItemStack(Material.PUMPKIN_PIE, 32))
+			add(ItemStack(Material.COOKIE, 32))
+			add(ItemStack(Material.BREAD, 32))
+		}
 	}
 
 	override fun preStart() {
@@ -61,10 +63,9 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 
 	override fun start() {
 		super.start()
-		currentPrize = prizes.getRandom()
+		currentPrize = prizes.random()
 
 		event = events.random()
-
 		event.preStart()
 
 		start = System.currentTimeMillis()
@@ -76,8 +77,7 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 		broadcastMessage(BroadcastType.CHAT_EVENT) { ("§e" + event.getAnnouncementMessage()).centralize() }
 
 		var message = "§6Irá ganhar §9" + currentPrize.amount + " " + ChatColor.stripColor(currentPrize.getTranslatedDisplayName("pt_BR"))
-		if (willGiveOutPesadelos)
-			message += "§6 e §cum pesadelo"
+		if (willGiveOutPesadelos) message += "§6 e §cum pesadelo"
 		message += "§6!"
 
 		broadcastMessage(BroadcastType.CHAT_EVENT) { message.centralize() }
@@ -86,8 +86,7 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 		scheduler().schedule(DreamChat.INSTANCE) {
 			waitFor(3600)
 
-			if (!running)
-				return@schedule
+			if (!running) return@schedule
 
 			running = false
 
@@ -109,15 +108,13 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 		lastWinner = player.uniqueId
 		DreamChat.INSTANCE.userData.set("last-chat-winner", player.uniqueId.toString())
 		// This "finish" method is called in a async event, so we need to synchronize to avoid issues
+
 		DreamChat.INSTANCE.launchMainThread {
 			player.addItemIfPossibleOrAddToPlayerMailbox(currentPrize)
 		}
 
 		scheduler().schedule(DreamChat.INSTANCE, SynchronizationContext.ASYNC) {
-			DreamCore.INSTANCE.dreamEventManager.addEventVictory(
-				player,
-				"Chat"
-			)
+			DreamCore.INSTANCE.dreamEventManager.addEventVictory(player, "Chat")
 			if (willGiveOutPesadelos)
 				NightmaresCashRegister.INSTANCE.giveCash(player, 1L, TransactionContext(type = TransactionType.EVENTS, extra = "Chat"))
 			DreamChat.INSTANCE.userData.save(DreamChat.INSTANCE.dataYaml)

@@ -4,7 +4,8 @@ import net.perfectdreams.dreamcore.utils.DreamUtils
 import org.bukkit.entity.Player
 
 class EventoChatCalcular : IEventoChat {
-	var calculation: Calculation? = null
+	private var calculation: Calculation? = null
+	var lastEventMessage: String? = null
 
 	override fun preStart() {
 		val randomNumber1 = DreamUtils.random.nextInt(0, 21)
@@ -18,22 +19,23 @@ class EventoChatCalcular : IEventoChat {
 	}
 
 	override fun getAnnouncementMessage(): String {
-		val calculation = calculation!!
+		val calc = calculation ?: return ""
 
-		val str = buildString {
-			this.append(calculation.first.toString())
-			this.append(" ")
-			if (calculation.type == Calculation.Type.PLUS)
-				this.append("+")
-			if (calculation.type == Calculation.Type.MINUS)
-				this.append("-")
-			if (calculation.type == Calculation.Type.MULTIPLICATION)
-				this.append("*")
-			this.append(" ")
-			this.append(calculation.second.toString())
+		return buildString {
+			append(calc.first.toString())
+			append(" ")
+			when (calc.type) {
+				Calculation.Type.PLUS -> append("+")
+				Calculation.Type.MINUS -> append("-")
+				Calculation.Type.MULTIPLICATION -> append("*")
+			}
+			append(" ")
+			append(calc.second.toString())
 		}
+	}
 
-		return str
+	fun getCorrectAnswer(): String {
+		return calculation?.getAnswer().toString() ?: ""
 	}
 
 	override fun getToDoWhat(): String {
@@ -42,10 +44,7 @@ class EventoChatCalcular : IEventoChat {
 
 	@Synchronized
 	override fun process(player: Player, message: String): Boolean {
-		if (calculation == null)
-			return false
-
-		return message.equals(calculation!!.getAnswer().toString(), true)
+		return message.equals(getCorrectAnswer(), true)
 	}
 
 	class Calculation(

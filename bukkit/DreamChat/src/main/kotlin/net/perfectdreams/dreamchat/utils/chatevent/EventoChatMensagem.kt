@@ -13,6 +13,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 class EventoChatMensagem : IEventoChat {
 	lateinit var currentMessage: EventMessage
 	val messages = mutableListOf<EventMessage>()
+	var lastEventMessage: String? = null // Adiciona a propriedade lastEventMessage
 
 	fun loadDatabaseMessages() {
 		transaction(Databases.databaseNetwork) {
@@ -53,8 +54,7 @@ class EventoChatMensagem : IEventoChat {
 
 				val faster = lastRecord.toDouble() / timeElapsed.toDouble()
 				broadcastMessage(BroadcastType.CHAT_EVENT) {
-					"§b${winner.displayName}§r§a bateu o recorde de §b${player?.name
-						?: "???"}§r§a! §3(${faster}x mais rápido!)".centralize()
+					"§b${winner.displayName}§r§a bateu o recorde de §b${player?.name ?: "???"}§r§a! §3(${faster}x mais rápido!)".centralize()
 				}
 
 				val seconds = lastRecord / 1000L
@@ -67,6 +67,10 @@ class EventoChatMensagem : IEventoChat {
 		}
 	}
 
+	fun getCorrectAnswer(): String {
+		return currentMessage.message
+	}
+
 	override fun getAnnouncementMessage() = currentMessage.message
 
 	override fun getToDoWhat(): String {
@@ -75,10 +79,9 @@ class EventoChatMensagem : IEventoChat {
 
 	@Synchronized
 	override fun process(player: Player, message: String): Boolean {
-		val contains = message.equals(currentMessage.message, true)
+		val contains = message.equals(lastEventMessage, true) // Usa lastEventMessage
 
-		if (contains)
-			return true
+		if (contains) return true
 
 		if (!contains) {
 			val distance = StringUtils.getLevenshteinDistance(message, currentMessage.message)
