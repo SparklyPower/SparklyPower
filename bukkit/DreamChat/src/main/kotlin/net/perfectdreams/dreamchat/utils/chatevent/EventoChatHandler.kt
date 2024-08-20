@@ -20,11 +20,13 @@ import org.bukkit.inventory.ItemStack
 import java.util.*
 
 class EventoChatHandler : ServerEvent("Chat", "") {
+    lateinit var event: IEventoChat
+    var start = 0L
+    var lastWinner: UUID? = null
+    var currentPrize: ItemStack = ItemStack(Material.AIR)
+    var willGiveOutPesadelos = false
+
 	val prizes = mutableListOf<ItemStack>()
-	var currentPrize: ItemStack = ItemStack(Material.AIR)
-	lateinit var event: IEventoChat
-	var start = 0L
-	var lastWinner: UUID? = null
 	val randomMessagesEvent = EventoChatMensagem()
 	val unshuffleWordEvent = EventoChatDesembaralhar()
 	val calculateEvent = EventoChatCalcular()
@@ -33,7 +35,6 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 		unshuffleWordEvent,
 		calculateEvent
 	)
-	var willGiveOutPesadelos = false
 
 	init {
 		this.delayBetween = 900_000 // 15 minutes
@@ -107,7 +108,7 @@ class EventoChatHandler : ServerEvent("Chat", "") {
 
 		lastWinner = player.uniqueId
 		DreamChat.INSTANCE.userData.set("last-chat-winner", player.uniqueId.toString())
-		// This "finish" method is called in a async event, so we need to synchronize to avoid issues
+		// This "finish" method is called in an async event, so we need to synchronize to avoid issues
 
 		DreamChat.INSTANCE.launchMainThread {
 			player.addItemIfPossibleOrAddToPlayerMailbox(currentPrize)

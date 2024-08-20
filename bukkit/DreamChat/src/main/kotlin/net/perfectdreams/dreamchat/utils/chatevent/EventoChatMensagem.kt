@@ -11,9 +11,8 @@ import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class EventoChatMensagem : IEventoChat {
-	lateinit var currentMessage: EventMessage
+    lateinit var currentMessage: EventMessage
 	val messages = mutableListOf<EventMessage>()
-	var lastEventMessage: String? = null // Adiciona a propriedade lastEventMessage
 
 	fun loadDatabaseMessages() {
 		transaction(Databases.databaseNetwork) {
@@ -67,11 +66,9 @@ class EventoChatMensagem : IEventoChat {
 		}
 	}
 
-	fun getCorrectAnswer(): String {
-		return currentMessage.message
-	}
-
 	override fun getAnnouncementMessage() = currentMessage.message
+
+    override fun getAnswer() = getAnnouncementMessage()
 
 	override fun getToDoWhat(): String {
 		return "escrever"
@@ -79,18 +76,15 @@ class EventoChatMensagem : IEventoChat {
 
 	@Synchronized
 	override fun process(player: Player, message: String): Boolean {
-		val contains = message.equals(lastEventMessage, true) // Usa lastEventMessage
+        return if (message.equals(currentMessage.message, true)) {
+            true
+        } else {
+            val distance = StringUtils.getLevenshteinDistance(message, currentMessage.message)
 
-		if (contains) return true
-
-		if (!contains) {
-			val distance = StringUtils.getLevenshteinDistance(message, currentMessage.message)
-
-			if (10 >= distance) {
-				player.playSound(player.location, "perfectdreams.sfx.errou", 1f, 1f)
-			}
-		}
-
-		return false
+            if (10 >= distance) {
+                player.playSound(player.location, "perfectdreams.sfx.errou", 1f, 1f)
+            }
+            false
+        }
 	}
 }

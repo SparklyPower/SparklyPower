@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamchat.utils.chatevent
 
+import net.perfectdreams.dreamchat.dao.*
 import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
 import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
@@ -18,6 +19,7 @@ interface IEventoChat {
 		broadcastMessage(BroadcastType.CHAT_EVENT) { ("§6Tempo gasto: §e$seconds segundos§6 e §e$milli milissegundos§6!").centralize() }
 	}
 
+    fun getAnswer(): String
 	fun getAnnouncementMessage(): String
 	fun getToDoWhat(): String
 	fun process(player: Player, message: String): Boolean

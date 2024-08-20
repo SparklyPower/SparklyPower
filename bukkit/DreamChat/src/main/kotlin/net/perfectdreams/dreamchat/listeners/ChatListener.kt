@@ -274,66 +274,59 @@ class ChatListener(val m: DreamChat) : Listener {
 
 		val player = e.player
 		var message = e.message
-		var currentMessage: String? = null
 
 		if (m.eventoChat.running) {
-			currentMessage = when (val event = m.eventoChat.event) {
-				is EventoChatCalcular -> event.getCorrectAnswer()
-				is EventoChatDesembaralhar -> event.getCorrectAnswer()
-				is EventoChatMensagem -> event.getCorrectAnswer()
-				else -> null
-			}
+			lastEventMessage = m.eventoChat.event.getAnswer()
 
-			if (message.equals(currentMessage, true)) {
-				m.logger.info("Mensagem do evento de chat detectada. Ignorando verificação de raid.")
+            // We need to check if it's a chat event message to avoid triggering the anti-raid system
+			if (message.equals(lastEventMessage, true)) {
+                m.logger.info { "Detected event chat message ($lastEventMessage). Skipping anti-raid verification" }
+
 				if (m.eventoChat.event.process(player, message)) {
 					m.eventoChat.finish(player)
-					lastEventMessage = currentMessage
 				}
 			}
 		}
 
-		if (message.equals(lastEventMessage, true)) {
-			m.logger.info("Mensagem do evento detectada ($lastEventMessage). Ignorando verificação de raid.");
-		} else {
-			synchronized(messageCache) {
-				if (messageCache.size >= maxCacheSize) {
-					messageCache.removeAt(0)
-				}
+		if (!message.equals(lastEventMessage, true)) {
+            synchronized(messageCache) {
+                if (messageCache.size >= maxCacheSize) {
+                    messageCache.removeAt(0)
+                }
 
-				val playersWithSameMessage = messageCache
-					.filter { it.message.equals(message, true) }
-					.map { it.player.name }
-					.toMutableList()
+                val playersWithSameMessage = messageCache
+                    .filter { it.message.equals(message, true) }
+                    .map { it.player.name }
+                    .toMutableList()
 
-				if (!playersWithSameMessage.contains(player.name)) {
-					playersWithSameMessage.add(player.name)
-					messageCache.add(PlayerMessage(player, message))
-				}
+                if (!playersWithSameMessage.contains(player.name)) {
+                    playersWithSameMessage.add(player.name)
+                    messageCache.add(PlayerMessage(player, message))
+                }
 
-				val messageCount = synchronized(messageCache) {
-					messageCache
-						.filter { it.message.equals(message, true) }
-						.map { it.player.name }
-						.toSet()
-						.size
-				}
+                val messageCount = synchronized(messageCache) {
+                    messageCache
+                        .filter { it.message.equals(message, true) }
+                        .map { it.player.name }
+                        .toSet()
+                        .size
+                }
 
-				if (messageCount >= 3) {
-					DreamNetwork.PANTUFA.sendMessageAsync(
-						"1274126432691552429",
-						"**${
-							player.name.replace(
-								"_",
-								"\\_"
-							)
-						}** provavelmente está raidando o servidor, mensagem enviada pelo usuário: ```\n$message\n``` <@&332650495522897920>"
-					)
-					e.isCancelled = true
-					return
-				}
-			}
-		}
+                if (messageCount >= 3) {
+                    DreamNetwork.PANTUFA.sendMessageAsync(
+                        "1274126432691552429",
+                        "**${
+                            player.name.replace(
+                                "_",
+                                "\\_"
+                            )
+                        }** provavelmente está raidando o servidor, mensagem enviada pelo usuário: ```\n$message\n``` <@&332650495522897920>"
+                    )
+                    e.isCancelled = true
+                    return
+                }
+            }
+        }
 
 		val lastMessageSentAt = chatCooldownCache.getOrDefault(player, 0)
 		val diff = System.currentTimeMillis() - lastMessageSentAt
