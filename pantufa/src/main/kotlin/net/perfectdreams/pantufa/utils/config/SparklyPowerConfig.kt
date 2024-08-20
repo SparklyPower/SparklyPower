@@ -39,6 +39,7 @@ data class SparklyPowerConfig(
         val coordRoleId: Long,
         val modRoleId: Long,
         val supportRoleId: Long,
+        val trialSupportRoleId: Long,
         val builderRoleId: Long,
         val devRoleId: Long,
         val vipRoleId: Long,
