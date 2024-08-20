@@ -10,14 +10,11 @@ import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.adventure.displayNameWithoutDecorations
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
-import net.perfectdreams.dreamcore.utils.preferences.sendMessage
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamjetpack.events.PlayerJetpackCheckEvent
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.Particle
-import org.bukkit.Particle.DustOptions
 import org.bukkit.boss.BarColor
 import org.bukkit.boss.BarStyle
 import org.bukkit.boss.BossBar
@@ -25,11 +22,12 @@ import org.bukkit.command.CommandSender
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
+import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
-import java.awt.Color
 
 class DreamJetpack : KotlinPlugin(), Listener {
 	companion object {
@@ -270,6 +268,20 @@ class DreamJetpack : KotlinPlugin(), Listener {
 		}
 
 		registerEvents(this)
+	}
+
+	@EventHandler(priority = EventPriority.LOWEST)
+	fun onTeleport(e: PlayerTeleportEvent) {
+		val blacklistedWorlds = config.getStringList("blacklisted-worlds")
+
+		if (flyingPlayers.contains(e.player) && e.to.world.name in blacklistedWorlds) {
+			bossBars[e.player]?.removeAll()
+			bossBars.remove(e.player)
+
+			flyingPlayers.remove(e.player)
+			e.player.allowFlight = false
+			e.player.sendMessage("$PREFIX §cVocê não pode voar aqui")
+		}
 	}
 
 	@EventHandler
