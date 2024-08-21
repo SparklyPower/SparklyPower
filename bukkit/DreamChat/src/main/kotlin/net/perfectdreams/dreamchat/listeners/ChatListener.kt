@@ -193,19 +193,19 @@ class ChatListener(val m: DreamChat) : Listener {
 		}
 	}
 
-	@EventHandler
-	fun onJoin(e: PlayerCommandPreprocessEvent) {
-		if (!m.eventoChat.running)
-			return
+    @EventHandler
+    fun onJoin(e: PlayerCommandPreprocessEvent) {
+        if (!m.eventoChat.running)
+            return
 
-		val cmd = e.message
-			.split(" ")[0]
-			.substring(1)
-			.toLowerCase()
+        val cmd = e.message
+            .split(" ")[0]
+            .substring(1)
+            .lowercase()
 
-		if (cmd == "calc" || cmd == "calculadora")
-			e.isCancelled = true
-	}
+        if (m.eventoChat.event is EventoChatCalcular && listOf("calc", "calculadora").contains(cmd))
+            e.isCancelled = true
+    }
 
 	@EventHandler
 	fun onEnderDragonDeathEvent(e: EntityDeathEvent) {
