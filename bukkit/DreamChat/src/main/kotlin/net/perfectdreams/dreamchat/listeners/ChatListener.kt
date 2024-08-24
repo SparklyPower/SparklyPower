@@ -312,7 +312,7 @@ class ChatListener(val m: DreamChat) : Listener {
                         .size
                 }
 
-                if (messageCount >= 3) {
+                if (messageCount >= 5) { // Trying to reduce false positives
                     DreamNetwork.PANTUFA.sendMessageAsync(
                         "1274126432691552429",
                         "**${
