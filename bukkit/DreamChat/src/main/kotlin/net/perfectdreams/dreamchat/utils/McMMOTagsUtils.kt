@@ -214,7 +214,7 @@ object McMMOTagsUtils {
                     "§x§7§0§8§0§9§0§lD",
                     "§x§7§0§8§0§9§0§lDemolidor",
                     listOf(
-                        "§b${e.player.displayName}§7 é o top #1 demolidor do McMMO!"
+                        "§b${e.player.displayName}§7 é o top #1 mangual do McMMO!"
                     ),
                     "/mctop mangual",
                     false
