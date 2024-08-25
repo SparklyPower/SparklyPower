@@ -164,13 +164,6 @@ class DreamRoadProtector : KotlinPlugin(), Listener {
 		}
 	}
 
-	@EventHandler
-	fun onBlockForm(e: BlockFormEvent) {
-		if (e.newState.block.type == Material.BLACK_CONCRETE_POWDER) {
-			e.isCancelled = true
-		}
-	}
-
 	fun hasRoadNearby(location: Location): Boolean {
 		// If it isn't in the survival world, ignore it!
 		if (location.world.name != "world" && location.world.name != "Survival2")
