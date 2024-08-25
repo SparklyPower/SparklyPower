@@ -47,7 +47,7 @@ class SparkSnap(val m: DreamCore, val spark: BukkitSparkPlugin) {
         }
     }
 
-    private fun snap() {
+    fun snap() {
         m.logger.info { "Automagically saving current spark profile to a file..." }
         val platform = getPlatformFieldHandler.invoke(spark) as SparkPlatform
 

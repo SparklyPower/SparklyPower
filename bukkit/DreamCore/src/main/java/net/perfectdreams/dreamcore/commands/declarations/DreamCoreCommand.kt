@@ -31,6 +31,13 @@ class DreamCoreCommand(val plugin: DreamCore) : SparklyCommandDeclarationWrapper
             }
         }
 
+        subcommand(listOf("sparksnap")) {
+            subcommand(listOf("save")) {
+                executor = DreamCoreSparkSnapSaveExecutor(plugin)
+                permissions = listOf("dreamcore.setup")
+            }
+        }
+
         subcommand(listOf("scheduler")) {
             executor = DreamCoreFakeNPCTestExecutor(plugin)
             permissions = listOf("dreamcore.setup")
