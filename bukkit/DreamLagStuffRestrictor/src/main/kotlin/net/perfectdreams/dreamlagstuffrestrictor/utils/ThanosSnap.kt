@@ -110,7 +110,7 @@ class ThanosSnap(val m: DreamLagStuffRestrictor) : Listener {
 
     @EventHandler
     fun onSpawn(e: EntitySpawnEvent) {
-        if (e.location.world.name != "world")
+        if (e.location.world.name !in Constants.SPARKLYPOWER_SURVIVAL_WORLDS)
             return
 
         val maxInChunks = maximumInChunks[e.entity.type]
