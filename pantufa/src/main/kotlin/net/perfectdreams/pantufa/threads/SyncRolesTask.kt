@@ -114,8 +114,6 @@ class SyncRolesTask : Runnable {
 					}.toMutableList()
 				}
 
-				logger.info { "List of all connected Discord accounts: ${discordAccounts.joinToString { "${it.minecraftId}: ${it.discordId}" }}" }
-
 				val role = guild.getRoleById(sparklyPower.guild.memberRoleId)!!
 
 				val usersWithSparklyMemberRole = guild.getMembersWithRoles(role)
@@ -133,7 +131,7 @@ class SyncRolesTask : Runnable {
 				for (discordAccount in discordAccounts) {
 					val member = guild.getMemberById(discordAccount.discordId)
 					if (member == null) {
-						logger.info { "Ignoring role update for ${discordAccount.discordId} because they aren't in the server..." }
+						logger.info { "Ignoring role update for ${discordAccount.discordId} because they aren't in the cache..." }
 						continue
 					}
 
