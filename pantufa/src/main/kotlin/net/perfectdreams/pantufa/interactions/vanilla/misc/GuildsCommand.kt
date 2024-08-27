@@ -22,7 +22,7 @@ class GuildsCommand : SlashCommandDeclarationWrapper {
         override suspend fun execute(context: UnleashedContext, args: SlashCommandArguments) {
             context.reply(false) {
                 styled(
-                    "Eu estou nos seguintes servidores: ${context.jda.guilds.joinToString(", ") { "`${it.name}` (${it.memberCache.size()} membros)" }} **(${context.jda.guilds.size})**",
+                    "Eu estou nos seguintes servidores: ${context.jda.guilds.joinToString(", ") { "`${it.name}` (${it.memberCount} membros / ${it.memberCache.size()} membros em cache)" }} **(${context.jda.guilds.size})**",
                     Emotes.PantufaGaming.asMention
                 )
             }
