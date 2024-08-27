@@ -25,7 +25,7 @@ dependencies {
     implementation("ch.qos.logback:logback-classic:1.4.11")
     implementation("io.github.microutils:kotlin-logging:2.1.23")
 
-    implementation("com.github.LorittaBot:DeviousJDA:c98147549f")
+    implementation("com.github.LorittaBot:DeviousJDA:40ea50aea7")
     implementation("club.minnced:jda-ktx:0.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.4")
