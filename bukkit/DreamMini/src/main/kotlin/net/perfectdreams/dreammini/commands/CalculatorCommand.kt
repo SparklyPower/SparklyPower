@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.*
 import net.perfectdreams.commands.annotation.Subcommand
 import net.perfectdreams.commands.bukkit.SparklyCommand
 import net.perfectdreams.dreamcore.utils.adventure.*
+import net.perfectdreams.dreamcore.utils.extensions.formatted
 import net.perfectdreams.dreamcore.utils.generateCommandInfo
 import net.perfectdreams.dreammini.DreamMini
 import net.perfectdreams.dreammini.utils.*
@@ -42,7 +43,9 @@ class CalculatorCommand(val m: DreamMini) : SparklyCommand(arrayOf("calc", "calc
                 )
             )
 
-        val mathResult = eval(expression.joinToString(" "))
+
+
+        val mathResult = eval(expression.joinToString(" "))?.formatted
             ?: return sender.buildAndSendMessage {
                 color(NamedTextColor.RED)
                 append(prefix())
@@ -52,11 +55,10 @@ class CalculatorCommand(val m: DreamMini) : SparklyCommand(arrayOf("calc", "calc
             }
 
         sender.buildAndSendMessage {
-            color(NamedTextColor.GREEN)
             append(prefix())
             appendSpace()
 
-            append("Resultado: $mathResult")
+            append("§6§lResultado: §c§l$mathResult")
         }
     }
 
