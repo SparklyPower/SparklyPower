@@ -8,6 +8,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.util.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -32,6 +33,17 @@ class APIServer(private val m: PantufaBot) {
             routing {
                 get("/") {
                     call.respondText("SparklyPower API Web Server")
+                }
+
+                get("/guilds/{guildId}/cached-members") {
+                    val guild = m.jda.getGuildById(call.parameters.getOrFail("guildId").toLong())!!
+                    call.respondText(
+                        buildString {
+                            for (member in guild.members) {
+                                appendLine("${member.idLong} (${member.user.name})")
+                            }
+                        }
+                    )
                 }
 
                 post("/rpc") {
