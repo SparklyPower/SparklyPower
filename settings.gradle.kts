@@ -107,7 +107,7 @@ include(":bukkit:DreamSeamlessWorlds")
 // include(":bungee:DreamNetworkBans")
 
 // ===[ VELOCITY ]===
-// include(":velocity:SparklyNeonVelocity")
+include(":velocity:SparklyNeonVelocity")
 
 // ===[ PANTUFA ]===
 include(":pantufa")
