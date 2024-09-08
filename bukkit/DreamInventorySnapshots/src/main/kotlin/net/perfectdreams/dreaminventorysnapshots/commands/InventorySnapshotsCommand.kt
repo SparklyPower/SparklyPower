@@ -19,6 +19,7 @@ import net.perfectdreams.dreaminventorysnapshots.DreamInventorySnapshots
 import net.perfectdreams.dreaminventorysnapshots.tables.InventorySnapshots
 import org.bukkit.Bukkit
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -89,6 +90,7 @@ class InventorySnapshotsCommand(private val m: DreamInventorySnapshots) : Sparkl
                             InventorySnapshots.playerId eq userData[Users.id].value
                         }
                         .limit(10, pageZeroIndexed * 10L)
+                        .orderBy(InventorySnapshots.createdAt, SortOrder.DESC)
                         .toList()
 
                     return@transaction Result.Success(rows)
@@ -96,14 +98,21 @@ class InventorySnapshotsCommand(private val m: DreamInventorySnapshots) : Sparkl
 
                 when (result) {
                     is Result.Success -> {
-                        context.sendMessage {
-                            color(NamedTextColor.AQUA)
-                            appendSpace()
+                        if (result.snapshots.isEmpty()) {
+                            context.sendMessage {
+                                color(NamedTextColor.YELLOW)
 
-                            append("Inventários:")
-                            for (inventorySnapshot in result.snapshots) {
-                                append("#${inventorySnapshot[InventorySnapshots.id].value}: ${inventorySnapshot[InventorySnapshots.createdAt]}")
-                                appendNewline()
+                                append("Nenhuma snapshot encontrada")
+                            }
+                        } else {
+                            context.sendMessage {
+                                color(NamedTextColor.AQUA)
+
+                                append("Inventários:")
+                                for (inventorySnapshot in result.snapshots) {
+                                    appendNewline()
+                                    append("#${inventorySnapshot[InventorySnapshots.id].value}: ${inventorySnapshot[InventorySnapshots.createdAt]}")
+                                }
                             }
                         }
                     }
