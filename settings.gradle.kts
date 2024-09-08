@@ -100,6 +100,7 @@ include(":bukkit:DreamSplegg")
 include(":bukkit:DreamSocial")
 include(":bukkit:DreamSonecas")
 include(":bukkit:DreamSeamlessWorlds")
+include(":bukkit:DreamInventorySnapshots")
 
 // ===[ BUNGEE ]===
 // include(":bungee:DreamCoreBungee")

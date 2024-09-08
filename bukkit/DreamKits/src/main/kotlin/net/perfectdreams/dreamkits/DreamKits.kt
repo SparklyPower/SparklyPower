@@ -8,16 +8,22 @@ import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamcore.utils.KotlinPlugin
 import net.perfectdreams.dreamcore.utils.adventure.append
 import net.perfectdreams.dreamcore.utils.adventure.textComponent
+import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcorreios.DreamCorreios
 import net.perfectdreams.dreamcorreios.utils.addItemIfPossibleOrAddToPlayerMailbox
 import net.perfectdreams.dreamkits.commands.KitCommand
 import net.perfectdreams.dreamkits.tables.Kits
 import net.perfectdreams.dreamkits.utils.Kit
+import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.PotionMeta
+import org.bukkit.potion.PotionEffect
+import org.bukkit.potion.PotionEffectType
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
@@ -71,8 +77,25 @@ class DreamKits : KotlinPlugin(), Listener {
 
 	fun giveKit(player: Player, kit: Kit) {
 		// We need to clone because DreamCorreios is dumb sometimes
+		// TODO: Properly implement potions, this is a hack!!!
 		// TODO: Do we really need to clone?
-		player.addItemIfPossibleOrAddToPlayerMailbox(*kit.items.map { it.clone() }.toTypedArray())
+		val items = kit.items.map { it.clone() }.toMutableList()
+		if (kit.name.equals("gladiador", true)) {
+			items.add(
+				ItemStack(Material.POTION)
+					.meta<PotionMeta> {
+						this.addCustomEffect(PotionEffect(PotionEffectType.STRENGTH, 6000, 1), true)
+					}
+			)
+			items.add(
+				ItemStack(Material.POTION)
+					.meta<PotionMeta> {
+						this.addCustomEffect(PotionEffect(PotionEffectType.HASTE, 3000, 1), true)
+					}
+			)
+		}
+
+		player.addItemIfPossibleOrAddToPlayerMailbox(*items.toTypedArray())
 	}
 
 	fun loadKits() {

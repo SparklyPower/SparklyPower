@@ -1,0 +1,5 @@
+name: DreamInventorySnapshots
+main: net.perfectdreams.dreaminventorysnapshots.DreamInventorySnapshots
+version: 1.0.0
+depend: ["DreamCore"]
+api-version: 1.13

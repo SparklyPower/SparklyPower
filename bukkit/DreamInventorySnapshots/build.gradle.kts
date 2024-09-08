@@ -1,9 +1,7 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm")
-    kotlin("plugin.serialization")
     id("io.papermc.paperweight.userdev")
+    kotlin("plugin.serialization")
 }
 
 repositories {
@@ -14,7 +12,6 @@ repositories {
 dependencies {
     paperweight.devBundle("net.sparklypower.sparklypaper", "1.21.1-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
-    compileOnly(project(":bukkit:DreamCorreios"))
 }
 
 kotlin {

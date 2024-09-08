@@ -14,6 +14,7 @@ import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamkits.DreamKits
 import net.perfectdreams.dreamkits.tables.Kits
 import net.perfectdreams.dreamkits.utils.PlayerKitsInfo
+import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.jetbrains.exposed.sql.select
@@ -207,6 +208,70 @@ class KitCommand(val m: DreamKits) : AbstractCommand("kits", listOf("kit")) {
 			switchContext(SynchronizationContext.ASYNC)
 
 			Webhooks.PANTUFA_INFO?.send("**${p0.name}** recebeu kit `${kit.name}`.")
+		}
+	}
+
+	@Subcommand
+	@SubcommandPermission("dreamkits.giveother")
+	fun getKit(p0: Player, kitName: String, playerName: String) {
+		val player = Bukkit.getPlayerExact(playerName)
+		val kit = m.kits.firstOrNull { it.name.equals(kitName, true) }
+
+		if (player == null) {
+			p0.sendMessage(
+				textComponent {
+					color(NamedTextColor.RED)
+					append(DreamKits.PREFIX)
+					append(" ")
+					append("Player $playerName não está online!")
+				}
+			)
+			return
+		}
+
+		if (kit == null) {
+			p0.sendMessage(
+				textComponent {
+					color(NamedTextColor.RED)
+					append(DreamKits.PREFIX)
+					append(" ")
+					append("Kit $kitName não existe! Para ver todos os kits, use ")
+					runCommandOnClick("kits")
+				}
+			)
+			return
+		}
+
+		if (!p0.hasPermission("dreamkits.kit.${kit.name}")) {
+			p0.sendMessage(
+				textComponent {
+					color(NamedTextColor.RED)
+					append(DreamKits.PREFIX)
+					append(" ")
+					append(LegacyComponentSerializer.legacySection().deserialize(withoutPermission!!))
+				}
+			)
+			return
+		}
+
+		scheduler().schedule(m, SynchronizationContext.SYNC) {
+			m.giveKit(player, kit)
+
+			p0.sendMessage(
+				textComponent {
+					color(NamedTextColor.GREEN)
+					append(DreamKits.PREFIX)
+					append(" Você deu o kit ")
+					append(kit.fancyName) {
+						color(NamedTextColor.AQUA)
+					}
+					append(" para ${playerName}!")
+				}
+			)
+
+			switchContext(SynchronizationContext.ASYNC)
+
+			Webhooks.PANTUFA_INFO?.send("**${player.name}** recebeu kit `${kit.name}`, dado por **${p0.name}**.")
 		}
 	}
 }
