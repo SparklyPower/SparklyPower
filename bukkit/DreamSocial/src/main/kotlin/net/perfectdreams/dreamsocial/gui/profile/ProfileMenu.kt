@@ -3,6 +3,7 @@ package net.perfectdreams.dreamsocial.gui.profile
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.skills.SkillTools
+import com.mojang.authlib.GameProfile
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
@@ -55,6 +56,15 @@ fun renderProfileMenu(plugin: DreamSocial, targetUUID: UUID, profileLayout: Prof
     createMenu(54, profileLayout.menuTitle) {
         val offlinePlayer = Bukkit.getOfflinePlayer(targetUUID)
 
+        // Hacky workaround: While setting the skull owner, a NullPointerException was thrown
+        // Because the `.playerProfile` cannot guarantee that the `name` is not null, and we need that, even if is an empty string
+        // So I manually created a GameProfile object to set it to the SkullMeta
+        val playerProfile = Bukkit.createProfile(targetUUID, offlinePlayer.name ?: " ").apply {
+            offlinePlayer.playerProfile.properties.forEach {
+                setProperty(it)
+            }
+        }
+
         val isGirl = MeninaAPI.isGirl(targetUUID)
         val pronoun = if (isCheckingSelf) "você" else MeninaAPI.getPronome(targetUUID)
         val pronounOrName = if (isCheckingSelf) "Você" else offlinePlayer.name
@@ -66,9 +76,8 @@ fun renderProfileMenu(plugin: DreamSocial, targetUUID: UUID, profileLayout: Prof
         /* Player Head */
         slot(5, 1) {
             item = ItemStack(Material.PLAYER_HEAD).meta<SkullMeta> {
-                owningPlayer = offlinePlayer
+                ownerProfile = playerProfile
                 setCustomModelData(1)
-                displayName(" ".asComponent)
             }
         }
 
