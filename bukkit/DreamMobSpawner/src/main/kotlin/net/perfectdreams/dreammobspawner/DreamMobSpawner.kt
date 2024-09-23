@@ -169,10 +169,11 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 	}
 
 	class SpawnerRegion(
-		val spawn: Location,
+		var spawn: Location,
 		val type: EntityType,
 		val region: String,
-		val price: Double) {
+		val price: Double
+	) {
 		@Transient
 		var spawnedMobs = mutableListOf<Entity>()
 
@@ -205,6 +206,32 @@ class DreamMobSpawner : KotlinPlugin(), Listener {
 			sender.sendMessage("§aSpawner de ${type.name} criado com sucesso!")
 
 			m.saveFile.writeText(DreamUtils.gson.toJson(m.spawners))
+		}
+
+		@Subcommand(["location"])
+		fun location(sender: Player, region: String) {
+			val spawnerRegion = m.spawners.firstOrNull { it.region == region }
+			if (spawnerRegion == null) {
+				sender.sendMessage("§cRegião $region não existe!")
+				return
+			}
+
+			spawnerRegion.spawn = sender.location
+
+			sender.sendMessage("§aSpawner de $region teve a localização alterada com sucesso!")
+
+			m.saveFile.writeText(DreamUtils.gson.toJson(m.spawners))
+		}
+
+		@Subcommand(["list"])
+		fun list(sender: Player) {
+			sender.sendMessage("§aRegiões de Spawners:")
+
+			m.spawners.forEach {
+				val location = "§3${TextUtils.ROUND_TO_2_DECIMAL.format(it.spawn.x)}§b, §3${TextUtils.ROUND_TO_2_DECIMAL.format(it.spawn.y)}§b, §3${TextUtils.ROUND_TO_2_DECIMAL.format(it.spawn.z)}"
+
+				sender.sendMessage("§a${it.region} (${it.type}) ($location§a)")
+			}
 		}
 
 		@Subcommand(["remove"])
