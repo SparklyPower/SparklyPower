@@ -3,10 +3,15 @@ package net.perfectdreams.dreaminventorysnapshots.commands
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.perfectdreams.dreamcore.tables.Users
 import net.perfectdreams.dreamcore.utils.Databases
+import net.perfectdreams.dreamcore.utils.DateUtils
 import net.perfectdreams.dreamcore.utils.ItemUtils
 import net.perfectdreams.dreamcore.utils.adventure.append
+import net.perfectdreams.dreamcore.utils.adventure.appendTextComponent
+import net.perfectdreams.dreamcore.utils.adventure.hoverText
+import net.perfectdreams.dreamcore.utils.adventure.suggestCommandOnClick
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
 import net.perfectdreams.dreamcore.utils.commands.declarations.SparklyCommandDeclarationWrapper
@@ -22,6 +27,9 @@ import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 class InventorySnapshotsCommand(private val m: DreamInventorySnapshots) : SparklyCommandDeclarationWrapper {
     override fun declaration() = sparklyCommand(listOf("inventorysnapshots")) {
@@ -111,7 +119,41 @@ class InventorySnapshotsCommand(private val m: DreamInventorySnapshots) : Sparkl
                                 append("Inventários:")
                                 for (inventorySnapshot in result.snapshots) {
                                     appendNewline()
-                                    append("#${inventorySnapshot[InventorySnapshots.id].value}: ${inventorySnapshot[InventorySnapshots.createdAt]}")
+                                    val diff = DateUtils.formatDateDiff(inventorySnapshot[InventorySnapshots.createdAt].toEpochMilli())
+
+                                    appendTextComponent {
+                                        color(NamedTextColor.GRAY)
+                                        content(diff)
+                                        hoverText {
+                                            // Convert the instant to a ZonedDateTime using the default time zone
+                                            val zonedDateTime = ZonedDateTime.ofInstant(inventorySnapshot[InventorySnapshots.createdAt], ZoneId.of("America/Sao_Paulo"))
+
+                                            // Define the desired format (e.g., "yyyy-MM-dd HH:mm:ss")
+                                            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
+                                            color(NamedTextColor.GRAY)
+                                            content(zonedDateTime.format(formatter))
+                                        }
+                                    }
+
+                                    appendSpace()
+                                    appendTextComponent {
+                                        color(NamedTextColor.WHITE)
+                                        content("#${inventorySnapshot[InventorySnapshots.id]}")
+                                    }
+
+                                    appendSpace()
+                                    appendTextComponent {
+                                        color(NamedTextColor.DARK_GRAY)
+                                        append("[")
+                                        appendTextComponent {
+                                            decorate(TextDecoration.BOLD)
+                                            color(NamedTextColor.GREEN)
+                                            content("Restaurar em Você")
+                                        }
+                                        append("]")
+                                        suggestCommandOnClick("/inventorysnapshots restore ${inventorySnapshot[InventorySnapshots.id]}")
+                                    }
                                 }
                             }
                         }
