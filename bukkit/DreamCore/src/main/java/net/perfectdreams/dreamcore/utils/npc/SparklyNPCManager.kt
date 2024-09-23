@@ -1,5 +1,6 @@
 package net.perfectdreams.dreamcore.utils.npc
 
+import net.kyori.adventure.text.Component
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket
 import net.minecraft.world.entity.EntityType
@@ -149,6 +150,7 @@ class SparklyNPCManager(val m: DreamCore) {
         }
 
         val entity = fakePlayer.bukkitEntity as Husk
+        entity.customName(Component.text("SparklyNPC"))
         val npcData = SparklyNPC(
             this,
             owner,
