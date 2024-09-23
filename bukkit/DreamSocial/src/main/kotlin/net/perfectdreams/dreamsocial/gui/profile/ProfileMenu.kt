@@ -3,6 +3,9 @@ package net.perfectdreams.dreamsocial.gui.profile
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType
 import com.gmail.nossr50.mcMMO
 import com.gmail.nossr50.util.skills.SkillTools
+import com.mojang.authlib.GameProfile
+import com.okkero.skedule.SynchronizationContext
+import com.okkero.skedule.schedule
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
@@ -13,12 +16,14 @@ import net.perfectdreams.dreamcasamentos.tables.Marriages
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamclubes.utils.ClubePermissionLevel
+import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.dao.Ban
 import net.perfectdreams.dreamcore.tables.Bans
 import net.perfectdreams.dreamcore.tables.EventVictories
 import net.perfectdreams.dreamcore.utils.adventure.append
 import net.perfectdreams.dreamcore.utils.adventure.lore
 import net.perfectdreams.dreamcore.utils.extensions.*
+import net.perfectdreams.dreamcore.utils.skins.SkinUtils
 import net.perfectdreams.dreamloja.dao.Shop
 import net.perfectdreams.dreamloja.dao.UserShopVote
 import net.perfectdreams.dreamloja.tables.Shops
@@ -54,6 +59,7 @@ private val luckPermsApi = LuckPermsProvider.get()
 fun renderProfileMenu(plugin: DreamSocial, targetUUID: UUID, profileLayout: ProfileLayout, isCheckingSelf: Boolean) =
     createMenu(54, profileLayout.menuTitle) {
         val offlinePlayer = Bukkit.getOfflinePlayer(targetUUID)
+        val playerSkin = runBlocking { DreamCore.INSTANCE.skinUtils.retrieveSkinTexturesBySparklyPowerUniqueId(targetUUID) }
 
         val isGirl = MeninaAPI.isGirl(targetUUID)
         val pronoun = if (isCheckingSelf) "você" else MeninaAPI.getPronome(targetUUID)
@@ -66,9 +72,15 @@ fun renderProfileMenu(plugin: DreamSocial, targetUUID: UUID, profileLayout: Prof
         /* Player Head */
         slot(5, 1) {
             item = ItemStack(Material.PLAYER_HEAD).meta<SkullMeta> {
-                owningPlayer = offlinePlayer
                 setCustomModelData(1)
-                displayName(" ".asComponent)
+
+                if (playerSkin != null) {
+                    offlinePlayer.playerProfile.setProperty(playerSkin)
+                } else {
+                    owningPlayer = offlinePlayer
+                }
+
+                displayName(offlinePlayer.name?.asComponent ?: " ".asComponent)
             }
         }
 
