@@ -221,8 +221,6 @@ class AssinaturaCommand(val m: DreamAssinaturas) : SparklyCommandDeclarationWrap
                     val currentClaim = GriefPrevention.instance.dataStore.getClaimAt(player.location, false, null)
                     val playerData = GriefPrevention.instance.dataStore.getPlayerData(player.uniqueId)
 
-                    println(playerData.ignoreClaims)
-
                     if (currentClaim != null) {
                         if (!currentClaim.hasExplicitPermission(player.uniqueId, ClaimPermission.Build) && !playerData.ignoreClaims) {
                             player.buildAndSendMessage {
