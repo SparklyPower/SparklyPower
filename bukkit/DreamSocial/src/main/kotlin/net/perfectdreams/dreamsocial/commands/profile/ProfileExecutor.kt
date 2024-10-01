@@ -26,13 +26,15 @@ class ProfileExecutor(private val plugin: DreamSocial) : SparklyCommandExecutor(
     override fun execute(context: CommandContext, args: CommandArguments) {
         val player = context.requirePlayer()
         val targetUsername = args[options.target]
-        val isCheckingSelf = targetUsername == null || player.name.equals(targetUsername, true)
+        val isCheckingSelf = targetUsername == null || player.name == targetUsername || player.name.equals(targetUsername, true)
 
         plugin.schedule(SynchronizationContext.ASYNC) {
             val targetUUID =
                 if (!isCheckingSelf) {
-                    val userInfo = DreamUtils.retrieveUserInfoCaseInsensitive(targetUsername!!)
+                    val userInfo = DreamUtils.retrieveUserInfo(targetUsername!!) ?: DreamUtils.retrieveUserInfoCaseInsensitive(targetUsername)
                         ?: return@schedule player.sendMessage("§c$targetUsername nunca jogou no SparklyPower.")
+
+                    println(userInfo.id.value)
 
                     userInfo.id.value
                 } else player.uniqueId
