@@ -23,5 +23,6 @@ enum class TransactionType(val title: String, val description: String) {
     EVENTS("Eventos", "ganhos em eventos do servidor"),
     SECRET_BOXES("Caixas Secretas", "recompensas em caixas secretas"),
     LSX("LSX", "conversões entre sonhos e sonecas"),
-    UNSPECIFIED("Não específicado", "sem motivo específico")
+    UNSPECIFIED("Não específicado", "sem motivo específico"),
+    PESADELOS_BUNDLE_PURCHASE("Compra de Pesadelos", "compras de pesadelos")
 }

@@ -343,6 +343,12 @@ object TransactionsUtils {
                             append("Enviou $formattedAmount ao ${transaction.extra}")
                         }
                     }
+
+                    TransactionType.PESADELOS_BUNDLE_PURCHASE -> {
+                        append(Emotes.Pesadelos)
+                        append(" ")
+                        append("Comprou $formattedAmount pesadelos na loja do SparklyPower")
+                    }
                 }
                 append("\n")
             }
