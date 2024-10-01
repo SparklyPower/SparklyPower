@@ -8,6 +8,7 @@ plugins {
 dependencies {
     paperweight.devBundle("net.sparklypower.sparklypaper", "1.21.1-R0.1-SNAPSHOT")
     compileOnly(project(":bukkit:DreamCore"))
+    compileOnly(project(":bukkit:DreamTerrainAdditions"))
     implementation("net.luckperms:api:5.0")
 }
 

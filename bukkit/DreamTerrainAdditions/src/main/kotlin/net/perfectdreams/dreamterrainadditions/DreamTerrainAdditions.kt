@@ -20,6 +20,7 @@ import net.perfectdreams.dreamjetpack.DreamJetpack
 import net.perfectdreams.dreamjetpack.events.PlayerJetpackCheckEvent
 import net.perfectdreams.dreamterrainadditions.commands.*
 import net.perfectdreams.dreamterrainadditions.commands.declarations.TempTrustCommand
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -40,6 +41,11 @@ import java.lang.IllegalArgumentException
 import java.util.*
 
 class DreamTerrainAdditions : KotlinPlugin(), Listener {
+	companion object {
+		val INSTANCE
+			get() = Bukkit.getPluginManager().getPlugin("DreamTerrainAdditions") as DreamTerrainAdditions
+	}
+
 	// We use a Map to make all claims additions check O1
 	// Using a list would require looping all claim additions just to check what matches what we want...
 	// and that's SUPER intensive!
