@@ -112,11 +112,13 @@ class DreamAuth : KotlinPlugin() {
 		if (event.isCancelled)
 			return
 
+		val playerAddress = player.address ?: error("Player address is null!")
+
 		scheduler().schedule(this, SynchronizationContext.ASYNC) {
 			val playerInfo = uniqueId2PlayerInfo[player.uniqueId]!!
 
 			transaction (Databases.databaseNetwork){
-				playerInfo.lastIp = player.address.address.hostAddress
+				playerInfo.lastIp = playerAddress.address.hostAddress
 				playerInfo.lastLogin = System.currentTimeMillis()
 			}
 
@@ -131,7 +133,7 @@ class DreamAuth : KotlinPlugin() {
 
 			// Logado com sucesso!
 			playerStatus[player] = PlayerStatus.LOGGED_IN
-			wrongPasswordCount.remove(player.address.address)
+			wrongPasswordCount.remove(playerAddress.address)
 		}
 	}
 
