@@ -19,5 +19,10 @@ fun SparklyNamespacedBooleanKey(key: String) = SparklyNamespacedBooleanKey<Boole
 class SparklyNamespacedBooleanKey<T, Z>(val key: NamespacedKey)
 
 fun <T, Z : Any> PersistentDataContainer.set(key: SparklyNamespacedBooleanKey<T, Z>, value: Boolean) = this.set(key.key, PersistentDataType.BYTE, if (value) 1 else 0)
-fun <T, Z> PersistentDataContainer.get(key: SparklyNamespacedBooleanKey<T, Z>) = this.get(key.key, PersistentDataType.BYTE) == 1.toByte()
+fun <T, Z> PersistentDataContainer.get(key: SparklyNamespacedBooleanKey<T, Z>): Boolean {
+    // This code is like this because FOR SOME REASON something changed in Paper that is now causing a slew of errors
+    // "java.lang.NullPointerException: Cannot invoke "java.lang.Number.byteValue()" because the return value of "org.bukkit.persistence.PersistentDataContainer.get(org.bukkit.NamespacedKey, org.bukkit.persistence.PersistentDataType)" is null"
+    val result = this.get(key.key, PersistentDataType.BYTE) ?: return false
+    return result == 1.toByte()
+}
 fun <T, Z> PersistentDataContainer.remove(key: SparklyNamespacedBooleanKey<T, Z>) = this.remove(key.key)
