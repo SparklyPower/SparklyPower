@@ -2,6 +2,7 @@ package net.perfectdreams.dreamvipstuff.commands
 
 import me.ryanhamshire.GriefPrevention.GriefPrevention
 import net.kyori.adventure.text.format.NamedTextColor
+import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.adventure.append
 import net.perfectdreams.dreamcore.utils.commands.context.CommandArguments
 import net.perfectdreams.dreamcore.utils.commands.context.CommandContext
@@ -22,21 +23,7 @@ class BackCommand(val m: DreamVIPStuff) : SparklyCommandDeclarationWrapper {
             val griefPrevention = GriefPrevention.instance
             val additions = DreamTerrainAdditions.INSTANCE
 
-            val prohibitedWorlds = listOf(
-                "MinaRecheada",
-                "xizum",
-                "Quiz",
-                "TNTRun",
-                "EventoFight",
-                "Labirinto",
-                "BlockParty",
-                "Splegg",
-                "DropParty",
-                "TorreDaMorte",
-                "Corrida",
-                "RealArenasPvP",
-                "WarpVIP"
-            )
+            val prohibitedWorlds = DreamCore.dreamConfig.blacklistedWorldsTeleport
 
             if (!player.hasPermission("group.vip++")) {
                 m.storedLocations.remove(player.uniqueId) // remove the stored location
