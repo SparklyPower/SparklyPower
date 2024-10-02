@@ -14,6 +14,7 @@ import net.perfectdreams.dreamcore.utils.registerEvents
 import net.perfectdreams.dreamcore.utils.scheduler.delayTicks
 import net.perfectdreams.dreamcore.utils.scheduler.onAsyncThread
 import net.perfectdreams.dreamcore.utils.scheduler.onMainThread
+import net.perfectdreams.dreamvipstuff.commands.BackCommand
 import net.perfectdreams.dreamvipstuff.commands.CabecasPersonalizadasCommand
 import net.perfectdreams.dreamvipstuff.commands.RenomearCommand
 import net.perfectdreams.dreamvipstuff.listeners.PlayerListener
@@ -35,6 +36,8 @@ class DreamVIPStuff : KotlinPlugin(), Listener {
 	private val vipPlusPlusNpcsData = mutableListOf<SpawnedVIPNPC>()
 	private val vipPlusNpcsData = mutableListOf<SpawnedVIPNPC>()
 	private val vipNpcsData = mutableListOf<SpawnedVIPNPC>()
+
+	val storedLocations = mutableMapOf<UUID, Location>()
 
 	override fun softEnable() {
 		super.softEnable()
@@ -160,6 +163,7 @@ class DreamVIPStuff : KotlinPlugin(), Listener {
 		val vipsPlusPlusCenterLocation = Location(Bukkit.getWorld("world"), 271.0, 70.0, 257.0).toCenterLocation()
 
 		registerEvents(PlayerListener(this))
+		registerCommand(BackCommand(this))
 		registerCommand(CabecasPersonalizadasCommand)
 		registerCommand(RenomearCommand)
 

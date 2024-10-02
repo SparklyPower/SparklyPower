@@ -5,14 +5,19 @@ import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
 import net.perfectdreams.dreamcore.utils.extensions.rightClick
 import net.perfectdreams.dreamvipstuff.DreamVIPStuff
 import net.perfectdreams.dreamvipstuff.utils.ExperienceUtils
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
 import org.bukkit.block.Chest
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.player.PlayerRespawnEvent
+import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.ItemStack
+import java.util.UUID
 
 class PlayerListener(val m: DreamVIPStuff) : Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -65,5 +70,20 @@ class PlayerListener(val m: DreamVIPStuff) : Listener {
         }
 
         e.player.sendMessage("${DreamVIPStuff.PREFIX} §9$idx potes§a foram convertidos para experiência com sucesso!")
+    }
+
+    @EventHandler
+    fun onTeleport(e: PlayerTeleportEvent) {
+        m.storedLocations[e.player.uniqueId] = e.player.location // for the /back
+    }
+
+    @EventHandler
+    fun onDeath(e: PlayerDeathEvent) {
+        m.storedLocations.remove(e.player.uniqueId)
+    }
+
+    @EventHandler
+    fun onRespawn(e: PlayerRespawnEvent) {
+        m.storedLocations.remove(e.player.uniqueId)
     }
 }
