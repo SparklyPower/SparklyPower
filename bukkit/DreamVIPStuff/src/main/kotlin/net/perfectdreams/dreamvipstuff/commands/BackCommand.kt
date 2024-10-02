@@ -15,6 +15,7 @@ import net.perfectdreams.dreamvipstuff.DreamVIPStuff
 class BackCommand(val m: DreamVIPStuff) : SparklyCommandDeclarationWrapper {
     override fun declaration() = sparklyCommand(listOf("back")) {
         executor = BackCommandExecutor()
+        permission = "dreamvipstuff.back"
     }
 
     inner class BackCommandExecutor : SparklyCommandExecutor() {
@@ -24,17 +25,6 @@ class BackCommand(val m: DreamVIPStuff) : SparklyCommandDeclarationWrapper {
             val additions = DreamTerrainAdditions.INSTANCE
 
             val prohibitedWorlds = DreamCore.dreamConfig.blacklistedWorldsTeleport
-
-            if (!player.hasPermission("group.vip++")) {
-                m.storedLocations.remove(player.uniqueId) // remove the stored location
-
-                return context.sendMessage {
-                    append("Você não tem permissão para usar este comando!") {
-                        color(NamedTextColor.RED)
-                    }
-                }
-            }
-
             val oldLocation = m.storedLocations[player.uniqueId] ?: run {
                 return context.sendMessage {
                     append("Você não se teleportou recentemente!") {
