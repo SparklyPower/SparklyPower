@@ -30,9 +30,9 @@ class SparklyCommandManager(val plugin: KotlinPlugin) {
         }
 
         val manager: LifecycleEventManager<Plugin> = plugin.getLifecycleManager()
-        manager.registerEventHandler<ReloadableRegistrarEvent<Commands?>>(
+        manager.registerEventHandler<ReloadableRegistrarEvent<Commands>>(
             LifecycleEvents.COMMANDS
-        ) { event: ReloadableRegistrarEvent<Commands?> ->
+        ) { event: ReloadableRegistrarEvent<Commands> ->
             // println("LifecycleEvents.COMMANDS for ${plugin.name}")
             val commands: Commands = event.registrar()
             commandWrappers.forEach {
