@@ -20,6 +20,7 @@ object RegisterCommand : DSLCommandBase<DreamAuth> {
         executes {
             val password1 = args.getOrNull(0)
             val password2 = args.getOrNull(1)
+            val playerAddress = player.address ?: error("Player address is null!")
 
             if (password1 == null) {
                 player.sendMessage(
@@ -48,7 +49,7 @@ object RegisterCommand : DSLCommandBase<DreamAuth> {
             scheduler().schedule(plugin, SynchronizationContext.ASYNC) {
                 val ipCount = transaction(Databases.databaseNetwork) {
                     AuthInfo.find {
-                        AuthStorage.lastIp eq player.address.address.hostAddress
+                        AuthStorage.lastIp eq playerAddress.address.hostAddress
                     }.count()
                 }
 
@@ -81,7 +82,7 @@ object RegisterCommand : DSLCommandBase<DreamAuth> {
                 val authInfo = transaction(Databases.databaseNetwork) {
                     AuthInfo.new(player.uniqueId) {
                         password = hashed
-                        lastIp = player.address.address.hostAddress
+                        lastIp = playerAddress.address.hostAddress
                         lastLogin = System.currentTimeMillis()
                         remember = false
                         twoFactorAuthEnabled = false

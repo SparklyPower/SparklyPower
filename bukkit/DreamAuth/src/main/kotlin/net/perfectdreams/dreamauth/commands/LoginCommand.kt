@@ -14,6 +14,7 @@ import org.mindrot.jbcrypt.BCrypt
 object LoginCommand : DSLCommandBase<DreamAuth> {
     override fun command(plugin: DreamAuth) = this.create(listOf("login", "logar")) {
         executes {
+            val playerAddress = player.address ?: error("Player address is null!")
             val password = args.getOrNull(0)
 
             if (password == null) {
@@ -37,8 +38,8 @@ object LoginCommand : DSLCommandBase<DreamAuth> {
                     player.sendMessage("§c")
                     player.sendMessage("§cEsqueceu a sua senha? A equipe do SparklyPower pode recuperar a sua senha caso você tenha associado a sua conta do SparklyPower com a do Discord! https://discord.gg/JYN6g2s")
 
-                    val count = plugin.wrongPasswordCount.getOrDefault(player.address.address, 0) + 1
-                    plugin.wrongPasswordCount[player.address.address] = count
+                    val count = plugin.wrongPasswordCount.getOrDefault(playerAddress.address, 0) + 1
+                    plugin.wrongPasswordCount[playerAddress.address] = count
 
                     if (count == 25) {
                         plugin.logger.info { "$player errou a senha vezes demais! Irei banir ele..." }
@@ -46,14 +47,14 @@ object LoginCommand : DSLCommandBase<DreamAuth> {
                         DreamNetwork.PANTUFA.sendMessageAsync(
                             "477902981606408222",
                             """<a:yoshi_pulsando:594962593161150483> **|** **`${player.name}`** errou a senha ao logar! Ele errou mais de 25 vezes, então irei banir ele! Nesta tentativa, tentou usar a senha: `$password`)
-						  |<:lori_morre_diabo:540656812836519936> **|** **IP do usuário:** ${player.address.address.hostAddress}
+						  |<:lori_morre_diabo:540656812836519936> **|** **IP do usuário:** ${playerAddress.address.hostAddress}
 						""".trimMargin()
                         )
 
                         DreamNetwork.PERFECTDREAMS_BUNGEE.sendAsync(
                             jsonObject(
                                 "type" to "executeCommand",
-                                "command" to "ipban ${player.address.address.hostAddress} Tentar invadir contas de outros players, errou a senha da conta mais de 10 vezes!"
+                                "command" to "ipban ${playerAddress.address.hostAddress} Tentar invadir contas de outros players, errou a senha da conta mais de 10 vezes!"
                             )
                         )
                     }
@@ -62,7 +63,7 @@ object LoginCommand : DSLCommandBase<DreamAuth> {
                         DreamNetwork.PANTUFA.sendMessageAsync(
                             "477902981606408222",
                             """<:tobias_nosa:450476856303419432> **|** **`${player.name}`** errou a senha ao logar! (Já tentou ${count} vezes, nesta tentativa, tentou usar a senha: `$password`)
-						  |<:lori_morre_diabo:540656812836519936> **|** **IP do usuário:** ${player.address.address.hostAddress}
+						  |<:lori_morre_diabo:540656812836519936> **|** **IP do usuário:** ${playerAddress.address.hostAddress}
 						""".trimMargin()
                         )
                         return@schedule

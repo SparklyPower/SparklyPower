@@ -62,6 +62,7 @@ class LoginListener(val m: DreamAuth) : Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	fun onJoin(e: PlayerJoinEvent) {
 		e.player.teleport(m.authConfig.loginLocation ?: error("DreamAuth Login Location is not present!"))
+		val playerAddress = e.player.address ?: error("Player address is null!")
 
 		val authInfo = m.uniqueId2PlayerInfo[e.player.uniqueId]
 		val player = e.player
@@ -106,7 +107,7 @@ class LoginListener(val m: DreamAuth) : Listener {
 			val password = authInfo.password
 			val lastIp = authInfo.lastIp
 			val remember = authInfo.remember
-			val userIp = player.address.address.hostAddress
+			val userIp = playerAddress.address.hostAddress
 
 			if (!remember) { // Registrado, o usuário não utiliza remember
 				handleLogin(player)
