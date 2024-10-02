@@ -33,6 +33,7 @@ import net.sparklypower.sparklyneonvelocity.utils.DreamNetwork
 import net.sparklypower.sparklyneonvelocity.utils.GeoUtils
 import net.sparklypower.sparklyneonvelocity.utils.LoginConnectionStatus
 import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
@@ -346,7 +347,9 @@ class LoginListener(val m: SparklyNeonVelocity, val server: ProxyServer) {
             }
 
             val ban = m.pudding.transaction {
-                Ban.find { Bans.player eq event.player.uniqueId }.firstOrNull()
+                Ban.find { Bans.player eq event.player.uniqueId }
+                    .sortedByDescending { it.punishedAt }
+                    .firstOrNull()
             }
 
             if (ban != null) {
@@ -369,7 +372,9 @@ class LoginListener(val m: SparklyNeonVelocity, val server: ProxyServer) {
             }
 
             val ipBan = m.pudding.transaction {
-                IpBan.find { IpBans.ip eq event.player.remoteAddress.hostString }.firstOrNull()
+                IpBan.find { IpBans.ip eq event.player.remoteAddress.hostString }
+                    .sortedByDescending { it.punishedAt }
+                    .firstOrNull()
             }
 
             // Because MCPE connections via Geyser uses "127.0.0.1" (for now), we will just ignore IP bans if they are bound to "127.0.0.1"

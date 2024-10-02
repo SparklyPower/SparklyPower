@@ -149,7 +149,7 @@ class SparklyNeonVelocity @Inject constructor(private val server: ProxyServer, _
         server.commandManager.register("ipreport", IpReportCommand(this, this.server))
         server.commandManager.register("ipunban", IpUnbanCommand(this, this.server), "desbanirip", "unbanip", "ipdesbanir")
         server.commandManager.register("kick", KickCommand(this))
-        server.commandManager.register("unban", UnbanCommand(this, this.server), "desbanir")
+        server.commandManager.register("unban", UnbanCommand(this, this.server))
         server.commandManager.register("unwarn", UnwarnCommand(this, this.server))
         server.commandManager.register("warn", WarnCommand(this, this.server), "avisar")
         server.commandManager.register("banasn", BanASNCommand(this, this.server))
