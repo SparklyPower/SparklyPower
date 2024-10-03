@@ -164,7 +164,7 @@ class SyncRolesTask : Runnable {
 				syncRolesEligibleForUsers(guild, sparklyPower.guild.trialSupportRoleId, trialSupports)
 				syncRolesEligibleForUsers(guild, sparklyPower.guild.builderRoleId, builders)
 				syncRolesEligibleForUsers(guild, sparklyPower.guild.devRoleId, developers)
-				syncRolesEligibleForUsers(guild, sparklyPower.guild.staffRoleId, owners.toMutableList() + admins.toMutableList() + coordenators.toMutableList() + moderators.toMutableList() + supports.toMutableList() + developers.toMutableList())
+				syncRolesEligibleForUsers(guild, sparklyPower.guild.staffRoleId, owners.toMutableList() + admins.toMutableList() + coordenators.toMutableList() + moderators.toMutableList() + supports.toMutableList())
 				syncRolesEligibleForUsers(guild, sparklyPower.guild.vipRoleId, vips)
 				syncRolesEligibleForUsers(guild, sparklyPower.guild.influencerRoleId, influencer)
 				syncRolesEligibleForUsers(guild, sparklyPower.guild.starRoleId, estrelinha)
