@@ -4,6 +4,8 @@ import com.github.salomonbrys.kotson.fromJson
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import kotlinx.coroutines.delay
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.toKotlinInstant
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.DreamCore
 import net.perfectdreams.dreamcore.utils.*
@@ -23,14 +25,15 @@ import org.bukkit.Bukkit
 import org.bukkit.Bukkit.getPlayerExact
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.util.*
 import kotlin.time.Duration.Companion.seconds
 
@@ -117,6 +120,41 @@ class DreamVote : KotlinPlugin() {
 				Votes.player eq uuid
 			}.count()
 		}
+	}
+
+	fun hasVotedThroughTheWeek(player: Player) = hasVotedThroughTheWeek(player.uniqueId)
+
+	fun hasVotedThroughTheWeek(uuid: UUID): Boolean {
+		// first we need to check if the user voted in the two websites during monday to friday
+		// if he voted, we need to double his reward in cash in the weekend (saturday and sunday)
+		DreamUtils.assertAsyncThread(true)
+
+		// let's instantiate the variable that will store the amount of days the player voted
+		var votedDays = 0
+
+		// first, we need to instanciate the calendar in the correct time, in the beginning of the week
+		val startOfTheWeek = LocalDate.now(ZoneId.systemDefault()).with(DayOfWeek.MONDAY)
+
+		// ok, now we need to list the votes from the player and filter them by the week
+		val votes = transaction(Databases.databaseNetwork) {
+			Votes.selectAll().where {
+				Votes.player eq uuid and (Votes.votedAt greaterEq startOfTheWeek.atStartOfDay()
+					.toInstant(ZoneOffset.of(ZoneId.systemDefault().id)).toEpochMilli())
+			}.toList()
+		}
+
+		// let's pass through all the votes and check if it's a valid date
+		for (vote in votes) {
+			val voteDate = LocalDate.ofInstant(Instant.ofEpochMilli(vote[Votes.votedAt]), ZoneId.of("America/Sao_Paulo")) // convert it to timestamp
+
+			if (voteDate.isAfter(startOfTheWeek.minusDays(1)) && voteDate.dayOfWeek != DayOfWeek.SATURDAY && voteDate.dayOfWeek != DayOfWeek.SUNDAY) {
+				votedDays++
+			}
+		}
+
+		// finally, check if the user voted all days of the week
+		// it's two websites, so the user needs to vote 10 times
+		return votedDays == 10
 	}
 
 	fun hasVotedToday(player: Player) = hasVotedToday(player.uniqueId)
@@ -222,7 +260,13 @@ class DreamVote : KotlinPlugin() {
 
 			switchContext(SynchronizationContext.ASYNC)
 
-			Cash.giveCash(uniqueId, 4, TransactionContext(type = TransactionType.VOTE_REWARDS))
+			val dayOfWeek = Calendar.getInstance().apply {
+				timeInMillis = System.currentTimeMillis()
+			}.get(Calendar.DAY_OF_WEEK)
+
+			val cash = if (hasVotedThroughTheWeek(uniqueId) && dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) 8L else 4L
+
+			Cash.giveCash(uniqueId, cash, TransactionContext(type = TransactionType.VOTE_REWARDS))
 
 			Webhooks.PANTUFA_INFO?.send("**$lastVoter** votou no $serviceName, agora **$lastVoter** possui ${voteCount + 1} votos. *Prêmios recebidos:* ${giveAwards.joinToString(", ", transform = { "`${it.name}`" })}")
 		}
