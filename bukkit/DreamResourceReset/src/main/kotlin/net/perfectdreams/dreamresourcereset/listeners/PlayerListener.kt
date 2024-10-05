@@ -219,7 +219,8 @@ class PlayerListener(val m: DreamResourceReset) : Listener {
             return
 
         val state = clickedBlock.state as Chest
-        if (state.persistentDataContainer.get(DreamResourceReset.IS_DEATH_CHEST, PersistentDataType.BYTE) != 1.toByte())
+        val deathChestState = state.persistentDataContainer.get(DreamResourceReset.IS_DEATH_CHEST, PersistentDataType.BYTE) ?: return
+        if (deathChestState != 1.toByte())
             return
 
         val chestId = state.persistentDataContainer.get(DreamResourceReset.DEATH_CHEST_ID, PersistentDataType.LONG)

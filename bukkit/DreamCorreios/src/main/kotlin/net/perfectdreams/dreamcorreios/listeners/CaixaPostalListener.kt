@@ -28,7 +28,8 @@ class CaixaPostalListener(val m: DreamCorreios) : Listener {
             return
 
         val state = clickedBlock.state as Chest
-        if (state.persistentDataContainer.get(DreamCorreios.IS_CAIXA_POSTAL, PersistentDataType.BYTE) != 1.toByte())
+        val caixaPostalState = state.persistentDataContainer.get(DreamCorreios.IS_CAIXA_POSTAL, PersistentDataType.BYTE) ?: return
+        if (caixaPostalState != 1.toByte())
             return
 
         e.isCancelled = true
