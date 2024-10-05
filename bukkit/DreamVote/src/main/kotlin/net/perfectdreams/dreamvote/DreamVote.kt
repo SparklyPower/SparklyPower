@@ -133,13 +133,15 @@ class DreamVote : KotlinPlugin() {
 		var votedDays = 0
 
 		// first, we need to instanciate the calendar in the correct time, in the beginning of the week
-		val startOfTheWeek = LocalDate.now(ZoneId.systemDefault()).with(DayOfWeek.MONDAY)
+		val startOfTheWeek = LocalDate.now(TimeUtils.TIME_ZONE).with(DayOfWeek.MONDAY)
 
 		// ok, now we need to list the votes from the player and filter them by the week
 		val votes = transaction(Databases.databaseNetwork) {
 			Votes.selectAll().where {
 				Votes.player eq uuid and (Votes.votedAt greaterEq startOfTheWeek.atStartOfDay()
-					.toInstant(ZoneOffset.of(ZoneId.systemDefault().id)).toEpochMilli())
+					.atZone(TimeUtils.TIME_ZONE)
+					.toInstant()
+					.toEpochMilli())
 			}.toList()
 		}
 
