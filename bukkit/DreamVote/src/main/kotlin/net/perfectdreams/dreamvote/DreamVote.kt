@@ -251,7 +251,11 @@ class DreamVote : KotlinPlugin() {
 					val playerName = player?.displayName ?: lastVoter
 
 					broadcastMessage(BroadcastType.VOTES_MESSAGE) {
-						"§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e no §3$serviceName§e e ganhou $prizes§e! Vote você também! §6/votar"
+						if (hasVotedThroughTheWeek(uniqueId)) {
+							"§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e e ganhou $prizes§e §c§l(VOTOU DURANTE A SEMANA INTEIRA! +4 PESADELOS)§e! Vote você também! §6/votar"
+						} else {
+							"§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e no §3$serviceName§e e ganhou $prizes§e! Vote você também! §6/votar"
+						}
 					}
 
 					player?.sendTitle("§aParabéns!", "§eVocê ganhou $prizes", 10, 60, 10)
