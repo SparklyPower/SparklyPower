@@ -6,6 +6,7 @@ import com.xxmicloxx.NoteBlockAPI.songplayer.RadioSongPlayer
 import net.perfectdreams.dreamcaixasecreta.DreamCaixaSecreta
 import net.perfectdreams.dreamcash.utils.Cash
 import net.perfectdreams.dreamcore.utils.*
+import net.perfectdreams.dreamcore.utils.extensions.isWithinRegion
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.event.EventHandler
@@ -37,6 +38,9 @@ class BlockListener(val m: DreamCaixaSecreta) : Listener {
 			return
 
 		if (!item.hasItemMeta())
+			return
+
+		if (e.player.location.isWithinRegion("spawn") && !e.player.hasPermission("dreammini.bypassdropblock"))
 			return
 
 		val data = item.itemMeta.persistentDataContainer.get(DreamCaixaSecreta.CAIXA_SECRETA_LEVEL_KEY) ?: return
