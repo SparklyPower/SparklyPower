@@ -227,7 +227,11 @@ class DreamVote : KotlinPlugin() {
 				items.addAll(it.items)
 			}
 
-			val hasVotedThroughTheWeek = hasVotedThroughTheWeek(uniqueId)
+			val dayOfWeek = Calendar.getInstance().apply {
+				timeInMillis = System.currentTimeMillis()
+			}.get(Calendar.DAY_OF_WEEK)
+
+			val hasVotedThroughTheWeek = hasVotedThroughTheWeek(uniqueId) && dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY
 
 			switchContext(SynchronizationContext.SYNC)
 			earnedMoney = 0.0
@@ -266,11 +270,7 @@ class DreamVote : KotlinPlugin() {
 
 			switchContext(SynchronizationContext.ASYNC)
 
-			val dayOfWeek = Calendar.getInstance().apply {
-				timeInMillis = System.currentTimeMillis()
-			}.get(Calendar.DAY_OF_WEEK)
-
-			val cash = if (hasVotedThroughTheWeek(uniqueId) && dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) 8L else 4L
+			val cash = if (hasVotedThroughTheWeek) 8L else 4L
 
 			Cash.giveCash(uniqueId, cash, TransactionContext(type = TransactionType.VOTE_REWARDS))
 
