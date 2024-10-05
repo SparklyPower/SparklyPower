@@ -227,6 +227,8 @@ class DreamVote : KotlinPlugin() {
 				items.addAll(it.items)
 			}
 
+			val hasVotedThroughTheWeek = hasVotedThroughTheWeek(uniqueId)
+
 			switchContext(SynchronizationContext.SYNC)
 			earnedMoney = 0.0
 
@@ -251,7 +253,7 @@ class DreamVote : KotlinPlugin() {
 					val playerName = player?.displayName ?: lastVoter
 
 					broadcastMessage(BroadcastType.VOTES_MESSAGE) {
-						if (hasVotedThroughTheWeek(uniqueId)) {
+						if (hasVotedThroughTheWeek) {
 							"§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e e ganhou $prizes§e §c§l(VOTOU DURANTE A SEMANA INTEIRA! +4 PESADELOS)§e! Vote você também! §6/votar"
 						} else {
 							"§6➠ §b$playerName §evotou no §4§lSparkly§b§lPower§e no §3$serviceName§e e ganhou $prizes§e! Vote você também! §6/votar"
