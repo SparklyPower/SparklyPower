@@ -90,7 +90,7 @@ class DreamAjuda : KotlinPlugin(), Listener {
 	fun onRulesApproval(e: PlayerInteractEvent) {
 		val clickedBlock = e.clickedBlock ?: return
 
-		if (e.action != Action.RIGHT_CLICK_BLOCK)
+		if (e.action != Action.LEFT_CLICK_BLOCK && e.action != Action.RIGHT_CLICK_BLOCK)
 			return
 
 		if (!clickedBlock.type.name.contains("_SIGN"))
