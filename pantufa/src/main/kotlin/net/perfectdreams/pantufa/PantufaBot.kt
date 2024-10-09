@@ -76,7 +76,9 @@ class PantufaBot(val config: PantufaConfig) {
 
 	lateinit var interactionsListener: InteractionsListener
 	lateinit var jda: JDA
-	var mainLandGuild: Guild? = null
+	// We should NEVER cache the guild instance, because that gives us stale guild (and member) references
+	val mainLandGuild: Guild?
+		get() = jda.getGuildById(config.sparklyPower.guild.idLong)
 	val tasksScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
 	fun start() {
@@ -95,7 +97,6 @@ class PantufaBot(val config: PantufaConfig) {
 			.awaitReady()
 
 		interactionsListener = InteractionsListener(this)
-		mainLandGuild = jda.getGuildById(config.sparklyPower.guild.idLong)
 
 		logger.info { "Starting API server..." }
 
