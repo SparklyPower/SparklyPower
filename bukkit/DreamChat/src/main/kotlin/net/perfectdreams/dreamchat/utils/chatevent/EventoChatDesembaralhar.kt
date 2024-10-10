@@ -133,6 +133,7 @@ class EventoChatDesembaralhar : IEventoChat {
 		"TERNO",
 		"TOTAL",
 		"VALOR",
+		"RECEBA"
 	)
 
 	var currentWord: String? = null
