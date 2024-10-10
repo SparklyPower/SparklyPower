@@ -26,6 +26,7 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
     var running = false
     var scheduler: CoroutineTask? = null
     var furnacePlayer: Player? = null
+    var furnaceMcMMOPlayer : McMMOPlayer? = null
 
     val inventory = Bukkit.createInventory(SuperFurnaceHolder(this), 36, "Super Fornalha").apply {
         repeat(36) {
@@ -100,7 +101,11 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
             result = recipe.result.asQuantity(item.amount)
 
             repeat(item.amount) {
-                UserManager.getPlayer(furnacePlayer)?.let { newAmount += smeltProcessing(item, recipe.result, it).amount }
+                newAmount += if (furnaceMcMMOPlayer != null) {
+                    smeltProcessing(item, recipe.result, furnaceMcMMOPlayer!!).amount
+                } else {
+                    recipe.result.amount
+                }
             }
 
             break
@@ -119,8 +124,8 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
     }
 
     fun start(whoStarted: Player) {
-
         furnacePlayer = whoStarted
+        furnaceMcMMOPlayer = UserManager.getPlayer(whoStarted)
 
         listOf(18, 19, 20, 21, 22, 23, 27,28, 29, 30, 31, 32).forEach {
             if (inventory.getItem(it) != null) {
@@ -144,7 +149,6 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
                 playersNearSuperFurnace().forEach {
                     it.playSound(location, Sound.BLOCK_FURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS, 1f, 1f)
                 }
-
 
                 waitFor(20)
                 ticksRunning -= 20
@@ -217,5 +221,4 @@ class SuperFurnace(val m: DreamCustomItems, val location: Location) {
             it.stopSound(Sound.BLOCK_FURNACE_FIRE_CRACKLE, SoundCategory.BLOCKS)
         }
     }
-
 }
