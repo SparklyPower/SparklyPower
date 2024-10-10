@@ -14,6 +14,7 @@ import net.perfectdreams.dreamcore.utils.adventure.textComponent
 import net.perfectdreams.dreamcore.utils.extensions.meta
 import net.perfectdreams.dreamloja.commands.*
 import net.perfectdreams.dreamloja.commands.declarations.LojaCommand
+import net.perfectdreams.dreamloja.dao.Shop
 import net.perfectdreams.dreamloja.dao.UserShopVote
 import net.perfectdreams.dreamloja.listeners.SignListener
 import net.perfectdreams.dreamloja.listeners.TagListener
@@ -70,6 +71,8 @@ class DreamLoja : KotlinPlugin() {
 
 	var dreamMenu: Inventory? = null
 	var lastUpdate = 0L
+
+	val selectedShopsToRename = mutableMapOf<UUID, Shop>()
 
 	override fun softEnable() {
 		super.softEnable()
