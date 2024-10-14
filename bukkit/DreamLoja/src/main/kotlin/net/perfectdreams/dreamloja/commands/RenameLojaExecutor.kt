@@ -34,7 +34,7 @@ class RenameLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
                         .toList()
                 }.sortedBy { it.order ?: Int.MAX_VALUE }
 
-                if (playerShops.size > 1) {
+                if (playerShops.isNotEmpty()) {
                     if (m.selectedShopsToRename[player.uniqueId] == null) {
                         onMainThread {
                             val menu = createMenu(InventoryUtils.roundToNearestMultipleOfNine(playerShops.size).coerceAtLeast(9), "§c§lSelecione a Loja!") {
@@ -78,6 +78,13 @@ class RenameLojaExecutor(m: DreamLoja) : LojaExecutorBase(m) {
                                 appendCommand("/loja manage rename <novo_nome>")
                                 append(" para renomear a loja!")
                             }
+                        }
+                    }
+                } else {
+                    onMainThread {
+                        context.sendLojaMessage {
+                            color(NamedTextColor.RED)
+                            content("Você não possui nenhuma loja!")
                         }
                     }
                 }
