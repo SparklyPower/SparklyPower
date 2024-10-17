@@ -15,5 +15,6 @@ open class TrailData(
     val locationOffsetY: Double = 0.0,
     val locationOffsetZ: Double = 0.0,
     val locationDirectionOffset: Double = -1.0,
-    val cooldown: Long = 0
+    val cooldown: Long = 0,
+    val additionalData: (() -> (Any))? = null
 )

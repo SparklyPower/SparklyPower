@@ -1,6 +1,8 @@
 package net.perfectdreams.dreamtrails.utils
 
+import net.perfectdreams.dreamcore.utils.DreamUtils
 import net.perfectdreams.dreamtrails.trails.TrailData
+import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.Particle
 
@@ -203,7 +205,10 @@ object Trails {
         TrailData(
             "§aMagia³",
             Material.EXPERIENCE_BOTTLE,
-            Particle.ENTITY_EFFECT
+            Particle.ENTITY_EFFECT,
+            additionalData = {
+                Color.fromRGB(DreamUtils.random.nextInt(0, 256), DreamUtils.random.nextInt(0, 256), DreamUtils.random.nextInt(0, 256))
+            }
         ),
         // TODO - 1.20.6: Fix this! (actually this entire list should be rechecked)
         /* TrailData(

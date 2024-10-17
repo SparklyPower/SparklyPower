@@ -59,11 +59,12 @@ class MoveListener(val m: DreamTrails) : Listener {
 						trailData.count,
 						trailData.offsetX,
 						trailData.offsetY,
-						trailData.offsetZ
+						trailData.offsetZ,
+						trailData.additionalData?.invoke()
 					)
 				}
 			} catch (ex: Exception) {
-				m.logger.log(Level.WARNING, ex) { "Something went wrong while trying to process particle ${activeParticle} for ${e.player.name}" }
+				m.logger.log(Level.WARNING, ex) { "Something went wrong while trying to process particle $activeParticle for ${e.player.name}" }
 			}
 		}
 	}
