@@ -2,9 +2,6 @@ package net.perfectdreams.dreamchat.listeners
 
 import club.minnced.discord.webhook.send.WebhookMessageBuilder
 import com.github.benmanes.caffeine.cache.Caffeine
-import com.github.kevinsawicki.http.HttpRequest
-import com.github.salomonbrys.kotson.get
-import com.github.salomonbrys.kotson.string
 import com.okkero.skedule.SynchronizationContext
 import com.okkero.skedule.schedule
 import com.viaversion.viaversion.api.Via
@@ -13,12 +10,12 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.content.*
 import io.ktor.http.*
-import kotlinx.coroutines.*
-import kotlinx.serialization.decodeFromString
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import net.kyori.adventure.text.format.NamedTextColor
-import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
 import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
@@ -30,11 +27,11 @@ import net.perfectdreams.dreamchat.dao.ChatUser
 import net.perfectdreams.dreamchat.events.ApplyPlayerTagsEvent
 import net.perfectdreams.dreamchat.tables.ChatUsers
 import net.perfectdreams.dreamchat.tables.PremiumUsers
-import net.perfectdreams.dreamchat.utils.*
+import net.perfectdreams.dreamchat.utils.ChatUtils
+import net.perfectdreams.dreamchat.utils.McMMOTagsUtils
+import net.perfectdreams.dreamchat.utils.PlayerTag
+import net.perfectdreams.dreamchat.utils.WordTagFitter
 import net.perfectdreams.dreamchat.utils.chatevent.EventoChatCalcular
-import net.perfectdreams.dreamchat.utils.chatevent.EventoChatDesembaralhar
-import net.perfectdreams.dreamchat.utils.chatevent.EventoChatMensagem
-import net.perfectdreams.dreamchat.utils.chatevent.IEventoChat
 import net.perfectdreams.dreamclubes.tables.PlayerDeaths
 import net.perfectdreams.dreamclubes.utils.ClubeAPI
 import net.perfectdreams.dreamclubes.utils.KDWrapper
@@ -42,15 +39,10 @@ import net.perfectdreams.dreamcore.dao.DiscordAccount
 import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.tables.DiscordAccounts
 import net.perfectdreams.dreamcore.utils.*
-import net.perfectdreams.dreamcore.utils.DreamUtils.jsonParser
 import net.perfectdreams.dreamcore.utils.adventure.appendTextComponent
 import net.perfectdreams.dreamcore.utils.adventure.sendTextComponent
 import net.perfectdreams.dreamcore.utils.extensions.artigo
-import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.girl
-import net.perfectdreams.dreamcore.utils.extensions.meta
-import net.perfectdreams.dreamcore.utils.preferences.BroadcastType
-import net.perfectdreams.dreamcore.utils.preferences.broadcastMessage
 import net.perfectdreams.pantufa.rpc.GetDiscordUserRequest
 import net.perfectdreams.pantufa.rpc.GetDiscordUserResponse
 import net.perfectdreams.pantufa.rpc.PantufaRPCRequest
@@ -77,12 +69,26 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.text.NumberFormat
 import java.time.LocalDateTime
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level
 import kotlin.collections.set
 
 class ChatListener(val m: DreamChat) : Listener {
+	companion object {
+		private val blockedCommandsDuringDiscordOnlyMode = setOf(
+			"anunciar",
+			"tell",
+			"msg",
+			"pm",
+			"m",
+			"whisper",
+			"w",
+			"tpa",
+			"tpask",
+			"call"
+		)
+	}
+
 	val chatCooldownCache = Caffeine.newBuilder()
 		.expireAfterWrite(1L, TimeUnit.MINUTES)
 		.build<Player, Long>()
@@ -197,7 +203,7 @@ class ChatListener(val m: DreamChat) : Listener {
 	}
 
     @EventHandler
-    fun onJoin(e: PlayerCommandPreprocessEvent) {
+    fun onCommand(e: PlayerCommandPreprocessEvent) {
         if (!m.eventoChat.running)
             return
 
@@ -209,6 +215,31 @@ class ChatListener(val m: DreamChat) : Listener {
         if (m.eventoChat.event is EventoChatCalcular && listOf("calc", "calculadora").contains(cmd))
             e.isCancelled = true
     }
+
+	@EventHandler
+	fun onDiscordOnlyModeCommand(e: PlayerCommandPreprocessEvent) {
+		if (m.onlyLetConnectedDiscordAccountsTalk) {
+			val cmd = e.message
+				.split(" ")[0]
+				.substring(1)
+				.lowercase()
+
+			// Let only SOME commands thru
+			if (cmd in blockedCommandsDuringDiscordOnlyMode) {
+				e.isCancelled = true
+
+				e.player.sendTextComponent {
+					color(NamedTextColor.RED)
+					content("Por medidas de segurança, você precisa conectar a sua conta do Discord com a sua conta do SparklyPower para usar este comando! ")
+					appendTextComponent {
+						color(NamedTextColor.AQUA)
+						content("https://discord.gg/sparklypower")
+					}
+				}
+				return
+			}
+		}
+	}
 
 	@EventHandler
 	fun onEnderDragonDeathEvent(e: EntityDeathEvent) {
