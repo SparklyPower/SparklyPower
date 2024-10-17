@@ -1,5 +1,5 @@
 name: DreamCore
 main: net.perfectdreams.dreamcore.DreamCore
 version: 1.0.0
-softdepend: ["ChestShop", "Multiverse-Core", "ProtocolLib", "Vault", "WorldEdit", "WorldGuard", "GriefPrevention", "LangUtils", "spark"]
+softdepend: ["Multiverse-Core", "ProtocolLib", "Vault", "WorldEdit", "WorldGuard", "GriefPrevention", "LangUtils", "spark"]
 api-version: 1.13
