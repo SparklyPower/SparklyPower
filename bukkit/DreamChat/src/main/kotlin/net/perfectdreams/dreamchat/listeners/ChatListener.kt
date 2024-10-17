@@ -74,21 +74,6 @@ import java.util.logging.Level
 import kotlin.collections.set
 
 class ChatListener(val m: DreamChat) : Listener {
-	companion object {
-		private val blockedCommandsDuringDiscordOnlyMode = setOf(
-			"anunciar",
-			"tell",
-			"msg",
-			"pm",
-			"m",
-			"whisper",
-			"w",
-			"tpa",
-			"tpask",
-			"call"
-		)
-	}
-
 	val chatCooldownCache = Caffeine.newBuilder()
 		.expireAfterWrite(1L, TimeUnit.MINUTES)
 		.build<Player, Long>()
@@ -225,7 +210,7 @@ class ChatListener(val m: DreamChat) : Listener {
 				.lowercase()
 
 			// Let only SOME commands thru
-			if (cmd in blockedCommandsDuringDiscordOnlyMode) {
+			if (cmd in m.config.getStringList("replacers")) {
 				e.isCancelled = true
 
 				e.player.sendTextComponent {
