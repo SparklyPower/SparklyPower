@@ -17,6 +17,7 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import net.kyori.adventure.text.format.NamedTextColor
 import net.luckperms.api.LuckPerms
 import net.luckperms.api.LuckPermsProvider
 import net.md_5.bungee.api.chat.ClickEvent
@@ -42,6 +43,8 @@ import net.perfectdreams.dreamcore.network.DreamNetwork
 import net.perfectdreams.dreamcore.tables.DiscordAccounts
 import net.perfectdreams.dreamcore.utils.*
 import net.perfectdreams.dreamcore.utils.DreamUtils.jsonParser
+import net.perfectdreams.dreamcore.utils.adventure.appendTextComponent
+import net.perfectdreams.dreamcore.utils.adventure.sendTextComponent
 import net.perfectdreams.dreamcore.utils.extensions.artigo
 import net.perfectdreams.dreamcore.utils.extensions.centralize
 import net.perfectdreams.dreamcore.utils.extensions.girl
@@ -327,6 +330,22 @@ class ChatListener(val m: DreamChat) : Listener {
                 }
             }
         }
+
+		val discordAccount = transaction(Databases.databaseNetwork) {
+			DiscordAccount.find { DiscordAccounts.minecraftId eq player.uniqueId and (DiscordAccounts.isConnected eq true) }.firstOrNull()
+		}
+
+		if (m.onlyLetConnectedDiscordAccountsTalk && discordAccount == null) {
+			player.sendTextComponent {
+				color(NamedTextColor.RED)
+				content("Por medidas de segurança, você precisa conectar a sua conta do Discord com a sua conta do SparklyPower para falar no chat! ")
+				appendTextComponent {
+					color(NamedTextColor.AQUA)
+					content("https://discord.gg/sparklypower")
+				}
+			}
+			return
+		}
 
 		val lastMessageSentAt = chatCooldownCache.getOrDefault(player, 0)
 		val diff = System.currentTimeMillis() - lastMessageSentAt
@@ -721,10 +740,6 @@ class ChatListener(val m: DreamChat) : Listener {
 					"§eMinecraft Original: $mcPremiumStatus",
 					"§eMinecraft: Bedrock Edition: $mcBedrockEditionStatus",
 				)
-			}
-
-			val discordAccount = transaction(Databases.databaseNetwork) {
-				DiscordAccount.find { DiscordAccounts.minecraftId eq player.uniqueId and (DiscordAccounts.isConnected eq true) }.firstOrNull()
 			}
 
 			if (discordAccount != null) {

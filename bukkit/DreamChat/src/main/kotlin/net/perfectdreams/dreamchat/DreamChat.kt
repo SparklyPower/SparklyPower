@@ -94,6 +94,7 @@ class DreamChat : KotlinPlugin() {
 	val tellMessagesQueue = ConcurrentLinkedQueue<String>()
 	val loginTimeDatabaseIds = mutableMapOf<Player, Long>()
 	val assinaturaCitizensNpcs = mutableListOf<NPC>()
+	var onlyLetConnectedDiscordAccountsTalk = false
 
 	val dataYaml by lazy {
 		File(dataFolder, "data.yml")
@@ -145,6 +146,7 @@ class DreamChat : KotlinPlugin() {
 		registerCommand(DreamChatSeeTellCommand)
 		registerCommand(DreamChatStartCommand)
 		registerCommand(OnlineCommand)
+		registerCommand(DiscordOnlyModeCommand(this))
 		reload()
 		loadResponses()
 
