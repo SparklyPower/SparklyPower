@@ -95,6 +95,12 @@ class ChatListener(val m: DreamChat) : Listener {
 
 				e.player.setDisplayName(nickname)
 				e.player.setPlayerListName(nickname)
+
+				val discordAccount = transaction(Databases.databaseNetwork) {
+					DiscordAccount.find { DiscordAccounts.minecraftId eq e.player.uniqueId and (DiscordAccounts.isConnected eq true) }.firstOrNull()
+				}
+
+				m.cachedConnectedAccounts[e.player] = discordAccount != null
 			}
 		}
 	}
@@ -105,6 +111,7 @@ class ChatListener(val m: DreamChat) : Listener {
 		chatCooldownCache.remove(e.player)
 		lastMessageCache.remove(e.player)
 		m.hideTells.remove(e.player)
+		m.cachedConnectedAccounts.remove(e.player)
 	}
 
 	@EventHandler
@@ -203,14 +210,14 @@ class ChatListener(val m: DreamChat) : Listener {
 
 	@EventHandler
 	fun onDiscordOnlyModeCommand(e: PlayerCommandPreprocessEvent) {
-		if (m.onlyLetConnectedDiscordAccountsTalk) {
+		if (m.onlyLetConnectedDiscordAccountsTalk && m.cachedConnectedAccounts.getOrDefault(e.player, false)) {
 			val cmd = e.message
 				.split(" ")[0]
 				.substring(1)
 				.lowercase()
 
-			// Let only SOME commands thru
-			if (cmd in m.config.getStringList("replacers")) {
+			// Let only SOME commands through
+			if (cmd in m.config.getStringList("blocked-commands-during-discord-only-mode")) {
 				e.isCancelled = true
 
 				e.player.sendTextComponent {
@@ -350,6 +357,8 @@ class ChatListener(val m: DreamChat) : Listener {
 		val discordAccount = transaction(Databases.databaseNetwork) {
 			DiscordAccount.find { DiscordAccounts.minecraftId eq player.uniqueId and (DiscordAccounts.isConnected eq true) }.firstOrNull()
 		}
+
+		m.cachedConnectedAccounts[e.player] = discordAccount != null
 
 		if (m.onlyLetConnectedDiscordAccountsTalk && discordAccount == null) {
 			player.sendTextComponent {

@@ -47,6 +47,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.regex.Pattern
@@ -95,6 +96,7 @@ class DreamChat : KotlinPlugin() {
 	val loginTimeDatabaseIds = mutableMapOf<Player, Long>()
 	val assinaturaCitizensNpcs = mutableListOf<NPC>()
 	var onlyLetConnectedDiscordAccountsTalk = false
+	val cachedConnectedAccounts = ConcurrentHashMap<Player, Boolean>()
 
 	val dataYaml by lazy {
 		File(dataFolder, "data.yml")
