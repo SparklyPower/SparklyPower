@@ -210,7 +210,7 @@ class ChatListener(val m: DreamChat) : Listener {
 
 	@EventHandler
 	fun onDiscordOnlyModeCommand(e: PlayerCommandPreprocessEvent) {
-		if (m.onlyLetConnectedDiscordAccountsTalk && m.cachedConnectedAccounts.getOrDefault(e.player, false)) {
+		if (m.onlyLetConnectedDiscordAccountsTalk && m.cachedConnectedAccounts.getOrDefault(e.player, false) == false) {
 			val cmd = e.message
 				.split(" ")[0]
 				.substring(1)
