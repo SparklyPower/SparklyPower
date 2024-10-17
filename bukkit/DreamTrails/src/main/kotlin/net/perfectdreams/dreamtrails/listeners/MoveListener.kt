@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
+import java.util.logging.Level
 
 class MoveListener(val m: DreamTrails) : Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -20,45 +21,49 @@ class MoveListener(val m: DreamTrails) : Listener {
 		val activeTrails = m.playerTrails[e.player.uniqueId] ?: return
 
 		activeTrails.activeParticles.forEach { activeParticle ->
-			val trailData = Trails.trails[activeParticle]
+			try {
+				val trailData = Trails.trails[activeParticle]
 
-			if (trailData != null) {
-				if (trailData.cooldown != 0L) {
-					val theLastTimeTheEffectWasPlayed = activeTrails.cooldowns.getOrPut(activeParticle, { 0L })
+				if (trailData != null) {
+					if (trailData.cooldown != 0L) {
+						val theLastTimeTheEffectWasPlayed = activeTrails.cooldowns.getOrPut(activeParticle, { 0L })
 
-					val diff = System.currentTimeMillis() - theLastTimeTheEffectWasPlayed
+						val diff = System.currentTimeMillis() - theLastTimeTheEffectWasPlayed
 
-					if (diff > trailData.cooldown) {
-						activeTrails.cooldowns[trailData.particle] = System.currentTimeMillis()
-					} else {
-						return@forEach
+						if (diff > trailData.cooldown) {
+							activeTrails.cooldowns[trailData.particle] = System.currentTimeMillis()
+						} else {
+							return@forEach
+						}
 					}
-				}
 
-				var location = e.player.location
+					var location = e.player.location
 
-				if (trailData.locationDirectionOffset != 0.0) {
-					location = e.player.location.add(
-						e.player.location.direction
-							.setY(0)
-							.multiply(trailData.locationDirectionOffset)
+					if (trailData.locationDirectionOffset != 0.0) {
+						location = e.player.location.add(
+							e.player.location.direction
+								.setY(0)
+								.multiply(trailData.locationDirectionOffset)
+						)
+					}
+
+					location = location.add(
+						trailData.locationOffsetX,
+						trailData.locationOffsetY,
+						trailData.locationOffsetZ
+					)
+
+					e.player.world.spawnParticle(
+						trailData.particle,
+						location,
+						trailData.count,
+						trailData.offsetX,
+						trailData.offsetY,
+						trailData.offsetZ
 					)
 				}
-
-				location = location.add(
-					trailData.locationOffsetX,
-					trailData.locationOffsetY,
-					trailData.locationOffsetZ
-				)
-
-				e.player.world.spawnParticle(
-					trailData.particle,
-					location,
-					trailData.count,
-					trailData.offsetX,
-					trailData.offsetY,
-					trailData.offsetZ
-				)
+			} catch (ex: Exception) {
+				m.logger.log(Level.WARNING, ex) { "Something went wrong while trying to process particle ${activeParticle} for ${e.player.name}" }
 			}
 		}
 	}
