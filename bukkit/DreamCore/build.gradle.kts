@@ -68,6 +68,7 @@ dependencies {
     api("io.prometheus:simpleclient:${Versions.PROMETHEUS}")
     api("io.prometheus:simpleclient_hotspot:${Versions.PROMETHEUS}")
     api("io.prometheus:simpleclient_common:${Versions.PROMETHEUS}")
+    api("io.micrometer:micrometer-registry-prometheus:1.13.6")
 
     // Ktor
     api("io.ktor:ktor-server-netty:${Versions.KTOR}")

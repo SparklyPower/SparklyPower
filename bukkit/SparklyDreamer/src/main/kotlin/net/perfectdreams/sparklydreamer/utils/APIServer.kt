@@ -1,6 +1,7 @@
 package net.perfectdreams.sparklydreamer.utils
 
 import com.destroystokyo.paper.profile.ProfileProperty
+import com.google.common.util.concurrent.AtomicDouble
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -9,6 +10,8 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.util.*
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
@@ -44,8 +47,11 @@ import org.bukkit.inventory.meta.MapMeta
 import org.bukkit.persistence.PersistentDataType
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.math.BigDecimal
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicLong
 import javax.imageio.ImageIO
 
 class APIServer(private val plugin: SparklyDreamer) {
@@ -55,6 +61,9 @@ class APIServer(private val plugin: SparklyDreamer) {
     }
     private val logger = plugin.logger
     private var server: ApplicationEngine? = null
+    private val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+    private val totalSonecasGauge: AtomicDouble = appMicrometerRegistry.gauge("sparklypower.total_sonecas", AtomicDouble(0.0))
+    private val playersOnlineGauge: AtomicInteger = appMicrometerRegistry.gauge("sparklypower.players_online", AtomicInteger(0))
 
     fun start() {
         logger.info { "Starting HTTP Server..." }
@@ -63,6 +72,22 @@ class APIServer(private val plugin: SparklyDreamer) {
             routing {
                 get("/") {
                     call.respondText("SparklyPower API Web Server")
+                }
+
+                get("/metrics") {
+                    val totalSonecasSum = PlayerSonecas.money.sum()
+
+                    val onlinePlayers = plugin.launchMainThreadDeferred {
+                        Bukkit.getOnlinePlayers()
+                    }.await()
+                    val totalSonecas = transaction(Databases.databaseNetwork) {
+                        PlayerSonecas.select(totalSonecasSum)
+                            .first()[totalSonecasSum] ?: BigDecimal.ZERO
+                    }
+                    totalSonecasGauge.set(totalSonecas.toDouble())
+                    playersOnlineGauge.set(onlinePlayers.size)
+
+                    call.respond(appMicrometerRegistry.scrape())
                 }
 
                 post("/rpc") {
