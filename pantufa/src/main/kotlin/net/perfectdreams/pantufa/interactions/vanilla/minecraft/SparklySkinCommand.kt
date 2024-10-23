@@ -280,7 +280,7 @@ class SparklySkinCommand(val m: PantufaBot) : SlashCommandDeclarationWrapper {
                     // Do we need to wait?
                     if (mineSkinRatelimitHeaders.remaining == 0) {
                         // Yeah, we do!
-                        val diff = System.currentTimeMillis() - mineSkinRatelimitHeaders.reset
+                        val diff = (mineSkinRatelimitHeaders.reset * 1_000) - System.currentTimeMillis()
                         logger.info { "Backing off for ${diff}ms because we are ratelimited!" }
                         delay(diff)
                     }
