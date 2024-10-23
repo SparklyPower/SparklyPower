@@ -13,6 +13,7 @@ dependencies {
     compileOnly(project(":bukkit:DreamCorreios"))
     compileOnly(project(":bukkit:DreamMapWatermarker"))
     compileOnly(project(":bukkit:DreamCash"))
+    compileOnly(project(":bukkit:DreamBedrockIntegrations"))
 }
 
 kotlin {
