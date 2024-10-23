@@ -41,7 +41,7 @@ dependencies {
     implementation("com.github.kevinsawicki:http-request:6.0")
 
     // Web API
-    api("io.ktor:ktor-server-netty:2.2.3")
+    api("io.ktor:ktor-server-netty:3.0.0")
 
     // Sequins
     implementation("net.perfectdreams.sequins.text:text-utils:1.0.0")
@@ -55,7 +55,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:0.50.1")
     implementation("net.perfectdreams.exposedpowerutils:postgres-java-time:1.4.0")
 
-    implementation("io.ktor:ktor-client-cio:2.1.0")
+    implementation("io.ktor:ktor-client-cio:3.0.0")
 
     // Pudding
     implementation("net.perfectdreams.loritta.cinnamon.pudding:client:0.0.3-20240105.172802-3")

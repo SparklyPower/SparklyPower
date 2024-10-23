@@ -25,7 +25,7 @@ class APIServer(private val m: PantufaBot) {
         private val logger = KotlinLogging.logger {}
     }
 
-    private var server: ApplicationEngine? = null
+    private var server: EmbeddedServer<*, *>? = null
 
     fun start() {
         logger.info { "Starting HTTP Server..." }
@@ -70,7 +70,7 @@ class APIServer(private val m: PantufaBot) {
 
                         is BanSparklyPowerPlayerLorittaBannedRequest -> {
                             val userId = request.userId
-                            logger.info { "Received Loritta Ban for $it!" }
+                            logger.info { "Received Loritta Ban for $userId!" }
 
                             val discordAccount = m.retrieveDiscordAccountFromUser(userId)
 
@@ -92,10 +92,10 @@ class APIServer(private val m: PantufaBot) {
                                             userInfo.username
                                         )
                                     } else {
-                                        logger.info { "Ignoring Loritta Ban notification because the user $it doesn't have an associated user info data... Minecraft ID: ${discordAccount.minecraftId}" }
+                                        logger.info { "Ignoring Loritta Ban notification because the user $userId doesn't have an associated user info data... Minecraft ID: ${discordAccount.minecraftId}" }
                                     }
                                 } else {
-                                    logger.info { "Ignoring Loritta Ban notification because the user $it didn't connect an account..." }
+                                    logger.info { "Ignoring Loritta Ban notification because the user $userId didn't connect an account..." }
                                 }
                                 return BanSparklyPowerPlayerLorittaBannedResponse.NotFound
                             }
