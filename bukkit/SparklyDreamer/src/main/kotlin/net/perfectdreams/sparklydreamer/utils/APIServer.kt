@@ -2,6 +2,9 @@ package net.perfectdreams.sparklydreamer.utils
 
 import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.common.util.concurrent.AtomicDouble
+import com.viaversion.viaversion.api.Via
+import com.viaversion.viaversion.api.ViaAPI
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -10,6 +13,10 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.util.*
+import io.micrometer.core.instrument.Gauge
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.MultiGauge
+import io.micrometer.core.instrument.Tag
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +24,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
+import net.perfectdreams.dreambedrockintegrations.utils.isBedrockClient
 import net.perfectdreams.dreamcash.DreamCash
 import net.perfectdreams.dreamcash.tables.Cashes
 import net.perfectdreams.dreamcore.dao.DiscordAccount
@@ -50,6 +58,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.math.BigDecimal
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
 import javax.imageio.ImageIO
@@ -64,6 +73,7 @@ class APIServer(private val plugin: SparklyDreamer) {
     private val appMicrometerRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     private val totalSonecasGauge: AtomicDouble = appMicrometerRegistry.gauge("sparklypower.total_sonecas", AtomicDouble(0.0))
     private val playersOnlineGauge: AtomicInteger = appMicrometerRegistry.gauge("sparklypower.players_online", AtomicInteger(0))
+    private val protocolVersionToCount = mutableMapOf<Pair<Int, Boolean>, AtomicInteger>()
 
     fun start() {
         logger.info { "Starting HTTP Server..." }
@@ -77,15 +87,37 @@ class APIServer(private val plugin: SparklyDreamer) {
                 get("/metrics") {
                     val totalSonecasSum = PlayerSonecas.money.sum()
 
-                    val onlinePlayers = plugin.launchMainThreadDeferred {
-                        Bukkit.getOnlinePlayers()
+                    plugin.launchMainThreadDeferred {
+                        val onlinePlayers = Bukkit.getOnlinePlayers()
+                        playersOnlineGauge.set(onlinePlayers.size)
+
+                        protocolVersionToCount.forEach { t, u ->
+                            u.set(0)
+                        }
+
+                        onlinePlayers.forEach {
+                            val viaVersion = Via.getAPI()
+                            val playerVersionId = viaVersion.getPlayerVersion(it)
+                            val versionPlusBedrock = Pair(playerVersionId, it.isBedrockClient)
+                            val currentAtomicInteger = protocolVersionToCount[versionPlusBedrock]
+
+                            if (currentAtomicInteger == null) {
+                                val atomicInteger = AtomicInteger(1)
+                                appMicrometerRegistry.gauge("sparklypower.player_online_versions", listOf(Tag.of("java_protocol_version", playerVersionId.toString()), Tag.of("java_version_name", ProtocolVersion.getProtocol(playerVersionId).name), Tag.of("is_bedrock", versionPlusBedrock.second.toString())), atomicInteger)
+                                protocolVersionToCount[versionPlusBedrock] = atomicInteger
+                            } else {
+                                currentAtomicInteger.incrementAndGet()
+                            }
+                        }
                     }.await()
+
                     val totalSonecas = transaction(Databases.databaseNetwork) {
                         PlayerSonecas.select(totalSonecasSum)
                             .first()[totalSonecasSum] ?: BigDecimal.ZERO
                     }
+
                     totalSonecasGauge.set(totalSonecas.toDouble())
-                    playersOnlineGauge.set(onlinePlayers.size)
+
 
                     call.respond(appMicrometerRegistry.scrape())
                 }
